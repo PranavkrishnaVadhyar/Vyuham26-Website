@@ -1,0 +1,325 @@
+@import "tailwindcss";
+
+/* ─── Vyuham 26 Design Tokens ─── */
+:root {
+  --ink: #06100b;
+  --ink-light: #08170f;
+  --ink-mid: #0b2014;
+  --deep: #0a2e20;
+  --paper: #e8eee9;
+  --muted: #94a89a;
+  --green: #c8ff42;
+  --green-dim: rgba(200, 255, 66, 0.35);
+  --emerald: #1d9d56;
+  --emerald-dark: #0d3826;
+  --line: rgba(232, 238, 233, 0.17);
+  --line-strong: rgba(232, 238, 233, 0.3);
+  --glass: rgba(6, 16, 11, 0.65);
+  --glass-border: rgba(200, 255, 66, 0.12);
+  --radius: 4px;
+  --radius-lg: 12px;
+}
+
+@theme inline {
+  --color-ink: var(--ink);
+  --color-ink-light: var(--ink-light);
+  --color-ink-mid: var(--ink-mid);
+  --color-deep: var(--deep);
+  --color-paper: var(--paper);
+  --color-muted: var(--muted);
+  --color-green: var(--green);
+  --color-green-dim: var(--green-dim);
+  --color-emerald: var(--emerald);
+  --color-emerald-dark: var(--emerald-dark);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-glass: var(--glass);
+  --color-glass-border: var(--glass-border);
+
+  --font-display: "Space Grotesk", sans-serif;
+  --font-body: "Manrope", Arial, sans-serif;
+  --font-mono: "DM Mono", monospace;
+}
+
+/* ─── Base ─── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background: var(--ink);
+  color: var(--paper);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  letter-spacing: -0.075em;
+  margin: 0;
+  font-weight: 600;
+}
+
+em {
+  font-style: normal;
+  color: var(--green);
+  font-weight: 500;
+}
+
+::selection {
+  background: var(--green);
+  color: var(--ink);
+}
+
+/* ─── Noise Overlay ─── */
+.noise-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.045;
+  z-index: 50;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 160 160' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.8'/%3E%3C/svg%3E");
+}
+
+/* ─── Grid Background ─── */
+.grid-bg {
+  background-image:
+    linear-gradient(var(--line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--line) 1px, transparent 1px);
+  background-size: 60px 60px;
+}
+
+.grid-bg-dense {
+  background-image:
+    linear-gradient(var(--line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--line) 1px, transparent 1px);
+  background-size: 30px 30px;
+}
+
+/* ─── Glassmorphism ─── */
+.glass-card {
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.glass-card-hover {
+  transition: border-color 0.3s, box-shadow 0.3s, transform 0.3s;
+}
+
+.glass-card-hover:hover {
+  border-color: rgba(200, 255, 66, 0.3);
+  box-shadow: 0 0 32px rgba(200, 255, 66, 0.08);
+  transform: translateY(-4px);
+}
+
+/* ─── Glow Effects ─── */
+.glow-green {
+  box-shadow: 0 0 38px rgba(200, 255, 66, 0.35);
+}
+
+.text-glow-green {
+  text-shadow: 0 0 24px rgba(200, 255, 66, 0.4);
+}
+
+/* ─── Signal Dot ─── */
+.signal-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-right: 8px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 12px var(--green);
+  animation: blink 1.6s infinite;
+}
+
+/* ─── Scan Lines ─── */
+.scan-lines::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(200, 255, 66, 0.015) 2px,
+    rgba(200, 255, 66, 0.015) 4px
+  );
+  z-index: 1;
+}
+
+/* ─── Custom Scrollbar ─── */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--ink);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--emerald-dark);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--emerald);
+}
+
+/* ─── Doomsday Motion Keyframes ─── */
+@keyframes blink {
+  50% { opacity: 0.25; }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes spin-reverse {
+  to { transform: rotate(-360deg); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 12px var(--green); }
+  50% { box-shadow: 0 0 28px var(--green); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scanline-pass {
+  0% { transform: translateY(-100%); opacity: 0.8; }
+  50% { opacity: 0.4; }
+  100% { transform: translateY(100%); opacity: 0.8; }
+}
+
+@keyframes expanding-ring {
+  0% { transform: scale(0.6); opacity: 0.9; }
+  100% { transform: scale(1.6); opacity: 0; }
+}
+
+@keyframes energy-bloom {
+  0% { box-shadow: 0 0 0 0 rgba(200, 255, 66, 0.6); }
+  70% { box-shadow: 0 0 30px 15px rgba(200, 255, 66, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(200, 255, 66, 0); }
+}
+
+@keyframes decrypt-flicker {
+  0% { opacity: 0.3; }
+  30% { opacity: 0.9; }
+  60% { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+
+/* ─── Doomsday Motion Utility Classes ─── */
+.scanline-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.scanline-card::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, rgba(200, 255, 66, 0.8), transparent);
+  animation: scanline-pass 3.5s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.signal-ring-anim {
+  animation: expanding-ring 2.5s cubic-bezier(0, 0.2, 0.8, 1) infinite;
+}
+
+.energy-bloom-click:active {
+  animation: energy-bloom 0.6s ease-out;
+}
+
+.decrypt-text-anim {
+  animation: decrypt-flicker 1.2s ease-out;
+}
+
+/* ─── The Signal opening sequence ─── */
+.intro-grid {
+  opacity: 0.22;
+  background-image:
+    linear-gradient(rgba(200, 255, 66, 0.09) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(200, 255, 66, 0.09) 1px, transparent 1px);
+  background-size: 42px 42px;
+  mask-image: radial-gradient(circle at center, black 0%, transparent 65%);
+}
+
+.intro-core {
+  box-shadow: 0 0 26px 12px rgba(200, 255, 66, 0.5);
+}
+
+.intro-emblem-shell {
+  background: radial-gradient(circle, rgba(200, 255, 66, 0.26), rgba(10, 46, 32, 0.42) 55%, transparent 72%);
+  box-shadow: 0 0 56px rgba(200, 255, 66, 0.52), inset 0 0 26px rgba(200, 255, 66, 0.35);
+}
+
+.intro-emblem {
+  filter: drop-shadow(0 0 18px rgba(200, 255, 66, 0.85));
+}
+
+.intro-wordmark {
+  text-shadow: 0 0 32px rgba(200, 255, 66, 0.24);
+}
+
+/* ─── Experience wayfinding ─── */
+.experience-rail::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 7px;
+  width: 1px;
+  background: var(--line);
+}
+
+.signal-ticker-track {
+  animation: signal-ticker 34s linear infinite;
+}
+
+@keyframes signal-ticker {
+  to { transform: translateX(-50%); }
+}
+
+/* ─── Reduced Motion ─── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .signal-ticker-track {
+    animation: none;
+  }
+}
