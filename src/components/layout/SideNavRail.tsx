@@ -46,7 +46,7 @@ export default function SideNavRail() {
           NEURAL SPINE
       ========================================================= */}
       <aside
-        className="fixed left-0 top-0 z-50 hidden h-screen w-14.5 md:flex"
+        className="side-nav-rail fixed left-0 top-0 z-50 hidden h-screen w-14.5 md:flex"
         aria-label="VYUHAM neural navigation"
       >
         {/* Deep background */}

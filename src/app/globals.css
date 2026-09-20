@@ -302,7 +302,8 @@ em {
 }
 
 /* Hide side navigation rail during intro sequence */
-body:has(.intro-cinema) aside[aria-label="Side navigation rail"] {
+body:has(.intro-cinema) aside,
+body:has(.intro-cinema) .side-nav-rail {
   display: none !important;
 }
 

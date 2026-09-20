@@ -1859,11 +1859,12 @@ function NetworkLine({
 
   const length = Math.sqrt(
     dx * dx + dy * dy
-  );
+  ).toFixed(4);
 
-  const angle =
+  const angle = (
     Math.atan2(dy, dx) *
-    (180 / Math.PI);
+    (180 / Math.PI)
+  ).toFixed(4);
 
   return (
     <motion.div
