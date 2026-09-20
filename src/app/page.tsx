@@ -7,7 +7,6 @@ import StreamsSection from "./sections/StreamsSection";
 import ScheduleSection from "./sections/ScheduleSection";
 import CtaSection from "./sections/CtaSection";
 import IntroSequence from "@/components/motion/IntroSequence";
-import ExperienceRail from "@/components/layout/ExperienceRail";
 import SignalTicker from "@/components/ui/SignalTicker";
 import { PageEntranceProvider } from "@/components/motion/PageEntrance";
 
@@ -15,7 +14,6 @@ export default function HomePage() {
   return (
     <>
       <IntroSequence />
-      <ExperienceRail />
       <Navbar />
       <PageEntranceProvider>
         <main className="flex-1">
@@ -32,4 +30,5 @@ export default function HomePage() {
     </>
   );
 }
+
 

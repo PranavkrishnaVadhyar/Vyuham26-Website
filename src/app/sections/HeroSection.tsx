@@ -11,11 +11,25 @@ import type { PointerEvent as ReactPointerEvent } from "react";
 import { PageEntranceGate } from "@/components/motion/PageEntrance";
 
 const titleLines = [
-  { text: "THE", em: false },
-  { text: "FUTURE", em: true },
-  { text: "AWAITS.", em: false },
+  {
+    text: "THE",
+    gradient:
+      "bg-linear-to-r from-white via-emerald-100 to-cyan-200 bg-clip-text text-transparent",
+    glow: "drop-shadow-[0_0_18px_rgba(110,231,183,0.12)]",
+  },
+  {
+    text: "FUTURE",
+    gradient:
+      "bg-linear-to-r from-emerald-300 via-cyan-300 to-blue-400 bg-clip-text text-transparent",
+    glow: "drop-shadow-[0_0_28px_rgba(52,211,153,0.28)]",
+  },
+  {
+    text: "AWAITS.",
+    gradient:
+      "bg-linear-to-r from-white via-violet-200 to-emerald-300 bg-clip-text text-transparent",
+    glow: "drop-shadow-[0_0_22px_rgba(167,139,250,0.16)]",
+  },
 ];
-
 const ParticleField = dynamic(
   () => import("@/components/motion/ParticleField"),
   { ssr: false }
@@ -36,39 +50,192 @@ const Portal = dynamic(
 function CoreReactor({ booted }: { booted: boolean }) {
   return (
     <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+      {/* OUTER ROTATING RING */}
       <motion.div
         aria-hidden="true"
-        className="absolute h-[82%] w-[82%] rounded-full border border-emerald-300/10"
-        animate={{ rotate: 360 }}
-        transition={{ duration: 28, repeat: Infinity, ease: "linear" }}
+        className="
+          absolute
+          h-[82%]
+          w-[82%]
+          rounded-full
+          border
+          border-emerald-300/10
+          border-t-emerald-300/35
+          border-r-cyan-300/20
+        "
+        animate={{
+          rotate: 360,
+        }}
+        transition={{
+          duration: 28,
+          repeat: Infinity,
+          ease: "linear",
+        }}
       />
+
+      {/* SECOND COUNTER-ROTATING RING */}
       <motion.div
         aria-hidden="true"
-        className="absolute h-[72%] w-[72%] rounded-full border border-dashed border-emerald-400/15"
-        animate={{ rotate: -360 }}
-        transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+        className="
+          absolute
+          h-[72%]
+          w-[72%]
+          rounded-full
+          border
+          border-dashed
+          border-emerald-400/15
+          border-l-cyan-300/30
+        "
+        animate={{
+          rotate: -360,
+        }}
+        transition={{
+          duration: 18,
+          repeat: Infinity,
+          ease: "linear",
+        }}
       />
+
+      {/* INNER PULSING RING */}
       <motion.div
         aria-hidden="true"
-        className="absolute h-[62%] w-[62%] rounded-full border border-emerald-300/10"
-        animate={{ scale: [0.94, 1.04, 0.94], opacity: [0.25, 0.55, 0.25] }}
-        transition={{ duration: 3.8, repeat: Infinity, ease: "easeInOut" }}
+        className="
+          absolute
+          h-[62%]
+          w-[62%]
+          rounded-full
+          border
+          border-emerald-300/10
+          border-t-emerald-300/30
+        "
+        animate={{
+          rotate: 360,
+          scale: [0.94, 1.04, 0.94],
+          opacity: [0.25, 0.55, 0.25],
+        }}
+        transition={{
+          rotate: {
+            duration: 14,
+            repeat: Infinity,
+            ease: "linear",
+          },
+          scale: {
+            duration: 3.8,
+            repeat: Infinity,
+            ease: "easeInOut",
+          },
+          opacity: {
+            duration: 3.8,
+            repeat: Infinity,
+            ease: "easeInOut",
+          },
+        }}
       />
-      {[0, 120, 240].map((angle) => (
-        <motion.span
-          key={angle}
-          aria-hidden="true"
-          className="absolute h-1.5 w-1.5 rounded-full bg-emerald-200 shadow-[0_0_12px_rgba(167,243,208,1)]"
-          style={{ transform: `rotate(${angle}deg) translateY(-46%)` }}
-          animate={{ rotate: [angle, angle + 360] }}
-          transition={{ duration: 12, repeat: Infinity, ease: "linear" }}
-        />
-      ))}
+
+      {/* ORBITING CORE NODES */}
       <motion.div
         aria-hidden="true"
-        className="absolute inset-[7%] rounded-full border border-emerald-400/10"
-        animate={{ opacity: booted ? [0.15, 0.5, 0.15] : 0 }}
-        transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut" }}
+        className="absolute h-[78%] w-[78%]"
+        animate={{
+          rotate: 360,
+        }}
+        transition={{
+          duration: 12,
+          repeat: Infinity,
+          ease: "linear",
+        }}
+      >
+        {[0, 120, 240].map((angle) => (
+          <span
+            key={angle}
+            className="
+              absolute
+              left-1/2
+              top-1/2
+              h-1.5
+              w-1.5
+              rounded-full
+              bg-emerald-200
+              shadow-[0_0_12px_rgba(167,243,208,1)]
+            "
+            style={{
+              transform: `rotate(${angle}deg) translateY(-50%)`,
+              transformOrigin: "0 0",
+            }}
+          />
+        ))}
+      </motion.div>
+
+      {/* FAST INNER ORBIT */}
+      <motion.div
+        aria-hidden="true"
+        className="
+          absolute
+          h-[52%]
+          w-[52%]
+          rounded-full
+          border
+          border-cyan-300/10
+          border-b-cyan-300/30
+        "
+        animate={{
+          rotate: -360,
+        }}
+        transition={{
+          duration: 9,
+          repeat: Infinity,
+          ease: "linear",
+        }}
+      />
+
+      {/* CORE PULSE */}
+      <motion.div
+        aria-hidden="true"
+        className="
+          absolute
+          h-[20%]
+          w-[20%]
+          rounded-full
+          bg-emerald-300/10
+          blur-md
+        "
+        animate={{
+          scale: booted ? [0.8, 1.2, 0.8] : 0.8,
+          opacity: booted ? [0.35, 0.8, 0.35] : 0.2,
+        }}
+        transition={{
+          duration: 2.4,
+          repeat: Infinity,
+          ease: "easeInOut",
+        }}
+      />
+
+      {/* BOOT / CORE RING */}
+      <motion.div
+        aria-hidden="true"
+        className="
+          absolute
+          inset-[7%]
+          rounded-full
+          border
+          border-emerald-400/10
+        "
+        animate={{
+          rotate: 360,
+          opacity: booted ? [0.15, 0.5, 0.15] : 0,
+        }}
+        transition={{
+          rotate: {
+            duration: 35,
+            repeat: Infinity,
+            ease: "linear",
+          },
+          opacity: {
+            duration: 2.6,
+            repeat: Infinity,
+            ease: "easeInOut",
+          },
+        }}
       />
     </div>
   );
@@ -139,13 +306,12 @@ export default function HeroSection() {
         onPointerMove={handlePointerMove}
         onPointerLeave={handlePointerLeave}
         className="
-          scan-lines
-          relative
-          min-h-screen
-          overflow-hidden
-          bg-[#030806]
-          pt-23
-        "
+    relative
+    min-h-screen
+    overflow-hidden
+    bg-[#030806]
+    pt-23
+  "
       >
         {/* =====================================================
             SYSTEM BOOT / OVERRIDE LAYER
@@ -190,11 +356,7 @@ export default function HeroSection() {
             animate={{ opacity: 1 }}
           >
             <div className="absolute inset-0 bg-[linear-gradient(to_bottom,transparent,rgba(52,211,153,0.06),transparent)] bg-size-[100%_7px]" />
-            <motion.div
-              className="absolute inset-0 bg-[repeating-linear-gradient(90deg,transparent_0,transparent_31px,rgba(52,211,153,0.08)_32px)]"
-              animate={{ backgroundPositionY: [0, 900] }}
-              transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-            />
+
             <div className="absolute inset-0 grid place-items-center">
               <motion.div
                 className="font-mono text-[clamp(30px,8vw,110px)] font-semibold tracking-[0.15em] text-emerald-300/20"
@@ -307,10 +469,9 @@ export default function HeroSection() {
                     text-[7px]
                     tracking-[0.2em]
                     transition-colors
-                    ${
-                      index === 0
-                        ? "text-emerald-300"
-                        : "text-white/20"
+                    ${index === 0
+                      ? "text-emerald-300"
+                      : "text-white/20"
                     }
                   `}
                 >
@@ -693,7 +854,7 @@ export default function HeroSection() {
                   MAIN TITLE
               ================================================= */}
 
-              <div className="relative">
+              <div className="relative z-20">
                 <motion.h1
                   className="
                     relative
@@ -715,7 +876,7 @@ export default function HeroSection() {
                     },
                   }}
                 >
-                  {titleLines.map((line) => (
+                  {titleLines.map((line, index) => (
                     <motion.span
                       key={line.text}
                       className="relative block"
@@ -732,91 +893,111 @@ export default function HeroSection() {
                           filter: "blur(0px)",
                           transition: {
                             duration: 0.9,
-                            ease: [
-                              0.22,
-                              1,
-                              0.36,
-                              1,
-                            ],
+                            ease: [0.22, 1, 0.36, 1],
                           },
                         },
                       }}
                     >
-                      {line.em ? (
-                        <span
-                          className="
-                            relative
-                            inline-block
-                            text-emerald-300
-                            drop-shadow-[0_0_22px_rgba(52,211,153,0.16)]
-                          "
-                        >
-                          {line.text}
+                      <motion.span
+                        className={`
+        relative inline-block
+        ${line.gradient}
+        ${line.glow}
+      `}
+                        animate={{
+                          backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
+                        }}
+                        transition={{
+                          duration: 7 + index * 1.5,
+                          repeat: Infinity,
+                          ease: "linear",
+                        }}
+                        style={{
+                          backgroundSize: "220% 100%",
+                        }}
+                      >
+                        {line.text}
 
-                          {/* Energy underline */}
+                        {/* Individual holographic light sweep */}
+                        <motion.span
+                          aria-hidden="true"
+                          className="
+          pointer-events-none
+          absolute
+          inset-y-0
+          left-[-20%]
+          w-[8%]
+          skew-x-[-18deg]
+          bg-white/40
+          blur-md
+        "
+                          animate={{
+                            left: ["-20%", "120%"],
+                            opacity: [0, 0.8, 0],
+                          }}
+                          transition={{
+                            duration: 2.4,
+                            delay: 1.5 + index * 0.8,
+                            repeat: Infinity,
+                            repeatDelay: 4.5,
+                            ease: "easeInOut",
+                          }}
+                        />
+
+                        {/* Existing energy underline — only for FUTURE */}
+                        {line.text === "FUTURE" && (
                           <motion.span
                             aria-hidden="true"
                             className="
-                              absolute
-                              -bottom-2
-                              left-0
-                              h-0.5
-                              w-full
-                              origin-left
-                              bg-linear-to-r
-                              from-emerald-500
-                              via-emerald-200
-                              to-transparent
-                              shadow-[0_0_14px_rgba(52,211,153,0.8)]
-                            "
-                            initial={{
-                              scaleX: 0,
-                            }}
-                            animate={{
-                              scaleX: 1,
-                            }}
+            absolute
+            -bottom-2
+            left-0
+            h-0.5
+            w-full
+            origin-left
+            bg-linear-to-r
+            from-emerald-400
+            via-cyan-300
+            to-blue-400
+            shadow-[0_0_16px_rgba(52,211,153,0.8)]
+          "
+                            initial={{ scaleX: 0 }}
+                            animate={{ scaleX: 1 }}
                             transition={{
                               duration: 1,
                               delay: 1.05,
-                              ease: [
-                                0.22,
-                                1,
-                                0.36,
-                                1,
-                              ],
+                              ease: [0.22, 1, 0.36, 1],
                             }}
                           />
+                        )}
 
-                          {/* Passing energy scan */}
-                          <motion.span
-                            aria-hidden="true"
-                            className="
-                              pointer-events-none
-                              absolute
-                              inset-y-0
-                              left-0
-                              w-0.5
-                              bg-emerald-100
-                              shadow-[0_0_16px_rgba(167,243,208,1)]
-                            "
-                            initial={{
-                              opacity: 0,
-                              x: 0,
-                            }}
-                            animate={{
-                              opacity: [0, 1, 0],
-                              x: ["0%", "1000%"],
-                            }}
-                            transition={{
-                              duration: 1.4,
-                              delay: 1.3,
-                              ease: "easeInOut",
-                            }}
-                          />
-                        </span>
-                      ) : (
-                        line.text
-                      )}
+                        {/* Passing energy scan */}
+                        <motion.span
+                          aria-hidden="true"
+                          className="
+          pointer-events-none
+          absolute
+          inset-y-0
+          left-0
+          w-0.5
+          bg-white
+          shadow-[0_0_18px_rgba(255,255,255,0.9)]
+        "
+                          initial={{
+                            opacity: 0,
+                            x: 0,
+                          }}
+                          animate={{
+                            opacity: [0, 1, 0],
+                            x: ["0%", "1000%"],
+                          }}
+                          transition={{
+                            duration: 1.4,
+                            delay: 1.3 + index * 0.25,
+                            ease: "easeInOut",
+                          }}
+                        />
+                      </motion.span>
                     </motion.span>
                   ))}
                 </motion.h1>
@@ -876,52 +1057,62 @@ export default function HeroSection() {
                 />
               </div>
 
+
+
               {/* =================================================
-                  DESCRIPTION
-              ================================================= */}
+    DESCRIPTION
+================================================= */}
 
               <motion.p
                 className="
-                  mt-10
-                  max-w-110
-                  text-sm
-                  leading-[1.8]
-                  text-white/45
-                  md:text-[15px]
-                "
+    relative
+    z-40
+    mt-10
+    max-w-110
+    text-[14px]
+    leading-[1.8]
+    text-white/70
+    md:text-[15px]
+    md:text-white/65
+  "
                 initial={{
                   opacity: 0,
-                  y: 15,
+                  y: 22,
+                  filter: "blur(8px)",
                 }}
                 animate={{
                   opacity: 1,
                   y: 0,
+                  filter: "blur(0px)",
                 }}
                 transition={{
-                  duration: 0.8,
-                  delay: 1.15,
+                  duration: 0.9,
+                  delay: 1.45,
+                  ease: [0.22, 1, 0.36, 1],
                 }}
               >
-                A national-level techno-cultural convergence
-                for the curious, the bold, and the people
-                building what is next.
+                A national-level techno-cultural convergence for the curious,
+                the bold, and the people building what is next.
               </motion.p>
 
+
               {/* =================================================
-                  ACTIONS
-              ================================================= */}
+    ACTIONS
+================================================= */}
 
               <motion.div
                 className="
-                  mt-8
-                  flex
-                  flex-wrap
-                  items-center
-                  gap-6
-                "
+    relative
+    z-40
+    mt-8
+    flex
+    flex-wrap
+    items-center
+    gap-6
+  "
                 initial={{
                   opacity: 0,
-                  y: 15,
+                  y: 20,
                 }}
                 animate={{
                   opacity: 1,
@@ -929,78 +1120,161 @@ export default function HeroSection() {
                 }}
                 transition={{
                   duration: 0.8,
-                  delay: 1.3,
+                  delay: 1.7,
+                  ease: [0.22, 1, 0.36, 1],
                 }}
               >
-                <Button href="/events">
-                  Explore events
-                  <span className="ml-2 text-base">
-                    →
-                  </span>
-                </Button>
 
-                <TextLink href="/about">
-                  Enter the dimension
-                </TextLink>
+                {/* PRIMARY ACTION */}
+
+                <motion.div
+                  whileHover={{
+                    scale: 1.04,
+                    y: -2,
+                  }}
+                  whileTap={{
+                    scale: 0.97,
+                  }}
+                >
+                  <Button href="/events">
+                    Explore events
+
+                    <motion.span
+                      className="ml-2 inline-block text-base"
+                      animate={{
+                        x: [0, 4, 0],
+                      }}
+                      transition={{
+                        duration: 1.4,
+                        repeat: Infinity,
+                        ease: "easeInOut",
+                      }}
+                    >
+                      →
+                    </motion.span>
+                  </Button>
+                </motion.div>
+
+
+                {/* SECONDARY ACTION */}
+
+                <motion.div
+                  whileHover={{
+                    x: 4,
+                  }}
+                >
+                  <TextLink href="/about">
+                    <span className="flex items-center gap-2">
+                      Enter the dimension
+
+                      <motion.span
+                        animate={{
+                          x: [0, 4, 0],
+                        }}
+                        transition={{
+                          duration: 1.6,
+                          repeat: Infinity,
+                          ease: "easeInOut",
+                        }}
+                      >
+                        →
+                      </motion.span>
+                    </span>
+                  </TextLink>
+                </motion.div>
+
               </motion.div>
 
+
               {/* =================================================
-                  TELEMETRY
-              ================================================= */}
+    TELEMETRY
+================================================= */}
 
               <motion.div
                 className="
-                  mt-10
-                  flex
-                  flex-wrap
-                  gap-x-8
-                  gap-y-3
-                  font-mono
-                  text-[7px]
-                  tracking-[0.22em]
-                  text-white/25
-                "
+    relative
+    z-40
+    mt-10
+    flex
+    flex-wrap
+    gap-x-8
+    gap-y-3
+    font-mono
+    text-[8px]
+    tracking-[0.22em]
+    text-white/45
+  "
                 initial={{
                   opacity: 0,
+                  y: 12,
                 }}
                 animate={{
                   opacity: 1,
+                  y: 0,
                 }}
                 transition={{
                   duration: 0.8,
-                  delay: 1.5,
+                  delay: 2,
                 }}
               >
-                <span>
+
+                {/* CORE */}
+
+                <motion.span
+                  animate={{
+                    opacity: [0.45, 1, 0.45],
+                  }}
+                  transition={{
+                    duration: 2,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                  }}
+                >
                   CORE //
-                  <span className="ml-1 text-emerald-400/70">
+                  <span className="ml-1 text-emerald-300">
                     ACTIVE
                   </span>
-                </span>
+                </motion.span>
 
-                <span>
+
+                {/* TRANSMISSION */}
+
+                <motion.span
+                  animate={{
+                    opacity: [0.4, 0.9, 0.4],
+                  }}
+                  transition={{
+                    duration: 2.6,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                  }}
+                >
                   TRANSMISSION //
-                  <span className="ml-1 text-emerald-400/70">
+                  <span className="ml-1 text-cyan-300">
                     STABLE
                   </span>
-                </span>
+                </motion.span>
+
+
+                {/* VYUHAM */}
 
                 <span>
                   VYUHAM //
-                  <span className="ml-1 text-emerald-400/70">
+
+                  <span className="ml-1 text-emerald-300">
                     26
                   </span>
                 </span>
-              </motion.div>
-            </AnimatedSection>
 
-            {/* =================================================
+              </motion.div>
+
+              {/* =================================================
                 ENERGY CONNECTION
             ================================================= */}
 
-            <motion.div
-              aria-hidden="true"
-              className="
+              <motion.div
+                aria-hidden="true"
+                className="
                 pointer-events-none
                 absolute
                 left-[43%]
@@ -1012,22 +1286,22 @@ export default function HeroSection() {
                 -translate-y-1/2
                 md:block
               "
-              initial={{
-                scaleX: 0,
-                opacity: 0,
-              }}
-              animate={{
-                scaleX: 1,
-                opacity: 1,
-              }}
-              transition={{
-                duration: 1.4,
-                delay: 1.2,
-                ease: "easeOut",
-              }}
-            >
-              <div
-                className="
+                initial={{
+                  scaleX: 0,
+                  opacity: 0,
+                }}
+                animate={{
+                  scaleX: 1,
+                  opacity: 1,
+                }}
+                transition={{
+                  duration: 1.4,
+                  delay: 1.2,
+                  ease: "easeOut",
+                }}
+              >
+                <div
+                  className="
                   h-px
                   w-full
                   bg-linear-to-r
@@ -1035,10 +1309,10 @@ export default function HeroSection() {
                   via-emerald-400/15
                   to-emerald-400/0
                 "
-              />
+                />
 
-              <motion.div
-                className="
+                <motion.div
+                  className="
                   absolute
                   top-1/2
                   h-1
@@ -1048,41 +1322,42 @@ export default function HeroSection() {
                   bg-emerald-200
                   shadow-[0_0_12px_rgba(167,243,208,1)]
                 "
-                animate={{
-                  left: ["0%", "100%"],
-                  opacity: [0, 1, 0],
-                }}
-                transition={{
-                  duration: 2.8,
-                  repeat: Infinity,
-                  ease: "linear",
-                }}
-              />
-            </motion.div>
+                  animate={{
+                    left: ["0%", "100%"],
+                    opacity: [0, 1, 0],
+                  }}
+                  transition={{
+                    duration: 2.8,
+                    repeat: Infinity,
+                    ease: "linear",
+                  }}
+                />
+              </motion.div>
 
-            {/* Core-to-portal energy bridge */}
-            <motion.div
-              aria-hidden="true"
-              className="pointer-events-none absolute left-[30%] right-[8%] top-[18%] z-10 hidden h-px md:block"
-              initial={{ scaleX: 0, opacity: 0 }}
-              animate={{ scaleX: booted ? 1 : 0, opacity: booted ? 1 : 0 }}
-              transition={{ duration: 1.4, delay: 1.1 }}
-            >
-              <div className="h-px w-full bg-linear-to-r from-transparent via-emerald-400/10 to-emerald-300/25" />
-              <motion.span
-                className="absolute -top-0.5 h-1 w-1 rounded-full bg-emerald-100 shadow-[0_0_12px_rgba(167,243,208,1)]"
-                animate={{ left: ["5%", "95%"], opacity: [0, 1, 0] }}
-                transition={{ duration: 2.2, repeat: Infinity, ease: "linear" }}
-              />
-            </motion.div>
+              {/* Core-to-portal energy bridge */}
+              <motion.div
+                aria-hidden="true"
+                className="pointer-events-none absolute left-[30%] right-[8%] top-[18%] z-10 hidden h-px md:block"
+                initial={{ scaleX: 0, opacity: 0 }}
+                animate={{ scaleX: booted ? 1 : 0, opacity: booted ? 1 : 0 }}
+                transition={{ duration: 1.4, delay: 1.1 }}
+              >
+                <div className="h-px w-full bg-linear-to-r from-transparent via-emerald-400/10 to-emerald-300/25" />
+                <motion.span
+                  className="absolute -top-0.5 h-1 w-1 rounded-full bg-emerald-100 shadow-[0_0_12px_rgba(167,243,208,1)]"
+                  animate={{ left: ["5%", "95%"], opacity: [0, 1, 0] }}
+                  transition={{ duration: 2.2, repeat: Infinity, ease: "linear" }}
+                />
+              </motion.div>
+            </AnimatedSection>
 
             {/* =================================================
                 PORTAL
             ================================================= */}
 
-            <AnimatedSection
-              delay={0.2}
-              className="
+              <AnimatedSection
+                delay={0.2}
+                className="
                 pointer-events-none
                 absolute
                 right-[-8%]
@@ -1092,12 +1367,12 @@ export default function HeroSection() {
                 -translate-y-1/2
                 md:block
               "
-            >
-              <div className="relative">
-                {/* Portal atmosphere */}
-                <motion.div
-                  aria-hidden="true"
-                  className="
+              >
+                <div className="relative">
+                  {/* Portal atmosphere */}
+                  <motion.div
+                    aria-hidden="true"
+                    className="
                     absolute
                     left-1/2
                     top-1/2
@@ -1109,26 +1384,26 @@ export default function HeroSection() {
                     bg-emerald-400/[0.035]
                     blur-[80px]
                   "
-                  animate={{
-                    scale: [1, 1.06, 1],
-                    opacity: [0.5, 0.8, 0.5],
-                  }}
-                  transition={{
-                    duration: 5,
-                    repeat: Infinity,
-                    ease: "easeInOut",
-                  }}
-                />
+                    animate={{
+                      scale: [1, 1.06, 1],
+                      opacity: [0.5, 0.8, 0.5],
+                    }}
+                    transition={{
+                      duration: 5,
+                      repeat: Infinity,
+                      ease: "easeInOut",
+                    }}
+                  />
 
-                {/* Portal itself */}
-                <Portal size="lg" />
+                  {/* Portal itself */}
+                  <Portal size="lg" />
 
-                {/* =================================================
+                  {/* =================================================
                     PORTAL TELEMETRY
                 ================================================= */}
 
-                <motion.div
-                  className="
+                  <motion.div
+                    className="
                     absolute
                     right-[9%]
                     top-[15%]
@@ -1137,20 +1412,20 @@ export default function HeroSection() {
                     tracking-[0.25em]
                     text-emerald-300/50
                   "
-                  animate={{
-                    opacity: [0.3, 0.9, 0.3],
-                  }}
-                  transition={{
-                    duration: 2.6,
-                    repeat: Infinity,
-                    ease: "easeInOut",
-                  }}
-                >
-                  SIGNAL // FOUND
-                </motion.div>
+                    animate={{
+                      opacity: [0.3, 0.9, 0.3],
+                    }}
+                    transition={{
+                      duration: 2.6,
+                      repeat: Infinity,
+                      ease: "easeInOut",
+                    }}
+                  >
+                    SIGNAL // FOUND
+                  </motion.div>
 
-                <motion.div
-                  className="
+                  <motion.div
+                    className="
                     absolute
                     bottom-[17%]
                     left-[7%]
@@ -1159,20 +1434,20 @@ export default function HeroSection() {
                     tracking-[0.25em]
                     text-emerald-300/40
                   "
-                  animate={{
-                    opacity: [0.2, 0.7, 0.2],
-                  }}
-                  transition={{
-                    duration: 3.1,
-                    repeat: Infinity,
-                    ease: "easeInOut",
-                  }}
-                >
-                  CORE // ACTIVE
-                </motion.div>
+                    animate={{
+                      opacity: [0.2, 0.7, 0.2],
+                    }}
+                    transition={{
+                      duration: 3.1,
+                      repeat: Infinity,
+                      ease: "easeInOut",
+                    }}
+                  >
+                    CORE // ACTIVE
+                  </motion.div>
 
-                <div
-                  className="
+                  <div
+                    className="
                     absolute
                     bottom-[8%]
                     right-[8%]
@@ -1181,14 +1456,14 @@ export default function HeroSection() {
                     tracking-[0.25em]
                     text-emerald-400/45
                   "
-                >
-                  V.26 // 2026
-                </div>
+                  >
+                    V.26 // 2026
+                  </div>
 
-                {/* Portal brackets */}
-                <div
-                  aria-hidden="true"
-                  className="
+                  {/* Portal brackets */}
+                  <div
+                    aria-hidden="true"
+                    className="
                     absolute
                     left-[8%]
                     top-[9%]
@@ -1198,11 +1473,11 @@ export default function HeroSection() {
                     border-t
                     border-emerald-400/25
                   "
-                />
+                  />
 
-                <div
-                  aria-hidden="true"
-                  className="
+                  <div
+                    aria-hidden="true"
+                    className="
                     absolute
                     bottom-[9%]
                     right-[8%]
@@ -1212,17 +1487,17 @@ export default function HeroSection() {
                     border-r
                     border-emerald-400/25
                   "
-                />
-              </div>
-            </AnimatedSection>
+                  />
+                </div>
+              </AnimatedSection>
 
-            {/* =================================================
+              {/* =================================================
                 MOBILE PORTAL
             ================================================= */}
 
-            <div
-              aria-hidden="true"
-              className="
+              <div
+                aria-hidden="true"
+                className="
                 pointer-events-none
                 absolute
                 -right-31.25
@@ -1231,9 +1506,9 @@ export default function HeroSection() {
                 opacity-[0.28]
                 md:hidden
               "
-            >
-              <Portal size="sm" />
-            </div>
+              >
+                <Portal size="sm" />
+              </div>
           </div>
 
           {/* Desktop targeting HUD */}
@@ -1649,7 +1924,21 @@ export default function HeroSection() {
         {/* Global signal sweep */}
         <motion.div
           aria-hidden="true"
-          className="pointer-events-none absolute left-0 right-0 top-0 z-30 h-px bg-linear-to-r from-transparent via-emerald-200/40 to-transparent shadow-[0_0_18px_rgba(52,211,153,0.5)]"
+          className="
+  pointer-events-none
+  absolute
+  left-0
+  right-0
+  top-0
+  z-30
+  h-px
+  opacity-40
+  bg-linear-to-r
+  from-transparent
+  via-emerald-200/30
+  to-transparent
+  shadow-[0_0_14px_rgba(52,211,153,0.35)]
+"
           animate={{ top: ["10%", "92%"], opacity: [0, 0.8, 0] }}
           transition={{ duration: 7.5, repeat: Infinity, repeatDelay: 7, ease: "easeInOut" }}
         />

@@ -132,13 +132,9 @@ export default function Footer() {
           <p className="font-mono text-[9px] tracking-widest text-muted">
             © 2026 VYUHAM — Digital University Kerala
           </p>
-          <button
-            type="button"
-            onClick={() => window.dispatchEvent(new Event("open-cyber-terminal"))}
-            className="font-mono text-[9px] font-bold tracking-widest text-emerald-400/70 transition hover:text-emerald-300"
-          >
-            [ &gt;_ CLI TERMINAL ]
-          </button>
+          <span className="font-mono text-[9px] tracking-widest text-emerald-400/60">
+            [ VYUHAM OS v26.4 ]
+          </span>
           <p className="font-mono text-[9px] tracking-widest text-muted/50">
             THE FUTURE AWAITS
           </p>
