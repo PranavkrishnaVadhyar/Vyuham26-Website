@@ -230,7 +230,7 @@ export default function CtaSection() {
           className="
             pointer-events-auto
             absolute
-            bottom-[-15%]
+            bottom-[-6%]
             right-[-2%]
             cursor-pointer
             select-none
@@ -239,7 +239,7 @@ export default function CtaSection() {
             font-bold
             leading-none
             tracking-[-0.08em]
-            text-emerald-400/[0.035]
+            text-[#B6FF00]/[0.07]
           "
           animate={{
             x: [0, -18, 0],
@@ -607,11 +607,11 @@ export default function CtaSection() {
                       animate={
                         accessGranted
                           ? {
-                              scale: [1, 1.04, 1],
-                            }
+                            scale: [1, 1.04, 1],
+                          }
                           : {
-                              scale: [1, 1.015, 1],
-                            }
+                            scale: [1, 1.015, 1],
+                          }
                       }
                       transition={{
                         duration: accessGranted ? 0.6 : 4,
@@ -1767,10 +1767,10 @@ function Corner({
   position,
 }: {
   position:
-    | "left-top"
-    | "right-top"
-    | "left-bottom"
-    | "right-bottom";
+  | "left-top"
+  | "right-top"
+  | "left-bottom"
+  | "right-bottom";
 }) {
   const positionClass = {
     "left-top":
