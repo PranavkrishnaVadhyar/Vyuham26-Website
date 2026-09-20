@@ -1,6 +1,10 @@
 "use client";
 
-import { useRef, useEffect, useCallback } from "react";
+import {
+  useRef,
+  useEffect,
+  useCallback,
+} from "react";
 
 interface Particle {
   x: number;
@@ -9,110 +13,392 @@ interface Particle {
   vy: number;
   size: number;
   opacity: number;
+  baseOpacity: number;
+  phase: number;
   hue: number;
 }
 
 interface ParticleFieldProps {
   className?: string;
   particleCount?: number;
+  connectionDistance?: number;
 }
 
 export default function ParticleField({
   className = "",
-  particleCount = 80,
+  particleCount = 65,
+  connectionDistance = 105,
 }: ParticleFieldProps) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const particlesRef = useRef<Particle[]>([]);
-  const animationRef = useRef<number>(0);
-  const prefersReducedMotion =
-    typeof window !== "undefined" &&
-    window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const canvasRef =
+    useRef<HTMLCanvasElement>(null);
+
+  const particlesRef =
+    useRef<Particle[]>([]);
+
+  const animationRef =
+    useRef<number | null>(null);
 
   const initParticles = useCallback(
     (width: number, height: number) => {
-      particlesRef.current = Array.from({ length: particleCount }, () => ({
-        x: Math.random() * width,
-        y: Math.random() * height,
-        vx: (Math.random() - 0.5) * 0.3,
-        vy: (Math.random() - 0.5) * 0.3,
-        size: Math.random() * 2 + 0.5,
-        opacity: Math.random() * 0.5 + 0.1,
-        hue: Math.random() > 0.7 ? 80 : 140, // green or emerald tint
-      }));
+      particlesRef.current = Array.from(
+        { length: particleCount },
+        () => {
+          const isBright =
+            Math.random() > 0.78;
+
+          return {
+            x: Math.random() * width,
+            y: Math.random() * height,
+
+            vx:
+              (Math.random() - 0.5) *
+              0.16,
+
+            vy:
+              (Math.random() - 0.5) *
+              0.16,
+
+            size: isBright
+              ? Math.random() * 1.4 + 0.8
+              : Math.random() * 1 + 0.35,
+
+            opacity: isBright
+              ? Math.random() * 0.28 + 0.18
+              : Math.random() * 0.18 + 0.05,
+
+            baseOpacity: isBright
+              ? Math.random() * 0.28 + 0.18
+              : Math.random() * 0.18 + 0.05,
+
+            phase:
+              Math.random() *
+              Math.PI *
+              2,
+
+            /*
+             * 140 = emerald
+             * 150 = green
+             */
+            hue:
+              Math.random() > 0.35
+                ? 145
+                : 158,
+          };
+        }
+      );
     },
     [particleCount]
   );
 
   useEffect(() => {
-    if (prefersReducedMotion) return;
     const canvas = canvasRef.current;
+
     if (!canvas) return;
 
-    const ctx = canvas.getContext("2d");
+    const ctx =
+      canvas.getContext("2d");
+
     if (!ctx) return;
 
+    let width = 0;
+    let height = 0;
+    let dpr = 1;
+
+    const prefersReducedMotion =
+      window.matchMedia(
+        "(prefers-reduced-motion: reduce)"
+      ).matches;
+
     const resize = () => {
-      const dpr = window.devicePixelRatio || 1;
-      const rect = canvas.getBoundingClientRect();
-      canvas.width = rect.width * dpr;
-      canvas.height = rect.height * dpr;
-      ctx.scale(dpr, dpr);
-      initParticles(rect.width, rect.height);
+      const rect =
+        canvas.getBoundingClientRect();
+
+      width = rect.width;
+      height = rect.height;
+
+      dpr = Math.min(
+        window.devicePixelRatio || 1,
+        2
+      );
+
+      canvas.width =
+        Math.floor(width * dpr);
+
+      canvas.height =
+        Math.floor(height * dpr);
+
+      /*
+       * Reset transform before applying
+       * the new DPR scale.
+       */
+      ctx.setTransform(
+        dpr,
+        0,
+        0,
+        dpr,
+        0,
+        0
+      );
+
+      initParticles(width, height);
     };
 
     resize();
-    window.addEventListener("resize", resize);
 
-    const animate = () => {
-      const rect = canvas.getBoundingClientRect();
-      ctx.clearRect(0, 0, rect.width, rect.height);
+    window.addEventListener(
+      "resize",
+      resize,
+      { passive: true }
+    );
 
-      particlesRef.current.forEach((p) => {
-        p.x += p.vx;
-        p.y += p.vy;
+    /*
+     * Respect reduced motion without
+     * removing the visual completely.
+     */
+    if (prefersReducedMotion) {
+      ctx.clearRect(
+        0,
+        0,
+        width,
+        height
+      );
 
-        // Wrap around
-        if (p.x < 0) p.x = rect.width;
-        if (p.x > rect.width) p.x = 0;
-        if (p.y < 0) p.y = rect.height;
-        if (p.y > rect.height) p.y = 0;
+      particlesRef.current.forEach(
+        (p) => {
+          ctx.beginPath();
 
+          ctx.arc(
+            p.x,
+            p.y,
+            p.size,
+            0,
+            Math.PI * 2
+          );
+
+          ctx.fillStyle = `hsla(
+            ${p.hue},
+            70%,
+            58%,
+            ${p.baseOpacity * 0.65}
+          )`;
+
+          ctx.fill();
+        }
+      );
+
+      return () => {
+        window.removeEventListener(
+          "resize",
+          resize
+        );
+      };
+    }
+
+    let lastTime = performance.now();
+
+    const animate = (
+      currentTime: number
+    ) => {
+      const delta =
+        Math.min(
+          currentTime - lastTime,
+          32
+        );
+
+      lastTime = currentTime;
+
+      const dt = delta / 16.67;
+
+      ctx.clearRect(
+        0,
+        0,
+        width,
+        height
+      );
+
+      const particles =
+        particlesRef.current;
+
+      /*
+       * ─────────────────────────
+       * PARTICLE MOVEMENT
+       * ─────────────────────────
+       */
+      for (const p of particles) {
+        p.x += p.vx * dt;
+        p.y += p.vy * dt;
+
+        /*
+         * Wrap around the viewport.
+         */
+        if (p.x < -4) {
+          p.x = width + 4;
+        }
+
+        if (p.x > width + 4) {
+          p.x = -4;
+        }
+
+        if (p.y < -4) {
+          p.y = height + 4;
+        }
+
+        if (p.y > height + 4) {
+          p.y = -4;
+        }
+
+        /*
+         * Very subtle signal pulse.
+         */
+        p.phase +=
+          0.008 * dt;
+
+        p.opacity =
+          p.baseOpacity +
+          Math.sin(p.phase) * 0.035;
+
+        /*
+         * Particle.
+         */
         ctx.beginPath();
-        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-        ctx.fillStyle = `hsla(${p.hue}, 100%, 65%, ${p.opacity})`;
-        ctx.fill();
-      });
 
-      // Draw connections
-      const particles = particlesRef.current;
-      for (let i = 0; i < particles.length; i++) {
-        for (let j = i + 1; j < particles.length; j++) {
-          const dx = particles[i].x - particles[j].x;
-          const dy = particles[i].y - particles[j].y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < 120) {
-            ctx.beginPath();
-            ctx.moveTo(particles[i].x, particles[i].y);
-            ctx.lineTo(particles[j].x, particles[j].y);
-            ctx.strokeStyle = `rgba(200, 255, 66, ${0.06 * (1 - dist / 120)})`;
-            ctx.lineWidth = 0.5;
-            ctx.stroke();
+        ctx.arc(
+          p.x,
+          p.y,
+          p.size,
+          0,
+          Math.PI * 2
+        );
+
+        ctx.fillStyle = `hsla(
+          ${p.hue},
+          72%,
+          62%,
+          ${Math.max(
+            0.02,
+            p.opacity
+          )}
+        )`;
+
+        ctx.fill();
+      }
+
+      /*
+       * ─────────────────────────
+       * SIGNAL CONNECTIONS
+       * ─────────────────────────
+       *
+       * Only nearby particles connect.
+       * This keeps the field lightweight
+       * and prevents a spider-web look.
+       */
+      for (
+        let i = 0;
+        i < particles.length;
+        i++
+      ) {
+        const a = particles[i];
+
+        for (
+          let j = i + 1;
+          j < particles.length;
+          j++
+        ) {
+          const b = particles[j];
+
+          const dx =
+            a.x - b.x;
+
+          const dy =
+            a.y - b.y;
+
+          const distanceSquared =
+            dx * dx + dy * dy;
+
+          const maxDistance =
+            connectionDistance;
+
+          if (
+            distanceSquared >
+            maxDistance *
+              maxDistance
+          ) {
+            continue;
           }
+
+          const distance =
+            Math.sqrt(
+              distanceSquared
+            );
+
+          /*
+           * Fade connections toward
+           * their endpoints.
+           */
+          const strength =
+            1 -
+            distance /
+              maxDistance;
+
+          /*
+           * Keep the network extremely
+           * subtle.
+           */
+          const alpha =
+            strength * 0.075;
+
+          ctx.beginPath();
+
+          ctx.moveTo(
+            a.x,
+            a.y
+          );
+
+          ctx.lineTo(
+            b.x,
+            b.y
+          );
+
+          ctx.strokeStyle = `rgba(
+            52,
+            211,
+            153,
+            ${alpha}
+          )`;
+
+          ctx.lineWidth = 0.45;
+
+          ctx.stroke();
         }
       }
 
-      animationRef.current = requestAnimationFrame(animate);
+      animationRef.current =
+        requestAnimationFrame(
+          animate
+        );
     };
 
-    animate();
+    animationRef.current =
+      requestAnimationFrame(
+        animate
+      );
 
     return () => {
-      window.removeEventListener("resize", resize);
-      cancelAnimationFrame(animationRef.current);
-    };
-  }, [prefersReducedMotion, initParticles]);
+      window.removeEventListener(
+        "resize",
+        resize
+      );
 
-  if (prefersReducedMotion) return null;
+      if (
+        animationRef.current !==
+        null
+      ) {
+        cancelAnimationFrame(
+          animationRef.current
+        );
+      }
+    };
+  }, [initParticles, connectionDistance]);
 
   return (
     <canvas

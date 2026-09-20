@@ -9,8 +9,9 @@ const navItems = [
   { num: "02", label: "ABOUT", href: "/about" },
   { num: "03", label: "EVENTS", href: "/events" },
   { num: "04", label: "SCHEDULE", href: "/schedule" },
-  { num: "05", label: "EXPO", href: "/events/tech-expo" },
+  { num: "05", label: "GALLERY", href: "/gallery" },
   { num: "06", label: "VENUE", href: "/venue" },
+  { num: "07", label: "TEAMS", href: "/teams" },
 ];
 
 export default function SideNavRail() {
@@ -71,7 +72,7 @@ export default function SideNavRail() {
               {activeHover === item.num && (
                 <motion.div
                   layoutId="side-rail-hover"
-                  className="absolute left-0 h-full w-[2px] bg-green"
+                  className="absolute left-0 h-full w-0.5 bg-green"
                   transition={{ duration: 0.15 }}
                 />
               )}
@@ -83,41 +84,66 @@ export default function SideNavRail() {
       {/* Expanded Full Drawer */}
       <AnimatePresence>
         {open && (
-          <motion.div
-            initial={{ opacity: 0, x: -300 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -300 }}
-            transition={{ type: "spring", damping: 25, stiffness: 220 }}
-            className="fixed top-0 left-12 z-40 hidden h-screen w-72 flex-col justify-between border-r border-line bg-ink/95 p-8 backdrop-blur-xl md:flex"
-          >
-            <div>
-              <div className="mb-8 font-mono text-xs tracking-widest text-green">
-                {'/// VYUHAM &apos;26 INDEX'}
-              </div>
-              <nav className="flex flex-col gap-6">
-                {navItems.map((item) => (
-                  <Link
-                    key={item.num}
-                    href={item.href}
-                    onClick={() => setOpen(false)}
-                    className="group flex items-center gap-4 text-paper no-underline transition hover:text-green"
+          <>
+            {/* Backdrop overlay — click to close */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="fixed inset-0 z-30 hidden bg-ink/60 backdrop-blur-sm md:block"
+              onClick={() => setOpen(false)}
+              aria-hidden="true"
+            />
+            <motion.div
+              initial={{ opacity: 0, x: -300 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -300 }}
+              transition={{ type: "spring", damping: 25, stiffness: 220 }}
+              className="fixed top-23 left-12 z-40 hidden h-[calc(100vh-92px)] w-72 flex-col justify-between border-r border-line bg-ink/95 p-8 backdrop-blur-xl md:flex"
+            >
+              <div>
+                <div className="mb-8 font-mono text-xs tracking-widest text-green">
+                  {'/// VYUHAM &apos;26 INDEX'}
+                </div>
+                <nav className="flex flex-col gap-6">
+                  {navItems.map((item) => (
+                    <Link
+                      key={item.num}
+                      href={item.href}
+                      onClick={() => setOpen(false)}
+                      className="group flex items-center gap-4 text-paper no-underline transition hover:text-green"
+                    >
+                      <span className="font-mono text-xs text-muted group-hover:text-green">
+                        {item.num}/
+                      </span>
+                      <span className="font-display text-xl font-bold tracking-tight">
+                        {item.label}
+                      </span>
+                    </Link>
+                  ))}
+                </nav>
+                <div className="mt-6 border-t border-line pt-4">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setOpen(false);
+                      window.dispatchEvent(new Event("open-cyber-terminal"));
+                    }}
+                    className="group flex w-full items-center justify-between rounded border border-emerald-500/30 bg-emerald-950/20 px-3 py-2 font-mono text-xs text-emerald-400 transition hover:border-emerald-500 hover:bg-emerald-500/10 hover:text-emerald-300"
                   >
-                    <span className="font-mono text-xs text-muted group-hover:text-green">
-                      {item.num}/
-                    </span>
-                    <span className="font-display text-xl font-bold tracking-tight">
-                      {item.label}
-                    </span>
-                  </Link>
-                ))}
-              </nav>
-            </div>
+                    <span>[ &gt;_ CLI TERMINAL ]</span>
+                    <span className="text-[10px] text-emerald-500/70">` KEY</span>
+                  </button>
+                </div>
+              </div>
 
-            <div className="border-t border-line pt-4 font-mono text-[10px] text-muted">
-              <p>DIGITAL UNIVERSITY KERALA</p>
-              <p className="mt-1 text-green">OCT 30 — NOV 01, 2026</p>
-            </div>
-          </motion.div>
+              <div className="border-t border-line pt-4 font-mono text-[10px] text-muted">
+                <p>DIGITAL UNIVERSITY KERALA</p>
+                <p className="mt-1 text-green">OCT 30 — NOV 01, 2026</p>
+              </div>
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
     </>

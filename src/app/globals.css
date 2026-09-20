@@ -289,6 +289,113 @@ em {
   text-shadow: 0 0 32px rgba(200, 255, 66, 0.24);
 }
 
+/* ─── Cinematic Intro (GSAP master-timeline) ─── */
+.intro-cinema {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: #f1f5f9;
+  will-change: opacity;
+}
+
+/* Hide side navigation rail during intro sequence */
+body:has(.intro-cinema) aside[aria-label="Side navigation rail"] {
+  display: none !important;
+}
+
+.intro-cinema--dark {
+  background: var(--ink);
+}
+
+.intro-cinema__skip {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  z-index: 30;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  color: #475569;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color 0.25s;
+}
+.intro-cinema__skip:hover {
+  color: #0f172a;
+}
+.intro-cinema--dark .intro-cinema__skip {
+  color: rgba(232, 238, 233, 0.6);
+}
+.intro-cinema--dark .intro-cinema__skip:hover {
+  color: var(--green);
+}
+
+/* Socket metallic bevel */
+.intro-socket-rim {
+  fill: #e2e8f0;
+  stroke: #cbd5e1;
+  stroke-width: 1.5;
+}
+.intro-socket-hole {
+  fill: #94a3b8;
+  opacity: 0.5;
+}
+
+/* Energy pulse ring on stone snap */
+@keyframes intro-stone-pulse {
+  0% { r: 0; opacity: 0.9; }
+  100% { r: 28; opacity: 0; }
+}
+.intro-stone-pulse {
+  fill: none;
+  stroke-width: 2;
+  animation: intro-stone-pulse 0.6s ease-out forwards;
+}
+
+/* Energy arcs during charging */
+@keyframes intro-arc-dash {
+  to { stroke-dashoffset: -40; }
+}
+.intro-arc {
+  fill: none;
+  stroke: #10b981;
+  stroke-width: 1.5;
+  stroke-dasharray: 8 12;
+  animation: intro-arc-dash 1.2s linear infinite;
+  opacity: 0;
+}
+
+/* Green flash overlay */
+.intro-flash {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 20;
+  background: radial-gradient(circle at center, #10b981, #c8ff42 40%, #ffffff 80%);
+  opacity: 0;
+}
+
+/* Logo reveal glow */
+@keyframes intro-logo-glow {
+  0%, 100% { filter: drop-shadow(0 0 12px rgba(200, 255, 66, 0.5)); }
+  50% { filter: drop-shadow(0 0 32px rgba(200, 255, 66, 0.9)); }
+}
+.intro-logo-glow {
+  animation: intro-logo-glow 1.6s ease-in-out infinite;
+}
+
+/* Particle canvas layer */
+.intro-particles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5;
+}
+
 /* ─── Experience wayfinding ─── */
 .experience-rail::before {
   content: "";

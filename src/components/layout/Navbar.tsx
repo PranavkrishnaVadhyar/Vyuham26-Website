@@ -9,8 +9,8 @@ const navLinks = [
   { href: "/about", label: "About" },
   { href: "/schedule", label: "Schedule" },
   { href: "/events", label: "Events" },
+  { href: "/gallery", label: "Gallery" },
   { href: "/sponsors", label: "Sponsors" },
-  { href: "/venue", label: "Venue" },
   { href: "/contact", label: "Contact" },
 ];
 
@@ -22,21 +22,21 @@ export default function Navbar() {
       className="fixed top-0 right-0 left-0 md:left-12 z-40 border-b border-line bg-ink/80 backdrop-blur-lg"
       aria-label="Primary navigation"
     >
-      <div className="mx-auto flex h-[72px] w-[min(1200px,calc(100%-48px))] items-center justify-between md:h-[92px] md:w-[min(1200px,calc(100%-64px))]">
+      <div className="mx-auto flex h-18 w-[min(1200px,calc(100%-48px))] items-center justify-between md:h-23 md:w-[min(1200px,calc(100%-64px))]">
         {/* Brand Logo */}
         <Link
           href="/"
-          className="flex items-center gap-3 font-display text-[17px] font-bold tracking-[-0.06em] text-paper no-underline group"
+          className="flex items-center gap-3 font-display text-lg font-bold tracking-[-0.06em] text-paper no-underline group"
           aria-label="Vyuham 26 home"
         >
           <Image
             src="/logo.png"
             alt="Vyuham '26 Logo"
-            width={40}
-            height={40}
+            width={48}
+            height={48}
             priority
             loading="eager"
-            className="h-10 w-10 object-contain drop-shadow-[0_0_12px_rgba(200,255,66,0.5)] transition-transform duration-300 group-hover:scale-105"
+            className="h-11 w-11 object-contain drop-shadow-[0_0_16px_rgba(52,211,153,0.55)] transition-transform duration-300 group-hover:scale-105"
           />
           <span className="font-display font-bold tracking-wider">
             VYUHAM<span className="text-green">&apos;26</span>
@@ -56,16 +56,21 @@ export default function Navbar() {
           ))}
         </div>
 
-        {/* Desktop CTA */}
-        <Link
-          href="/events"
-          className="hidden border-b border-green pb-1 font-mono text-[11px] uppercase tracking-[0.12em] text-paper no-underline transition-colors hover:text-green md:block"
-        >
-          Explore Events{" "}
-          <span className="ml-2 text-[17px] text-green" aria-hidden="true">
-            ↗
-          </span>
-        </Link>
+        {/* Desktop Auth CTA */}
+        <div className="hidden items-center gap-5 md:flex">
+          <Link
+            href="/login"
+            className="font-mono text-[11px] uppercase tracking-[0.12em] text-muted no-underline transition-colors hover:text-paper"
+          >
+            Login
+          </Link>
+          <Link
+            href="/signup"
+            className="inline-flex items-center bg-green px-4 py-2 font-mono text-[10px] font-extrabold uppercase tracking-widest text-ink no-underline transition-all hover:bg-green/90 hover:shadow-[0_0_20px_rgba(200,255,66,0.25)]"
+          >
+            Sign Up
+          </Link>
+        </div>
 
         {/* Mobile hamburger */}
         <button
@@ -99,7 +104,7 @@ export default function Navbar() {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: "100%" }}
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="fixed inset-0 top-[72px] z-30 flex flex-col gap-6 border-t border-line bg-ink/95 px-8 pt-12 backdrop-blur-xl md:hidden"
+            className="fixed inset-0 top-18 z-30 flex flex-col gap-6 border-t border-line bg-ink/95 px-8 pt-12 backdrop-blur-xl md:hidden"
           >
             {navLinks.map((link, i) => (
               <motion.div
@@ -117,18 +122,27 @@ export default function Navbar() {
                 </Link>
               </motion.div>
             ))}
+
+            {/* Mobile auth links */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
-              className="mt-auto mb-12"
+              className="mt-auto mb-12 flex flex-col gap-4"
             >
               <Link
-                href="/events"
+                href="/login"
                 onClick={() => setMobileOpen(false)}
-                className="inline-flex items-center bg-green px-5 py-3 font-mono text-[10px] font-extrabold uppercase tracking-[0.1em] text-ink no-underline"
+                className="inline-flex items-center justify-center border border-line px-5 py-3 font-mono text-[10px] font-extrabold uppercase tracking-widest text-paper no-underline transition-colors hover:border-green hover:text-green"
               >
-                Explore Events <span className="ml-2 text-base">→</span>
+                Login
+              </Link>
+              <Link
+                href="/signup"
+                onClick={() => setMobileOpen(false)}
+                className="inline-flex items-center justify-center bg-green px-5 py-3 font-mono text-[10px] font-extrabold uppercase tracking-widest text-ink no-underline"
+              >
+                Sign Up <span className="ml-2 text-base">→</span>
               </Link>
             </motion.div>
           </motion.div>
@@ -137,3 +151,4 @@ export default function Navbar() {
     </nav>
   );
 }
+

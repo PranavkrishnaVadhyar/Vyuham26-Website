@@ -73,7 +73,7 @@ export default function StreamsSection() {
             >
               <Link
                 href={`/events?stream=${stream.slug}`}
-                className="group relative block min-h-[245px] overflow-hidden border-r border-b border-line p-5 text-paper no-underline transition-all duration-300 hover:-translate-y-2 hover:bg-ink-mid md:min-h-[330px]"
+                className="group relative block min-h-61.25 overflow-hidden border-r border-b border-line p-5 text-paper no-underline transition-all duration-300 hover:-translate-y-2 hover:bg-ink-mid md:min-h-82.5"
               >
                 {/* Hover radial glow */}
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_65%_45%,rgba(200,255,66,0.2),transparent_48%)] opacity-0 transition-opacity duration-300 group-hover:opacity-100" />

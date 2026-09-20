@@ -1,7 +1,8 @@
 "use client";
 
-import { motion, useReducedMotion } from "framer-motion";
+import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
+import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
 
 const stations = [
   { id: "home", number: "01", label: "Home" },
@@ -13,7 +14,7 @@ const stations = [
 
 export default function ExperienceRail() {
   const [active, setActive] = useState("home");
-  const reduceMotion = useReducedMotion();
+  const reduceMotion = usePrefersReducedMotion();
 
   useEffect(() => {
     const observer = new IntersectionObserver(

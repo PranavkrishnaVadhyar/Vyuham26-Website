@@ -1,6 +1,5 @@
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
-import SideNavRail from "@/components/layout/SideNavRail";
 import HeroSection from "./sections/HeroSection";
 import StatsBar from "./sections/StatsBar";
 import AboutSection from "./sections/AboutSection";
@@ -16,7 +15,6 @@ export default function HomePage() {
   return (
     <>
       <IntroSequence />
-      <SideNavRail />
       <ExperienceRail />
       <Navbar />
       <PageEntranceProvider>
@@ -34,3 +32,4 @@ export default function HomePage() {
     </>
   );
 }
+

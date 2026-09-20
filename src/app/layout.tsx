@@ -1,5 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Space_Grotesk, Manrope, DM_Mono } from "next/font/google";
+import SideNavRail from "@/components/layout/SideNavRail";
+import CyberTerminal from "@/components/ui/CyberTerminal";
 import "./globals.css";
 
 const spaceGrotesk = Space_Grotesk({
@@ -66,11 +68,18 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
+      data-scroll-behavior="smooth"
       className={`${spaceGrotesk.variable} ${manrope.variable} ${dmMono.variable}`}
     >
       <body>
         {/* Noise texture overlay */}
         <div className="noise-overlay" aria-hidden="true" />
+
+        {/* Global side navigation */}
+        <SideNavRail />
+
+        {/* Global Cyber Terminal Console */}
+        <CyberTerminal />
 
         {/* Site shell */}
         <div className="relative z-0 flex min-h-screen flex-col">

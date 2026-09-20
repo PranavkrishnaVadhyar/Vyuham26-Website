@@ -1,158 +1,974 @@
 "use client";
 
-import Image from "next/image";
-import { AnimatePresence, motion } from "framer-motion";
-import { useEffect, useState, useSyncExternalStore } from "react";
-import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
-import ChronometerLoader from "@/components/motion/ChronometerLoader";
+import {
+  useRef,
+  useEffect,
+  useState,
+  useCallback,
+} from "react";
 
-const messages = [
-  "SYSTEM // STANDBY",
-  "SIGNAL DETECTED",
-  "DIMENSIONAL BREACH",
-  "ENERGY LEVEL // RISING",
-  "PROTOCOL // VYUHAM 26",
-];
+import { gsap } from "gsap";
+
+import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
+
+import StoneSystem, {
+  type StoneSystemHandle,
+} from "@/components/motion/StoneSystem";
+
+import EnergyRing, {
+  type EnergyRingHandle,
+} from "@/components/motion/EnergyRing";
+
+import CornerStructures, {
+  type CornerStructuresHandle,
+} from "@/components/motion/CornerStructures";
+
+import IntroParticleField, {
+  type ParticleFieldHandle,
+} from "@/components/motion/ParticleField3D";
+
+import LogoReveal, {
+  type LogoRevealHandle,
+} from "@/components/motion/LogoReveal";
+
+// Track whether intro has completed in this JS execution context (resets on F5 / browser refresh)
+let hasCompletedIntroInThisPageLoad = false;
 
 export default function IntroSequence() {
   const reduceMotion = usePrefersReducedMotion();
-  const [phase, setPhase] = useState<"loader" | "breach">("loader");
+
+  const [mounted, setMounted] = useState(false);
   const [dismissed, setDismissed] = useState(false);
-  const shouldPlay = useSyncExternalStore(
-    () => () => {},
-    () => !sessionStorage.getItem("vyuham-intro-seen"),
-    () => false
-  );
 
-  const visible = shouldPlay && !dismissed && !reduceMotion;
+  /* =========================================================
+     SESSION STATE
+  ========================================================= */
 
-  const dismiss = () => {
-    sessionStorage.setItem("vyuham-intro-seen", "true");
+  useEffect(() => {
+    setMounted(true);
+
+    if (hasCompletedIntroInThisPageLoad) {
+      setDismissed(true);
+    }
+  }, []);
+
+  /* =========================================================
+     DOM REFS
+  ========================================================= */
+
+  const sectionRef =
+    useRef<HTMLElement>(null);
+
+  const flashRef =
+    useRef<HTMLDivElement>(null);
+
+  const stageRef =
+    useRef<HTMLDivElement>(null);
+
+  const gridRef =
+    useRef<HTMLDivElement>(null);
+
+  const scanlineRef =
+    useRef<HTMLDivElement>(null);
+
+  const vignetteRef =
+    useRef<HTMLDivElement>(null);
+
+  const shakeContainerRef =
+    useRef<HTMLDivElement>(null);
+
+  const ambientGlowRef =
+    useRef<HTMLDivElement>(null);
+
+  const statusTextRef =
+    useRef<HTMLParagraphElement>(null);
+
+  const statusSubRef =
+    useRef<HTMLParagraphElement>(null);
+
+  const tlRef =
+    useRef<gsap.core.Timeline | null>(null);
+
+  /* =========================================================
+     ANIMATION COMPONENT REFS
+  ========================================================= */
+
+  const stoneRef =
+    useRef<StoneSystemHandle>(null);
+
+  const ringRef =
+    useRef<EnergyRingHandle>(null);
+
+  const structuresRef =
+    useRef<CornerStructuresHandle>(null);
+
+  const particlesRef =
+    useRef<ParticleFieldHandle>(null);
+
+  const logoRef =
+    useRef<LogoRevealHandle>(null);
+
+  /* =========================================================
+     VISIBILITY
+  ========================================================= */
+
+  const visible =
+    mounted &&
+    !dismissed &&
+    !reduceMotion;
+
+  /* =========================================================
+     DISMISS
+  ========================================================= */
+
+  const dismiss = useCallback(() => {
+    hasCompletedIntroInThisPageLoad = true;
+
+    if (tlRef.current) {
+      tlRef.current.kill();
+      tlRef.current = null;
+    }
+
+    try {
+      sessionStorage.setItem("vyuham-intro-dismissed", "1");
+    } catch {
+      // Ignore sessionStorage restrictions.
+    }
+
     setDismissed(true);
-  };
+  }, []);
+
+  /* =========================================================
+     SKIP
+  ========================================================= */
+
+  const skip = useCallback(() => {
+    const tl = tlRef.current;
+
+    if (!tl) return;
+
+    /*
+     * Finish the timeline rather than abruptly
+     * removing the intro.
+     */
+    tl.progress(1);
+  }, []);
+
+  /* =========================================================
+     VYUHAM SYSTEM STATUS
+  ========================================================= */
+
+  const STATUS_MESSAGES = [
+    {
+      at: 0.00,
+      text: "SYSTEM // INITIALIZING",
+      sub: "AWAITING ENERGY SIGNATURE",
+    },
+
+    {
+      at: 0.05,
+      text: "CORE ARRAY // ONLINE",
+      sub: "FIVE ENERGY CORES DETECTED",
+    },
+
+    {
+      at: 0.12,
+      text: "VECTOR CORE // LOCKED",
+      sub: "PRIMARY SIGNAL ESTABLISHED",
+    },
+
+    {
+      at: 0.19,
+      text: "COGNITION CORE // LOCKED",
+      sub: "NEURAL SIGNAL SYNCHRONIZED",
+    },
+
+    {
+      at: 0.26,
+      text: "REALITY CORE // LOCKED",
+      sub: "DIMENSIONAL FIELD STABLE",
+    },
+
+    {
+      at: 0.33,
+      text: "POWER CORE // LOCKED",
+      sub: "ENERGY OUTPUT RISING",
+    },
+
+    {
+      at: 0.40,
+      text: "TEMPORAL CORE // ACTIVE",
+      sub: "VYUHAM SIGNAL DETECTED",
+    },
+
+    {
+      at: 0.46,
+      text: "CORE ARRAY // SYNCHRONIZED",
+      sub: "DIMENSIONAL SYSTEM ONLINE",
+    },
+
+    {
+      at: 0.51,
+      text: "RING SYSTEM // IGNITION",
+      sub: "CONTAINMENT FIELD FORMING",
+    },
+
+    {
+      at: 0.58,
+      text: "DIMENSIONAL LOCKS // APPROACHING",
+      sub: "FOUR STRUCTURES DETECTED",
+    },
+
+    {
+      at: 0.65,
+      text: "CONTAINMENT // LOCKED",
+      sub: "ENERGY FIELD STABILIZED",
+    },
+
+    {
+      at: 0.73,
+      text: "ENERGY SYSTEM // CHARGING",
+      sub: "POWER LEVEL RISING",
+    },
+
+    {
+      at: 0.84,
+      text: "CRITICAL ENERGY // DETECTED",
+      sub: "SYSTEM APPROACHING MAXIMUM OUTPUT",
+    },
+
+    {
+      at: 0.90,
+      text: "SYSTEM // OVERLOAD",
+      sub: "DIMENSIONAL FIELD RELEASE",
+    },
+
+    {
+      at: 0.95,
+      text: "VYUHAM'26 // ONLINE",
+      sub: "THE FUTURE AWAITS",
+    },
+
+    {
+      at: 0.985,
+      text: "SIGNAL // TRANSMITTED",
+      sub: "WELCOME TO THE FUTURE",
+    },
+  ];
+
+  /* =========================================================
+     MASTER TIMELINE
+  ========================================================= */
 
   useEffect(() => {
     if (!visible) return;
-    if (phase === "loader") {
-      const next = window.setTimeout(() => setPhase("breach"), 2600);
-      return () => window.clearTimeout(next);
+
+    const section =
+      sectionRef.current;
+
+    const flash =
+      flashRef.current;
+
+    const stage =
+      stageRef.current;
+
+    const grid =
+      gridRef.current;
+
+    const scanline =
+      scanlineRef.current;
+
+    const vignette =
+      vignetteRef.current;
+
+    const shakeContainer =
+      shakeContainerRef.current;
+
+    const ambientGlow =
+      ambientGlowRef.current;
+
+    const statusText =
+      statusTextRef.current;
+
+    const statusSub =
+      statusSubRef.current;
+
+    if (
+      !section ||
+      !flash ||
+      !stage ||
+      !shakeContainer
+    ) {
+      return;
     }
-    const complete = window.setTimeout(dismiss, 5900);
-    return () => window.clearTimeout(complete);
-  }, [visible, phase]);
+
+    const buildTimer =
+      requestAnimationFrame(() => {
+        /* =====================================================
+           MASTER TIMELINE
+        ===================================================== */
+
+        const tl = gsap.timeline({
+          paused: true,
+
+          onComplete: dismiss,
+
+          onUpdate() {
+            if (
+              !statusText ||
+              !statusSub
+            ) {
+              return;
+            }
+
+            const progress =
+              tl.progress();
+
+            let current =
+              STATUS_MESSAGES[0];
+
+            for (
+              const message of STATUS_MESSAGES
+            ) {
+              if (
+                progress >= message.at
+              ) {
+                current = message;
+              }
+            }
+
+            if (
+              statusText.textContent !==
+              current.text
+            ) {
+              statusText.textContent =
+                current.text;
+
+              statusSub.textContent =
+                current.sub;
+
+              gsap.fromTo(
+                statusText,
+                {
+                  opacity: 0.25,
+                  y: 2,
+                },
+                {
+                  opacity: 1,
+                  y: 0,
+                  duration: 0.16,
+                  ease: "power2.out",
+                }
+              );
+
+              gsap.fromTo(
+                statusSub,
+                {
+                  opacity: 0.3,
+                },
+                {
+                  opacity: 1,
+                  duration: 0.2,
+                }
+              );
+            }
+          },
+        });
+
+        /* =====================================================
+           INTRO ENVIRONMENT
+        ===================================================== */
+
+        /*
+         * Start WHITE.
+         * The dark environment gradually arrives
+         * when the energy system activates.
+         */
+
+        gsap.set(section, {
+          backgroundColor: "#eef4ef",
+        });
+
+        if (grid) {
+          tl.fromTo(
+            grid,
+            {
+              opacity: 0,
+            },
+            {
+              opacity: 0.08,
+              duration: 0.8,
+              ease: "power1.out",
+            },
+            0
+          );
+        }
+
+        if (scanline) {
+          tl.fromTo(
+            scanline,
+            {
+              opacity: 0,
+            },
+            {
+              opacity: 0.15,
+              duration: 0.6,
+            },
+            0.4
+          );
+        }
+
+        if (vignette) {
+          tl.fromTo(
+            vignette,
+            {
+              opacity: 0,
+            },
+            {
+              opacity: 0.35,
+              duration: 2.5,
+              ease: "power1.in",
+            },
+            1.2
+          );
+        }
+
+        /* =====================================================
+           AMBIENT GREEN ENERGY
+        ===================================================== */
+
+        if (ambientGlow) {
+          tl.fromTo(
+            ambientGlow,
+            {
+              opacity: 0,
+              scale: 0.6,
+            },
+            {
+              opacity: 0.12,
+              scale: 1,
+              duration: 1.5,
+              ease: "power2.out",
+            },
+            0.5
+          );
+        }
+
+        /* =====================================================
+           PHASE 01
+           FIVE CORE ARRAY
+        ===================================================== */
+
+        stoneRef.current?.addToTimeline(tl);
+
+        tl.addLabel("coresComplete");
+
+        tl.to(
+          section,
+          {
+            backgroundColor: "#030806",
+            duration: 0.7,
+            ease: "power2.inOut",
+          },
+          "coresComplete"
+        );
+
+        if (grid) {
+          tl.to(
+            grid,
+            {
+              opacity: 0.16,
+              duration: 0.8,
+            },
+            "activate"
+          );
+        }
+
+        if (ambientGlow) {
+          tl.to(
+            ambientGlow,
+            {
+              opacity: 0.25,
+              scale: 1.15,
+              duration: 0.8,
+              ease: "power2.out",
+            },
+            "activate"
+          );
+        }
+
+        /* =====================================================
+           PHASE 02
+           ENERGY RING
+        ===================================================== */
+
+        ringRef.current?.addToTimeline(
+          tl
+        );
+
+        /* =====================================================
+           PHASE 03
+           DIMENSIONAL STRUCTURES
+        ===================================================== */
+
+        structuresRef.current?.addToTimeline(
+          tl
+        );
+
+        /* =====================================================
+           PHASE 04
+           PARTICLE FIELD
+        ===================================================== */
+
+        particlesRef.current?.addToTimeline(
+          tl
+        );
+
+        /* =====================================================
+           SYSTEM CHARGE SHAKE
+        ===================================================== */
+
+        /*
+         * Very subtle vibration first.
+         */
+
+        tl.to(
+          shakeContainer,
+          {
+            x: "+=1",
+            y: "+=0.5",
+            yoyo: true,
+            repeat: 22,
+            duration: 0.07,
+            ease: "power1.inOut",
+          },
+          "charge+=0.55"
+        );
+
+        /*
+         * Stronger vibration as the system
+         * approaches critical energy.
+         */
+
+        tl.to(
+          shakeContainer,
+          {
+            x: "+=2.5",
+            y: "+=1.5",
+            yoyo: true,
+            repeat: 14,
+            duration: 0.045,
+            ease: "power1.inOut",
+          },
+          "charge+=2.25"
+        );
+
+        /* =====================================================
+           CRITICAL ENERGY
+        ===================================================== */
+
+        tl.to(
+          shakeContainer,
+          {
+            x: "+=4",
+            y: "+=2",
+            yoyo: true,
+            repeat: 8,
+            duration: 0.035,
+            ease: "power2.inOut",
+          },
+          "critical"
+        );
+
+        /* =====================================================
+           BREAK / OVERLOAD
+        ===================================================== */
+
+        tl.addLabel(
+          "overload",
+          "break"
+        );
+
+        /*
+         * Environment gets darker before the
+         * green overload flash.
+         */
+
+        tl.to(
+          section,
+          {
+            backgroundColor:
+              "#010403",
+            duration: 0.25,
+            ease: "power2.in",
+          },
+          "break"
+        );
+
+        if (grid) {
+          tl.to(
+            grid,
+            {
+              opacity: 0,
+              duration: 0.2,
+            },
+            "break"
+          );
+        }
+
+        if (scanline) {
+          tl.to(
+            scanline,
+            {
+              opacity: 0,
+              duration: 0.2,
+            },
+            "break"
+          );
+        }
+
+        /*
+         * Short distortion hit.
+         */
+
+        tl.to(
+          shakeContainer,
+          {
+            filter:
+              "blur(2px) brightness(2) saturate(1.5)",
+            duration: 0.1,
+            ease: "power2.out",
+          },
+          "break+=0.12"
+        );
+
+        tl.to(
+          shakeContainer,
+          {
+            filter: "none",
+            duration: 0.16,
+            ease: "power1.out",
+          },
+          "break+=0.22"
+        );
+
+        /*
+         * Green dimensional flash.
+         */
+
+        tl.to(
+          flash,
+          {
+            opacity: 0.92,
+            scale: 1.2,
+            duration: 0.12,
+            ease: "power3.out",
+          },
+          "break+=0.18"
+        );
+
+        tl.to(
+          flash,
+          {
+            opacity: 0,
+            scale: 4,
+            duration: 0.45,
+            ease: "power2.out",
+          },
+          "break+=0.3"
+        );
+
+        /*
+         * Collapse the old core stage.
+         *
+         * The actual logo layer will now
+         * take over.
+         */
+
+        tl.to(
+          stage,
+          {
+            opacity: 0,
+            scale: 0.25,
+            duration: 0.32,
+            ease: "expo.in",
+          },
+          "break+=0.12"
+        );
+
+        /*
+         * Final impact.
+         */
+
+        tl.to(
+          shakeContainer,
+          {
+            x: "+=7",
+            y: "-=5",
+            yoyo: true,
+            repeat: 5,
+            duration: 0.04,
+            ease: "power2.inOut",
+          },
+          "break+=0.18"
+        );
+
+        tl.set(
+          shakeContainer,
+          {
+            x: 0,
+            y: 0,
+            filter: "none",
+          },
+          "break+=0.65"
+        );
+
+        /* =====================================================
+           PHASE 05
+           LOGO REVEAL
+        ===================================================== */
+
+        logoRef.current?.addToTimeline(
+          tl
+        );
+
+        /* =====================================================
+           PHASE 06
+           HOMEPAGE TRANSITION
+        ===================================================== */
+
+        tl.addLabel(
+          "transition"
+        );
+
+        /*
+         * Let the logo sit for a moment.
+         * This is important: don't immediately
+         * remove the brand after revealing it.
+         */
+
+        tl.to(
+          {},
+          {
+            duration: 0.55,
+          },
+          "transition"
+        );
+
+        /*
+         * Fade the entire cinematic layer.
+         */
+
+        tl.to(
+          section,
+          {
+            opacity: 0,
+            duration: 0.65,
+            ease: "power2.inOut",
+          },
+          "transition+=0.5"
+        );
+
+        tlRef.current = tl;
+
+        /* =====================================================
+           PLAY
+        ===================================================== */
+
+        tl.play();
+      });
+
+    return () => {
+      cancelAnimationFrame(
+        buildTimer
+      );
+
+      if (tlRef.current) {
+        hasCompletedIntroInThisPageLoad = true;
+        tlRef.current.kill();
+        tlRef.current = null;
+      }
+    };
+  }, [visible, dismiss]);
+
+  /* =========================================================
+     RENDER
+  ========================================================= */
+
+  if (!visible) {
+    return null;
+  }
 
   return (
-    <AnimatePresence>
-      {visible && phase === "loader" && <ChronometerLoader key="chronometer" />}
+    <section
+      ref={sectionRef}
+      className="intro-cinema"
+      aria-label="VYUHAM 26 opening sequence"
+    >
+      {/* =====================================================
+          SKIP
+      ===================================================== */}
 
-      {visible && phase === "breach" && (
-        <motion.section
-          key="breach"
-          className="intro-sequence fixed inset-0 z-[100] grid place-items-center overflow-hidden bg-ink"
-          aria-label="Vyuham 26 opening sequence"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0, transition: { duration: 0.55, ease: "easeInOut" } }}
+      <button
+        type="button"
+        onClick={skip}
+        className="intro-cinema__skip"
+      >
+        SKIP INTRO ↗
+      </button>
+
+      {/* =====================================================
+          BACKGROUND GRID
+      ===================================================== */}
+
+      <div
+        ref={gridRef}
+        className="pointer-events-none absolute inset-0"
+        style={{
+          opacity: 0,
+
+          backgroundImage:
+            "linear-gradient(rgba(16,185,129,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(16,185,129,0.08) 1px, transparent 1px)",
+
+          backgroundSize:
+            "40px 40px",
+        }}
+        aria-hidden="true"
+      />
+
+      {/* =====================================================
+          AMBIENT ENERGY
+      ===================================================== */}
+
+      <div
+        ref={ambientGlowRef}
+        className="pointer-events-none absolute left-1/2 top-1/2 z-0 h-80 w-80 -translate-x-1/2 -translate-y-1/2 rounded-full"
+        style={{
+          opacity: 0,
+
+          background:
+            "radial-gradient(circle, rgba(16,185,129,0.22) 0%, rgba(16,185,129,0.08) 35%, transparent 72%)",
+
+          filter: "blur(28px)",
+        }}
+        aria-hidden="true"
+      />
+
+      {/* =====================================================
+          SCANLINES
+      ===================================================== */}
+
+      <div
+        ref={scanlineRef}
+        className="pointer-events-none absolute inset-0 z-30"
+        style={{
+          opacity: 0,
+
+          background:
+            "repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.035) 2px, rgba(0,0,0,0.035) 4px)",
+        }}
+        aria-hidden="true"
+      />
+
+      {/* =====================================================
+          VIGNETTE
+      ===================================================== */}
+
+      <div
+        ref={vignetteRef}
+        className="pointer-events-none absolute inset-0 z-5"
+        style={{
+          opacity: 0,
+
+          background:
+            "radial-gradient(circle at center, transparent 28%, rgba(0,0,0,0.5) 100%)",
+        }}
+        aria-hidden="true"
+      />
+
+      {/* =====================================================
+          MAIN CINEMATIC LAYER
+      ===================================================== */}
+
+      <div
+        ref={shakeContainerRef}
+        className="absolute inset-0 grid place-items-center"
+        style={{
+          willChange:
+            "transform, filter",
+        }}
+      >
+        {/* ===================================================
+            PARTICLES
+        =================================================== */}
+
+        <IntroParticleField
+          ref={particlesRef}
+        />
+
+        {/* ===================================================
+            GREEN OVERLOAD FLASH
+        =================================================== */}
+
+        <div
+          ref={flashRef}
+          className="intro-flash"
+          aria-hidden="true"
+          style={{
+            opacity: 0,
+            transform: "scale(1)",
+          }}
+        />
+
+        {/* ===================================================
+            CORE SYSTEM STAGE
+        =================================================== */}
+
+        <div
+          ref={stageRef}
+          className="relative z-10 h-[min(78vw,620px)] w-[min(78vw,620px)]"
         >
-          <motion.button
-            type="button"
-            onClick={dismiss}
-            className="absolute top-6 right-6 z-20 font-mono text-[10px] tracking-[0.16em] text-paper/70 transition hover:text-green focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-green"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.7 }}
-          >
-            SKIP INTRO ↗
-          </motion.button>
-
-          <div className="intro-grid pointer-events-none absolute inset-0" aria-hidden="true" />
-          <motion.div
-            className="intro-flash pointer-events-none absolute inset-0 bg-green"
-            aria-hidden="true"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: [0, 0, 0, 0.66, 0] }}
-            transition={{ duration: 5.9, times: [0, 0.58, 0.68, 0.74, 0.84] }}
+          <StoneSystem
+            ref={stoneRef}
           />
 
-          <div className="relative z-10 grid place-items-center text-center">
-            <motion.p
-              className="absolute -top-28 font-mono text-[10px] tracking-[0.17em] text-green"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: [0, 1, 1, 0] }}
-              transition={{ duration: 1.2, delay: 0.15, times: [0, 0.2, 0.75, 1] }}
-            >
-              {messages[0]}
-            </motion.p>
+          <EnergyRing
+            ref={ringRef}
+          />
 
-            <motion.div
-              className="intro-core relative grid h-10 w-10 place-items-center rounded-full bg-green"
-              initial={{ opacity: 0, scale: 0.05 }}
-              animate={{ opacity: [0, 1, 1, 0], scale: [0.05, 1, 4.8, 7] }}
-              transition={{ duration: 4.6, delay: 0.5, times: [0, 0.13, 0.72, 1], ease: [0.22, 1, 0.36, 1] }}
-            >
-              <span className="h-2 w-2 rounded-full bg-paper" />
-              {[0, 1, 2].map((ring) => (
-                <motion.span
-                  key={ring}
-                  className="absolute inset-0 rounded-full border border-green"
-                  initial={{ opacity: 0, scale: 0.2 }}
-                  animate={{ opacity: [0, 0.75, 0], scale: [0.2, 4.5 + ring * 1.1, 6 + ring] }}
-                  transition={{ duration: 1.35, delay: 1.0 + ring * 0.24, ease: "easeOut" }}
-                />
-              ))}
-            </motion.div>
+          <CornerStructures
+            ref={structuresRef}
+          />
+        </div>
 
-            <motion.div
-              className="absolute grid place-items-center"
-              initial={{ opacity: 0, scale: 0.25, rotate: -25 }}
-              animate={{ opacity: [0, 0, 1, 1, 0], scale: [0.25, 0.25, 1, 1.15, 3.2], rotate: [-25, -25, 0, 0, 0] }}
-              transition={{ duration: 3.05, delay: 2.15, times: [0, 0.22, 0.5, 0.75, 1], ease: [0.22, 1, 0.36, 1] }}
-            >
-              <div className="intro-emblem-shell grid h-32 w-32 place-items-center rounded-full md:h-40 md:w-40">
-                <Image
-                  src="/logo.png"
-                  alt="Vyuham logo"
-                  width={128}
-                  height={128}
-                  priority
-                  loading="eager"
-                  fetchPriority="high"
-                  className="intro-emblem h-24 w-24 object-contain md:h-32 md:w-32"
-                />
-              </div>
-            </motion.div>
+        {/* ===================================================
+            LOGO
+        =================================================== */}
 
-            <motion.div
-              className="absolute top-28 w-[min(90vw,520px)]"
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: [0, 0, 1, 1, 0], y: [16, 16, 0, 0, -8] }}
-              transition={{ duration: 2.2, delay: 3.75, times: [0, 0.15, 0.35, 0.78, 1] }}
-            >
-              <h1 className="intro-wordmark font-display text-[clamp(48px,10vw,112px)] leading-none tracking-[-0.09em] text-paper">
-                VYUHAM<span className="text-green">&apos;26</span>
-              </h1>
-              <p className="mt-3 font-mono text-[10px] tracking-[0.3em] text-green">TECH FEST 2026</p>
-            </motion.div>
-          </div>
+        <LogoReveal
+          ref={logoRef}
+        />
+      </div>
 
-          <div className="absolute bottom-8 left-1/2 z-10 w-[min(88vw,560px)] -translate-x-1/2 font-mono text-[9px] tracking-[0.14em] text-muted" aria-live="polite">
-            <AnimatePresence>
-              {messages.map((message, index) => (
-                <motion.p
-                  key={message}
-                  className="absolute inset-x-0 text-center"
-                  initial={{ opacity: 0, y: 6 }}
-                  animate={{ opacity: index === 0 ? [1, 0] : [0, 1, 1, 0] }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: index === 0 ? 0.95 : 1.15, delay: index === 0 ? 0 : 0.6 + index * 0.72, times: [0, 0.18, 0.7, 1] }}
-                >
-                  {message}
-                </motion.p>
-              ))}
-            </AnimatePresence>
-          </div>
-        </motion.section>
-      )}
-    </AnimatePresence>
+      {/* =====================================================
+          SYSTEM TELEMETRY
+      ===================================================== */}
+
+      <div className="pointer-events-none absolute bottom-8 left-1/2 z-40 -translate-x-1/2 text-center font-mono">
+        <p
+          ref={statusTextRef}
+          className="text-[10px] font-bold tracking-[0.24em] text-green uppercase"
+        >
+          SYSTEM // INITIALIZING
+        </p>
+
+        <p
+          ref={statusSubRef}
+          className="mt-1 text-[8px] tracking-[0.18em] text-muted uppercase"
+        >
+          AWAITING ENERGY SIGNATURE
+        </p>
+      </div>
+    </section>
   );
 }
