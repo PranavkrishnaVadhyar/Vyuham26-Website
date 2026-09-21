@@ -29,6 +29,10 @@ const navItems: NavItem[] = [
 export default function SideNavRail() {
   const pathname = usePathname();
 
+  if (pathname === "/intro-test" || pathname?.startsWith("/intro-test")) {
+    return null;
+  }
+
   const [open, setOpen] = useState(false);
   const [hovered, setHovered] = useState<string | null>(null);
 

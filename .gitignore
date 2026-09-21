@@ -16,6 +16,7 @@
 /build
 /dist
 /.turbopack
+/.vercel
 
 # Environment Variables
 .env
@@ -29,13 +30,31 @@
 /coverage
 
 # Debug & Error Logs
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 lerna-debug.log*
 
-# IDE & Editor Configs
+# Compressed Archives & Media Backups
+*.zip
+*.tar.gz
+*.tgz
+*.rar
+*.7z
+*.bak
+
+# Temporary Files & Scratch Backups
+_prototype-backup/
+.docx-review/
+website_completeness_audit.txt
+*.tmp
+
+# AI & IDE Metadata
+.agents/
+.gemini/
+.claude/
 .vscode/*
 !.vscode/settings.json
 !.vscode/tasks.json
@@ -47,6 +66,8 @@ lerna-debug.log*
 *.njsproj
 *.sln
 *.sw?
+*.swo
+*.swp
 
 # Operating System Files
 .DS_Store
@@ -58,9 +79,7 @@ ehthumbs.db
 Thumbs.db
 desktop.ini
 
-# Temporary files & Scratch backups
-_prototype-backup/
-.docx-review/
-
-# TypeScript
+# TypeScript & Caches
 *.tsbuildinfo
+.next/cache
+

@@ -61,7 +61,12 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-family: var(--font-display);
   letter-spacing: -0.075em;
   margin: 0;
@@ -149,13 +154,11 @@ em {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: repeating-linear-gradient(
-    0deg,
-    transparent,
-    transparent 2px,
-    rgba(200, 255, 66, 0.015) 2px,
-    rgba(200, 255, 66, 0.015) 4px
-  );
+  background: repeating-linear-gradient(0deg,
+      transparent,
+      transparent 2px,
+      rgba(200, 255, 66, 0.015) 2px,
+      rgba(200, 255, 66, 0.015) 4px);
   z-index: 1;
 }
 
@@ -163,73 +166,147 @@ em {
 ::-webkit-scrollbar {
   width: 6px;
 }
+
 ::-webkit-scrollbar-track {
   background: var(--ink);
 }
+
 ::-webkit-scrollbar-thumb {
   background: var(--emerald-dark);
   border-radius: 3px;
 }
+
 ::-webkit-scrollbar-thumb:hover {
   background: var(--emerald);
 }
 
 /* ─── Doomsday Motion Keyframes ─── */
 @keyframes blink {
-  50% { opacity: 0.25; }
+  50% {
+    opacity: 0.25;
+  }
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 @keyframes spin-reverse {
-  to { transform: rotate(-360deg); }
+  to {
+    transform: rotate(-360deg);
+  }
 }
 
 @keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 12px var(--green); }
-  50% { box-shadow: 0 0 28px var(--green); }
+
+  0%,
+  100% {
+    box-shadow: 0 0 12px var(--green);
+  }
+
+  50% {
+    box-shadow: 0 0 28px var(--green);
+  }
 }
 
 @keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-8px); }
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-8px);
+  }
 }
 
 @keyframes gradient-shift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 @keyframes slide-up {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes scanline-pass {
-  0% { transform: translateY(-100%); opacity: 0.8; }
-  50% { opacity: 0.4; }
-  100% { transform: translateY(100%); opacity: 0.8; }
+  0% {
+    transform: translateY(-100%);
+    opacity: 0.8;
+  }
+
+  50% {
+    opacity: 0.4;
+  }
+
+  100% {
+    transform: translateY(100%);
+    opacity: 0.8;
+  }
 }
 
 @keyframes expanding-ring {
-  0% { transform: scale(0.6); opacity: 0.9; }
-  100% { transform: scale(1.6); opacity: 0; }
+  0% {
+    transform: scale(0.6);
+    opacity: 0.9;
+  }
+
+  100% {
+    transform: scale(1.6);
+    opacity: 0;
+  }
 }
 
 @keyframes energy-bloom {
-  0% { box-shadow: 0 0 0 0 rgba(200, 255, 66, 0.6); }
-  70% { box-shadow: 0 0 30px 15px rgba(200, 255, 66, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(200, 255, 66, 0); }
+  0% {
+    box-shadow: 0 0 0 0 rgba(200, 255, 66, 0.6);
+  }
+
+  70% {
+    box-shadow: 0 0 30px 15px rgba(200, 255, 66, 0);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 rgba(200, 255, 66, 0);
+  }
 }
 
 @keyframes decrypt-flicker {
-  0% { opacity: 0.3; }
-  30% { opacity: 0.9; }
-  60% { opacity: 0.5; }
-  100% { opacity: 1; }
+  0% {
+    opacity: 0.3;
+  }
+
+  30% {
+    opacity: 0.9;
+  }
+
+  60% {
+    opacity: 0.5;
+  }
+
+  100% {
+    opacity: 1;
+  }
 }
 
 /* ─── Doomsday Motion Utility Classes ─── */
@@ -297,7 +374,7 @@ em {
   display: grid;
   place-items: center;
   overflow: hidden;
-  background: #f1f5f9;
+  background: #000000;
   will-change: opacity;
 }
 
@@ -325,12 +402,15 @@ body:has(.intro-cinema) .side-nav-rail {
   cursor: pointer;
   transition: color 0.25s;
 }
+
 .intro-cinema__skip:hover {
   color: #0f172a;
 }
+
 .intro-cinema--dark .intro-cinema__skip {
   color: rgba(232, 238, 233, 0.6);
 }
+
 .intro-cinema--dark .intro-cinema__skip:hover {
   color: var(--green);
 }
@@ -341,6 +421,7 @@ body:has(.intro-cinema) .side-nav-rail {
   stroke: #cbd5e1;
   stroke-width: 1.5;
 }
+
 .intro-socket-hole {
   fill: #94a3b8;
   opacity: 0.5;
@@ -348,9 +429,17 @@ body:has(.intro-cinema) .side-nav-rail {
 
 /* Energy pulse ring on stone snap */
 @keyframes intro-stone-pulse {
-  0% { r: 0; opacity: 0.9; }
-  100% { r: 28; opacity: 0; }
+  0% {
+    r: 0;
+    opacity: 0.9;
+  }
+
+  100% {
+    r: 28;
+    opacity: 0;
+  }
 }
+
 .intro-stone-pulse {
   fill: none;
   stroke-width: 2;
@@ -359,8 +448,11 @@ body:has(.intro-cinema) .side-nav-rail {
 
 /* Energy arcs during charging */
 @keyframes intro-arc-dash {
-  to { stroke-dashoffset: -40; }
+  to {
+    stroke-dashoffset: -40;
+  }
 }
+
 .intro-arc {
   fill: none;
   stroke: #10b981;
@@ -382,9 +474,17 @@ body:has(.intro-cinema) .side-nav-rail {
 
 /* Logo reveal glow */
 @keyframes intro-logo-glow {
-  0%, 100% { filter: drop-shadow(0 0 12px rgba(200, 255, 66, 0.5)); }
-  50% { filter: drop-shadow(0 0 32px rgba(200, 255, 66, 0.9)); }
+
+  0%,
+  100% {
+    filter: drop-shadow(0 0 12px rgba(200, 255, 66, 0.5));
+  }
+
+  50% {
+    filter: drop-shadow(0 0 32px rgba(200, 255, 66, 0.9));
+  }
 }
+
 .intro-logo-glow {
   animation: intro-logo-glow 1.6s ease-in-out infinite;
 }
@@ -413,11 +513,14 @@ body:has(.intro-cinema) .side-nav-rail {
 }
 
 @keyframes signal-ticker {
-  to { transform: translateX(-50%); }
+  to {
+    transform: translateX(-50%);
+  }
 }
 
 /* ─── Reduced Motion ─── */
 @media (prefers-reduced-motion: reduce) {
+
   *,
   *::before,
   *::after {

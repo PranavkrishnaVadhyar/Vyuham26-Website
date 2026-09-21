@@ -43,7 +43,7 @@ export default function AnalyticsDashboardPage() {
   return (
     <>
       <Navbar />
-      <main className="flex-1 pt-[92px]">
+      <main className="flex-1 pt-23">
         <section className="py-20 md:py-28">
           <div className="mx-auto w-[min(1200px,calc(100%-48px))] md:w-[min(1200px,calc(100%-64px))]">
             <AnimatedSection>

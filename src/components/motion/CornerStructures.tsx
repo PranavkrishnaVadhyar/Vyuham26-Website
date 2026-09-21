@@ -216,7 +216,22 @@ const CornerStructures = forwardRef<CornerStructuresHandle>(
            STRUCTURE ENTRY
         ===================================================== */
 
-        tl.addLabel("structures", "ring+=0.12");
+        /* =====================================================
+           FRAME 09 — STRUCTURES APPROACH
+           Four irregular mechanical locks enter from the
+           corners. The beams arrive first, then the bodies.
+        ===================================================== */
+
+        tl.addLabel(
+          "structuresApproach",
+          "ring+=0.12"
+        );
+
+        /* Compatibility label used by older timelines. */
+        tl.addLabel(
+          "structures",
+          "structuresApproach"
+        );
 
         STRUCTURES.forEach((structure, i) => {
           const group = groupRefs.current[i];
@@ -281,7 +296,7 @@ const CornerStructures = forwardRef<CornerStructuresHandle>(
               duration: 0.5,
               ease: "power2.out",
             },
-            `structures+=${delay}`
+            `structuresApproach+=${delay}`
           );
 
           /* =================================================
@@ -325,7 +340,7 @@ const CornerStructures = forwardRef<CornerStructuresHandle>(
                   });
               },
             },
-            `structures+=${delay + 0.08}`
+            `structuresApproach+=${delay + 0.08}`
           );
 
           /* =================================================
@@ -349,7 +364,7 @@ const CornerStructures = forwardRef<CornerStructuresHandle>(
                 duration: 0.12,
                 ease: "power3.out",
               },
-              `structures+=${delay + 0.63}`
+              `structuresApproach+=${delay + 0.63}`
             );
 
             tl.to(
@@ -387,7 +402,7 @@ const CornerStructures = forwardRef<CornerStructuresHandle>(
                 duration: 0.16,
                 ease: "power3.out",
               },
-              `structures+=${delay + 0.63}`
+              `structuresApproach+=${delay + 0.63}`
             );
 
             tl.to(
@@ -404,6 +419,77 @@ const CornerStructures = forwardRef<CornerStructuresHandle>(
             );
           }
         });
+
+        /* =====================================================
+           FRAME 10 — STRUCTURES LOCK
+           Once all four arms arrive, pull them tightly into
+           the ring and create a mechanical containment lock.
+        ===================================================== */
+
+        tl.addLabel(
+          "structuresLock",
+          "structuresApproach+=1.15"
+        );
+
+        tl.to(
+          groupRefs.current.filter(Boolean),
+          {
+            scale: 1.045,
+            duration: 0.22,
+            ease: "power2.out",
+          },
+          "structuresLock"
+        );
+
+        tl.to(
+          groupRefs.current.filter(Boolean),
+          {
+            scale: 1,
+            duration: 0.28,
+            ease: "power2.inOut",
+          },
+          "structuresLock+=0.22"
+        );
+
+        /* Lock all four impact nodes together. */
+
+        tl.to(
+          sparkRefs.current.filter(Boolean),
+          {
+            opacity: 1,
+            attr: { r: 4.5 },
+            duration: 0.12,
+            stagger: 0.035,
+            ease: "power2.out",
+          },
+          "structuresLock+=0.18"
+        );
+
+        tl.to(
+          sparkRefs.current.filter(Boolean),
+          {
+            opacity: 0.35,
+            attr: { r: 2 },
+            duration: 0.22,
+            ease: "power2.inOut",
+          },
+          "structuresLock+=0.3"
+        );
+
+        /* Short lock vibration before loading begins. */
+
+        tl.to(
+          groupRefs.current.filter(Boolean),
+          {
+            x: "+=1.5",
+            y: "+=1",
+            duration: 0.055,
+            yoyo: true,
+            repeat: 5,
+            ease: "power1.inOut",
+          },
+          "structuresLock+=0.34"
+        );
 
         /* =====================================================
            CONTAINMENT / CHARGE

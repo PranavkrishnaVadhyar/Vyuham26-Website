@@ -31,8 +31,15 @@ import LogoReveal, {
   type LogoRevealHandle,
 } from "@/components/motion/LogoReveal";
 
-// Track whether intro has completed in this JS execution context (resets on F5 / browser refresh)
+/* =========================================================
+   PAGE-LOAD STATE
+========================================================= */
+
 let hasCompletedIntroInThisPageLoad = false;
+
+/* =========================================================
+   COMPONENT
+========================================================= */
 
 export default function IntroSequence() {
   const reduceMotion = usePrefersReducedMotion();
@@ -130,7 +137,10 @@ export default function IntroSequence() {
     }
 
     try {
-      sessionStorage.setItem("vyuham-intro-dismissed", "1");
+      sessionStorage.setItem(
+        "vyuham-intro-dismissed",
+        "1"
+      );
     } catch {
       // Ignore sessionStorage restrictions.
     }
@@ -147,110 +157,112 @@ export default function IntroSequence() {
 
     if (!tl) return;
 
-    /*
-     * Finish the timeline rather than abruptly
-     * removing the intro.
-     */
     tl.progress(1);
   }, []);
 
   /* =========================================================
-     VYUHAM SYSTEM STATUS
+     SYSTEM STATUS
   ========================================================= */
 
   const STATUS_MESSAGES = [
     {
       at: 0.00,
       text: "SYSTEM // INITIALIZING",
-      sub: "AWAITING ENERGY SIGNATURE",
+      sub: "AWAITING SIGNAL",
     },
 
     {
-      at: 0.05,
-      text: "CORE ARRAY // ONLINE",
-      sub: "FIVE ENERGY CORES DETECTED",
+      at: 0.035,
+      text: "SIGNAL // LOST",
+      sub: "NO ACTIVE SIGNATURE DETECTED",
     },
 
     {
-      at: 0.12,
-      text: "VECTOR CORE // LOCKED",
-      sub: "PRIMARY SIGNAL ESTABLISHED",
+      at: 0.09,
+      text: "SIGNAL // DETECTED",
+      sub: "UNKNOWN ENERGY SIGNATURE",
     },
 
     {
-      at: 0.19,
-      text: "COGNITION CORE // LOCKED",
-      sub: "NEURAL SIGNAL SYNCHRONIZED",
+      at: 0.16,
+      text: "SCAN // ACTIVE",
+      sub: "MAPPING SIGNAL PARAMETERS",
     },
 
     {
-      at: 0.26,
-      text: "REALITY CORE // LOCKED",
-      sub: "DIMENSIONAL FIELD STABLE",
+      at: 0.24,
+      text: "CORE // ASSEMBLING",
+      sub: "GEOMETRIC STRUCTURE FORMING",
     },
 
     {
       at: 0.33,
-      text: "POWER CORE // LOCKED",
-      sub: "ENERGY OUTPUT RISING",
+      text: "FRAGMENTS // DETECTED",
+      sub: "ENERGY NODES SEPARATING",
     },
 
     {
-      at: 0.40,
-      text: "TEMPORAL CORE // ACTIVE",
-      sub: "VYUHAM SIGNAL DETECTED",
+      at: 0.42,
+      text: "NETWORK // SYNCHRONIZING",
+      sub: "NEURAL ENERGY PATHS CONNECTED",
     },
 
     {
-      at: 0.46,
-      text: "CORE ARRAY // SYNCHRONIZED",
-      sub: "DIMENSIONAL SYSTEM ONLINE",
+      at: 0.49,
+      text: "VYUHAM PROTOCOL // LOCKED",
+      sub: "SYSTEM ARCHITECTURE STABLE",
     },
 
     {
-      at: 0.51,
+      at: 0.55,
+      text: "SYSTEM // IGNITION",
+      sub: "ENERGY SIGNATURE CONFIRMED",
+    },
+
+    {
+      at: 0.61,
       text: "RING SYSTEM // IGNITION",
       sub: "CONTAINMENT FIELD FORMING",
     },
 
     {
-      at: 0.58,
+      at: 0.68,
       text: "DIMENSIONAL LOCKS // APPROACHING",
       sub: "FOUR STRUCTURES DETECTED",
     },
 
     {
-      at: 0.65,
+      at: 0.75,
       text: "CONTAINMENT // LOCKED",
       sub: "ENERGY FIELD STABILIZED",
     },
 
     {
-      at: 0.73,
+      at: 0.82,
       text: "ENERGY SYSTEM // CHARGING",
       sub: "POWER LEVEL RISING",
     },
 
     {
-      at: 0.84,
+      at: 0.89,
       text: "CRITICAL ENERGY // DETECTED",
       sub: "SYSTEM APPROACHING MAXIMUM OUTPUT",
     },
 
     {
-      at: 0.90,
+      at: 0.94,
       text: "SYSTEM // OVERLOAD",
       sub: "DIMENSIONAL FIELD RELEASE",
     },
 
     {
-      at: 0.95,
+      at: 0.975,
       text: "VYUHAM'26 // ONLINE",
       sub: "THE FUTURE AWAITS",
     },
 
     {
-      at: 0.985,
+      at: 0.992,
       text: "SIGNAL // TRANSMITTED",
       sub: "WELCOME TO THE FUTURE",
     },
@@ -376,17 +388,17 @@ export default function IntroSequence() {
         });
 
         /* =====================================================
-           INTRO ENVIRONMENT
+           ENVIRONMENT INITIALIZATION
         ===================================================== */
 
-        /*
-         * Start WHITE.
-         * The dark environment gradually arrives
-         * when the energy system activates.
-         */
-
         gsap.set(section, {
-          backgroundColor: "#eef4ef",
+          opacity: 1,
+          backgroundColor: "#000000",
+        });
+
+        gsap.set(stage, {
+          opacity: 1,
+          scale: 1,
         });
 
         if (grid) {
@@ -411,10 +423,10 @@ export default function IntroSequence() {
               opacity: 0,
             },
             {
-              opacity: 0.15,
+              opacity: 0.12,
               duration: 0.6,
             },
-            0.4
+            0.2
           );
         }
 
@@ -425,16 +437,16 @@ export default function IntroSequence() {
               opacity: 0,
             },
             {
-              opacity: 0.35,
+              opacity: 0.3,
               duration: 2.5,
               ease: "power1.in",
             },
-            1.2
+            0.8
           );
         }
 
         /* =====================================================
-           AMBIENT GREEN ENERGY
+           AMBIENT ENERGY
         ===================================================== */
 
         if (ambientGlow) {
@@ -442,26 +454,48 @@ export default function IntroSequence() {
             ambientGlow,
             {
               opacity: 0,
-              scale: 0.6,
+              scale: 0.55,
             },
             {
-              opacity: 0.12,
+              opacity: 0.1,
               scale: 1,
-              duration: 1.5,
+              duration: 1.4,
               ease: "power2.out",
             },
-            0.5
+            0.2
           );
         }
 
         /* =====================================================
-           PHASE 01
-           FIVE CORE ARRAY
+           NEW FRAMES 1–8
+           SIGNAL CORE SYSTEM
         ===================================================== */
 
-        stoneRef.current?.addToTimeline(tl);
+        stoneRef.current?.addToTimeline(
+          tl
+        );
 
-        tl.addLabel("coresComplete");
+        /*
+         * The new StoneSystem creates:
+         *
+         * 01 Signal Lost
+         * 02 Signal Detected
+         * 03 Scan
+         * 04 Core Assembly
+         * 05 Fragmentation
+         * 06 Synchronization
+         * 07 Protocol Lock
+         * 08 System Ignition
+         *
+         * It exposes both:
+         * "coresComplete"
+         * "activate"
+         * for compatibility with this timeline.
+         */
+
+        /* =====================================================
+           ENVIRONMENT TRANSITION
+        ===================================================== */
 
         tl.to(
           section,
@@ -488,8 +522,8 @@ export default function IntroSequence() {
           tl.to(
             ambientGlow,
             {
-              opacity: 0.25,
-              scale: 1.15,
+              opacity: 0.24,
+              scale: 1.12,
               duration: 0.8,
               ease: "power2.out",
             },
@@ -498,7 +532,7 @@ export default function IntroSequence() {
         }
 
         /* =====================================================
-           PHASE 02
+           FRAME 9
            ENERGY RING
         ===================================================== */
 
@@ -507,7 +541,7 @@ export default function IntroSequence() {
         );
 
         /* =====================================================
-           PHASE 03
+           FRAME 10
            DIMENSIONAL STRUCTURES
         ===================================================== */
 
@@ -516,7 +550,7 @@ export default function IntroSequence() {
         );
 
         /* =====================================================
-           PHASE 04
+           FRAME 11+
            PARTICLE FIELD
         ===================================================== */
 
@@ -525,12 +559,8 @@ export default function IntroSequence() {
         );
 
         /* =====================================================
-           SYSTEM CHARGE SHAKE
+           ENERGY CHARGE
         ===================================================== */
-
-        /*
-         * Very subtle vibration first.
-         */
 
         tl.to(
           shakeContainer,
@@ -545,10 +575,9 @@ export default function IntroSequence() {
           "charge+=0.55"
         );
 
-        /*
-         * Stronger vibration as the system
-         * approaches critical energy.
-         */
+        /* =====================================================
+           HIGH ENERGY
+        ===================================================== */
 
         tl.to(
           shakeContainer,
@@ -589,16 +618,10 @@ export default function IntroSequence() {
           "break"
         );
 
-        /*
-         * Environment gets darker before the
-         * green overload flash.
-         */
-
         tl.to(
           section,
           {
-            backgroundColor:
-              "#010403",
+            backgroundColor: "#010403",
             duration: 0.25,
             ease: "power2.in",
           },
@@ -627,9 +650,9 @@ export default function IntroSequence() {
           );
         }
 
-        /*
-         * Short distortion hit.
-         */
+        /* =====================================================
+           DISTORTION HIT
+        ===================================================== */
 
         tl.to(
           shakeContainer,
@@ -652,9 +675,9 @@ export default function IntroSequence() {
           "break+=0.22"
         );
 
-        /*
-         * Green dimensional flash.
-         */
+        /* =====================================================
+           GREEN FLASH
+        ===================================================== */
 
         tl.to(
           flash,
@@ -678,27 +701,117 @@ export default function IntroSequence() {
           "break+=0.3"
         );
 
-        /*
-         * Collapse the old core stage.
-         *
-         * The actual logo layer will now
-         * take over.
-         */
+        /* =====================================================
+   FRAME 13 — BREAKTHROUGH
+===================================================== */
 
+        /*
+         * First: everything freezes for a fraction of a second.
+         * This gives the 100% state a cinematic "maximum load" moment.
+         */
         tl.to(
           stage,
           {
-            opacity: 0,
-            scale: 0.25,
-            duration: 0.32,
-            ease: "expo.in",
+            scale: 1.035,
+            duration: 0.12,
+            ease: "power2.out",
+          },
+          "break"
+        );
+
+        /*
+         * Reactor compression.
+         */
+        tl.to(
+          stage,
+          {
+            scale: 0.82,
+            duration: 0.16,
+            ease: "power4.in",
           },
           "break+=0.12"
         );
 
         /*
-         * Final impact.
+         * Massive green-white flash.
          */
+        tl.to(
+          flash,
+          {
+            opacity: 1,
+            scale: 1.15,
+            duration: 0.08,
+            ease: "power4.out",
+          },
+          "break+=0.23"
+        );
+
+        tl.to(
+          flash,
+          {
+            opacity: 0,
+            scale: 5.5,
+            duration: 0.65,
+            ease: "expo.out",
+          },
+          "break+=0.31"
+        );
+
+        /*
+         * Camera shock.
+         */
+        tl.to(
+          shakeContainer,
+          {
+            x: 10,
+            y: -6,
+            rotation: 0.35,
+            duration: 0.035,
+            yoyo: true,
+            repeat: 9,
+            ease: "power3.inOut",
+          },
+          "break+=0.2"
+        );
+
+        /*
+         * Stage shoots outward instead of simply disappearing.
+         */
+        tl.to(
+          stage,
+          {
+            opacity: 0,
+            scale: 2.4,
+            filter: "blur(5px) brightness(2.5)",
+            duration: 0.48,
+            ease: "expo.out",
+          },
+          "break+=0.26"
+        );
+
+        tl.set(
+          stage,
+          {
+            opacity: 0,
+            scale: 1,
+            filter: "none",
+          },
+          "break+=0.82"
+        );
+
+        tl.set(
+          shakeContainer,
+          {
+            x: 0,
+            y: 0,
+            rotation: 0,
+            filter: "none",
+          },
+          "break+=0.82"
+        );
+        /* =====================================================
+           FINAL IMPACT
+        ===================================================== */
 
         tl.to(
           shakeContainer,
@@ -724,7 +837,6 @@ export default function IntroSequence() {
         );
 
         /* =====================================================
-           PHASE 05
            LOGO REVEAL
         ===================================================== */
 
@@ -733,8 +845,7 @@ export default function IntroSequence() {
         );
 
         /* =====================================================
-           PHASE 06
-           HOMEPAGE TRANSITION
+           FINAL HOLD
         ===================================================== */
 
         tl.addLabel(
@@ -742,9 +853,8 @@ export default function IntroSequence() {
         );
 
         /*
-         * Let the logo sit for a moment.
-         * This is important: don't immediately
-         * remove the brand after revealing it.
+         * Give VYUHAM '26 enough time to remain
+         * visible before leaving the intro.
          */
 
         tl.to(
@@ -755,9 +865,9 @@ export default function IntroSequence() {
           "transition"
         );
 
-        /*
-         * Fade the entire cinematic layer.
-         */
+        /* =====================================================
+           FADE OUT
+        ===================================================== */
 
         tl.to(
           section,
@@ -769,11 +879,11 @@ export default function IntroSequence() {
           "transition+=0.5"
         );
 
-        tlRef.current = tl;
-
         /* =====================================================
-           PLAY
+           STORE + PLAY
         ===================================================== */
+
+        tlRef.current = tl;
 
         tl.play();
       });
@@ -784,7 +894,6 @@ export default function IntroSequence() {
       );
 
       if (tlRef.current) {
-        hasCompletedIntroInThisPageLoad = true;
         tlRef.current.kill();
         tlRef.current = null;
       }
@@ -806,7 +915,7 @@ export default function IntroSequence() {
       aria-label="VYUHAM 26 opening sequence"
     >
       {/* =====================================================
-          SKIP
+          SKIP BUTTON
       ===================================================== */}
 
       <button
@@ -837,7 +946,7 @@ export default function IntroSequence() {
       />
 
       {/* =====================================================
-          AMBIENT ENERGY
+          AMBIENT GREEN ENERGY
       ===================================================== */}
 
       <div
@@ -907,7 +1016,7 @@ export default function IntroSequence() {
         />
 
         {/* ===================================================
-            GREEN OVERLOAD FLASH
+            OVERLOAD FLASH
         =================================================== */}
 
         <div
@@ -921,12 +1030,12 @@ export default function IntroSequence() {
         />
 
         {/* ===================================================
-            CORE SYSTEM STAGE
+            CORE SYSTEM
         =================================================== */}
 
         <div
           ref={stageRef}
-          className="relative z-10 h-[min(78vw,620px)] w-[min(78vw,620px)]"
+          className="relative h-[min(78vw,620px)] w-[min(78vw,620px)]"
         >
           <StoneSystem
             ref={stoneRef}
@@ -966,7 +1075,7 @@ export default function IntroSequence() {
           ref={statusSubRef}
           className="mt-1 text-[8px] tracking-[0.18em] text-muted uppercase"
         >
-          AWAITING ENERGY SIGNATURE
+          AWAITING SIGNAL
         </p>
       </div>
     </section>

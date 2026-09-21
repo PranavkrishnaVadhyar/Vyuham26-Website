@@ -292,6 +292,28 @@ const EnergyRing = forwardRef<EnergyRingHandle>(
            ROTATION
         ===================================================== */
 
+        /*
+         * IMPORTANT:
+         * The secondary circular tracks must not exist visually
+         * during Frames 01–08. They are part of the EnergyRing
+         * phase (Frames 09–12), not the initial StoneSystem.
+         */
+        if (reverseRotatingGroup) {
+          gsap.set(reverseRotatingGroup, {
+            opacity: 0,
+          });
+
+          tl.to(
+            reverseRotatingGroup,
+            {
+              opacity: 1,
+              duration: 0.45,
+              ease: "power2.out",
+            },
+            "activate"
+          );
+        }
+
         if (rotatingGroup) {
           tl.add(() => {
             const tw = gsap.to(rotatingGroup, {
@@ -712,6 +734,7 @@ const EnergyRing = forwardRef<EnergyRingHandle>(
 
           <g
             ref={reverseRotatingGroupRef}
+            opacity="0"
           >
             <circle
               cx="100"

@@ -18,6 +18,17 @@ interface HistoryItem {
   linkText?: string;
 }
 
+type VisualEffect =
+  | "none"
+  | "scan"
+  | "trace"
+  | "hack"
+  | "decrypt"
+  | "neural"
+  | "doomsday";
+
+type VisualPhase = "idle" | "intro" | "active" | "critical" | "complete";
+
 type MatrixPhase =
   | "idle"
   | "glitch"
@@ -25,6 +36,17 @@ type MatrixPhase =
   | "logo"
   | "fade"
   | "complete";
+
+type DoomsdayPhase =
+  | "idle"
+  | "arming"
+  | "countdown"
+  | "critical"
+  | "offline"
+  | "blackout"
+  | "restore"
+  | "prank"
+  | "return";
 
 const ASCII_LOGO = `
  ██╗   ██╗██╗   ██╗██╗  ██╗██████╗ ███╗   ███╗    ██████╗  ██████╗ 
@@ -74,10 +96,17 @@ export default function CyberTerminal() {
   const [showMatrix, setShowMatrix] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [classifiedUnlocked, setClassifiedUnlocked] = useState(false);
+  const [visualEffect, setVisualEffect] = useState<VisualEffect>("none");
+  const [visualPhase, setVisualPhase] = useState<VisualPhase>("idle");
 
   const [matrixSequence, setMatrixSequence] = useState(false);
   const [matrixPhase, setMatrixPhase] =
     useState<MatrixPhase>("idle");
+
+  const [doomsdaySequence, setDoomsdaySequence] = useState(false);
+  const [doomsdayPhase, setDoomsdayPhase] =
+    useState<DoomsdayPhase>("idle");
+  const [doomsdayCount, setDoomsdayCount] = useState(10);
 
   const inputRef = useRef<HTMLInputElement>(null);
   const terminalEndRef = useRef<HTMLDivElement>(null);
@@ -115,6 +144,7 @@ export default function CyberTerminal() {
           setMatrixPhase("idle");
           setShowMatrix(false);
           setIsProcessing(false);
+          setVisualEffect("none");
           setIsOpen(true);
           return;
         }
@@ -148,7 +178,7 @@ export default function CyberTerminal() {
         handleCustomEvent
       );
     };
-  }, [isOpen, matrixSequence]);
+  }, [isOpen, matrixSequence, doomsdaySequence]);
 
   /* =========================================================
      FOCUS INPUT
@@ -366,6 +396,23 @@ export default function CyberTerminal() {
     )}] ${percent}%`;
   };
 
+  const runVisualEffect = useCallback(
+    async (effect: Exclude<VisualEffect, "none">, duration: number) => {
+      setVisualEffect(effect);
+      setVisualPhase("intro");
+      await sleep(900);
+      setVisualPhase("active");
+      await sleep(Math.max(700, duration - 1800));
+      setVisualPhase("critical");
+      await sleep(550);
+      setVisualPhase("complete");
+      await sleep(350);
+      setVisualEffect("none");
+      setVisualPhase("idle");
+    },
+    []
+  );
+
   /* =========================================================
      MATRIX CINEMATIC SEQUENCE
   ========================================================= */
@@ -459,6 +506,69 @@ export default function CyberTerminal() {
       setMatrixPhase("idle");
       setIsProcessing(false);
     }, [isProcessing]);
+
+  /* =========================================================
+     DOOMSDAY CINEMATIC SEQUENCE
+  ========================================================= */
+
+  const runDoomsdaySequence = useCallback(async () => {
+    if (isProcessing || doomsdaySequence) return;
+
+    setIsProcessing(true);
+    setDoomsdaySequence(true);
+    setIsOpen(false);
+    setDoomsdayPhase("arming");
+    setDoomsdayCount(10);
+
+    await sleep(2600);
+
+    setDoomsdayPhase("countdown");
+
+    for (let i = 10; i >= 0; i--) {
+      setDoomsdayCount(i);
+
+      if (i <= 4) {
+        setDoomsdayPhase("critical");
+      }
+
+      await sleep(i <= 3 ? 1500 : 1900);
+    }
+
+    // Hold the final zero long enough for the viewer to understand
+    // that something catastrophic is about to happen.
+    setDoomsdayPhase("critical");
+    await sleep(2600);
+
+    // Skip the old "SYSTEM FAILURE" panel and collapse directly
+    // into the blackout.
+    setDoomsdayPhase("blackout");
+    await sleep(5000);
+
+    setDoomsdayPhase("restore");
+    await sleep(2600);
+
+    setDoomsdayPhase("prank");
+    await sleep(4200);
+
+    setDoomsdayPhase("return");
+    await sleep(1600);
+
+    setDoomsdaySequence(false);
+    setDoomsdayPhase("idle");
+    setDoomsdayCount(10);
+    setIsOpen(true);
+
+    setHistory((prev) => [
+      ...prev,
+      {
+        type: "system",
+        content:
+          "DOOMSDAY PROTOCOL COMPLETE. SYSTEM RESTORED. You actually thought we would destroy the website? 😈 It's a prank.",
+      },
+    ]);
+
+    setIsProcessing(false);
+  }, [isProcessing, doomsdaySequence]);
 
   /* =========================================================
      COMMAND PROCESSOR
@@ -819,6 +929,7 @@ System ready.`,
         case "scan": {
           setHistory(newHistory);
           setIsProcessing(true);
+          const effectPromise = runVisualEffect("scan", 4200);
 
           await sleep(400);
 
@@ -872,6 +983,7 @@ One classified node is responding.`,
             },
           ]);
 
+          await effectPromise;
           setIsProcessing(false);
           return;
         }
@@ -883,6 +995,7 @@ One classified node is responding.`,
         case "trace": {
           setHistory(newHistory);
           setIsProcessing(true);
+          const effectPromise = runVisualEffect("trace", 4000);
 
           const routes = [
             "localhost",
@@ -941,6 +1054,7 @@ One classified node is responding.`,
             },
           ]);
 
+          await effectPromise;
           setIsProcessing(false);
           return;
         }
@@ -952,6 +1066,7 @@ One classified node is responding.`,
         case "hack": {
           setHistory(newHistory);
           setIsProcessing(true);
+          const effectPromise = runVisualEffect("hack", 5000);
 
           const hackStages = [
             "Establishing handshake...",
@@ -991,6 +1106,7 @@ No actual system was compromised.`,
             },
           ]);
 
+          await effectPromise;
           setIsProcessing(false);
           return;
         }
@@ -1122,6 +1238,7 @@ Try the 'matrix' command.`,
         case "decrypt": {
           setHistory(newHistory);
           setIsProcessing(true);
+          const effectPromise = runVisualEffect("decrypt", 4500);
 
           await sleep(500);
 
@@ -1179,6 +1296,7 @@ Try:
             },
           ]);
 
+          await effectPromise;
           setIsProcessing(false);
           return;
         }
@@ -1190,6 +1308,7 @@ Try:
         case "neural": {
           setHistory(newHistory);
           setIsProcessing(true);
+          const effectPromise = runVisualEffect("neural", 5500);
 
           await sleep(400);
 
@@ -1252,6 +1371,7 @@ CLASSIFIED COMMANDS UNLOCKED.`,
             },
           ]);
 
+          await effectPromise;
           setIsProcessing(false);
           return;
         }
@@ -1262,65 +1382,7 @@ CLASSIFIED COMMANDS UNLOCKED.`,
 
         case "doomsday": {
           setHistory(newHistory);
-          setIsProcessing(true);
-          setShowMatrix(true);
-
-          await sleep(300);
-
-          setHistory((prev) => [
-            ...prev,
-            {
-              type: "error",
-              content: `
-⚠ VYUHAM EMERGENCY PROTOCOL ⚠
-
-DOOMSDAY SEQUENCE INITIALIZING...`,
-            },
-          ]);
-
-          for (
-            let i = 10;
-            i >= 0;
-            i--
-          ) {
-            await sleep(350);
-
-            setHistory((prev) => [
-              ...prev,
-              {
-                type: "error",
-                content:
-                  `T - ${String(
-                    i
-                  ).padStart(
-                    2,
-                    "0"
-                  )} // CORE COUNTDOWN`,
-              },
-            ]);
-          }
-
-          await sleep(500);
-
-          setHistory((prev) => [
-            ...prev,
-            {
-              type: "system",
-              content: `
-T - 00
-
-DOOMSDAY PROTOCOL COMPLETE.
-
-SYSTEM OVERRIDE CANCELLED.
-
-You actually thought we were
-going to destroy the website? ;)
-
-VYUHAM NEURAL CORE remains stable.`,
-            },
-          ]);
-
-          setIsProcessing(false);
+          await runDoomsdaySequence();
           return;
         }
 
@@ -1407,6 +1469,7 @@ Type 'help -a' for advanced commands.`,
       isProcessing,
       classifiedUnlocked,
       runMatrixSequence,
+      runVisualEffect,
     ]
   );
 
@@ -1497,13 +1560,145 @@ Type 'help -a' for advanced commands.`,
   if (
     !isOpen &&
     !showMatrix &&
-    !matrixSequence
+    !matrixSequence &&
+    !doomsdaySequence
   ) {
     return null;
   }
 
   return (
     <>
+      {/* =====================================================
+          INTERACTIVE EASTER-EGG VISUAL EFFECTS
+      ===================================================== */}
+
+      {visualEffect !== "none" && (
+        <div
+          className={`pointer-events-none fixed inset-0 z-99995 overflow-hidden font-mono ${
+            visualEffect === "hack" || visualEffect === "doomsday"
+              ? "bg-black/95"
+              : "bg-[#010504]/95"
+          } ${visualPhase === "critical" ? "animate-[eggShake_.11s_steps(2)_infinite]" : ""}`}
+        >
+          {/* universal CRT / scanline layer */}
+          <div className="absolute inset-0 opacity-20 bg-[repeating-linear-gradient(0deg,transparent_0px,transparent_3px,rgba(255,255,255,.055)_4px)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(16,185,129,.13),transparent_52%)]" />
+          <div className="absolute inset-0 animate-[eggNoise_.18s_steps(2)_infinite] opacity-[.08] bg-[repeating-linear-gradient(90deg,transparent_0,transparent_7px,rgba(255,255,255,.18)_8px)]" />
+
+          {visualEffect === "scan" && (
+            <div className="absolute inset-0 text-emerald-300">
+              <div className="absolute inset-x-0 top-0 h-1 bg-emerald-200 shadow-[0_0_40px_#34d399] animate-[eggScan_1.8s_linear_infinite]" />
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="relative h-[min(72vw,620px)] w-[min(72vw,620px)] rounded-full border border-emerald-400/25 shadow-[0_0_100px_rgba(52,211,153,.12)]">
+                  {Array.from({ length: 16 }).map((_, i) => (
+                    <span key={i} className="absolute left-1/2 top-1/2 h-2 w-2 rounded-full bg-emerald-200 shadow-[0_0_18px_#34d399] animate-pulse" style={{ transform: `rotate(${i * 22.5}deg) translateY(-${220 + (i % 4) * 22}px)`, animationDelay: `${i * 55}ms` }} />
+                  ))}
+                  <div className="absolute inset-[12%] rounded-full border border-emerald-400/20 animate-[eggPulse_1.5s_ease-in-out_infinite]" />
+                  <div className="absolute inset-[25%] rounded-full border border-emerald-400/20" />
+                  <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-center">
+                    <div className="text-[9px] tracking-[.65em] text-emerald-400">NEURAL MESH</div>
+                    <div className="mt-3 text-5xl font-black tracking-widest text-emerald-50 sm:text-7xl">SCAN</div>
+                    <div className="mt-4 text-[9px] tracking-[.35em] text-emerald-400/70">{visualPhase === "intro" ? "CALIBRATING SENSORS" : visualPhase === "critical" ? "ANOMALY DETECTED" : "05 NODES // 03 LINKS"}</div>
+                  </div>
+                </div>
+              </div>
+              <div className="absolute bottom-10 left-1/2 -translate-x-1/2 text-center text-[9px] tracking-[.4em] text-emerald-400/60">VYUHAM SECURITY SCANNER // LIVE TELEMETRY</div>
+            </div>
+          )}
+
+          {visualEffect === "trace" && (
+            <div className="absolute inset-0">
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="relative h-[min(72vh,620px)] w-[min(92vw,900px)]">
+                  {Array.from({ length: 7 }).map((_, i) => (
+                    <div key={i} className="absolute left-1/2 top-1/2 h-px origin-left bg-emerald-400/70 shadow-[0_0_14px_#34d399]" style={{ width: `${30 + i * 7}%`, transform: `rotate(${i * 51.4}deg)`, animation: `eggTrace 1.1s ${i * .09}s ease-in-out infinite alternate` }} />
+                  ))}
+                  {[
+                    [50,50,"VYUHAM"],[13,23,"LOCALHOST"],[84,18,"GATEWAY"],[16,74,"NEURAL"],[84,70,"CORE"],[50,90,"UNKNOWN"]
+                  ].map(([x,y,label],i)=>(
+                    <div key={i} className="absolute -translate-x-1/2 -translate-y-1/2 text-center" style={{left:`${x}%`,top:`${y}%`}}>
+                      <div className="mx-auto h-3 w-3 rounded-full bg-emerald-100 shadow-[0_0_22px_#34d399] animate-pulse" />
+                      <div className="mt-2 text-[8px] tracking-[.25em] text-emerald-300">{label}</div>
+                    </div>
+                  ))}
+                  <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded border border-emerald-400/40 bg-black/70 px-8 py-5 text-center backdrop-blur-md">
+                    <div className="text-[9px] tracking-[.6em] text-emerald-400">PACKET TRACE</div>
+                    <div className="mt-2 text-3xl font-black text-emerald-50">{visualPhase === "critical" ? "IDENTITY MASKED" : "ROUTE LOCKED"}</div>
+                    <div className="mt-2 text-[8px] tracking-[.35em] text-emerald-400/60">HOP 05 // LATENCY NOMINAL</div>
+                  </div>
+                </div>
+              </div>
+              <div className="absolute left-6 top-6 text-[8px] tracking-[.35em] text-emerald-500/70">TRACE://LIVE</div>
+              <div className="absolute bottom-6 right-6 text-[8px] tracking-[.35em] text-emerald-500/70">SOURCE: CONCEALED</div>
+            </div>
+          )}
+
+          {visualEffect === "hack" && (
+            <div className="absolute inset-0 text-red-300">
+              <div className="absolute inset-0 bg-[repeating-linear-gradient(0deg,transparent_0,transparent_5px,rgba(239,68,68,.05)_6px)]" />
+              <div className="absolute inset-x-0 top-1/2 h-px bg-red-400 shadow-[0_0_40px_#ef4444] animate-[eggScan_1.2s_linear_infinite]" />
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="w-[min(90vw,820px)] border-y border-red-500/40 py-10 text-center">
+                  <div className="text-[9px] tracking-[.7em] text-red-500">SECURITY CORE // INTRUSION SIMULATION</div>
+                  <div className="relative mt-5 inline-block text-6xl font-black tracking-[.18em] text-red-50 sm:text-8xl">
+                    BREACH
+                    <span className="absolute inset-0 translate-x-2 text-cyan-400/25 blur-[1px]">BREACH</span>
+                  </div>
+                  <div className="mx-auto mt-8 h-2 w-full overflow-hidden bg-red-950">
+                    <div className="h-full origin-left bg-red-400 shadow-[0_0_25px_#f87171] animate-[eggProgress_5s_linear_forwards]" />
+                  </div>
+                  <div className="mt-5 grid grid-cols-2 gap-3 text-left text-[8px] tracking-[.2em] text-red-300/70 sm:grid-cols-4">
+                    {['FIREWALL','CRYPTO','PAYLOAD','NEURAL'].map((x,i)=><div key={x} className="border border-red-500/20 p-3">{x}<span className="float-right text-red-400">{visualPhase === "critical" && i === 3 ? "FAIL" : "OK"}</span></div>)}
+                  </div>
+                  <div className="mt-7 text-[9px] tracking-[.35em] text-red-400/70 animate-pulse">{visualPhase === "critical" ? "BOUNDARY BREACHED // SIMULATION PEAK" : "NO REAL SYSTEM IS BEING COMPROMISED"}</div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {visualEffect === "decrypt" && (
+            <div className="absolute inset-0 flex items-center justify-center text-cyan-300">
+              <div className="w-[min(90vw,760px)] text-center">
+                <div className="text-[9px] tracking-[.7em]">CLASSIFIED PACKET // AES-256</div>
+                <div className="mt-5 text-5xl font-black tracking-[.18em] text-cyan-50 sm:text-7xl animate-[eggDecode_.55s_steps(2)_infinite]">DECRYPT</div>
+                <div className="mx-auto mt-8 grid w-full grid-cols-24 gap-1 opacity-80">
+                  {Array.from({length:24}).map((_,i)=><span key={i} className="h-10 bg-cyan-300/70" style={{animation:`eggBars .9s ${i*38}ms ease-in-out infinite`}} />)}
+                </div>
+                <div className="mt-7 flex flex-wrap justify-center gap-2 text-[8px] tracking-[.25em] text-cyan-300/70">
+                  {Array.from({length:12}).map((_,i)=><span key={i} className="border border-cyan-400/20 px-2 py-1">{visualPhase === "critical" ? "FF" : ["A7","3C","91","E2"][i%4]}</span>)}
+                </div>
+                <div className="mt-6 text-[9px] tracking-[.4em] text-cyan-300/60">{visualPhase === "critical" ? "KEY RECONSTRUCTED // ACCESS GRANTED" : "RECONSTRUCTING KEY FRAGMENTS"}</div>
+              </div>
+            </div>
+          )}
+
+          {visualEffect === "neural" && (
+            <div className="absolute inset-0 flex items-center justify-center text-emerald-300">
+              <div className="relative h-[min(78vw,680px)] w-[min(78vw,680px)]">
+                <div className="absolute inset-[15%] rounded-full border border-emerald-400/20 animate-[eggPulse_1.4s_ease-in-out_infinite]" />
+                <div className="absolute inset-[27%] rounded-full border border-emerald-400/30" />
+                {Array.from({length:34}).map((_,i)=>{const a=i/34*Math.PI*2;const r=35+(i%5)*5;return <span key={i} className="absolute left-1/2 top-1/2 h-2 w-2 rounded-full bg-emerald-100 shadow-[0_0_18px_#34d399] animate-pulse" style={{transform:`translate(-50%,-50%) translate(${Math.cos(a)*r}vw,${Math.sin(a)*r}vw)`,animationDelay:`${i*55}ms`}}/>})}
+                {Array.from({length:10}).map((_,i)=><div key={i} className="absolute left-1/2 top-1/2 h-px origin-left bg-emerald-400/50" style={{width:`${35+i*4}%`,transform:`rotate(${i*36}deg)`,animation:`eggTrace 1.3s ${i*80}ms ease-in-out infinite alternate`}} />)}
+                <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border border-emerald-300/60 bg-black/65 px-10 py-9 text-center shadow-[0_0_100px_rgba(52,211,153,.3)] animate-[eggCore_1.2s_ease-in-out_infinite]">
+                  <div className="text-[9px] tracking-[.6em]">NEURAL CORE</div>
+                  <div className="mt-2 text-4xl font-black tracking-widest text-emerald-50">{visualPhase === "critical" ? "UNLOCKED" : "SYNCING"}</div>
+                  <div className="mt-3 text-[8px] tracking-[.35em] text-emerald-400/60">LEVEL 5 // BI-DIRECTIONAL LINK</div>
+                </div>
+              </div>
+              <div className="absolute bottom-8 left-1/2 -translate-x-1/2 text-[9px] tracking-[.45em] text-emerald-400/60">SYNAPTIC PATHWAYS // {visualPhase === "critical" ? "STABLE" : "CALIBRATING"}</div>
+            </div>
+          )}
+
+          {visualEffect !== "doomsday" && (
+            <div className="absolute inset-x-0 bottom-0 flex justify-center pb-6">
+              <div className="border border-white/10 bg-black/50 px-5 py-2 text-[8px] tracking-[.35em] text-white/40 backdrop-blur-sm">
+                {visualPhase === "intro" ? "INITIALIZING VISUAL PROTOCOL" : visualPhase === "critical" ? "PROTOCOL PEAK" : visualPhase === "complete" ? "SIGNAL LOCKED" : "LIVE SYSTEM TELEMETRY"}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* =====================================================
           MATRIX CANVAS
       ===================================================== */}
@@ -1722,6 +1917,146 @@ Type 'help -a' for advanced commands.`,
       )}
 
       {/* =====================================================
+          DOOMSDAY CINEMATIC OVERLAY
+      ===================================================== */}
+
+      {doomsdaySequence && (
+        <div
+          className={`fixed inset-0 z-100000 overflow-hidden bg-black font-mono text-white transition-all duration-700 ${
+            doomsdayPhase === "critical"
+              ? "animate-[doomsdayShake_0.12s_infinite]"
+              : ""
+          }`}
+        >
+          <div
+            className={`absolute inset-0 transition-opacity duration-700 ${
+              doomsdayPhase === "blackout" ? "opacity-0" : "opacity-100"
+            }`}
+          >
+            {/* Emergency grid / scanlines */}
+            <div className="absolute inset-0 opacity-20 bg-[linear-gradient(rgba(255,255,255,.08)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.08)_1px,transparent_1px)] bg-size-[42px_42px]" />
+            <div className="absolute inset-0 opacity-10 bg-[repeating-linear-gradient(0deg,transparent_0px,transparent_3px,rgba(255,255,255,.12)_4px)]" />
+
+            {/* Emergency flash */}
+            {doomsdayPhase === "critical" && (
+              <>
+                <div className="absolute inset-0 animate-[doomsdayFlash_0.55s_steps(2,end)_infinite] bg-red-600/20" />
+                <div className="absolute inset-x-0 top-1/3 h-px bg-red-300/60 shadow-[0_0_25px_rgba(248,113,113,.9)] animate-[doomsdayScan_1.1s_linear_infinite]" />
+                <div className="absolute inset-0 mix-blend-screen opacity-20 animate-[doomsdayChromatic_0.22s_steps(2,end)_infinite] bg-[linear-gradient(90deg,transparent_0%,rgba(239,68,68,.7)_48%,transparent_52%)]" />
+              </>
+            )}
+
+            {doomsdayPhase === "arming" && (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="w-full max-w-xl px-6 text-center">
+                  <div className="text-[10px] font-bold tracking-[0.5em] text-red-400">
+                    VYUHAM EMERGENCY SYSTEM
+                  </div>
+                  <div className="mt-6 text-4xl font-black tracking-[0.18em] text-white sm:text-7xl">
+                    DOOMSDAY
+                  </div>
+                  <div className="mt-4 animate-pulse text-[10px] tracking-[0.35em] text-red-400">
+                    PROTOCOL ARMING...
+                  </div>
+                  <div className="mx-auto mt-8 h-1 max-w-md overflow-hidden bg-red-950">
+                    <div className="h-full origin-left animate-[doomsdayCharge_1.4s_ease-out_forwards] bg-red-500 shadow-[0_0_25px_rgba(239,68,68,.9)]" />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {(doomsdayPhase === "countdown" ||
+              doomsdayPhase === "critical") && (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="text-center">
+                  <div className="text-[9px] font-bold tracking-[0.55em] text-red-400 sm:text-xs">
+                    VYUHAM CORE // TERMINATION SEQUENCE
+                  </div>
+
+                  <div
+                    className={`mt-8 text-[clamp(7rem,25vw,18rem)] font-black leading-none tracking-[-0.08em] ${
+                      doomsdayCount <= 3
+                        ? "text-red-100 drop-shadow-[0_0_55px_rgba(239,68,68,.95)]"
+                        : "text-white drop-shadow-[0_0_40px_rgba(255,255,255,.35)]"
+                    }`}
+                  >
+                    {doomsdayCount}
+                  </div>
+
+                  <div className="mt-5 text-[10px] tracking-[0.45em] text-red-400 sm:text-sm">
+                    {doomsdayCount <= 3
+                      ? "CRITICAL CORE INSTABILITY"
+                      : "SYSTEM SHUTDOWN IMMINENT"}
+                  </div>
+
+                  <div className="mt-7 flex justify-center gap-2 text-[8px] tracking-[0.25em] text-red-500/60">
+                    <span className="animate-[doomsdayFlicker_0.8s_steps(2,end)_infinite]">
+                      CORE_ERR
+                    </span>
+                    <span className="animate-[doomsdayFlicker_1.1s_steps(2,end)_infinite]">
+                      0x7F
+                    </span>
+                    <span className="animate-[doomsdayFlicker_0.6s_steps(2,end)_infinite]">
+                      LINK_LOST
+                    </span>
+                  </div>
+
+                  <div className="mt-8 grid grid-cols-3 gap-2 text-[8px] text-red-300/70 sm:text-[10px]">
+                    <span>NEURAL CORE</span>
+                    <span>NETWORK</span>
+                    <span>EVENT SYSTEM</span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {doomsdayPhase === "restore" && (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="text-center">
+                  <div className="text-xs tracking-[0.5em] text-emerald-400">
+                    SYSTEM RESTORATION
+                  </div>
+                  <div className="mt-6 text-3xl font-black tracking-[0.18em] text-white sm:text-6xl">
+                    VYUHAM SYSTEM
+                  </div>
+                  <div className="mt-3 text-xs tracking-[0.4em] text-emerald-400">
+                    RESTORING...
+                  </div>
+                  <div className="mx-auto mt-8 h-1 w-72 overflow-hidden bg-emerald-950 sm:w-96">
+                    <div className="h-full animate-[doomsdayRestore_1.8s_ease-out_forwards] bg-emerald-400 shadow-[0_0_20px_rgba(52,211,153,.9)]" />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {doomsdayPhase === "prank" && (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="px-6 text-center">
+                  <div className="text-[10px] tracking-[0.5em] text-emerald-400">
+                    SYSTEM MESSAGE
+                  </div>
+                  <div className="mt-7 text-3xl font-black tracking-[0.08em] text-white sm:text-6xl">
+                    YOU ACTUALLY THOUGHT...
+                  </div>
+                  <div className="mt-7 text-5xl font-black text-emerald-300 drop-shadow-[0_0_35px_rgba(52,211,153,.8)] sm:text-8xl">
+                    IT'S A PRANK 😈
+                  </div>
+                  <div className="mt-6 text-[10px] tracking-[0.4em] text-emerald-400/80">
+                    VYUHAM CORE REMAINS STABLE
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* True blackout: intentionally empty for the cinematic pause */}
+          {doomsdayPhase === "blackout" && (
+            <div className="absolute inset-0 bg-black animate-[doomsdayBlackout_900ms_ease-out_forwards]" />
+          )}
+        </div>
+      )}
+
+      {/* =====================================================
           TERMINAL
       ===================================================== */}
 
@@ -1919,6 +2254,18 @@ Type 'help -a' for advanced commands.`,
       ===================================================== */}
 
       <style jsx global>{`
+        @keyframes eggScan { 0% { top: -5%; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { top: 105%; opacity: 0; } }
+        @keyframes eggPulse { 0%,100% { transform: scale(.94); opacity: .65; } 50% { transform: scale(1); opacity: 1; } }
+        @keyframes eggTrace { from { opacity: .2; transform: rotate(var(--r,0deg)) scaleX(.65); } to { opacity: 1; transform: rotate(var(--r,0deg)) scaleX(1); } }
+        @keyframes eggGlitch { 0% { transform: translate(0); } 50% { transform: translate(3px,-2px); } 100% { transform: translate(-3px,2px); } }
+        @keyframes eggProgress { from { transform: scaleX(0); transform-origin: left; } to { transform: scaleX(1); transform-origin: left; } }
+        @keyframes eggDecode { 0%,100% { filter: blur(0); opacity: 1; } 50% { filter: blur(3px); opacity: .55; } }
+        @keyframes eggBars { 0%,100% { transform: scaleY(.25); opacity: .35; } 50% { transform: scaleY(1); opacity: 1; } }
+        @keyframes eggCore { 0%,100% { transform: translate(-50%,-50%) scale(.96); } 50% { transform: translate(-50%,-50%) scale(1.04); } }
+        @keyframes eggShake { 0%,100% { transform: translate(0); } 25% { transform: translate(-2px,1px); } 50% { transform: translate(2px,-1px); } 75% { transform: translate(-1px,-2px); } }
+
+        @keyframes eggNoise { 0% { transform: translateX(0); opacity:.04; } 25% { transform: translateX(-2px); opacity:.12; } 50% { transform: translateX(3px); opacity:.05; } 75% { transform: translateX(-1px); opacity:.1; } 100% { transform: translateX(0); opacity:.04; } }
+
         @keyframes matrixGlitch {
           0% {
             transform: translate(0);
@@ -2029,6 +2376,58 @@ Type 'help -a' for advanced commands.`,
             transform: scale(1.025);
             filter: brightness(1.4);
           }
+        }
+
+        @keyframes doomsdayShake {
+          0% { transform: translate(0, 0); }
+          20% { transform: translate(-3px, 2px); }
+          40% { transform: translate(3px, -2px); }
+          60% { transform: translate(-2px, -1px); }
+          80% { transform: translate(2px, 2px); }
+          100% { transform: translate(0, 0); }
+        }
+
+        @keyframes doomsdayFlash {
+          0%, 100% { opacity: 0; }
+          50% { opacity: 1; }
+        }
+
+        @keyframes doomsdayCharge {
+          from { transform: scaleX(0); }
+          to { transform: scaleX(1); }
+        }
+
+        @keyframes doomsdayRestore {
+          from { transform: scaleX(0); }
+          to { transform: scaleX(1); }
+        }
+
+        @keyframes doomsdayScan {
+          0% { transform: translateY(-35vh); opacity: 0; }
+          15% { opacity: 1; }
+          85% { opacity: 1; }
+          100% { transform: translateY(35vh); opacity: 0; }
+        }
+
+        @keyframes doomsdayChromatic {
+          0% { transform: translateX(0) skewX(0deg); opacity: .15; }
+          35% { transform: translateX(-8px) skewX(-1deg); opacity: .5; }
+          70% { transform: translateX(7px) skewX(1deg); opacity: .25; }
+          100% { transform: translateX(0) skewX(0deg); opacity: .15; }
+        }
+
+        @keyframes doomsdayFlicker {
+          0%, 72%, 100% { opacity: .35; }
+          74% { opacity: 1; }
+          76% { opacity: .1; }
+          79% { opacity: .9; }
+          82% { opacity: .2; }
+        }
+
+        @keyframes doomsdayBlackout {
+          0% { opacity: 0; }
+          35% { opacity: .35; }
+          100% { opacity: 1; }
         }
       `}</style>
     </>
