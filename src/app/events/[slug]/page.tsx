@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { events, getEventBySlug } from "@/data/events";
@@ -33,5 +34,9 @@ export default async function EventDetailPage({
 
   if (!event) notFound();
 
-  return <EventDetailClient event={event} />;
+  return (
+    <Suspense fallback={null}>
+      <EventDetailClient event={event} />
+    </Suspense>
+  );
 }

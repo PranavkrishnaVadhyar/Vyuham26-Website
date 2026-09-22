@@ -308,10 +308,10 @@ export default function SponsorsPage() {
                   className={`relative z-10 grid gap-4 ${ti === 0
                       ? "grid-cols-1 md:max-w-md"
                       : ti === 1
-                        ? "grid-cols-2"
+                        ? "grid-cols-1 sm:grid-cols-2"
                         : ti === 2
                           ? "grid-cols-1 sm:grid-cols-3"
-                          : "grid-cols-2 md:grid-cols-4"
+                          : "grid-cols-1 sm:grid-cols-2 md:grid-cols-4"
                     }`}
                 >
                   {tier.sponsors.map((sponsor, si) => (

@@ -1018,7 +1018,7 @@ export default function CtaSection() {
                       relative
                       z-10
                       grid
-                      grid-cols-2
+                      grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-0
                       border-t
                       border-emerald-400/10
                       pt-5

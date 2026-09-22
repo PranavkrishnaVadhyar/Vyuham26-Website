@@ -706,7 +706,7 @@ export default function StreamsSection() {
                 </motion.h3>
 
                 {/* Four nodes */}
-                <div className="mt-8 grid grid-cols-4 gap-2">
+                <div className="mt-8 grid grid-cols-2 sm:grid-cols-4 gap-2">
                   {streams.map((stream, index) => {
                     const style =
                       colorStyles[stream.color];

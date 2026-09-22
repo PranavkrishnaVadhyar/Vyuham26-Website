@@ -1,16 +1,24 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import AnimatedSection from "@/components/motion/AnimatedSection";
 import { Kicker, Button } from "@/components/ui/Elements";
 import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
+import { useAuth } from "@/context/AuthContext";
 
-export default function LoginPage() {
+function LoginContent() {
   const reduceMotion = usePrefersReducedMotion();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectUrl = searchParams.get("redirect");
+  const eventSlug = searchParams.get("event");
+
+  const { login } = useAuth();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -25,7 +33,17 @@ export default function LoginPage() {
     setStatus("verifying");
 
     setTimeout(() => {
+      login(email);
       setStatus("success");
+
+      setTimeout(() => {
+        if (redirectUrl) {
+          const dest = eventSlug ? `${redirectUrl}?registered=true` : redirectUrl;
+          router.push(dest);
+        } else {
+          router.push("/dashboard");
+        }
+      }, 1000);
     }, 1200);
   };
 
@@ -306,10 +324,10 @@ export default function LoginPage() {
 
                         <div className="mt-8">
                           <Button
-                            href="/dashboard"
+                            href={redirectUrl ? (eventSlug ? `${redirectUrl}?registered=true` : redirectUrl) : "/dashboard"}
                             variant="primary"
                           >
-                            Enter Dashboard →
+                            {redirectUrl ? "Continue to Event Registration →" : "Enter Dashboard →"}
                           </Button>
                         </div>
                       </motion.div>
@@ -335,6 +353,12 @@ export default function LoginPage() {
                         }}
                         className="space-y-6"
                       >
+                        {redirectUrl && (
+                          <div className="flex items-center gap-2 rounded border border-green/30 bg-green/10 p-3.5 font-mono text-[9px] uppercase tracking-wider text-green">
+                            <span className="h-1.5 w-1.5 rounded-full bg-green animate-pulse" />
+                            <span>Authentication Required: Please sign in to register for this event.</span>
+                          </div>
+                        )}
 
                         {/* NODE */}
                         <div className="mb-7 flex items-center justify-between border-b border-white/5 pb-4">
@@ -521,5 +545,13 @@ export default function LoginPage() {
 
       <Footer />
     </>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={null}>
+      <LoginContent />
+    </Suspense>
   );
 }

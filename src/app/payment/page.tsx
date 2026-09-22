@@ -69,7 +69,7 @@ export default function PaymentGatewayPage() {
                       <label className="block font-mono text-[10px] tracking-wider uppercase text-muted">
                         SELECT PAYMENT METHOD
                       </label>
-                      <div className="mt-2 grid grid-cols-3 gap-3">
+                      <div className="mt-2 grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3">
                         <button
                           type="button"
                           onClick={() => setMethod("upi")}

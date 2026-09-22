@@ -664,7 +664,8 @@ export default function AboutSection() {
                   <div
                     className="
                       grid
-                      grid-cols-3
+                      grid-cols-1
+                      sm:grid-cols-3
                       border-y
                       border-emerald-400/10
                     "
@@ -695,7 +696,7 @@ export default function AboutSection() {
                               ${index !==
                                 missionData.length -
                                 1
-                                ? "border-r border-emerald-400/10"
+                                ? "border-b sm:border-b-0 sm:border-r border-emerald-400/10"
                                 : ""
                               }
                               ${isActive

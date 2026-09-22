@@ -1,14 +1,224 @@
+/*
+ * VYUHAM'26 — Greenanime.tsx
+ * MAIN CINEMATIC INTRO ANIMATION
+ *
+ * This is the main self-contained animation component.
+ */
+
 "use client";
 
 import {
   useEffect,
   useRef,
   useState,
+  useCallback,
   forwardRef,
   useImperativeHandle,
 } from "react";
 import Image from "next/image";
+
 import { gsap } from "gsap";
+
+/*
+ * VYUHAM'26 — HAPTIC + CINEMATIC AUDIO
+ *
+ * Haptics:
+ * - Uses navigator.vibrate when supported (mainly Android/mobile browsers).
+ * - Completely optional; unsupported devices simply ignore it.
+ *
+ * Audio:
+ * - Uses the Web Audio API to synthesize short reactor/UI sounds.
+ * - No external audio files are required.
+ * - Browsers may block audio until the user interacts with the page.
+ */
+
+type HapticPattern = number | number[];
+
+const haptic = (pattern: HapticPattern) => {
+  if (typeof navigator === "undefined") return;
+
+  try {
+    if ("vibrate" in navigator && typeof navigator.vibrate === "function") {
+      navigator.vibrate(pattern);
+    }
+  } catch {
+    // Haptics are an enhancement; never allow them to break the animation.
+  }
+};
+
+const audioContextRef: { current: AudioContext | null } = {
+  current: null,
+};
+
+const getAudioContext = () => {
+  if (typeof window === "undefined") return null;
+
+  try {
+    if (!audioContextRef.current) {
+      const AudioContextClass =
+        window.AudioContext ||
+        (window as typeof window & {
+          webkitAudioContext?: typeof AudioContext;
+        }).webkitAudioContext;
+
+      if (!AudioContextClass) return null;
+      audioContextRef.current = new AudioContextClass();
+    }
+
+    return audioContextRef.current;
+  } catch {
+    return null;
+  }
+};
+
+const unlockCinematicAudio = () => {
+  const ctx = getAudioContext();
+  if (!ctx) return;
+
+  try {
+    if (ctx.state === "suspended") {
+      void ctx.resume();
+    }
+  } catch {
+    // Ignore browser audio-policy restrictions.
+  }
+};
+
+const reactorSound = (
+  type:
+    | "signal"
+    | "core"
+    | "lock"
+    | "containment"
+    | "charge"
+    | "overload"
+    | "breakthrough"
+) => {
+  const ctx = getAudioContext();
+  if (!ctx || ctx.state !== "running") return;
+
+  try {
+    const now = ctx.currentTime;
+    const master = ctx.createGain();
+    master.gain.setValueAtTime(0.0001, now);
+    master.connect(ctx.destination);
+
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    osc.connect(gain);
+    gain.connect(master);
+
+    let startFreq = 120;
+    let endFreq = 70;
+    let duration = 0.16;
+    let volume = 0.045;
+    let wave: OscillatorType = "sine";
+
+    switch (type) {
+      case "signal":
+        startFreq = 720;
+        endFreq = 260;
+        duration = 0.16;
+        volume = 0.035;
+        wave = "sine";
+        break;
+
+      case "core":
+        startFreq = 180;
+        endFreq = 620;
+        duration = 0.34;
+        volume = 0.055;
+        wave = "triangle";
+        break;
+
+      case "lock":
+        startFreq = 140;
+        endFreq = 90;
+        duration = 0.10;
+        volume = 0.035;
+        wave = "square";
+        break;
+
+      case "containment":
+        startFreq = 95;
+        endFreq = 48;
+        duration = 0.24;
+        volume = 0.055;
+        wave = "sawtooth";
+        break;
+
+      case "charge":
+        startFreq = 90;
+        endFreq = 190;
+        duration = 0.28;
+        volume = 0.035;
+        wave = "sine";
+        break;
+
+      case "overload":
+        startFreq = 80;
+        endFreq = 34;
+        duration = 0.42;
+        volume = 0.085;
+        wave = "sawtooth";
+        break;
+
+      case "breakthrough":
+        startFreq = 55;
+        endFreq = 980;
+        duration = 0.62;
+        volume = 0.12;
+        wave = "sawtooth";
+        break;
+    }
+
+    osc.type = wave;
+    osc.frequency.setValueAtTime(startFreq, now);
+    osc.frequency.exponentialRampToValueAtTime(
+      Math.max(20, endFreq),
+      now + duration
+    );
+
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.exponentialRampToValueAtTime(volume, now + 0.015);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+
+    master.gain.setValueAtTime(0.0001, now);
+    master.gain.exponentialRampToValueAtTime(1, now + 0.01);
+    master.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+
+    osc.start(now);
+    osc.stop(now + duration + 0.03);
+
+    osc.addEventListener("ended", () => {
+      try {
+        osc.disconnect();
+        gain.disconnect();
+        master.disconnect();
+      } catch {
+        // Already disconnected.
+      }
+    });
+  } catch {
+    // Audio is optional and must never interrupt the cinematic timeline.
+  }
+};
+
+const impact = (
+  vibration: HapticPattern,
+  sound:
+    | "signal"
+    | "core"
+    | "lock"
+    | "containment"
+    | "charge"
+    | "overload"
+    | "breakthrough"
+) => {
+  haptic(vibration);
+  reactorSound(sound);
+};
 
 /*
  * VYUHAM'26 — INTRO PAGE 2
@@ -92,7 +302,11 @@ export interface LogoRevealHandle {
   addToTimeline: (tl: gsap.core.Timeline) => void;
 }
 
-export default function GreenAnime2() {
+interface GreenAnimeProps {
+  onComplete?: () => void;
+}
+
+export default function GreenAnime({ onComplete }: GreenAnimeProps = {}) {
   const rootRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<HTMLDivElement>(null);
   const signalRef = useRef<HTMLDivElement>(null);
@@ -121,6 +335,10 @@ export default function GreenAnime2() {
   const stoneRefs = useRef<(SVGGElement | null)[]>([]);
   const structureRefs = useRef<(SVGGElement | null)[]>([]);
   const beamRefs = useRef<(SVGLineElement | null)[]>([]);
+  const connectorBeamRefs = useRef<(SVGLineElement | null)[]>([]);
+  const connectorGlowRefs = useRef<(SVGLineElement | null)[]>([]);
+  const guaranteedBeamRefs = useRef<(SVGLineElement | null)[]>([]);
+  const guaranteedBeamGlowRefs = useRef<(SVGLineElement | null)[]>([]);
   const crackRefs = useRef<(SVGPathElement | null)[]>([]);
   const highBeamRef = useRef<SVGLineElement>(null);
   const networkRef = useRef<SVGGElement>(null);
@@ -283,8 +501,51 @@ export default function GreenAnime2() {
     };
   }, []);
 
+  /*
+   * Unlock Web Audio after the first real user interaction.
+   * This is needed because mobile browsers commonly block autoplay audio.
+   * Vibration does not depend on this unlock.
+   */
+  useEffect(() => {
+    const unlock = () => {
+      unlockCinematicAudio();
+    };
+
+    window.addEventListener("pointerdown", unlock, { once: true });
+    window.addEventListener("touchstart", unlock, { once: true });
+    window.addEventListener("keydown", unlock, { once: true });
+
+    return () => {
+      window.removeEventListener("pointerdown", unlock);
+      window.removeEventListener("touchstart", unlock);
+      window.removeEventListener("keydown", unlock);
+    };
+  }, []);
+
+  const handleSkip = useCallback(() => {
+    if (rootRef.current) {
+      gsap.to(rootRef.current, {
+        opacity: 0,
+        duration: 0.25,
+        ease: "power2.inOut",
+        onComplete: () => {
+          onComplete?.();
+        },
+      });
+    } else {
+      onComplete?.();
+    }
+  }, [onComplete]);
+
   useEffect(() => {
     if (!rootRef.current) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        handleSkip();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
 
     const ctx = gsap.context(() => {
       const tl = gsap.timeline({
@@ -303,6 +564,9 @@ export default function GreenAnime2() {
             opacity: 0,
             duration: 0.38,
             ease: "power2.inOut",
+            onComplete: () => {
+              onComplete?.();
+            },
           });
         },
       });
@@ -313,18 +577,18 @@ export default function GreenAnime2() {
        * -----------------------------------------------------------
        */
 
-      gsap.set(sceneRef.current, { opacity: 1, scale: 1 });
-      gsap.set(signalRef.current, {
+      if (sceneRef.current) gsap.set(sceneRef.current, { opacity: 1, scale: 1 });
+      if (signalRef.current) gsap.set(signalRef.current, {
         opacity: 0,
         scale: 0.02,
         transformOrigin: "center",
       });
-      gsap.set(signalHaloRef.current, {
+      if (signalHaloRef.current) gsap.set(signalHaloRef.current, {
         opacity: 0,
         scale: 0.1,
         transformOrigin: "center",
       });
-      gsap.set(energyRef.current, {
+      if (energyRef.current) gsap.set(energyRef.current, {
         opacity: 0,
         scale: 0.25,
         transformOrigin: "center",
@@ -332,30 +596,30 @@ export default function GreenAnime2() {
       // Core formation starts as a single energy point. The individual
       // geometric layers are revealed separately so they visibly GROW
       // out of that point instead of appearing as a pre-built shape.
-      gsap.set(coreRef.current, {
+      if (coreRef.current) gsap.set(coreRef.current, {
         opacity: 1,
         scale: 1,
         rotation: 0,
         transformOrigin: "center",
       });
-      gsap.set(coreOuterShapeRef.current, {
+      if (coreOuterShapeRef.current) gsap.set(coreOuterShapeRef.current, {
         opacity: 0,
         scale: 0.02,
         rotation: 45,
         transformOrigin: "center",
       });
-      gsap.set(coreInnerShapeRef.current, {
+      if (coreInnerShapeRef.current) gsap.set(coreInnerShapeRef.current, {
         opacity: 0,
         scale: 0.02,
         rotation: 45,
         transformOrigin: "center",
       });
-      gsap.set(corePointRef.current, {
+      if (corePointRef.current) gsap.set(corePointRef.current, {
         opacity: 1,
         scale: 0.35,
         transformOrigin: "center",
       });
-      gsap.set(coreSvgRef.current, {
+      if (coreSvgRef.current) gsap.set(coreSvgRef.current, {
         opacity: 0,
         attr: {
           transform: `translate(${CX} ${CY}) scale(0.02) translate(${-CX} ${-CY})`,
@@ -391,6 +655,28 @@ export default function GreenAnime2() {
         strokeDashoffset: 420,
       });
 
+      // Dedicated visible energy connectors. These are rendered above the
+      // expanding core so the six stone→core links never get covered.
+      gsap.set(connectorBeamRefs.current.filter(Boolean), {
+        opacity: 0,
+        strokeWidth: 1.5,
+      });
+
+      gsap.set(connectorGlowRefs.current.filter(Boolean), {
+        opacity: 0,
+        strokeWidth: 4,
+      });
+
+      gsap.set(guaranteedBeamRefs.current.filter(Boolean), {
+        opacity: 0,
+        strokeWidth: 2,
+      });
+
+      gsap.set(guaranteedBeamGlowRefs.current.filter(Boolean), {
+        opacity: 0,
+        strokeWidth: 6,
+      });
+
       gsap.set(structureRefs.current.filter(Boolean), {
         opacity: 0,
       });
@@ -406,71 +692,71 @@ export default function GreenAnime2() {
         },
       });
 
-      gsap.set(highBeamRef.current, {
+      if (highBeamRef.current) gsap.set(highBeamRef.current, {
         opacity: 0,
         strokeDashoffset: 860,
         strokeWidth: 1,
       });
 
-      gsap.set(networkRef.current, {
+      if (networkRef.current) gsap.set(networkRef.current, {
         opacity: 0,
         scale: 0.7,
         transformOrigin: `${CX}px ${CY}px`,
       });
 
-      gsap.set(tickRef.current, {
+      if (tickRef.current) gsap.set(tickRef.current, {
         opacity: 0,
         scale: 0.75,
         transformOrigin: `${CX}px ${CY}px`,
       });
 
-      gsap.set(loadingRef.current, {
+      if (loadingRef.current) gsap.set(loadingRef.current, {
         opacity: 0,
         strokeDashoffset: 440,
       });
 
-      gsap.set(loadingTextRef.current, {
+      if (loadingTextRef.current) gsap.set(loadingTextRef.current, {
         opacity: 0,
         scale: 0.65,
       });
 
-      gsap.set(loadingLabelRef.current, { opacity: 0 });
+      if (loadingLabelRef.current) gsap.set(loadingLabelRef.current, { opacity: 0 });
 
-      gsap.set(flashRef.current, {
+      if (flashRef.current) gsap.set(flashRef.current, {
         opacity: 0,
         scale: 0.5,
       });
 
-      gsap.set(logoRef.current, {
+      if (logoRef.current) gsap.set(logoRef.current, {
         opacity: 0,
         scale: 0.2,
         y: 20,
         filter: "blur(14px) brightness(2.5)",
       });
 
-      gsap.set(titleRef.current, {
+      if (titleRef.current) gsap.set(titleRef.current, {
         opacity: 0,
         y: 38,
         filter: "blur(7px)",
       });
 
-      gsap.set(subtitleRef.current, {
+      if (subtitleRef.current) gsap.set(subtitleRef.current, {
         opacity: 0,
         y: 16,
       });
 
-      gsap.set(taglineRef.current, {
+      if (taglineRef.current) gsap.set(taglineRef.current, {
         opacity: 0,
         y: 18,
         letterSpacing: "0.55em",
       });
 
-      gsap.set(glitchRef.current, {
+      if (glitchRef.current) gsap.set(glitchRef.current, {
         opacity: 0,
         scaleX: 1.2,
       });
 
-      gsap.set(scanRef.current, {
+      if (scanRef.current) gsap.set(scanRef.current, {
         opacity: 0,
         scaleX: 0,
       });
@@ -497,6 +783,11 @@ export default function GreenAnime2() {
         duration: 0.38,
         ease: "expo.out",
       }, 0.70);
+
+      // SIGNAL DETECTED — first physical response.
+      tl.call(() => {
+        impact(15, "signal");
+      }, [], 0.70);
 
       tl.to(signalRef.current, {
         scale: 2.5,
@@ -560,6 +851,11 @@ export default function GreenAnime2() {
         duration: 0.16,
         ease: "expo.out",
       }, 2.93);
+
+      // CORE IGNITION — short focused pulse.
+      tl.call(() => {
+        impact([18, 18, 28], "core");
+      }, [], 2.93);
 
       tl.to(corePointRef.current, {
         scale: 0.72,
@@ -639,6 +935,11 @@ export default function GreenAnime2() {
         duration: 0.15,
         ease: "power2.out",
       }, 4.30);
+
+      // CORE SETTLE — second, heavier mechanical hit.
+      tl.call(() => {
+        impact(32, "core");
+      }, [], 4.30);
 
       // 8. A final radial energy pulse launches outward into the ring system.
       tl.to(signalRef.current, {
@@ -735,6 +1036,11 @@ export default function GreenAnime2() {
           ease: "power3.inOut",
         }, 5.81 + i * 0.13);
 
+        // Each arriving fragment gives a short mechanical lock pulse.
+        tl.call(() => {
+          impact(18, "lock");
+        }, [], 6.19 + i * 0.13);
+
         // Tiny lock pulse after arrival, without changing the final position.
         tl.to(stone, {
           attr: {
@@ -810,6 +1116,11 @@ export default function GreenAnime2() {
         ease: "power2.out",
       }, 8.05);
 
+      // SYNCHRONIZATION — all six nodes become one system.
+      tl.call(() => {
+        impact([25, 20, 35], "containment");
+      }, [], 8.05);
+
       tl.to([coreRef.current, coreSvgRef.current], {
         scale: 1.12,
         duration: 0.18,
@@ -834,6 +1145,11 @@ export default function GreenAnime2() {
         duration: 0.38,
         ease: "back.out(1.7)",
       }, 9.15);
+
+      // PROTOCOL LOCK — crisp confirmation hit.
+      tl.call(() => {
+        impact(28, "lock");
+      }, [], 9.15);
 
       // Small synchronized pulse without changing the stones' fixed
       // orbital positions. We scale around their local SVG origin.
@@ -986,6 +1302,11 @@ export default function GreenAnime2() {
         ease: "power1.inOut",
       }, 12.25);
 
+      // SIX-WAY CONTAINMENT — mechanical clamp impact.
+      tl.call(() => {
+        impact([30, 25, 45], "containment");
+      }, [], 12.15);
+
       tl.to(networkRef.current, {
         rotation: 0,
         duration: 0.38,
@@ -1077,6 +1398,99 @@ export default function GreenAnime2() {
            *
            * Its endpoint is the exact same point as the hexagon.
            */
+          // TOP-LAYER CONNECTOR BEAM
+          //
+          // The normal SVG beam can disappear underneath the HTML core when
+          // the core enlarges. This second line is deliberately rendered
+          // later in the DOM, above the core. It starts just outside the
+          // actual core edge and ends beyond the stone, creating one
+          // continuous energy channel:
+          //
+          //       CORE ======> STONE ======> OUTWARD
+          //
+          // Both endpoints are computed from the SAME angle/radius as the
+          // hexagon, so there is no diagonal drift or separation.
+          // Match the visible reactor geometry as it expands.
+          // The connector begins just outside the largest core layer,
+          // so the beam never appears detached from the reactor.
+          const coreEdgeRadius = 78 + expansion * 18;
+          const connectorOuterRadius = radius + 138;
+
+          const connectorGlow = connectorGlowRefs.current[i];
+
+          if (connectorGlow) {
+            gsap.set(connectorGlow, {
+              attr: {
+                x1: CX + dx * coreEdgeRadius,
+                y1: CY + dy * coreEdgeRadius,
+                x2: CX + dx * connectorOuterRadius,
+                y2: CY + dy * connectorOuterRadius,
+              },
+              strokeWidth: 4 + expansion * 15,
+              strokeOpacity: 0.16 + expansion * 0.32,
+              filter: "url(#ga2-heavy-glow)",
+            });
+          }
+
+          const connector = connectorBeamRefs.current[i];
+
+          if (connector) {
+            gsap.set(connector, {
+              attr: {
+                x1: CX + dx * coreEdgeRadius,
+                y1: CY + dy * coreEdgeRadius,
+                x2: CX + dx * connectorOuterRadius,
+                y2: CY + dy * connectorOuterRadius,
+              },
+              strokeWidth: 2.2 + expansion * 8.8,
+              strokeOpacity: 0.42 + expansion * 0.58,
+              filter:
+                expansion > 0.70
+                  ? "url(#ga2-heavy-glow)"
+                  : "url(#ga2-glow)",
+            });
+          }
+
+          // GUARANTEED SIX-BEAM LAYER
+          // This is independent of the original beamRefs animation.
+          // It deliberately uses the exact STONES angle so the vertical
+          // red/orange channels cannot disappear.
+          const guaranteedGlow = guaranteedBeamGlowRefs.current[i];
+          const guaranteed = guaranteedBeamRefs.current[i];
+
+          const guaranteedStart = 82 + expansion * 14;
+          const guaranteedEnd = radius + 142;
+
+          if (guaranteedGlow) {
+            gsap.set(guaranteedGlow, {
+              attr: {
+                x1: CX + dx * guaranteedStart,
+                y1: CY + dy * guaranteedStart,
+                x2: CX + dx * guaranteedEnd,
+                y2: CY + dy * guaranteedEnd,
+              },
+              stroke: stone.glow,
+              strokeWidth: 5 + expansion * 15,
+              strokeOpacity: 0.20 + expansion * 0.38,
+              filter: "url(#ga2-heavy-glow)",
+            });
+          }
+
+          if (guaranteed) {
+            gsap.set(guaranteed, {
+              attr: {
+                x1: CX + dx * guaranteedStart,
+                y1: CY + dy * guaranteedStart,
+                x2: CX + dx * guaranteedEnd,
+                y2: CY + dy * guaranteedEnd,
+              },
+              stroke: stone.color,
+              strokeWidth: 2 + expansion * 8,
+              strokeOpacity: 0.55 + expansion * 0.45,
+              filter: "url(#ga2-heavy-glow)",
+            });
+          }
+
           const beam = beamRefs.current[i];
 
           if (beam) {
@@ -1119,27 +1533,38 @@ export default function GreenAnime2() {
         /*
          * The entire reactor expands from its center.
          */
-        gsap.set(sceneRef.current, {
-          scale: 1 + expansion * 0.22,
-        });
+        if (sceneRef.current) {
+          gsap.set(sceneRef.current, {
+            scale: 1 + expansion * 0.22,
+          });
+        }
 
-        gsap.set(networkRef.current, {
-          scale: 1 + expansion * 0.26,
-        });
+        if (networkRef.current) {
+          gsap.set(networkRef.current, {
+            scale: 1 + expansion * 0.26,
+          });
+        }
 
-        gsap.set(energyRef.current, {
-          opacity: 0.62 + expansion * 0.38,
-          scale: 1.20 + expansion * 1.35,
-        });
+        if (energyRef.current) {
+          gsap.set(energyRef.current, {
+            opacity: 0.62 + expansion * 0.38,
+            scale: 1.20 + expansion * 1.35,
+          });
+        }
 
-        gsap.set(coreRef.current, {
-          scale: 1 + expansion * 0.30,
-        });
-        gsap.set(coreSvgRef.current, {
-          attr: {
-            transform: `translate(${CX} ${CY}) scale(${1 + expansion * 0.30}) translate(${-CX} ${-CY})`,
-          },
-        });
+        if (coreRef.current) {
+          gsap.set(coreRef.current, {
+            scale: 1 + expansion * 0.30,
+          });
+        }
+
+        if (coreSvgRef.current) {
+          gsap.set(coreSvgRef.current, {
+            attr: {
+              transform: `translate(${CX} ${CY}) scale(${1 + expansion * 0.30}) translate(${-CX} ${-CY})`,
+            },
+          });
+        }
 
         /*
          * CRACK FORMATION
@@ -1254,6 +1679,16 @@ export default function GreenAnime2() {
         },
       }, 13.40);
 
+      // CHARGE START — low rumble as the reactor begins loading.
+      tl.call(() => {
+        impact(16, "charge");
+      }, [], 13.40);
+
+      // MID-CHARGE — one restrained pulse, not constant vibration.
+      tl.call(() => {
+        impact([18, 24, 18], "charge");
+      }, [], 15.55);
+
       particleState.current.count = 180;
       particleState.current.speed = 1.2;
 
@@ -1261,14 +1696,92 @@ export default function GreenAnime2() {
        * Final 100% overload. This overlaps the last part of the SAME
        * 0 → 100 tween instead of creating another percentage sequence.
        */
-      tl.to(beamRefs.current.filter(Boolean), {
-        stroke: "#ecfdf5",
-        strokeWidth: 9,
-        strokeOpacity: 1,
-        filter: "url(#ga2-heavy-glow)",
-        duration: 0.18,
-        ease: "expo.in",
-      }, 18.40);
+      /*
+       * FINAL SIX-BEAM SYNCHRONIZATION
+       * --------------------------------
+       * Keep all six radial beams alive and visible through the
+       * overload/breakthrough moment.  Each beam is driven from the
+       * exact same radial endpoint as its corresponding stone.
+       *
+       * The old animation could visually read as only four beams because
+       * the beams were thin/overlapped near the center.  At 100% we give
+       * every beam its own strong glow and a slightly different timing.
+       */
+      // FINAL SIX CONNECTOR BEAMS
+      // Keep the six channels visibly attached to the six stones and
+      // extend them outward, matching the cinematic reference layout.
+      connectorBeamRefs.current.forEach((beam, i) => {
+        if (!beam) return;
+
+        const stone = STONES[i];
+        const a = (stone.angle * Math.PI) / 180;
+        const dx = Math.cos(a);
+        const dy = Math.sin(a);
+
+        const finalCoreEdge = 96;
+        const finalOuter = loadMaxRadius + 138;
+
+        tl.set(beam, {
+          attr: {
+            x1: CX + dx * finalCoreEdge,
+            y1: CY + dy * finalCoreEdge,
+            x2: CX + dx * finalOuter,
+            y2: CY + dy * finalOuter,
+          },
+          stroke: stone.color,
+          strokeWidth: 10,
+          strokeOpacity: 1,
+          filter: "url(#ga2-heavy-glow)",
+        }, 18.34);
+
+        tl.to(beam, {
+          stroke: "#ecfdf5",
+          strokeWidth: 11,
+          strokeOpacity: 1,
+          duration: 0.12,
+          ease: "expo.in",
+        }, 18.40 + i * 0.015);
+      });
+
+      beamRefs.current.forEach((beam, i) => {
+        if (!beam) return;
+
+        const stone = STONES[i];
+        const a = (stone.angle * Math.PI) / 180;
+        // Extend each beam beyond its stone so the energy is visibly
+        // emitted THROUGH the stone and continues outward.
+        const finalBeamRadius = loadMaxRadius + 105;
+        const finalX = CX + Math.cos(a) * finalBeamRadius;
+        const finalY = CY + Math.sin(a) * finalBeamRadius;
+
+        tl.set(beam, {
+          attr: {
+            x1: CX,
+            y1: CY,
+            x2: finalX,
+            y2: finalY,
+          },
+          stroke: stone.color,
+          strokeWidth: 10,
+          strokeOpacity: 1,
+          strokeDashoffset: 0,
+          filter: "url(#ga2-heavy-glow)",
+        }, 18.38);
+
+        tl.to(beam, {
+          stroke: "#ecfdf5",
+          strokeWidth: 9,
+          strokeOpacity: 1,
+          filter: "url(#ga2-heavy-glow)",
+          duration: 0.16,
+          ease: "expo.in",
+        }, 18.40 + i * 0.012);
+      });
+
+      // 100% OVERLOAD — strongest pre-breakthrough reactor hit.
+      tl.call(() => {
+        impact([45, 25, 70], "overload");
+      }, [], 18.40);
 
       tl.to(energyRef.current, {
         scale: 2.75,
@@ -1297,11 +1810,14 @@ export default function GreenAnime2() {
        * one of them in a diagonal direction.
        */
       STONES.forEach((stone, i) => {
+        const stoneEl = stoneRefs.current[i];
+        if (!stoneEl) return;
+
         const a = (stone.angle * Math.PI) / 180;
         const finalX = CX + Math.cos(a) * loadMaxRadius;
         const finalY = CY + Math.sin(a) * loadMaxRadius;
 
-        tl.set(stoneRefs.current[i], {
+        tl.set(stoneEl, {
           attr: {
             transform:
               `translate(${finalX} ${finalY}) scale(1.16)`,
@@ -1318,6 +1834,182 @@ export default function GreenAnime2() {
       }, 18.38);
 
       /*
+       * SIX-BEAM FINAL PULSE
+       * --------------------
+       * A synchronized pulse makes all six radial feeds unmistakable
+       * immediately before the central beam erupts.
+       */
+      tl.to(
+        connectorBeamRefs.current.filter(Boolean),
+        {
+          strokeWidth: 14,
+          strokeOpacity: 1,
+          duration: 0.10,
+          yoyo: true,
+          repeat: 1,
+          ease: "sine.inOut",
+        },
+        18.56
+      );
+
+      tl.to(beamRefs.current.filter(Boolean), {
+        strokeWidth: 12,
+        strokeOpacity: 1,
+        duration: 0.10,
+        yoyo: true,
+        repeat: 1,
+        ease: "sine.inOut",
+      }, 18.56);
+
+      /*
+       * FINAL SIX-STONE BEAM FLASH
+       * Each beam is flashed independently so none of the six radial
+       * directions can visually disappear into the reactor glow.
+       */
+      guaranteedBeamGlowRefs.current.forEach((beam, i) => {
+        if (!beam) return;
+
+        const stone = STONES[i];
+        const a = (stone.angle * Math.PI) / 180;
+        const dx = Math.cos(a);
+        const dy = Math.sin(a);
+
+        tl.set(
+          beam,
+          {
+            attr: {
+              x1: CX + dx * 82,
+              y1: CY + dy * 82,
+              x2: CX + dx * (loadMaxRadius + 142),
+              y2: CY + dy * (loadMaxRadius + 142),
+            },
+            stroke: stone.glow,
+            strokeWidth: 24,
+            strokeOpacity: 0.62,
+            filter: "url(#ga2-heavy-glow)",
+          },
+          18.34
+        );
+
+        tl.to(
+          beam,
+          {
+            strokeWidth: 32,
+            strokeOpacity: 0.78,
+            duration: 0.14,
+            yoyo: true,
+            repeat: 1,
+            ease: "sine.inOut",
+          },
+          18.56
+        );
+      });
+
+      guaranteedBeamRefs.current.forEach((beam, i) => {
+        if (!beam) return;
+
+        const stone = STONES[i];
+        const a = (stone.angle * Math.PI) / 180;
+        const dx = Math.cos(a);
+        const dy = Math.sin(a);
+
+        tl.set(
+          beam,
+          {
+            attr: {
+              x1: CX + dx * 82,
+              y1: CY + dy * 82,
+              x2: CX + dx * (loadMaxRadius + 142),
+              y2: CY + dy * (loadMaxRadius + 142),
+            },
+            stroke: stone.color,
+            strokeWidth: 10,
+            strokeOpacity: 1,
+            filter: "url(#ga2-heavy-glow)",
+          },
+          18.34
+        );
+
+        tl.to(
+          beam,
+          {
+            stroke: "#ffffff",
+            strokeWidth: 16,
+            strokeOpacity: 1,
+            duration: 0.08,
+            yoyo: true,
+            repeat: 1,
+            ease: "power2.inOut",
+          },
+          18.58 + i * 0.012
+        );
+      });
+
+      connectorGlowRefs.current.forEach((beam, i) => {
+        if (!beam) return;
+
+        tl.set(
+          beam,
+          {
+            stroke: STONES[i].glow,
+            strokeWidth: 18,
+            strokeOpacity: 0.58,
+            filter: "url(#ga2-heavy-glow)",
+          },
+          18.34
+        );
+
+        tl.to(
+          beam,
+          {
+            strokeWidth: 26,
+            strokeOpacity: 0.72,
+            duration: 0.16,
+            yoyo: true,
+            repeat: 1,
+            ease: "sine.inOut",
+          },
+          18.56
+        );
+      });
+
+      connectorBeamRefs.current.forEach((beam, i) => {
+        if (!beam) return;
+
+        tl.to(
+          beam,
+          {
+            stroke: "#ffffff",
+            strokeWidth: 17,
+            strokeOpacity: 1,
+            duration: 0.07,
+            yoyo: true,
+            repeat: 1,
+            ease: "power2.inOut",
+          },
+          18.58 + i * 0.018
+        );
+      });
+
+      beamRefs.current.forEach((beam, i) => {
+        if (!beam) return;
+
+        tl.to(
+          beam,
+          {
+            stroke: "#ffffff",
+            strokeWidth: 15,
+            strokeOpacity: 1,
+            duration: 0.07,
+            yoyo: true,
+            repeat: 1,
+            ease: "power2.inOut",
+          },
+          18.58 + i * 0.018
+        );
+      });
+
+      /*
        * 100% — CENTRAL HIGH BEAM
        *
        * The six radial beams peak first. Only after the 0→100 controller
@@ -1331,6 +2023,11 @@ export default function GreenAnime2() {
         duration: 0.13,
         ease: "expo.out",
       }, 18.60);
+
+      // CENTRAL BEAM ERUPTION.
+      tl.call(() => {
+        impact(65, "overload");
+      }, [], 18.60);
 
       tl.to(highBeamRef.current, {
         strokeWidth: 34,
@@ -1390,6 +2087,11 @@ export default function GreenAnime2() {
         ease: "power3.out",
       }, 19.00);
 
+      // BREAKTHROUGH — cinematic double-impact.
+      tl.call(() => {
+        impact([120, 45, 180], "breakthrough");
+      }, [], 19.00);
+
       tl.to(sceneRef.current, {
         opacity: 0,
         scale: 3.1,
@@ -1419,10 +2121,13 @@ export default function GreenAnime2() {
       tl.play();
 
       return () => tl.kill();
-    }, rootRef);
+    }, rootRef.current);
 
-    return () => ctx.revert();
-  }, []);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      ctx.revert();
+    };
+  }, [handleSkip]);
 
   const ringRadius = [155, 184, 212, 238];
 
@@ -1909,6 +2614,109 @@ export default function GreenAnime2() {
           />
         </div>
 
+        {/* =========================================================
+            SIX CONTINUOUS STONE → CORE ENERGY CHANNELS
+            ---------------------------------------------------------
+            This layer is intentionally ABOVE the expanding core.
+            Each line:
+              CORE EDGE ======> STONE ======> OUTWARD EMITTER
+
+            The six lines share the exact same angle/radius system as
+            the six hexagons, so they remain physically connected while
+            the stones expand.
+        ========================================================= */}
+        <svg
+          className="pointer-events-none absolute inset-0 z-[35] h-full w-full"
+          viewBox="0 0 1000 860"
+          preserveAspectRatio="none"
+          aria-hidden="true"
+        >
+          {STONES.map((stone, i) => (
+            <g key={`connector-system-${stone.id}`}>
+              <line
+                ref={(el) => {
+                  connectorGlowRefs.current[i] = el;
+                }}
+                x1={CX}
+                y1={CY}
+                x2={point(stone.angle, STONE_R + 138).x}
+                y2={point(stone.angle, STONE_R + 138).y}
+                stroke={stone.glow}
+                strokeWidth="4"
+                strokeLinecap="round"
+                filter="url(#ga2-heavy-glow)"
+                opacity="0"
+              />
+              <line
+                key={`connector-beam-${stone.id}`}
+                ref={(el) => {
+                  connectorBeamRefs.current[i] = el;
+                }}
+              x1={CX}
+              y1={CY}
+              x2={point(stone.angle, STONE_R + 112).x}
+              y2={point(stone.angle, STONE_R + 112).y}
+              stroke={stone.color}
+              strokeWidth="1.6"
+              strokeLinecap="round"
+                filter="url(#ga2-glow)"
+                opacity="0"
+              />
+            </g>
+          ))}
+        </svg>
+
+        {/* =========================================================
+            GUARANTEED SIX-BEAM TOP LAYER
+            ---------------------------------------------------------
+            Independent from the original beam system.
+            Explicitly renders all six radial channels, including the
+            vertical RED (top) and ORANGE (bottom) channels.
+        ========================================================= */}
+        <svg
+          className="pointer-events-none absolute inset-0 z-[50] h-full w-full"
+          viewBox="0 0 1000 860"
+          preserveAspectRatio="none"
+          aria-hidden="true"
+        >
+          {STONES.map((stone, i) => {
+            const p = point(stone.angle, STONE_R + 142);
+
+            return (
+              <g key={`guaranteed-${stone.id}`}>
+                <line
+                  ref={(el) => {
+                    guaranteedBeamGlowRefs.current[i] = el;
+                  }}
+                  x1={CX}
+                  y1={CY}
+                  x2={p.x}
+                  y2={p.y}
+                  stroke={stone.glow}
+                  strokeWidth="6"
+                  strokeLinecap="round"
+                  filter="url(#ga2-heavy-glow)"
+                  opacity="0"
+                />
+                <line
+                  ref={(el) => {
+                    guaranteedBeamRefs.current[i] = el;
+                  }}
+                  x1={CX}
+                  y1={CY}
+                  x2={p.x}
+                  y2={p.y}
+                  stroke={stone.color}
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  filter="url(#ga2-heavy-glow)"
+                  opacity="0"
+                />
+              </g>
+            );
+          })}
+        </svg>
+
         {/* LOADING TEXT */}
         <div
           ref={loadingTextRef}
@@ -1920,7 +2728,7 @@ export default function GreenAnime2() {
 
         <div
           ref={loadingLabelRef}
-          className="absolute left-1/2 top-[58%] -translate-x-1/2 font-mono text-[8px] tracking-[0.45em] text-emerald-300"
+          className="absolute left-1/2 top-[58%] -translate-x-1/2 font-mono text-[8px] tracking-[0.58em] text-emerald-300"
         >
           ENERGY LOAD
         </div>
@@ -2009,10 +2817,15 @@ export default function GreenAnime2() {
           style={{ mixBlendMode: "screen" }}
         />
 
-        {/* TOP RIGHT */}
-        <div className="absolute right-[3%] top-[3%] font-mono text-[8px] tracking-[0.28em] text-emerald-500/50">
-          SKIP INTRO //
-        </div>
+        {/* TOP RIGHT - SKIP BUTTON */}
+        <button
+          type="button"
+          onClick={handleSkip}
+          className="group absolute right-[3%] top-[3%] z-[10000] flex cursor-pointer items-center gap-2 rounded border border-emerald-500/20 bg-black/60 px-3.5 py-2 font-mono text-[9px] tracking-[0.24em] text-emerald-500/80 backdrop-blur-sm transition-all hover:border-emerald-400 hover:bg-emerald-950/40 hover:text-emerald-400"
+        >
+          <span>SKIP INTRO</span>
+          <span className="transition-transform group-hover:translate-x-0.5">//</span>
+        </button>
       </div>
 
       {/* =========================================================

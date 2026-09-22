@@ -481,7 +481,7 @@ export default function ResultsWinnersPage() {
                     </p>
                   </div>
 
-                  <div className="grid grid-cols-3 gap-6 border-t border-white/[0.06] pt-5 md:border-l md:border-t-0 md:pl-8 md:pt-0">
+                  <div className="grid grid-cols-3 gap-3 sm:gap-6 border-t border-white/[0.06] pt-5 md:border-l md:border-t-0 md:pl-8 md:pt-0">
                     <div>
                       <span className="block font-mono text-[8px] uppercase tracking-[0.16em] text-white/25">
                         Events

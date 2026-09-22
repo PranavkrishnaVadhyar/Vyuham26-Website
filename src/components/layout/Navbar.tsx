@@ -6,6 +6,7 @@ import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 
 import { usePathname } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
 
 const navLinks = [
   { href: "/about", label: "About", code: "01" },
@@ -19,6 +20,7 @@ const navLinks = [
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = usePathname();
+  const { user, isAuthenticated, logout } = useAuth();
 
   const isActive = (href: string) => pathname === href;
 
@@ -195,28 +197,51 @@ export default function Navbar() {
             </span>
           </div>
 
-          <Link
-            href="/login"
-            className="font-mono text-[9px] font-semibold uppercase tracking-[0.15em] text-white/40 no-underline transition-colors hover:text-[#c8ff42]"
-          >
-            Login
-          </Link>
+          {isAuthenticated ? (
+            <div className="flex items-center gap-3">
+              <Link
+                href="/dashboard"
+                className="group relative inline-flex items-center gap-2 overflow-hidden border border-[#c8ff42]/40 bg-[#c8ff42]/[0.08] px-3.5 py-2 font-mono text-[9px] font-bold uppercase tracking-[0.15em] text-[#c8ff42] no-underline transition-all duration-300 hover:border-[#c8ff42] hover:bg-[#c8ff42]/[0.16]"
+              >
+                <span className="h-1.5 w-1.5 rounded-full bg-[#c8ff42]" />
+                <span className="max-w-[120px] truncate">{user?.name || "OPERATIVE"}</span>
+                <span className="text-white/40">// DASHBOARD</span>
+              </Link>
 
-          <Link
-            href="/signup"
-            className="group relative inline-flex items-center overflow-hidden border border-[#c8ff42]/40 bg-[#c8ff42]/[0.08] px-4 py-2.5 font-mono text-[9px] font-extrabold uppercase tracking-[0.17em] text-[#c8ff42] no-underline transition-all duration-300 hover:border-[#c8ff42]/70 hover:bg-[#c8ff42]/[0.14] hover:shadow-[0_0_25px_rgba(200,255,66,.12)]"
-          >
-            {/* Button scan */}
-            <span className="absolute inset-y-0 left-0 w-1/3 -translate-x-full bg-gradient-to-r from-transparent via-[#c8ff42]/20 to-transparent transition-transform duration-700 group-hover:translate-x-[400%]" />
+              <button
+                type="button"
+                onClick={logout}
+                className="cursor-pointer font-mono text-[8px] uppercase tracking-[0.14em] text-white/40 transition-colors hover:text-white"
+              >
+                Sign Out
+              </button>
+            </div>
+          ) : (
+            <>
+              <Link
+                href="/login"
+                className="font-mono text-[9px] font-semibold uppercase tracking-[0.15em] text-white/40 no-underline transition-colors hover:text-[#c8ff42]"
+              >
+                Login
+              </Link>
 
-            <span className="relative">
-              Sign Up
-            </span>
+              <Link
+                href="/signup"
+                className="group relative inline-flex items-center overflow-hidden border border-[#c8ff42]/40 bg-[#c8ff42]/[0.08] px-4 py-2.5 font-mono text-[9px] font-extrabold uppercase tracking-[0.17em] text-[#c8ff42] no-underline transition-all duration-300 hover:border-[#c8ff42]/70 hover:bg-[#c8ff42]/[0.14] hover:shadow-[0_0_25px_rgba(200,255,66,.12)]"
+              >
+                {/* Button scan */}
+                <span className="absolute inset-y-0 left-0 w-1/3 -translate-x-full bg-gradient-to-r from-transparent via-[#c8ff42]/20 to-transparent transition-transform duration-700 group-hover:translate-x-[400%]" />
 
-            <span className="relative ml-2 text-sm leading-none transition-transform duration-300 group-hover:translate-x-1">
-              →
-            </span>
-          </Link>
+                <span className="relative">
+                  Sign Up
+                </span>
+
+                <span className="relative ml-2 text-sm leading-none transition-transform duration-300 group-hover:translate-x-1">
+                  →
+                </span>
+              </Link>
+            </>
+          )}
         </div>
 
         {/* =======================================================
@@ -441,26 +466,53 @@ export default function Navbar() {
                       </span>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-3">
-                      <Link
-                        href="/login"
-                        onClick={() => setMobileOpen(false)}
-                        className="inline-flex items-center justify-center rounded border border-white/[0.1] bg-white/[0.02] px-5 py-3.5 font-mono text-[9px] font-extrabold uppercase tracking-[0.15em] text-paper no-underline transition-all hover:border-[#c8ff42]/40 hover:text-[#c8ff42]"
-                      >
-                        Login
-                      </Link>
+                    {isAuthenticated ? (
+                      <div className="space-y-3">
+                        <Link
+                          href="/dashboard"
+                          onClick={() => setMobileOpen(false)}
+                          className="flex items-center justify-between rounded border border-[#c8ff42]/40 bg-[#c8ff42]/10 p-3.5 font-mono text-[10px] font-bold uppercase tracking-[0.15em] text-[#c8ff42] no-underline"
+                        >
+                          <div className="flex items-center gap-2">
+                            <span className="h-2 w-2 rounded-full bg-[#c8ff42]" />
+                            <span>{user?.name || "OPERATIVE"} // DASHBOARD</span>
+                          </div>
+                          <span>→</span>
+                        </Link>
 
-                      <Link
-                        href="/signup"
-                        onClick={() => setMobileOpen(false)}
-                        className="inline-flex items-center justify-center rounded border border-[#c8ff42]/40 bg-[#c8ff42]/10 px-5 py-3.5 font-mono text-[9px] font-extrabold uppercase tracking-[0.15em] text-[#c8ff42] no-underline transition-all hover:bg-[#c8ff42]/15"
-                      >
-                        Sign Up
-                        <span className="ml-2 text-sm">
-                          →
-                        </span>
-                      </Link>
-                    </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            logout();
+                            setMobileOpen(false);
+                          }}
+                          className="w-full rounded border border-white/10 bg-white/[0.02] py-2.5 font-mono text-[9px] uppercase tracking-[0.15em] text-white/50"
+                        >
+                          Sign Out
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-2 gap-3">
+                        <Link
+                          href="/login"
+                          onClick={() => setMobileOpen(false)}
+                          className="inline-flex items-center justify-center rounded border border-white/[0.1] bg-white/[0.02] px-5 py-3.5 font-mono text-[9px] font-extrabold uppercase tracking-[0.15em] text-paper no-underline transition-all hover:border-[#c8ff42]/40 hover:text-[#c8ff42]"
+                        >
+                          Login
+                        </Link>
+
+                        <Link
+                          href="/signup"
+                          onClick={() => setMobileOpen(false)}
+                          className="inline-flex items-center justify-center rounded border border-[#c8ff42]/40 bg-[#c8ff42]/10 px-5 py-3.5 font-mono text-[9px] font-extrabold uppercase tracking-[0.15em] text-[#c8ff42] no-underline transition-all hover:bg-[#c8ff42]/15"
+                        >
+                          Sign Up
+                          <span className="ml-2 text-sm">
+                            →
+                          </span>
+                        </Link>
+                      </div>
+                    )}
                   </div>
 
                   {/* Bottom telemetry */}

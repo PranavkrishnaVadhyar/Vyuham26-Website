@@ -1,7 +1,9 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { useRouter, useSearchParams } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
 
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
@@ -9,12 +11,46 @@ import AnimatedSection from "@/components/motion/AnimatedSection";
 import SignalRing from "@/components/motion/SignalRing";
 import { Kicker, Button, Chip, StreamBadge } from "@/components/ui/Elements";
 import { type Event } from "@/data/events";
+import { useAuth } from "@/context/AuthContext";
 
 interface EventDetailClientProps {
   event: Event;
 }
 
 export default function EventDetailClient({ event }: EventDetailClientProps) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const { user, isAuthenticated, isEventRegistered, registerForEvent } = useAuth();
+
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [isRegistering, setIsRegistering] = useState(false);
+
+  const isRegistered = isEventRegistered(event.slug);
+
+  // Check if redirected back after authenticating with intent to register
+  useEffect(() => {
+    if (searchParams.get("registered") === "true" && isAuthenticated) {
+      registerForEvent(event.slug);
+      setShowSuccessModal(true);
+    }
+  }, [searchParams, isAuthenticated, event.slug, registerForEvent]);
+
+  const handleRegisterClick = () => {
+    if (!isAuthenticated) {
+      // User is not signed in: move to sign in page
+      router.push(`/login?redirect=/events/${event.slug}&event=${event.slug}`);
+      return;
+    }
+
+    // User is signed in: show registered successfully
+    setIsRegistering(true);
+    setTimeout(() => {
+      registerForEvent(event.slug);
+      setIsRegistering(false);
+      setShowSuccessModal(true);
+    }, 400);
+  };
+
   const dayLabel =
     event.day === 1
       ? "30 OCTOBER"
@@ -155,7 +191,7 @@ export default function EventDetailClient({ event }: EventDetailClientProps) {
                       duration: 0.75,
                       ease: [0.22, 1, 0.36, 1],
                     }}
-                    className="mt-7 max-w-5xl font-display text-[clamp(42px,7vw,88px)] font-semibold leading-[0.85] tracking-[-0.045em]"
+                    className="mt-7 max-w-5xl font-display text-[clamp(30px,7vw,88px)] font-semibold leading-[0.95] tracking-[-0.045em] break-words"
                   >
                     {event.title.toUpperCase()}
                   </motion.h1>
@@ -364,19 +400,54 @@ export default function EventDetailClient({ event }: EventDetailClientProps) {
                     </p>
                   </div>
 
-                  {/* Register */}
-                  <Button
-                    href="/contact"
-                    className="group relative w-full justify-center overflow-hidden"
-                  >
-                    <span className="relative z-10">
-                      Register for this event
-                    </span>
+                  {/* Register Block */}
+                  {isRegistered ? (
+                    <div className="space-y-3">
+                      <div className="flex w-full items-center justify-center gap-2.5 rounded border border-[#c8ff42]/60 bg-[#c8ff42]/10 py-4 font-mono text-xs font-bold uppercase tracking-[0.18em] text-[#c8ff42] shadow-[0_0_25px_rgba(200,255,66,0.15)]">
+                        <span className="relative flex h-2 w-2">
+                          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#c8ff42] opacity-75" />
+                          <span className="relative inline-flex h-2 w-2 rounded-full bg-[#c8ff42]" />
+                        </span>
+                        ✓ REGISTERED SUCCESSFULLY
+                      </div>
 
-                    <span className="relative z-10 ml-2 text-base transition-transform duration-300 group-hover:translate-x-1">
-                      →
-                    </span>
-                  </Button>
+                      <div className="flex items-center justify-between font-mono text-[9px] uppercase tracking-[0.15em] text-white/40">
+                        <span>PASS: VYU26-ACTIVE</span>
+                        <Link
+                          href="/dashboard"
+                          className="text-[#c8ff42] underline decoration-[#c8ff42]/40 underline-offset-4 transition-colors hover:text-white"
+                        >
+                          View in Dashboard →
+                        </Link>
+                      </div>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={handleRegisterClick}
+                      disabled={isRegistering}
+                      className="group relative flex w-full cursor-pointer items-center justify-center overflow-hidden border border-[#c8ff42]/50 bg-[#c8ff42]/10 px-6 py-4 font-mono text-xs font-extrabold uppercase tracking-[0.18em] text-[#c8ff42] transition-all duration-300 hover:border-[#c8ff42] hover:bg-[#c8ff42]/20 hover:shadow-[0_0_30px_rgba(200,255,66,0.2)] active:scale-[0.99] disabled:opacity-70"
+                    >
+                      {/* Button scan */}
+                      <span className="absolute inset-y-0 left-0 w-1/3 -translate-x-full bg-gradient-to-r from-transparent via-[#c8ff42]/30 to-transparent transition-transform duration-700 group-hover:translate-x-[400%]" />
+
+                      <span className="relative z-10 flex items-center gap-2">
+                        {isRegistering ? (
+                          <>
+                            <span className="inline-block h-3.5 w-3.5 animate-spin rounded-full border-2 border-[#c8ff42] border-t-transparent" />
+                            CONFIRMING PROTOCOL...
+                          </>
+                        ) : (
+                          <>
+                            Register for this event
+                            <span className="ml-2 text-base transition-transform duration-300 group-hover:translate-x-1">
+                              →
+                            </span>
+                          </>
+                        )}
+                      </span>
+                    </button>
+                  )}
                 </div>
               </AnimatedSection>
             </div>
@@ -431,6 +502,98 @@ export default function EventDetailClient({ event }: EventDetailClientProps) {
             </AnimatedSection>
           </div>
         </section>
+
+        {/* =========================================================
+            SUCCESS REGISTRATION MODAL
+        ========================================================= */}
+        <AnimatePresence>
+          {showSuccessModal && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+              {/* Backdrop */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setShowSuccessModal(false)}
+                className="fixed inset-0 bg-[#020504]/85 backdrop-blur-md"
+              />
+
+              {/* Modal Card */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.92, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+                className="relative z-10 w-full max-w-lg overflow-hidden rounded border border-[#c8ff42]/40 bg-[#06100b]/95 p-6 shadow-[0_0_80px_rgba(200,255,66,0.18)] backdrop-blur-2xl md:p-8"
+              >
+                {/* Corner brackets */}
+                <div className="absolute left-0 top-0 h-6 w-6 border-l-2 border-t-2 border-[#c8ff42]" />
+                <div className="absolute right-0 top-0 h-6 w-6 border-r-2 border-t-2 border-[#c8ff42]" />
+                <div className="absolute bottom-0 left-0 h-6 w-6 border-b-2 border-l-2 border-[#c8ff42]" />
+                <div className="absolute bottom-0 right-0 h-6 w-6 border-b-2 border-r-2 border-[#c8ff42]" />
+
+                {/* Holographic icon */}
+                <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-[#c8ff42]/40 bg-[#c8ff42]/10 text-3xl text-[#c8ff42] shadow-[0_0_30px_rgba(200,255,66,0.3)]">
+                  ✓
+                </div>
+
+                {/* Status text */}
+                <div className="mt-5 text-center">
+                  <span className="font-mono text-[9px] uppercase tracking-[0.24em] text-[#c8ff42]/70">
+                    PROTOCOL CONFIRMED // ENLISTMENT COMPLETE
+                  </span>
+
+                  <h3 className="mt-2 font-display text-2xl font-bold tracking-tight text-paper md:text-3xl">
+                    REGISTERED SUCCESSFULLY!
+                  </h3>
+
+                  <p className="mx-auto mt-2 max-w-sm text-xs leading-5 text-white/50">
+                    You are officially registered for{" "}
+                    <strong className="text-paper">{event.title}</strong>. Your mission dossier and event credentials are now active.
+                  </p>
+                </div>
+
+                {/* Telemetry Box */}
+                <div className="mt-6 rounded border border-white/[0.08] bg-black/40 p-4 font-mono text-[10px]">
+                  <div className="flex justify-between border-b border-white/[0.06] pb-2">
+                    <span className="text-white/30 uppercase">OPERATIVE</span>
+                    <span className="text-paper">{user?.name || "AUTHENTICATED OPERATIVE"}</span>
+                  </div>
+                  <div className="flex justify-between border-b border-white/[0.06] py-2">
+                    <span className="text-white/30 uppercase">EVENT</span>
+                    <span className="text-[#c8ff42]">{event.title}</span>
+                  </div>
+                  <div className="flex justify-between border-b border-white/[0.06] py-2">
+                    <span className="text-white/30 uppercase">TIMING</span>
+                    <span className="text-paper">DAY {event.day} // {event.time}</span>
+                  </div>
+                  <div className="flex justify-between pt-2">
+                    <span className="text-white/30 uppercase">STATUS</span>
+                    <span className="font-bold text-[#c8ff42]">PASS ACTIVE // SEATS RESERVED</span>
+                  </div>
+                </div>
+
+                {/* Action buttons */}
+                <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+                  <Link
+                    href="/dashboard"
+                    className="flex-1 rounded border border-[#c8ff42] bg-[#c8ff42] py-3 text-center font-mono text-xs font-bold uppercase tracking-[0.16em] text-[#06100b] shadow-[0_0_20px_rgba(200,255,66,0.3)] transition-all hover:bg-[#d8ff66]"
+                  >
+                    Go to Dashboard →
+                  </Link>
+
+                  <button
+                    type="button"
+                    onClick={() => setShowSuccessModal(false)}
+                    className="flex-1 rounded border border-white/10 bg-white/[0.04] py-3 text-center font-mono text-xs uppercase tracking-[0.16em] text-white/60 transition-all hover:bg-white/[0.08] hover:text-white"
+                  >
+                    Continue Browsing
+                  </button>
+                </div>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>
       </main>
 
       <Footer />

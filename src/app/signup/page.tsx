@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 
 import Navbar from "@/components/layout/Navbar";
@@ -11,9 +12,14 @@ import AuthTransition from "@/components/motion/AuthTransition";
 
 import { Kicker, Button } from "@/components/ui/Elements";
 import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
+import { useAuth } from "@/context/AuthContext";
 
-export default function SignupPage() {
+function SignupContent() {
   const reduceMotion = usePrefersReducedMotion();
+  const searchParams = useSearchParams();
+  const redirectUrl = searchParams.get("redirect");
+  const eventSlug = searchParams.get("event");
+  const { signup } = useAuth();
 
   const [formData, setFormData] = useState({
     name: "",
@@ -61,6 +67,12 @@ export default function SignupPage() {
     setStatus("registering");
 
     setTimeout(() => {
+      signup({
+        name: formData.name,
+        email: formData.email,
+        college: formData.college,
+        phone: formData.phone,
+      });
       setStatus("success");
 
       /*
@@ -88,7 +100,7 @@ export default function SignupPage() {
 
       <AuthTransition
         active={authTransition}
-        destination="/profile"
+        destination={redirectUrl ? (eventSlug ? `${redirectUrl}?registered=true` : redirectUrl) : "/profile"}
         label="PROVISIONING IDENTITY"
       />
 
@@ -793,5 +805,13 @@ export default function SignupPage() {
 
       <Footer />
     </>
+  );
+}
+
+export default function SignupPage() {
+  return (
+    <Suspense fallback={null}>
+      <SignupContent />
+    </Suspense>
   );
 }

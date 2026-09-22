@@ -26,7 +26,7 @@ export default function ReceiptPage() {
 
             <AnimatedSection delay={0.15}>
               <div className="glass-card mt-6 p-6 md:p-8 space-y-6">
-                <div className="grid grid-cols-2 gap-4 font-mono text-xs border-b border-line/60 pb-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 font-mono text-xs border-b border-line/60 pb-6">
                   <div>
                     <span className="text-muted block">RECEIPT NO:</span>
                     <strong className="text-paper">REC-2026-90421</strong>

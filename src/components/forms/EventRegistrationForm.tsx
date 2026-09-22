@@ -6,6 +6,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
 import { Button } from "@/components/ui/Elements";
 import { Event } from "@/data/events";
+import { useAuth } from "@/context/AuthContext";
 
 export default function EventRegistrationForm({
   event,
@@ -13,6 +14,7 @@ export default function EventRegistrationForm({
   event: Event;
 }) {
   const reduceMotion = usePrefersReducedMotion();
+  const { registerForEvent, isAuthenticated } = useAuth();
 
   const [isTeam, setIsTeam] = useState(true);
   const [teamName, setTeamName] = useState("");
@@ -21,6 +23,9 @@ export default function EventRegistrationForm({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (isAuthenticated) {
+      registerForEvent(event.slug);
+    }
     setSubmitted(true);
   };
 

@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Space_Grotesk, Manrope, DM_Mono } from "next/font/google";
 import SideNavRail from "@/components/layout/SideNavRail";
 import CyberTerminal from "@/components/ui/CyberTerminal";
+import { AuthProvider } from "@/context/AuthContext";
 import "./globals.css";
 
 const spaceGrotesk = Space_Grotesk({
@@ -27,6 +28,8 @@ const dmMono = DM_Mono({
 
 export const viewport: Viewport = {
   themeColor: "#06100b",
+  width: "device-width",
+  initialScale: 1,
 };
 
 export const metadata: Metadata = {
@@ -72,19 +75,21 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${spaceGrotesk.variable} ${manrope.variable} ${dmMono.variable}`}
     >
       <body>
-        {/* Noise texture overlay */}
-        <div className="noise-overlay" aria-hidden="true" />
+        <AuthProvider>
+          {/* Noise texture overlay */}
+          <div className="noise-overlay" aria-hidden="true" />
 
-        {/* Global side navigation */}
-        <SideNavRail />
+          {/* Global side navigation */}
+          <SideNavRail />
 
-        {/* Global Cyber Terminal Console */}
-        <CyberTerminal />
+          {/* Global Cyber Terminal Console */}
+          <CyberTerminal />
 
-        {/* Site shell */}
-        <div className="relative z-0 flex min-h-screen flex-col">
-          {children}
-        </div>
+          {/* Site shell */}
+          <div className="relative z-0 flex min-h-screen flex-col">
+            {children}
+          </div>
+        </AuthProvider>
       </body>
     </html>
   );
