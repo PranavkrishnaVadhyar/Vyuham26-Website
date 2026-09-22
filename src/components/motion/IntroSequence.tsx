@@ -810,7 +810,7 @@ export default function IntroSequence() {
           "break+=0.82"
         );
         /* =====================================================
-           FINAL IMPACT
+           FINAL MANAGEMENT
         ===================================================== */
 
         tl.to(

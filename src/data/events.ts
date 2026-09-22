@@ -3,7 +3,7 @@
 export interface Event {
   slug: string;
   title: string;
-  stream: "tech" | "culture" | "gaming" | "impact";
+  stream: "tech" | "culture" | "gaming" | "management";
   day: 1 | 2 | 3;
   time: string;
   venue: string;
@@ -205,7 +205,7 @@ export const events: Event[] = [
   {
     slug: "pitch-perfect",
     title: "Pitch Perfect",
-    stream: "impact",
+    stream: "management",
     day: 3,
     time: "09:00 — 15:00",
     venue: "Conference Hall",
@@ -226,12 +226,12 @@ export const events: Event[] = [
   {
     slug: "sustainability-hack",
     title: "Sustainability Hack",
-    stream: "impact",
+    stream: "management",
     day: 1,
     time: "09:00 — 17:00",
     venue: "Green Lab",
     description:
-      "Design solutions for real environmental and social challenges. Judged on feasibility, impact and innovation.",
+      "Design solutions for real environmental and social challenges. Judged on feasibility, management and innovation.",
     rules: [
       "Teams of 2–4",
       "Problem statements provided on day",

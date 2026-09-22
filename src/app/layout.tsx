@@ -35,7 +35,7 @@ export const metadata: Metadata = {
     template: "%s | Vyuham '26",
   },
   description:
-    "Vyuham 26 — Digital University Kerala's national-level techno-cultural fest. Three days of technology, culture, gaming, and impact at Technocity, Thiruvananthapuram.",
+    "Vyuham 26 — Digital University Kerala's national-level techno-cultural fest. Three days of technology, culture, gaming, and management at Technocity, Thiruvananthapuram.",
   keywords: [
     "Vyuham",
     "DUK",

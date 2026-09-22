@@ -24,21 +24,21 @@ const streamFilters = [
   { id: "tech", label: "TECH", code: "01" },
   { id: "culture", label: "CULTURE", code: "02" },
   { id: "gaming", label: "GAMING", code: "03" },
-  { id: "impact", label: "IMPACT", code: "04" },
+  { id: "management", label: "MANAGMENT", code: "04" },
 ];
 
 const streamAccent: Record<string, string> = {
   tech: "text-green border-green/30 bg-green/5",
   culture: "text-purple-300 border-purple-400/30 bg-purple-400/5",
   gaming: "text-cyan-300 border-cyan-400/30 bg-cyan-400/5",
-  impact: "text-amber-300 border-amber-400/30 bg-amber-400/5",
+  management: "text-amber-300 border-amber-400/30 bg-amber-400/5",
 };
 
 const streamGlow: Record<string, string> = {
   tech: "group-hover:border-green/40",
   culture: "group-hover:border-purple-400/40",
   gaming: "group-hover:border-cyan-400/40",
-  impact: "group-hover:border-amber-400/40",
+  management: "group-hover:border-amber-400/40",
 };
 
 function ScheduleBackground() {
@@ -140,20 +140,19 @@ function SignalBars({
       {Array.from({ length: total }).map((_, i) => (
         <motion.span
           key={i}
-          className={`w-0.75 ${
-            i < active ? "bg-green" : "bg-line"
-          }`}
+          className={`w-0.75 ${i < active ? "bg-green" : "bg-line"
+            }`}
           style={{
             height: `${5 + i * 3}px`,
           }}
           animate={
             i < active
               ? {
-                  opacity: [0.45, 1, 0.45],
-                }
+                opacity: [0.45, 1, 0.45],
+              }
               : {
-                  opacity: 0.35,
-                }
+                opacity: 0.35,
+              }
           }
           transition={{
             duration: 1.2,
@@ -241,12 +240,12 @@ function ScheduleContent() {
   const progress =
     totalDayEvents > 0
       ? Math.min(
-          100,
-          Math.max(
-            5,
-            (filteredCount / totalDayEvents) * 100
-          )
+        100,
+        Math.max(
+          5,
+          (filteredCount / totalDayEvents) * 100
         )
+      )
       : 0;
 
   return (
@@ -289,9 +288,8 @@ function ScheduleContent() {
             </div>
 
             <div
-              className={`mt-1 font-mono text-[11px] tracking-[0.12em] ${
-                item.accent ? "text-green" : "text-paper"
-              }`}
+              className={`mt-1 font-mono text-[11px] tracking-[0.12em] ${item.accent ? "text-green" : "text-paper"
+                }`}
             >
               {item.value}
             </div>
@@ -354,11 +352,10 @@ function ScheduleContent() {
                 <button
                   key={day}
                   onClick={() => setActiveDay(day)}
-                  className={`group relative cursor-pointer border-line px-5 py-6 text-left transition-all md:not-last:border-r ${
-                    isActive
+                  className={`group relative cursor-pointer border-line px-5 py-6 text-left transition-all md:not-last:border-r ${isActive
                       ? "bg-ink-mid"
                       : "bg-ink/70 hover:bg-ink-light"
-                  }`}
+                    }`}
                 >
                   {isActive && (
                     <>
@@ -386,22 +383,20 @@ function ScheduleContent() {
                       </span>
 
                       <span
-                        className={`font-mono text-[8px] ${
-                          isActive
+                        className={`font-mono text-[8px] ${isActive
                             ? "text-green"
                             : "text-muted"
-                        }`}
+                          }`}
                       >
                         {String(count).padStart(2, "0")} EVT
                       </span>
                     </div>
 
                     <strong
-                      className={`mt-4 block font-display text-xl font-medium transition-colors md:text-2xl ${
-                        isActive
+                      className={`mt-4 block font-display text-xl font-medium transition-colors md:text-2xl ${isActive
                           ? "text-paper"
                           : "text-muted group-hover:text-paper"
-                      }`}
+                        }`}
                     >
                       {dayDates[day - 1]
                         .split(" ")
@@ -411,11 +406,10 @@ function ScheduleContent() {
 
                     <div className="mt-1 flex items-center gap-2">
                       <span
-                        className={`h-1 w-1 rounded-full ${
-                          isActive
+                        className={`h-1 w-1 rounded-full ${isActive
                             ? "bg-green"
                             : "bg-line"
-                        }`}
+                          }`}
                       />
 
                       <p className="font-mono text-[9px] uppercase tracking-[0.15em] text-muted">
@@ -429,17 +423,16 @@ function ScheduleContent() {
                         (_, i) => (
                           <span
                             key={i}
-                            className={`h-px flex-1 ${
-                              i <
-                              Math.round(
-                                (count / Math.max(events.length, 1)) *
+                            className={`h-px flex-1 ${i <
+                                Math.round(
+                                  (count / Math.max(events.length, 1)) *
                                   12
-                              )
+                                )
                                 ? isActive
                                   ? "bg-green/70"
                                   : "bg-line"
                                 : "bg-line/40"
-                            }`}
+                              }`}
                           />
                         )
                       )}
@@ -489,11 +482,10 @@ function ScheduleContent() {
                     onClick={() =>
                       setSelectedStream(stream.id)
                     }
-                    className={`relative cursor-pointer overflow-hidden border px-3 py-1.5 font-mono text-[9px] uppercase tracking-[0.12em] transition-all ${
-                      active
+                    className={`relative cursor-pointer overflow-hidden border px-3 py-1.5 font-mono text-[9px] uppercase tracking-[0.12em] transition-all ${active
                         ? "border-green/50 bg-green text-ink shadow-[0_0_16px_rgba(200,255,66,0.18)]"
                         : "border-line text-muted hover:border-paper/30 hover:text-paper"
-                    }`}
+                      }`}
                   >
                     {active && (
                       <motion.span
@@ -629,15 +621,14 @@ function ScheduleContent() {
                     <div className="group relative">
                       {/* Timeline node */}
                       <motion.div
-                        className={`absolute -left-9.25 top-7 h-3 w-3 rounded-full border bg-ink md:-left-12.25 ${
-                          event.stream === "culture"
+                        className={`absolute -left-9.25 top-7 h-3 w-3 rounded-full border bg-ink md:-left-12.25 ${event.stream === "culture"
                             ? "border-purple-300"
                             : event.stream === "gaming"
                               ? "border-cyan-300"
-                              : event.stream === "impact"
+                              : event.stream === "management"
                                 ? "border-amber-300"
                                 : "border-green"
-                        }`}
+                          }`}
                         whileHover={{
                           scale: 1.5,
                         }}
@@ -752,11 +743,10 @@ function ScheduleContent() {
                             </span>
 
                             <span
-                              className={`mt-1 block font-mono text-[9px] ${
-                                event.prizes
+                              className={`mt-1 block font-mono text-[9px] ${event.prizes
                                   ? "text-green"
                                   : "text-muted"
-                              }`}
+                                }`}
                             >
                               {event.prizes || "CLASSIFIED"}
                             </span>
@@ -770,15 +760,14 @@ function ScheduleContent() {
 
                         {/* Stream accent */}
                         <div
-                          className={`absolute bottom-0 left-0 h-px w-0 transition-all duration-700 group-hover:w-full ${
-                            event.stream === "culture"
+                          className={`absolute bottom-0 left-0 h-px w-0 transition-all duration-700 group-hover:w-full ${event.stream === "culture"
                               ? "bg-purple-300"
                               : event.stream === "gaming"
                                 ? "bg-cyan-300"
-                                : event.stream === "impact"
+                                : event.stream === "management"
                                   ? "bg-amber-300"
                                   : "bg-green"
-                          }`}
+                            }`}
                         />
                       </Link>
                     </div>
@@ -822,23 +811,23 @@ function ScheduleContent() {
 
                 <p className="mt-3 font-mono text-xs text-muted">
                   {searchQuery ||
-                  selectedStream !== "all"
+                    selectedStream !== "all"
                     ? "No schedule events match the active protocol filters."
                     : "Schedule for this channel will be announced soon."}
                 </p>
 
                 {(searchQuery ||
                   selectedStream !== "all") && (
-                  <button
-                    onClick={() => {
-                      setSelectedStream("all");
-                      setSearchQuery("");
-                    }}
-                    className="mt-5 cursor-pointer border border-green/30 px-4 py-2 font-mono text-[9px] uppercase tracking-[0.16em] text-green transition-all hover:bg-green hover:text-ink"
-                  >
-                    Reset Protocol
-                  </button>
-                )}
+                    <button
+                      onClick={() => {
+                        setSelectedStream("all");
+                        setSearchQuery("");
+                      }}
+                      className="mt-5 cursor-pointer border border-green/30 px-4 py-2 font-mono text-[9px] uppercase tracking-[0.16em] text-green transition-all hover:bg-green hover:text-ink"
+                    >
+                      Reset Protocol
+                    </button>
+                  )}
               </div>
             </motion.div>
           )}

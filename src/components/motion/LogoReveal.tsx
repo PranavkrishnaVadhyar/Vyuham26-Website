@@ -218,7 +218,7 @@ const LogoReveal = forwardRef<
       }
 
       /* -----------------------------------------------------
-         ENERGY IMPACT / CORE
+         ENERGY MANAGEMENT / CORE
       ----------------------------------------------------- */
 
       if (aura) {
@@ -358,7 +358,7 @@ const LogoReveal = forwardRef<
       );
 
       /* -----------------------------------------------------
-         LOGO IMPACT PULSE
+         LOGO MANAGEMENT PULSE
       ----------------------------------------------------- */
 
       tl.to(

@@ -20,7 +20,7 @@ import { gsap } from "gsap";
    • enters independently
    • has its own energy beam
    • locks into the central ring
-   • produces an impact flash
+   • produces an management flash
    • vibrates during containment
    • explodes outward during overload
 ========================================================= */
@@ -63,7 +63,7 @@ const STRUCTURES = [
       rotation: -42,
     },
 
-    impact: {
+    management: {
       x: 52,
       y: 52,
     },
@@ -104,7 +104,7 @@ const STRUCTURES = [
       rotation: 42,
     },
 
-    impact: {
+    management: {
       x: 148,
       y: 52,
     },
@@ -145,7 +145,7 @@ const STRUCTURES = [
       rotation: 42,
     },
 
-    impact: {
+    management: {
       x: 52,
       y: 148,
     },
@@ -186,7 +186,7 @@ const STRUCTURES = [
       rotation: -42,
     },
 
-    impact: {
+    management: {
       x: 148,
       y: 148,
     },
@@ -317,7 +317,7 @@ const CornerStructures = forwardRef<CornerStructuresHandle>(
               ease: "expo.out",
 
               onComplete: () => {
-                /* Mechanical impact */
+                /* Mechanical management */
                 gsap.timeline()
                   .to(group, {
                     x: "+=4",
@@ -344,7 +344,7 @@ const CornerStructures = forwardRef<CornerStructuresHandle>(
           );
 
           /* =================================================
-             IMPACT SPARK
+             MANAGEMENT SPARK
           ================================================= */
 
           if (spark) {
@@ -382,7 +382,7 @@ const CornerStructures = forwardRef<CornerStructuresHandle>(
           }
 
           /* =================================================
-             IMPACT FLASH
+             MANAGEMENT FLASH
           ================================================= */
 
           if (flash) {
@@ -451,7 +451,7 @@ const CornerStructures = forwardRef<CornerStructuresHandle>(
           "structuresLock+=0.22"
         );
 
-        /* Lock all four impact nodes together. */
+        /* Lock all four management nodes together. */
 
         tl.to(
           sparkRefs.current.filter(Boolean),
@@ -677,7 +677,7 @@ const CornerStructures = forwardRef<CornerStructuresHandle>(
             </feMerge>
           </filter>
 
-          {/* Impact */}
+          {/* Management */}
           <filter
             id="vyuham-spark-glow"
             x="-400%"
@@ -810,15 +810,15 @@ const CornerStructures = forwardRef<CornerStructuresHandle>(
             </g>
 
             {/* =================================================
-                IMPACT GLOW
+                MANAGEMENT GLOW
             ================================================= */}
 
             <circle
               ref={(el) => {
                 flashRefs.current[i] = el;
               }}
-              cx={structure.impact.x}
-              cy={structure.impact.y}
+              cx={structure.management.x}
+              cy={structure.management.y}
               r="0"
               fill="#34d399"
               opacity="0"
@@ -826,15 +826,15 @@ const CornerStructures = forwardRef<CornerStructuresHandle>(
             />
 
             {/* =================================================
-                IMPACT CORE
+                MANAGEMENT CORE
             ================================================= */}
 
             <circle
               ref={(el) => {
                 sparkRefs.current[i] = el;
               }}
-              cx={structure.impact.x}
-              cy={structure.impact.y}
+              cx={structure.management.x}
+              cy={structure.management.y}
               r="0"
               fill="#d1fae5"
               opacity="0"
@@ -842,8 +842,8 @@ const CornerStructures = forwardRef<CornerStructuresHandle>(
             />
 
             <circle
-              cx={structure.impact.x}
-              cy={structure.impact.y}
+              cx={structure.management.x}
+              cy={structure.management.y}
               r="1.6"
               fill="#6ee7b7"
             />

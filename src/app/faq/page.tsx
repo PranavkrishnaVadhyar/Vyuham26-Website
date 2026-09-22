@@ -14,7 +14,7 @@ const faqs = [
   {
     question: "What is Vyuham 26?",
     answer:
-      "Vyuham 26 is Digital University Kerala's national-level techno-cultural fest. It spans three days of competitions, performances, hackathons, and experiences across four streams: Technology, Culture, Gaming, and Impact.",
+      "Vyuham 26 is Digital University Kerala's national-level techno-cultural fest. It spans three days of competitions, performances, hackathons, and experiences across four streams: Technology, Culture, Gaming, and management.",
   },
   {
     question: "When and where does Vyuham 26 take place?",
@@ -81,26 +81,25 @@ function FaqItem({
         reduceMotion
           ? false
           : {
-              opacity: 0,
-              y: 18,
-            }
+            opacity: 0,
+            y: 18,
+          }
       }
       whileInView={
         reduceMotion
           ? undefined
           : {
-              opacity: 1,
-              y: 0,
-            }
+            opacity: 1,
+            y: 0,
+          }
       }
       viewport={{ once: true, amount: 0.2 }}
       transition={{
         duration: 0.45,
         delay: Math.min(index * 0.035, 0.3),
       }}
-      className={`group relative border-b border-white/[0.07] ${
-        open ? "border-[#c8ff42]/20" : ""
-      }`}
+      className={`group relative border-b border-white/[0.07] ${open ? "border-[#c8ff42]/20" : ""
+        }`}
     >
       {/* Active energy line */}
       <motion.div
@@ -121,9 +120,8 @@ function FaqItem({
       >
         {/* Index */}
         <span
-          className={`w-7 shrink-0 font-mono text-[9px] tracking-[0.15em] transition-colors ${
-            open ? "text-[#c8ff42]" : "text-white/25"
-          }`}
+          className={`w-7 shrink-0 font-mono text-[9px] tracking-[0.15em] transition-colors ${open ? "text-[#c8ff42]" : "text-white/25"
+            }`}
         >
           {String(index + 1).padStart(2, "0")}
         </span>
@@ -131,11 +129,10 @@ function FaqItem({
         {/* Status node */}
         <span className="relative flex h-5 w-5 shrink-0 items-center justify-center">
           <span
-            className={`absolute h-1.5 w-1.5 rounded-full transition-all duration-300 ${
-              open
+            className={`absolute h-1.5 w-1.5 rounded-full transition-all duration-300 ${open
                 ? "bg-[#c8ff42] shadow-[0_0_10px_rgba(200,255,66,.9)]"
                 : "bg-white/20"
-            }`}
+              }`}
           />
 
           {open && (
@@ -149,11 +146,10 @@ function FaqItem({
 
         {/* Question */}
         <span
-          className={`flex-1 font-display text-sm font-semibold tracking-tight transition-colors md:text-base ${
-            open
+          className={`flex-1 font-display text-sm font-semibold tracking-tight transition-colors md:text-base ${open
               ? "text-[#c8ff42]"
               : "text-paper group-hover:text-[#c8ff42]"
-          }`}
+            }`}
         >
           {question}
         </span>
@@ -172,11 +168,10 @@ function FaqItem({
             duration: 0.25,
             ease: "easeOut",
           }}
-          className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full border font-mono text-lg transition-colors ${
-            open
+          className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full border font-mono text-lg transition-colors ${open
               ? "border-[#c8ff42]/40 bg-[#c8ff42]/10 text-[#c8ff42]"
               : "border-white/10 bg-white/[0.02] text-white/40 group-hover:border-[#c8ff42]/30 group-hover:text-[#c8ff42]"
-          }`}
+            }`}
         >
           +
         </motion.span>
@@ -190,9 +185,9 @@ function FaqItem({
               reduceMotion
                 ? false
                 : {
-                    height: 0,
-                    opacity: 0,
-                  }
+                  height: 0,
+                  opacity: 0,
+                }
             }
             animate={{
               height: "auto",
@@ -202,9 +197,9 @@ function FaqItem({
               reduceMotion
                 ? undefined
                 : {
-                    height: 0,
-                    opacity: 0,
-                  }
+                  height: 0,
+                  opacity: 0,
+                }
             }
             transition={{
               duration: 0.35,
@@ -343,19 +338,19 @@ export default function FaqPage() {
                     reduceMotion
                       ? false
                       : {
-                          opacity: 0,
-                          y: 25,
-                          filter: "blur(10px)",
-                        }
+                        opacity: 0,
+                        y: 25,
+                        filter: "blur(10px)",
+                      }
                   }
                   animate={
                     reduceMotion
                       ? undefined
                       : {
-                          opacity: 1,
-                          y: 0,
-                          filter: "blur(0px)",
-                        }
+                        opacity: 1,
+                        y: 0,
+                        filter: "blur(0px)",
+                      }
                   }
                   transition={{ duration: 0.8 }}
                   className="mt-5 max-w-5xl font-display text-[clamp(48px,7vw,100px)] font-semibold leading-[0.84] tracking-[-0.045em]"

@@ -2234,7 +2234,7 @@ const IntegratedLogoReveal = forwardRef<
       }
 
       /* -----------------------------------------------------
-         ENERGY IMPACT / CORE
+         ENERGY MANAGEMENT / CORE
       ----------------------------------------------------- */
 
       if (aura) {
@@ -2374,7 +2374,7 @@ const IntegratedLogoReveal = forwardRef<
       );
 
       /* -----------------------------------------------------
-         LOGO IMPACT PULSE
+         LOGO MANAGEMENT PULSE
       ----------------------------------------------------- */
 
       tl.to(

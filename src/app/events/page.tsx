@@ -19,35 +19,35 @@ import {
 /* Configuration                                                              */
 /* -------------------------------------------------------------------------- */
 
-const streams = ["all", "tech", "culture", "gaming", "impact"] as const;
+const streams = ["all", "tech", "culture", "gaming", "management"] as const;
 const days = ["all", "1", "2", "3"] as const;
 
 const streamColors: Record<string, string> = {
   tech: "green",
   culture: "purple",
   gaming: "cyan",
-  impact: "amber",
+  management: "amber",
 };
 
 const streamText: Record<string, string> = {
   tech: "text-green",
   culture: "text-purple-400",
   gaming: "text-cyan-400",
-  impact: "text-amber-400",
+  management: "text-amber-400",
 };
 
 const streamBg: Record<string, string> = {
   tech: "bg-green",
   culture: "bg-purple-400",
   gaming: "bg-cyan-400",
-  impact: "bg-amber-400",
+  management: "bg-amber-400",
 };
 
 const streamBorder: Record<string, string> = {
   tech: "border-green/30",
   culture: "border-purple-500/30",
   gaming: "border-cyan-400/30",
-  impact: "border-amber-400/30",
+  management: "border-amber-400/30",
 };
 
 /* -------------------------------------------------------------------------- */
@@ -347,7 +347,7 @@ function EventCard({
           {event.stream === "tech" && "⌁"}
           {event.stream === "culture" && "◈"}
           {event.stream === "gaming" && "✦"}
-          {event.stream === "impact" && "⊹"}
+          {event.stream === "management" && "⊹"}
         </motion.div>
 
         {/* Title */}
@@ -611,11 +611,10 @@ export default function EventsPage() {
                 <button
                   key={day}
                   onClick={() => setActiveDay(String(day))}
-                  className={`group cursor-pointer whitespace-nowrap font-mono text-[8px] uppercase tracking-[0.14em] ${
-                    activeDay === String(day)
+                  className={`group cursor-pointer whitespace-nowrap font-mono text-[8px] uppercase tracking-[0.14em] ${activeDay === String(day)
                       ? "text-green"
                       : "text-muted"
-                  }`}
+                    }`}
                 >
                   <span>DAY {day}</span>
 

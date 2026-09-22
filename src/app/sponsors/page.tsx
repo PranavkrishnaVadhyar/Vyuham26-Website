@@ -243,7 +243,7 @@ export default function SponsorsPage() {
                   <span>TECHNOLOGY</span>
                   <span>CULTURE</span>
                   <span>GAMING</span>
-                  <span>IMPACT</span>
+                  <span>MANAGEMENT</span>
                   <span className="text-green">ALLIANCE READY</span>
                 </div>
               </div>
@@ -305,15 +305,14 @@ export default function SponsorsPage() {
                 />
 
                 <div
-                  className={`relative z-10 grid gap-4 ${
-                    ti === 0
+                  className={`relative z-10 grid gap-4 ${ti === 0
                       ? "grid-cols-1 md:max-w-md"
                       : ti === 1
                         ? "grid-cols-2"
                         : ti === 2
                           ? "grid-cols-1 sm:grid-cols-3"
                           : "grid-cols-2 md:grid-cols-4"
-                  }`}
+                    }`}
                 >
                   {tier.sponsors.map((sponsor, si) => (
                     <AnimatedSection
@@ -321,11 +320,10 @@ export default function SponsorsPage() {
                       delay={si * 0.07}
                     >
                       <div
-                        className={`group relative overflow-hidden border border-line bg-[#050807]/90 transition-all duration-500 hover:border-green/30 hover:bg-green/[0.02] ${
-                          ti === 0
+                        className={`group relative overflow-hidden border border-line bg-[#050807]/90 transition-all duration-500 hover:border-green/30 hover:bg-green/[0.02] ${ti === 0
                             ? "min-h-[210px]"
                             : "min-h-[150px]"
-                        }`}
+                          }`}
                       >
 
                         {/* top energy line */}
@@ -409,7 +407,7 @@ export default function SponsorsPage() {
                 ["01", "VISIBILITY", "Reach a diverse student and technology audience."],
                 ["02", "ENGAGEMENT", "Connect directly with participants and creators."],
                 ["03", "BRAND", "Build meaningful presence across the festival."],
-                ["04", "IMPACT", "Support innovation and emerging talent."],
+                ["04", "management", "Support innovation and emerging talent."],
               ].map(([code, title, description], index) => (
                 <AnimatedSection
                   key={code}

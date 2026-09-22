@@ -395,11 +395,11 @@ export default function VyuhamNaturalCinematic() {
     )
       .to(
         q(".nc-logo"),
-      {
-        opacity: 1,
-        scale: 1,
-        y: 0,
-        filter: "brightness(1) blur(0px)",
+        {
+          opacity: 1,
+          scale: 1,
+          y: 0,
+          filter: "brightness(1) blur(0px)",
           duration: 0.9,
           ease: "expo.out",
         },
@@ -592,153 +592,153 @@ export default function VyuhamNaturalCinematic() {
           NATURAL CINEMATIC BACKGROUND
       -------------------------------------------------------------- */}
       <div className="nc-camera absolute inset-[-2%]">
-      <div className="nc-sky absolute inset-0 bg-[radial-gradient(circle_at_50%_38%,rgba(90,210,190,.12),transparent_24%),radial-gradient(circle_at_50%_80%,rgba(240,100,55,.08),transparent_35%),linear-gradient(180deg,#020508_0%,#071316_52%,#030608_100%)]" />
+        <div className="nc-sky absolute inset-0 bg-[radial-gradient(circle_at_50%_38%,rgba(90,210,190,.12),transparent_24%),radial-gradient(circle_at_50%_80%,rgba(240,100,55,.08),transparent_35%),linear-gradient(180deg,#020508_0%,#071316_52%,#030608_100%)]" />
 
-      {/* soft atmospheric mist */}
-      <div className="nc-mist pointer-events-none absolute left-1/2 top-[46%] h-[34%] w-[90%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(ellipse,rgba(125,220,202,.09),transparent_68%)] blur-[30px]" />
+        {/* soft atmospheric mist */}
+        <div className="nc-mist pointer-events-none absolute left-1/2 top-[46%] h-[34%] w-[90%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(ellipse,rgba(125,220,202,.09),transparent_68%)] blur-[30px]" />
 
-      {/* distant atmospheric light — intentionally soft/transparent, never a solid orb */}
-      <div className="nc-moon pointer-events-none absolute left-[17%] top-[19%] h-28 w-28 rounded-full bg-[radial-gradient(circle,rgba(190,245,232,.12),rgba(170,230,220,.045)_34%,transparent_70%)] blur-xs" />
+        {/* distant atmospheric light — intentionally soft/transparent, never a solid orb */}
+        <div className="nc-moon pointer-events-none absolute left-[17%] top-[19%] h-28 w-28 rounded-full bg-[radial-gradient(circle,rgba(190,245,232,.12),rgba(170,230,220,.045)_34%,transparent_70%)] blur-xs" />
 
-      {/* horizon */}
+        {/* horizon */}
 
-      {/* subtle volumetric light shafts */}
-      <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="nc-beam absolute left-[34%] top-[12%] h-[62%] w-0.5 origin-top rotate-16 bg-linear-to-b from-transparent via-[#a7efe0]/20 to-transparent blur-[5px]" />
-        <div className="nc-beam absolute left-[58%] top-[8%] h-[68%] w-0.75 origin-top -rotate-12 bg-linear-to-b from-transparent via-[#f6b38e]/14 to-transparent blur-[7px]" />
-        <div className="nc-shooting absolute left-[18%] top-[28%] h-px w-[28%] bg-linear-to-r from-transparent via-white/80 to-transparent blur-[1px]" />
-      </div>
+        {/* subtle volumetric light shafts */}
+        <div className="pointer-events-none absolute inset-0 overflow-hidden">
+          <div className="nc-beam absolute left-[34%] top-[12%] h-[62%] w-0.5 origin-top rotate-16 bg-linear-to-b from-transparent via-[#a7efe0]/20 to-transparent blur-[5px]" />
+          <div className="nc-beam absolute left-[58%] top-[8%] h-[68%] w-0.75 origin-top -rotate-12 bg-linear-to-b from-transparent via-[#f6b38e]/14 to-transparent blur-[7px]" />
+          <div className="nc-shooting absolute left-[18%] top-[28%] h-px w-[28%] bg-linear-to-r from-transparent via-white/80 to-transparent blur-[1px]" />
+        </div>
 
-      {/* organic dust bloom */}
-      <div className="nc-dust pointer-events-none absolute left-1/2 top-[53%] h-[16vw] w-[16vw] max-h-55 max-w-55 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,rgba(220,255,247,.22),rgba(117,220,202,.08)_35%,transparent_72%)] blur-xl" />
+        {/* organic dust bloom */}
+        <div className="nc-dust pointer-events-none absolute left-1/2 top-[53%] h-[16vw] w-[16vw] max-h-55 max-w-55 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,rgba(220,255,247,.22),rgba(117,220,202,.08)_35%,transparent_72%)] blur-xl" />
 
-      {/* subtle film grain */}
-      <div
-        className="pointer-events-none absolute inset-0 opacity-[.08]"
-        style={{
-          backgroundImage:
-            "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.28'/%3E%3C/svg%3E\")",
-        }}
-      />
+        {/* subtle film grain */}
+        <div
+          className="pointer-events-none absolute inset-0 opacity-[.08]"
+          style={{
+            backgroundImage:
+              "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.28'/%3E%3C/svg%3E\")",
+          }}
+        />
 
-      {/* vignette */}
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_20%,rgba(0,0,0,.78)_100%)]" />
+        {/* vignette */}
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_20%,rgba(0,0,0,.78)_100%)]" />
 
-      {/* --------------------------------------------------------------
+        {/* --------------------------------------------------------------
           PARTICLE ATMOSPHERE
       -------------------------------------------------------------- */}
-      <div className="absolute inset-0">
-        {Array.from({ length: PARTICLES }).map((_, i) => {
-          const a = (i / PARTICLES) * Math.PI * 2;
-          const r = 90 + (i % 18) * 18;
+        <div className="absolute inset-0">
+          {Array.from({ length: PARTICLES }).map((_, i) => {
+            const a = (i / PARTICLES) * Math.PI * 2;
+            const r = 90 + (i % 18) * 18;
 
-          return (
-            <span
-              key={i}
-              className="nc-particle absolute left-1/2 top-[57%] h-0.5 w-0.5 rounded-full bg-[#a6e8db]/70 shadow-[0_0_7px_rgba(166,232,219,.4)]"
-              style={{
-                transform: `translate(-50%,-50%) translate(${(Math.cos(a) * r).toFixed(2)}px,${(Math.sin(a) * r * 0.55).toFixed(2)}px)`,
-              }}
-            />
-          );
-        })}
+            return (
+              <span
+                key={i}
+                className="nc-particle absolute left-1/2 top-[57%] h-0.5 w-0.5 rounded-full bg-[#a6e8db]/70 shadow-[0_0_7px_rgba(166,232,219,.4)]"
+                style={{
+                  transform: `translate(-50%,-50%) translate(${(Math.cos(a) * r).toFixed(2)}px,${(Math.sin(a) * r * 0.55).toFixed(2)}px)`,
+                }}
+              />
+            );
+          })}
 
-        {Array.from({ length: FIREFLIES }).map((_, i) => {
-          const x = ((i * 37) % 100) - 50;
-          const y = ((i * 61) % 64) - 32;
+          {Array.from({ length: FIREFLIES }).map((_, i) => {
+            const x = ((i * 37) % 100) - 50;
+            const y = ((i * 61) % 64) - 32;
 
-          return (
-            <span
-              key={i}
-              className="nc-firefly absolute left-1/2 top-[52%] h-1 w-1 rounded-full bg-[#c9fff3] shadow-[0_0_10px_rgba(201,255,243,.7)]"
-              style={{
-                transform: `translate(${x}vw,${y}vh)`,
-              }}
-            />
-          );
-        })}
-      </div>
+            return (
+              <span
+                key={i}
+                className="nc-firefly absolute left-1/2 top-[52%] h-1 w-1 rounded-full bg-[#c9fff3] shadow-[0_0_10px_rgba(201,255,243,.7)]"
+                style={{
+                  transform: `translate(${x}vw,${y}vh)`,
+                }}
+              />
+            );
+          })}
+        </div>
 
-      {/* breathing light */}
-      <div className="nc-breathe pointer-events-none absolute left-1/2 top-[48%] h-[38vw] w-[38vw] max-h-130 max-w-130 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#79d9c5]/6 blur-[90px]" />
+        {/* breathing light */}
+        <div className="nc-breathe pointer-events-none absolute left-1/2 top-[48%] h-[38vw] w-[38vw] max-h-130 max-w-130 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#79d9c5]/6 blur-[90px]" />
 
-      <div className="nc-glow pointer-events-none absolute left-1/2 top-[49%] h-[34%] w-[34%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,rgba(148,238,218,.24),rgba(90,210,190,.07)_38%,transparent_70%)] blur-md" />
+        <div className="nc-glow pointer-events-none absolute left-1/2 top-[49%] h-[34%] w-[34%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,rgba(148,238,218,.24),rgba(90,210,190,.07)_38%,transparent_70%)] blur-md" />
 
-      {/* --------------------------------------------------------------
+        {/* --------------------------------------------------------------
           ORGANIC RIPPLE / ENERGY WAVES
       -------------------------------------------------------------- */}
-      <div className="absolute left-1/2 top-[49%] h-[55vw] w-[55vw] max-h-175 max-w-175 -translate-x-1/2 -translate-y-1/2">
-        {[0, 1, 2].map((i) => (
-          <div
-            key={i}
-            className="nc-wave absolute inset-0 rounded-full border border-[#9be8d7]/20"
-          />
-        ))}
-      </div>
+        <div className="absolute left-1/2 top-[49%] h-[55vw] w-[55vw] max-h-175 max-w-175 -translate-x-1/2 -translate-y-1/2">
+          {[0, 1, 2].map((i) => (
+            <div
+              key={i}
+              className="nc-wave absolute inset-0 rounded-full border border-[#9be8d7]/20"
+            />
+          ))}
+        </div>
 
-      {/* --------------------------------------------------------------
+        {/* --------------------------------------------------------------
           CENTRAL SYMBOL — subtle, not a giant HUD
       -------------------------------------------------------------- */}
-      <div className="nc-symbol pointer-events-none absolute left-1/2 top-[49%] h-[31%] w-[31%] -translate-x-1/2 -translate-y-1/2 rounded-[42%] border border-[#b5eee3]/15 rotate-45">
-        <div className="absolute inset-[16%] rounded-[42%] border border-[#f5a06f]/15" />
-        <div className="absolute inset-[30%] rounded-full border border-[#b5eee3]/20" />
-        <div className="absolute left-1/2 top-1/2 h-[42%] w-px -translate-x-1/2 -translate-y-1/2 bg-linear-to-b from-transparent via-[#d7fff8]/30 to-transparent" />
-        <div className="absolute left-1/2 top-1/2 h-px w-[42%] -translate-x-1/2 -translate-y-1/2 bg-linear-to-r from-transparent via-[#f5a06f]/30 to-transparent" />
-      </div>
+        <div className="nc-symbol pointer-events-none absolute left-1/2 top-[49%] h-[31%] w-[31%] -translate-x-1/2 -translate-y-1/2 rounded-[42%] border border-[#b5eee3]/15 rotate-45">
+          <div className="absolute inset-[16%] rounded-[42%] border border-[#f5a06f]/15" />
+          <div className="absolute inset-[30%] rounded-full border border-[#b5eee3]/20" />
+          <div className="absolute left-1/2 top-1/2 h-[42%] w-px -translate-x-1/2 -translate-y-1/2 bg-linear-to-b from-transparent via-[#d7fff8]/30 to-transparent" />
+          <div className="absolute left-1/2 top-1/2 h-px w-[42%] -translate-x-1/2 -translate-y-1/2 bg-linear-to-r from-transparent via-[#f5a06f]/30 to-transparent" />
+        </div>
 
-      {/* --------------------------------------------------------------
+        {/* --------------------------------------------------------------
           LOGO
       -------------------------------------------------------------- */}
-      <div className="absolute left-1/2 top-[49%] flex h-[43vw] w-[43vw] max-h-107.5 max-w-107.5 -translate-x-1/2 -translate-y-1/2 items-center justify-center">
-        
+        <div className="absolute left-1/2 top-[49%] flex h-[43vw] w-[43vw] max-h-107.5 max-w-107.5 -translate-x-1/2 -translate-y-1/2 items-center justify-center">
 
-        {/* glow-only logo shadow — deliberately transparent so no black ball can appear */}
-        <div className="nc-logo-shadow pointer-events-none absolute h-[62%] w-[72%] rounded-[45%] bg-[radial-gradient(ellipse,rgba(160,240,224,.20),transparent_68%)] blur-[26px]" />
 
-        <div className="nc-logo absolute flex h-[74%] w-[82%] items-center justify-center">
-          <img
-            src="/logo1.png"
-            alt="VYUHAM26 26"
-            className="block max-h-full max-w-full object-contain drop-shadow-[0_0_28px_rgba(180,245,232,.28)]"
-          />
+          {/* glow-only logo shadow — deliberately transparent so no black ball can appear */}
+          <div className="nc-logo-shadow pointer-events-none absolute h-[62%] w-[72%] rounded-[45%] bg-[radial-gradient(ellipse,rgba(160,240,224,.20),transparent_68%)] blur-[26px]" />
+
+          <div className="nc-logo absolute flex h-[74%] w-[82%] items-center justify-center">
+            <img
+              src="/logo1.png"
+              alt="VYUHAM26 26"
+              className="block max-h-full max-w-full object-contain drop-shadow-[0_0_28px_rgba(180,245,232,.28)]"
+            />
+          </div>
+
+          {/* natural light passing through the logo */}
+          <div className="nc-light pointer-events-none absolute left-[8%] top-[7%] h-[86%] w-px bg-linear-to-b from-transparent via-white/80 to-transparent blur-[.5px] shadow-[0_0_24px_rgba(255,255,255,.55)]" />
+          <div className="nc-final-flare pointer-events-none absolute left-[-25%] top-[46%] h-px w-[150%] bg-linear-to-r from-transparent via-white/55 to-transparent blur-[2px]" />
         </div>
 
-        {/* natural light passing through the logo */}
-        <div className="nc-light pointer-events-none absolute left-[8%] top-[7%] h-[86%] w-px bg-linear-to-b from-transparent via-white/80 to-transparent blur-[.5px] shadow-[0_0_24px_rgba(255,255,255,.55)]" />
-        <div className="nc-final-flare pointer-events-none absolute left-[-25%] top-[46%] h-px w-[150%] bg-linear-to-r from-transparent via-white/55 to-transparent blur-[2px]" />
-      </div>
-
-      {/* --------------------------------------------------------------
+        {/* --------------------------------------------------------------
           SIMPLE VYUHAM26 TITLE
       -------------------------------------------------------------- */}
-      <div className="nc-title pointer-events-none absolute inset-x-0 bottom-[11%] z-30 flex justify-center">
-        <div className="relative w-[min(94vw,1050px)] text-center">
+        <div className="nc-title pointer-events-none absolute inset-x-0 bottom-[11%] z-30 flex justify-center">
+          <div className="relative w-[min(94vw,1050px)] text-center">
 
-          <div
-            className="font-sans text-[clamp(3.2rem,7vw,6.5rem)] font-medium leading-[0.9] tracking-[0.16em] text-red-600"
-            style={{
-              textShadow: "0 0 10px rgba(255,90,100,.85), 0 0 38px rgba(224,60,75,.45)",
-            }}
-          >
-            VYUHAM'26
-          </div>
+            <div
+              className="font-sans text-[clamp(3.2rem,7vw,6.5rem)] font-medium leading-[0.9] tracking-[0.16em] text-red-600"
+              style={{
+                textShadow: "0 0 10px rgba(255,90,100,.85), 0 0 38px rgba(224,60,75,.45)",
+              }}
+            >
+              VYUHAM'26
+            </div>
 
-          <div className="pointer-events-none absolute left-[25%] right-[25%] top-[calc(100%+12px)] h-px overflow-hidden">
-            <div className="nc-title-line h-full origin-center bg-linear-to-r from-transparent via-[#ff5147]/35 to-transparent" />
-          </div>
+            <div className="pointer-events-none absolute left-[25%] right-[25%] top-[calc(100%+12px)] h-px overflow-hidden">
+              <div className="nc-title-line h-full origin-center bg-linear-to-r from-transparent via-[#ff5147]/35 to-transparent" />
+            </div>
 
-          <div className="nc-subtitle mt-6 font-mono text-[8px] font-light tracking-[.34em] text-white/45 md:text-[10px]">
-            TECHNOLOGY • CULTURE • GAMING • IMPACT
-          </div>
+            <div className="nc-subtitle mt-6 font-mono text-[8px] font-light tracking-[.34em] text-white/45 md:text-[10px]">
+              TECHNOLOGY • CULTURE • GAMING • MANAGEMENT
+            </div>
 
-          <div className="nc-tagline mt-3 font-mono text-[9px] font-light tracking-[.44em] text-white/28 md:text-[11px]">
-            THE FUTURE AWAITS.
+            <div className="nc-tagline mt-3 font-mono text-[9px] font-light tracking-[.44em] text-white/28 md:text-[11px]">
+              THE FUTURE AWAITS.
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* final cinematic edge */}
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[16%] bg-linear-to-t from-black/45 via-black/10 to-transparent" />
+        {/* final cinematic edge */}
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[16%] bg-linear-to-t from-black/45 via-black/10 to-transparent" />
 
       </div>
 

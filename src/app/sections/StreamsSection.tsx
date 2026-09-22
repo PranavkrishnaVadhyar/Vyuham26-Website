@@ -45,10 +45,10 @@ const streams = [
   {
     number: "04",
     glyph: "⊹",
-    title: "Impact",
+    title: "Management",
     description: "Ideas designed to move the world forward.",
-    slug: "impact",
-    code: "IMPACT PROTOCOL",
+    slug: "management",
+    code: "MANAGEMENT PROTOCOL",
     signal: "88%",
     status: "ONLINE",
     color: "lime",
@@ -129,9 +129,8 @@ function EnergyNode({
 
   return (
     <div
-      className={`relative flex items-center justify-center ${
-        large ? "h-16 w-16" : "h-10 w-10"
-      }`}
+      className={`relative flex items-center justify-center ${large ? "h-16 w-16" : "h-10 w-10"
+        }`}
     >
       {/* Outer ring */}
       <motion.div
@@ -158,9 +157,8 @@ function EnergyNode({
 
       {/* Secondary ring */}
       <motion.div
-        className={`absolute rounded-full border border-emerald-300/20 ${
-          large ? "inset-2" : "inset-1.5"
-        }`}
+        className={`absolute rounded-full border border-emerald-300/20 ${large ? "inset-2" : "inset-1.5"
+          }`}
         animate={{
           rotate: -360,
         }}
@@ -195,9 +193,8 @@ function EnergyNode({
 
       {/* Core */}
       <div
-        className={`relative rounded-full border border-white/30 bg-[#07140e] ${
-          large ? "h-5 w-5" : "h-3 w-3"
-        }`}
+        className={`relative rounded-full border border-white/30 bg-[#07140e] ${large ? "h-5 w-5" : "h-3 w-3"
+          }`}
       >
         <div
           className={`absolute inset-1 rounded-full ${style.line} ${style.shadow}`}
@@ -335,16 +332,15 @@ function SignalMeter({
         {Array.from({ length: 10 }).map((_, index) => (
           <motion.span
             key={index}
-            className={`h-1 flex-1 rounded-full ${
-              override || index < active
+            className={`h-1 flex-1 rounded-full ${override || index < active
                 ? style.line
                 : "bg-white/10"
-            }`}
+              }`}
             animate={
               override
                 ? {
-                    opacity: [0.35, 1, 0.35],
-                  }
+                  opacity: [0.35, 1, 0.35],
+                }
                 : undefined
             }
             transition={{
@@ -424,7 +420,7 @@ export default function StreamsSection() {
 
   // ============================================================
   // EASTER EGG 02
-  // TECHNOLOGY → CULTURE → GAMING → IMPACT
+  // TECHNOLOGY → CULTURE → GAMING → MANAGEMENT
   // ============================================================
 
   const handleStreamClick = (
@@ -1266,9 +1262,9 @@ export default function StreamsSection() {
                     animate={
                       overrideMode
                         ? {
-                            scale: [1, 1.3, 1],
-                            rotate: [0, 180, 360],
-                          }
+                          scale: [1, 1.3, 1],
+                          rotate: [0, 180, 360],
+                        }
                         : undefined
                     }
                     transition={{
@@ -1338,8 +1334,8 @@ export default function StreamsSection() {
                 animate={
                   overrideMode
                     ? {
-                        scale: [1, 1.2, 1],
-                      }
+                      scale: [1, 1.2, 1],
+                    }
                     : undefined
                 }
                 transition={{
@@ -1789,7 +1785,7 @@ export default function StreamsSection() {
 
             <div className="flex flex-wrap items-center gap-5">
               <span className="font-mono text-[7px] tracking-[0.2em] text-white/20">
-                PEOPLE // IDEAS // EXPERIENCES // IMPACT
+                PEOPLE // IDEAS // EXPERIENCES // MANAGEMENT
               </span>
 
               <span className="font-mono text-[7px] tracking-[0.2em] text-emerald-300/60">

@@ -112,10 +112,6 @@ export default function Navbar() {
               </span>
             </div>
 
-            <div className="mt-0.5 flex items-center gap-2 font-mono text-[7px] uppercase tracking-[0.2em] text-white/25">
-              <span className="h-1 w-1 rounded-full bg-[#c8ff42]/70" />
-              FUTURE AWAITS
-            </div>
           </div>
         </Link>
 

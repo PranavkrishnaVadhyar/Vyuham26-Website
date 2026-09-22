@@ -69,10 +69,10 @@ const venues = [
   {
     name: "Green Lab",
     description:
-      "Sustainability and impact events",
+      "Sustainability and management events",
     events: "Sustainability Hack",
     code: "GL-08",
-    type: "IMPACT",
+    type: "MANAGEMENT",
   },
   {
     name: "Campus Grounds",
@@ -144,11 +144,9 @@ const venueRoutes = zonePoints
       !(point.x === hub.x && point.y === hub.y)
   )
   .map((point, i) => ({
-    d: `M ${hub.x} ${hub.y} Q ${
-      (hub.x + point.x) / 2
-    } ${
-      (hub.y + point.y) / 2 - 30
-    } ${point.x} ${point.y}`,
+    d: `M ${hub.x} ${hub.y} Q ${(hub.x + point.x) / 2
+      } ${(hub.y + point.y) / 2 - 30
+      } ${point.x} ${point.y}`,
     delay: i * 0.06,
   }));
 
@@ -560,11 +558,10 @@ function VenuePageContent() {
                     }}
                   >
                     <div
-                      className={`relative flex h-10 w-10 items-center justify-center rounded-full border transition-all ${
-                        selected
+                      className={`relative flex h-10 w-10 items-center justify-center rounded-full border transition-all ${selected
                           ? "border-green bg-green text-ink shadow-[0_0_24px_rgba(200,255,66,0.35)]"
                           : "border-line bg-ink/90 text-green hover:border-green/50"
-                      }`}
+                        }`}
                     >
                       <span className="font-mono text-[8px] font-bold">
                         {String(i + 1).padStart(
@@ -589,11 +586,10 @@ function VenuePageContent() {
                     </div>
 
                     <span
-                      className={`absolute left-1/2 mt-2 -translate-x-1/2 whitespace-nowrap font-mono text-[7px] uppercase tracking-widest ${
-                        selected
+                      className={`absolute left-1/2 mt-2 -translate-x-1/2 whitespace-nowrap font-mono text-[7px] uppercase tracking-widest ${selected
                           ? "text-green"
                           : "text-muted"
-                      }`}
+                        }`}
                     >
                       {venue?.name}
                     </span>
@@ -628,11 +624,10 @@ function VenuePageContent() {
                   onClick={() =>
                     setSelectedVenue(venue.name)
                   }
-                  className={`cursor-pointer border p-4 text-left transition-all ${
-                    selected
+                  className={`cursor-pointer border p-4 text-left transition-all ${selected
                       ? "border-green/50 bg-green/4"
                       : "border-line bg-ink-mid/30"
-                  }`}
+                    }`}
                 >
                   <span className="font-mono text-[8px] text-green">
                     ZONE_
@@ -730,11 +725,10 @@ function VenuePageContent() {
                   whileHover={{
                     y: -5,
                   }}
-                  className={`group relative w-full cursor-pointer overflow-hidden border p-6 text-left transition-all ${
-                    selectedVenue === venue.name
+                  className={`group relative w-full cursor-pointer overflow-hidden border p-6 text-left transition-all ${selectedVenue === venue.name
                       ? "border-green/40 bg-green/2.5"
                       : "border-line bg-ink-mid/30 hover:border-green/20"
-                  }`}
+                    }`}
                 >
                   <div className="absolute right-0 top-0 h-8 w-8 border-r border-t border-green/20 opacity-0 transition-opacity group-hover:opacity-100" />
 

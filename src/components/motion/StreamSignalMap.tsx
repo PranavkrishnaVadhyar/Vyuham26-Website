@@ -48,7 +48,7 @@ const nodes: StreamNode[] = [
   {
     x: 70,
     y: 210,
-    label: "Impact",
+    label: "Management",
     code: "IMPT",
     color: "#a7f3d0",
   },
@@ -179,10 +179,9 @@ export default function StreamSignalMap() {
 
             const route =
               `M ${center.x} ${center.y} ` +
-              `Q ${mid.x} ${
-                node.y -
-                20 *
-                  (i % 2)
+              `Q ${mid.x} ${node.y -
+              20 *
+              (i % 2)
               } ${node.x} ${node.y}`;
 
             return (
@@ -203,9 +202,9 @@ export default function StreamSignalMap() {
                     animate={
                       inView
                         ? {
-                            pathLength: 1,
-                            opacity: 0.16,
-                          }
+                          pathLength: 1,
+                          opacity: 0.16,
+                        }
                         : {}
                     }
                     viewport={{
@@ -219,14 +218,14 @@ export default function StreamSignalMap() {
                         delay:
                           0.3 +
                           i *
-                            0.16,
+                          0.16,
                       },
                       opacity: {
                         duration: 0.4,
                         delay:
                           0.3 +
                           i *
-                            0.16,
+                          0.16,
                       },
                     }}
                     stroke={
@@ -258,13 +257,13 @@ export default function StreamSignalMap() {
                   animate={
                     inView
                       ? {
-                          pathLength: 1,
-                          opacity: 0.55,
-                        }
+                        pathLength: 1,
+                        opacity: 0.55,
+                      }
                       : {
-                          pathLength: 0,
-                          opacity: 0,
-                        }
+                        pathLength: 0,
+                        opacity: 0,
+                      }
                   }
                   transition={{
                     pathLength: {
@@ -274,7 +273,7 @@ export default function StreamSignalMap() {
                       delay:
                         0.3 +
                         i *
-                          0.18,
+                        0.18,
                     },
 
                     opacity: {
@@ -282,7 +281,7 @@ export default function StreamSignalMap() {
                       delay:
                         0.3 +
                         i *
-                          0.18,
+                        0.18,
                     },
                   }}
                   stroke={
@@ -312,27 +311,27 @@ export default function StreamSignalMap() {
                     animate={
                       inView
                         ? {
-                            opacity: [
-                              0,
-                              1,
-                              0,
-                            ],
+                          opacity: [
+                            0,
+                            1,
+                            0,
+                          ],
 
-                            cx: [
-                              center.x,
-                              node.x,
-                              node.x,
-                            ],
+                          cx: [
+                            center.x,
+                            node.x,
+                            node.x,
+                          ],
 
-                            cy: [
-                              center.y,
-                              node.y,
-                              node.y,
-                            ],
-                          }
+                          cy: [
+                            center.y,
+                            node.y,
+                            node.y,
+                          ],
+                        }
                         : {
-                            opacity: 0,
-                          }
+                          opacity: 0,
+                        }
                     }
                     transition={{
                       duration: 2.2,
@@ -341,7 +340,7 @@ export default function StreamSignalMap() {
                       delay:
                         0.7 +
                         i *
-                          0.35,
+                        0.35,
                       times: [
                         0,
                         0.62,
@@ -369,9 +368,9 @@ export default function StreamSignalMap() {
           animate={
             inView
               ? {
-                  opacity: 1,
-                  scale: 1,
-                }
+                opacity: 1,
+                scale: 1,
+              }
               : {}
           }
           transition={{
@@ -399,8 +398,8 @@ export default function StreamSignalMap() {
               reduceMotion
                 ? undefined
                 : {
-                    rotate: 360,
-                  }
+                  rotate: 360,
+                }
             }
             transition={{
               duration: 12,
@@ -436,18 +435,18 @@ export default function StreamSignalMap() {
               reduceMotion
                 ? undefined
                 : {
-                    scale: [
-                      0.8,
-                      1.15,
-                      0.8,
-                    ],
+                  scale: [
+                    0.8,
+                    1.15,
+                    0.8,
+                  ],
 
-                    opacity: [
-                      0.65,
-                      1,
-                      0.65,
-                    ],
-                  }
+                  opacity: [
+                    0.65,
+                    1,
+                    0.65,
+                  ],
+                }
             }
             transition={{
               duration: 2.4,
@@ -495,9 +494,9 @@ export default function StreamSignalMap() {
               animate={
                 inView
                   ? {
-                      opacity: 1,
-                      scale: 1,
-                    }
+                    opacity: 1,
+                    scale: 1,
+                  }
                   : {}
               }
               transition={{
@@ -548,7 +547,7 @@ export default function StreamSignalMap() {
                     delay:
                       0.8 +
                       i *
-                        0.2,
+                      0.2,
                     ease:
                       "easeOut",
                   }}

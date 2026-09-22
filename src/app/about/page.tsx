@@ -56,7 +56,7 @@ const streams = [
   {
     id: "04",
     glyph: "⊹",
-    title: "IMPACT",
+    title: "MANAGEMENT",
     command: "IDEATE // INNOVATE // TRANSFORM",
     description:
       "Social innovation, sustainability and entrepreneurship. Turn meaningful ideas into actions capable of changing the world around you.",

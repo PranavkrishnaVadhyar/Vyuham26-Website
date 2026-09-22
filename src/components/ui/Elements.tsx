@@ -114,7 +114,7 @@ export function Chip({ children, variant = "upcoming", className = "" }: ChipPro
 
 /* ─── Stream Badge ─── */
 interface StreamBadgeProps {
-  stream: "tech" | "culture" | "gaming" | "impact";
+  stream: "tech" | "culture" | "gaming" | "management";
   className?: string;
 }
 
@@ -122,14 +122,14 @@ const streamColors = {
   tech: "bg-green/10 text-green border-green/20",
   culture: "bg-purple-500/10 text-purple-400 border-purple-500/20",
   gaming: "bg-cyan-500/10 text-cyan-400 border-cyan-500/20",
-  impact: "bg-amber-500/10 text-amber-400 border-amber-500/20",
+  management: "bg-amber-500/10 text-amber-400 border-amber-500/20",
 };
 
 const streamLabels = {
   tech: "Technology",
   culture: "Culture",
   gaming: "Gaming",
-  impact: "Impact",
+  management: "Management",
 };
 
 export function StreamBadge({ stream, className = "" }: StreamBadgeProps) {
