@@ -26,7 +26,7 @@ export default function Navbar() {
 
   return (
     <nav
-      className="fixed left-0 right-0 top-0 z-40 border-b border-white/[0.07] bg-[#020504]/85 backdrop-blur-xl md:left-12"
+      className="fixed left-0 right-0 top-0 z-40 border-b border-white/[0.07] bg-[#020504]/85 backdrop-blur-xl md:left-14.5"
       aria-label="Primary navigation"
     >
       {/* =========================================================

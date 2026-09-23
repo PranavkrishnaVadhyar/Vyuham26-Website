@@ -522,10 +522,16 @@ body:has(.intro-cinema) .side-nav-rail {
   }
 }
 
-/* ─── Hide SideNavRail during Intro Animation ─── */
+/* ─── Hide SideNavRail and reset site-shell padding during Intro Animation ─── */
 html[data-intro-active="true"] .side-nav-rail,
 body[data-intro-active="true"] .side-nav-rail {
   display: none !important;
+}
+
+html[data-intro-active="true"] .site-shell,
+body[data-intro-active="true"] .site-shell,
+body:has([data-intro-page]) .site-shell {
+  padding-left: 0 !important;
 }
 
 /* ─── Reduced Motion ─── */

@@ -85,8 +85,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           {/* Global Cyber Terminal Console */}
           <CyberTerminal />
 
-          {/* Site shell */}
-          <div className="relative z-0 flex min-h-screen flex-col">
+          {/* Site shell with responsive sidebar placeholder gap */}
+          <div className="site-shell relative z-0 flex min-h-screen flex-col transition-[padding] duration-300 md:pl-16 lg:pl-20 xl:pl-24">
             {children}
           </div>
         </AuthProvider>
