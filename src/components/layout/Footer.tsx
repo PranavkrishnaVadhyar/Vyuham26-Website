@@ -59,7 +59,7 @@ function FooterLink({
         no-underline
         transition-all duration-300
         hover:translate-x-1
-        hover:text-[#c8ff42]
+        hover:text-[#2ee59d]
       "
     >
       <span
@@ -68,7 +68,7 @@ function FooterLink({
           text-[8px]
           text-white/20
           transition-colors
-          group-hover:text-[#c8ff42]/60
+          group-hover:text-[#2ee59d]/60
         "
       >
         {code}
@@ -110,8 +110,8 @@ function FooterColumn({
         <span
           className="
             h-1.5 w-1.5 rounded-full
-            bg-[#c8ff42]
-            shadow-[0_0_8px_rgba(200,255,66,.65)]
+            bg-[#2ee59d]
+            shadow-[0_0_8px_rgba(46,229,157,.65)]
           "
         />
 
@@ -120,7 +120,7 @@ function FooterColumn({
             font-mono text-[9px]
             font-medium
             uppercase tracking-[0.2em]
-            text-[#c8ff42]/75
+            text-[#2ee59d]/75
           "
         >
           {title}
@@ -162,7 +162,7 @@ export default function Footer() {
             absolute left-1/2 top-0
             h-[400px] w-[600px]
             -translate-x-1/2
-            bg-[#c8ff42]/[0.025]
+            bg-[#2ee59d]/[0.025]
             blur-[130px]
           "
         />
@@ -172,7 +172,7 @@ export default function Footer() {
           className="
             absolute -left-40 bottom-0
             h-72 w-72 rounded-full
-            bg-[#c8ff42]/[0.018]
+            bg-[#2ee59d]/[0.018]
             blur-[100px]
           "
         />
@@ -181,7 +181,7 @@ export default function Footer() {
           className="
             absolute -right-40 bottom-0
             h-72 w-72 rounded-full
-            bg-[#c8ff42]/[0.018]
+            bg-[#2ee59d]/[0.018]
             blur-[100px]
           "
         />
@@ -192,12 +192,12 @@ export default function Footer() {
           style={{
             backgroundImage: `
               linear-gradient(
-                rgba(200,255,66,.45) 1px,
+                rgba(46,229,157,.45) 1px,
                 transparent 1px
               ),
               linear-gradient(
                 90deg,
-                rgba(200,255,66,.45) 1px,
+                rgba(46,229,157,.45) 1px,
                 transparent 1px
               )
             `,
@@ -267,7 +267,7 @@ export default function Footer() {
                   inline-flex h-full w-full
                   animate-ping
                   rounded-full
-                  bg-[#c8ff42]
+                  bg-[#2ee59d]
                   opacity-40
                 "
               />
@@ -276,8 +276,8 @@ export default function Footer() {
                 className="
                   relative h-2 w-2
                   rounded-full
-                  bg-[#c8ff42]
-                  shadow-[0_0_8px_#c8ff42]
+                  bg-[#2ee59d]
+                  shadow-[0_0_8px_#2ee59d]
                 "
               />
             </span>
@@ -305,7 +305,7 @@ export default function Footer() {
               TRANSMISSION: SECURE
             </span>
 
-            <span className="text-[#c8ff42]/60">
+            <span className="text-[#2ee59d]/60">
               SYSTEM ONLINE
             </span>
           </div>
@@ -346,7 +346,7 @@ export default function Footer() {
                 absolute -left-3 -top-3
                 h-7 w-7
                 border-l border-t
-                border-[#c8ff42]/20
+                border-[#2ee59d]/20
               "
             />
 
@@ -378,7 +378,7 @@ export default function Footer() {
                   className="
                     absolute inset-0
                     rounded-full
-                    border border-[#c8ff42]/20
+                    border border-[#2ee59d]/20
                   "
                 />
 
@@ -400,10 +400,10 @@ export default function Footer() {
                     relative z-10
                     h-11 w-11
                     object-contain
-                    drop-shadow-[0_0_15px_rgba(200,255,66,.45)]
+                    drop-shadow-[0_0_15px_rgba(46,229,157,.45)]
                     transition-all duration-300
                     group-hover:scale-105
-                    group-hover:drop-shadow-[0_0_24px_rgba(200,255,66,.65)]
+                    group-hover:drop-shadow-[0_0_24px_rgba(46,229,157,.65)]
                   "
                 />
               </div>
@@ -418,7 +418,7 @@ export default function Footer() {
                     className="
                       font-display font-bold
                       tracking-[0.15em]
-                      text-[#c8ff42]
+                      text-[#2ee59d]
                     "
                   >
                     &apos;26
@@ -480,7 +480,7 @@ export default function Footer() {
                   text-white/60
                   no-underline
                   transition-colors
-                  hover:text-[#c8ff42]
+                  hover:text-[#2ee59d]
                 "
               >
                 techfest@duk.ac.in
@@ -491,10 +491,10 @@ export default function Footer() {
                   mt-4 flex items-center gap-2
                   font-mono text-[8px]
                   uppercase tracking-[0.15em]
-                  text-[#c8ff42]/50
+                  text-[#2ee59d]/50
                 "
               >
-                <span className="h-1.5 w-1.5 rounded-full bg-[#c8ff42]" />
+                <span className="h-1.5 w-1.5 rounded-full bg-[#2ee59d]" />
                 Channel Active
               </div>
             </div>
@@ -587,12 +587,12 @@ export default function Footer() {
             <span
               className="
                 rounded
-                border border-[#c8ff42]/15
-                bg-[#c8ff42]/[0.04]
+                border border-[#2ee59d]/15
+                bg-[#2ee59d]/[0.04]
                 px-2.5 py-1.5
                 font-mono text-[8px]
                 tracking-[0.15em]
-                text-[#c8ff42]/60
+                text-[#2ee59d]/60
               "
             >
               v26.4
@@ -603,7 +603,7 @@ export default function Footer() {
             className="
               font-mono text-[9px]
               uppercase tracking-[0.18em]
-              text-[#c8ff42]/50
+              text-[#2ee59d]/50
             "
           >
             THE FUTURE AWAITS
@@ -629,9 +629,9 @@ export default function Footer() {
               h-px w-1/4
               bg-gradient-to-r
               from-transparent
-              via-[#c8ff42]
+              via-[#2ee59d]
               to-transparent
-              shadow-[0_0_8px_rgba(200,255,66,.7)]
+              shadow-[0_0_8px_rgba(46,229,157,.7)]
             "
           />
         </div>
@@ -662,7 +662,7 @@ export default function Footer() {
           </span>
 
           <div className="flex items-center gap-2">
-            <span className="h-1 w-1 rounded-full bg-[#c8ff42]/60" />
+            <span className="h-1 w-1 rounded-full bg-[#2ee59d]/60" />
 
             <span
               className="

@@ -79,7 +79,7 @@ export default function RegistrationHubPage() {
                       onClick={() => toggleEvent(event.slug)}
                       className={`group relative flex cursor-pointer flex-col justify-between rounded-sm border p-6 transition-all duration-300 ${
                         isSelected
-                          ? "border-green bg-ink-mid shadow-[0_0_24px_rgba(200,255,66,0.12)] energy-bloom-click"
+                          ? "border-green bg-ink-mid shadow-[0_0_24px_rgba(46,229,157,0.12)] energy-bloom-click"
                           : "border-line bg-ink/60 hover:border-green/30"
                       }`}
                     >

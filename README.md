@@ -61,6 +61,6 @@ src/
 ## Design Language
 
 - **Theme:** "The Future Awaits" — fractured digital dimension / command center
-- **Palette:** Dark charcoal (#06100b), emerald energy (#c8ff42), deep green, metallic white
+- **Palette:** Dark charcoal (#06100b), emerald energy (#2ee59d), deep green, metallic white
 - **Motion:** Cinematic but selective — scroll reveals, portal animation, particle field
 - **Accessibility:** `prefers-reduced-motion` support, semantic HTML, ARIA labels

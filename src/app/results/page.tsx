@@ -49,19 +49,19 @@ export default function ResultsWinnersPage() {
 
         <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
           {/* Main atmospheric glow */}
-          <div className="absolute left-1/2 top-[15%] h-[520px] w-[520px] -translate-x-1/2 rounded-full bg-[#c8ff42]/[0.035] blur-[140px]" />
+          <div className="absolute left-1/2 top-[15%] h-[520px] w-[520px] -translate-x-1/2 rounded-full bg-[#2ee59d]/[0.035] blur-[140px]" />
 
-          <div className="absolute -left-[180px] top-[45%] h-[420px] w-[420px] rounded-full bg-[#c8ff42]/[0.025] blur-[120px]" />
+          <div className="absolute -left-[180px] top-[45%] h-[420px] w-[420px] rounded-full bg-[#2ee59d]/[0.025] blur-[120px]" />
 
-          <div className="absolute -right-[180px] top-[65%] h-[420px] w-[420px] rounded-full bg-[#c8ff42]/[0.02] blur-[120px]" />
+          <div className="absolute -right-[180px] top-[65%] h-[420px] w-[420px] rounded-full bg-[#2ee59d]/[0.02] blur-[120px]" />
 
           {/* Technical grid */}
           <div
             className="absolute inset-0 opacity-[0.055]"
             style={{
               backgroundImage: `
-                linear-gradient(rgba(200,255,66,.45) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(200,255,66,.45) 1px, transparent 1px)
+                linear-gradient(rgba(46,229,157,.45) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(46,229,157,.45) 1px, transparent 1px)
               `,
               backgroundSize: "64px 64px",
             }}
@@ -100,12 +100,12 @@ export default function ResultsWinnersPage() {
           <div className="mx-auto w-[min(1120px,calc(100%-40px))] md:w-[min(1120px,calc(100%-64px))]">
 
             <AnimatedSection>
-              <div className="relative border-b border-[#c8ff42]/15 pb-8">
+              <div className="relative border-b border-[#2ee59d]/15 pb-8">
 
                 {/* Top telemetry */}
                 <div className="mb-7 flex flex-wrap items-center justify-between gap-4 font-mono text-[10px] uppercase tracking-[0.22em] text-white/35">
                   <div className="flex items-center gap-3">
-                    <span className="h-1.5 w-1.5 rounded-full bg-[#c8ff42] shadow-[0_0_10px_#c8ff42]" />
+                    <span className="h-1.5 w-1.5 rounded-full bg-[#2ee59d] shadow-[0_0_10px_#2ee59d]" />
                     VYUHAM'26 // RESULTS NETWORK
                   </div>
 
@@ -136,7 +136,7 @@ export default function ResultsWinnersPage() {
                     >
                       RESULTS
                       <br />
-                      <em className="not-italic text-[#c8ff42] [text-shadow:0_0_30px_rgba(200,255,66,.28)]">
+                      <em className="not-italic text-[#2ee59d] [text-shadow:0_0_30px_rgba(46,229,157,.28)]">
                         & WINNERS
                       </em>
                     </motion.h1>
@@ -159,7 +159,7 @@ export default function ResultsWinnersPage() {
                   <span>EVENTS FINALIZED: 03</span>
                   <span>WINNER RECORDS: 09</span>
                   <span>NETWORK STATUS: STABLE</span>
-                  <span className="text-[#c8ff42]/60">
+                  <span className="text-[#2ee59d]/60">
                     ARCHIVE: ONLINE
                   </span>
                 </div>
@@ -216,14 +216,14 @@ export default function ResultsWinnersPage() {
                         delay: 0.2 + idx * 0.15,
                         ease: "easeInOut",
                       }}
-                      className="pointer-events-none absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-transparent via-[#c8ff42]/[0.035] to-transparent"
+                      className="pointer-events-none absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-transparent via-[#2ee59d]/[0.035] to-transparent"
                     />
 
                     {/* Corner markers */}
-                    <div className="absolute left-0 top-0 h-8 w-8 border-l border-t border-[#c8ff42]/35" />
-                    <div className="absolute right-0 top-0 h-8 w-8 border-r border-t border-[#c8ff42]/35" />
-                    <div className="absolute bottom-0 left-0 h-8 w-8 border-b border-l border-[#c8ff42]/20" />
-                    <div className="absolute bottom-0 right-0 h-8 w-8 border-b border-r border-[#c8ff42]/20" />
+                    <div className="absolute left-0 top-0 h-8 w-8 border-l border-t border-[#2ee59d]/35" />
+                    <div className="absolute right-0 top-0 h-8 w-8 border-r border-t border-[#2ee59d]/35" />
+                    <div className="absolute bottom-0 left-0 h-8 w-8 border-b border-l border-[#2ee59d]/20" />
+                    <div className="absolute bottom-0 right-0 h-8 w-8 border-b border-r border-[#2ee59d]/20" />
 
                     {/* Card header */}
                     <div className="relative flex flex-col justify-between gap-5 border-b border-white/[0.07] p-6 md:flex-row md:items-center md:px-8 md:py-7">
@@ -249,7 +249,7 @@ export default function ResultsWinnersPage() {
                           TOTAL PRIZE POOL
                         </span>
 
-                        <span className="mt-1 block font-mono text-xl font-bold text-[#c8ff42] [text-shadow:0_0_15px_rgba(200,255,66,.25)]">
+                        <span className="mt-1 block font-mono text-xl font-bold text-[#2ee59d] [text-shadow:0_0_15px_rgba(46,229,157,.25)]">
                           {res.prize}
                         </span>
                       </div>
@@ -296,25 +296,25 @@ export default function ResultsWinnersPage() {
                                 scale: 1.015,
                               }
                         }
-                        className="relative overflow-hidden rounded border border-[#c8ff42]/45 bg-[#c8ff42]/[0.055] p-6 text-center shadow-[0_0_35px_rgba(200,255,66,.08)]"
+                        className="relative overflow-hidden rounded border border-[#2ee59d]/45 bg-[#2ee59d]/[0.055] p-6 text-center shadow-[0_0_35px_rgba(46,229,157,.08)]"
                       >
                         {/* Podium glow */}
-                        <div className="pointer-events-none absolute left-1/2 top-0 h-32 w-32 -translate-x-1/2 rounded-full bg-[#c8ff42]/10 blur-3xl" />
+                        <div className="pointer-events-none absolute left-1/2 top-0 h-32 w-32 -translate-x-1/2 rounded-full bg-[#2ee59d]/10 blur-3xl" />
 
                         <SignalRing
                           className="inset-0 m-auto opacity-70"
                           size={64}
                           count={2}
                           duration={2.6}
-                          color="rgba(200,255,66,0.35)"
+                          color="rgba(46,229,157,0.35)"
                         />
 
                         <div className="relative">
-                          <div className="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-full border border-[#c8ff42]/40 bg-[#c8ff42]/10 font-mono text-lg">
+                          <div className="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-full border border-[#2ee59d]/40 bg-[#2ee59d]/10 font-mono text-lg">
                             01
                           </div>
 
-                          <span className="font-mono text-[9px] font-bold uppercase tracking-[0.18em] text-[#c8ff42]">
+                          <span className="font-mono text-[9px] font-bold uppercase tracking-[0.18em] text-[#2ee59d]">
                             1ST PLACE
                           </span>
 
@@ -322,7 +322,7 @@ export default function ResultsWinnersPage() {
                             {res.first}
                           </h3>
 
-                          <div className="mx-auto mt-5 h-px w-16 bg-[#c8ff42]/30" />
+                          <div className="mx-auto mt-5 h-px w-16 bg-[#2ee59d]/30" />
 
                           <span className="mt-4 block font-mono text-[9px] uppercase tracking-[0.16em] text-white/30">
                             CHAMPION
@@ -445,7 +445,7 @@ export default function ResultsWinnersPage() {
 
                       <div className="flex items-center gap-4">
                         <span>VERIFIED</span>
-                        <span className="h-1 w-1 rounded-full bg-[#c8ff42]/60" />
+                        <span className="h-1 w-1 rounded-full bg-[#2ee59d]/60" />
                         <span>ARCHIVED</span>
                       </div>
                     </div>
@@ -459,18 +459,18 @@ export default function ResultsWinnersPage() {
             ========================================================== */}
 
             <AnimatedSection delay={0.35}>
-              <div className="mt-12 overflow-hidden rounded border border-[#c8ff42]/15 bg-[#07100c]/70 p-6 backdrop-blur-xl md:p-8">
+              <div className="mt-12 overflow-hidden rounded border border-[#2ee59d]/15 bg-[#07100c]/70 p-6 backdrop-blur-xl md:p-8">
 
                 <div className="flex flex-col gap-7 md:flex-row md:items-center md:justify-between">
 
                   <div>
                     <div className="flex items-center gap-3">
                       <span className="relative flex h-2 w-2">
-                        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#c8ff42] opacity-50" />
-                        <span className="relative inline-flex h-2 w-2 rounded-full bg-[#c8ff42]" />
+                        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#2ee59d] opacity-50" />
+                        <span className="relative inline-flex h-2 w-2 rounded-full bg-[#2ee59d]" />
                       </span>
 
-                      <span className="font-mono text-[9px] uppercase tracking-[0.22em] text-[#c8ff42]">
+                      <span className="font-mono text-[9px] uppercase tracking-[0.22em] text-[#2ee59d]">
                         Results Archive Online
                       </span>
                     </div>
@@ -504,7 +504,7 @@ export default function ResultsWinnersPage() {
                       <span className="block font-mono text-[8px] uppercase tracking-[0.16em] text-white/25">
                         Status
                       </span>
-                      <span className="mt-1 block font-mono text-lg font-bold text-[#c8ff42]">
+                      <span className="mt-1 block font-mono text-lg font-bold text-[#2ee59d]">
                         LIVE
                       </span>
                     </div>

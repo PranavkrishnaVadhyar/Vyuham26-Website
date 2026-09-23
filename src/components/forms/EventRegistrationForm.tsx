@@ -41,8 +41,8 @@ export default function EventRegistrationForm({
           className="absolute inset-0 opacity-[0.035]"
           style={{
             backgroundImage: `
-              linear-gradient(rgba(200,255,66,.45) 1px, transparent 1px),
-              linear-gradient(90deg, rgba(200,255,66,.45) 1px, transparent 1px)
+              linear-gradient(rgba(46,229,157,.45) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(46,229,157,.45) 1px, transparent 1px)
             `,
             backgroundSize: "40px 40px",
           }}
@@ -58,7 +58,7 @@ export default function EventRegistrationForm({
         />
 
         {/* Glow */}
-        <div className="absolute left-1/2 top-0 h-56 w-56 -translate-x-1/2 rounded-full bg-[#c8ff42]/[0.045] blur-[100px]" />
+        <div className="absolute left-1/2 top-0 h-56 w-56 -translate-x-1/2 rounded-full bg-[#2ee59d]/[0.045] blur-[100px]" />
 
         {/* Vignette */}
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_20%,rgba(0,0,0,.35)_100%)]" />
@@ -73,7 +73,7 @@ export default function EventRegistrationForm({
           <div className="flex gap-1.5">
             <span className="h-2 w-2 rounded-full bg-white/15" />
             <span className="h-2 w-2 rounded-full bg-white/15" />
-            <span className="h-2 w-2 rounded-full bg-[#c8ff42]/60 shadow-[0_0_8px_rgba(200,255,66,.4)]" />
+            <span className="h-2 w-2 rounded-full bg-[#2ee59d]/60 shadow-[0_0_8px_rgba(46,229,157,.4)]" />
           </div>
 
           <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-white/30">
@@ -83,7 +83,7 @@ export default function EventRegistrationForm({
 
         <div className="flex items-center gap-3 font-mono text-[8px] uppercase tracking-[0.18em]">
           <span className="text-white/20">NODE</span>
-          <span className="text-[#c8ff42]/60">ACTIVE</span>
+          <span className="text-[#2ee59d]/60">ACTIVE</span>
         </div>
       </div>
 
@@ -140,7 +140,7 @@ export default function EventRegistrationForm({
                         repeat: Infinity,
                         ease: "linear",
                       }}
-                      className="absolute inset-0 rounded-full border border-dashed border-[#c8ff42]/25"
+                      className="absolute inset-0 rounded-full border border-dashed border-[#2ee59d]/25"
                     />
 
                     <motion.div
@@ -153,17 +153,17 @@ export default function EventRegistrationForm({
                         repeat: Infinity,
                         ease: "easeInOut",
                       }}
-                      className="absolute inset-3 rounded-full border border-[#c8ff42]/20"
+                      className="absolute inset-3 rounded-full border border-[#2ee59d]/20"
                     />
                   </>
                 )}
 
-                <div className="relative flex h-14 w-14 items-center justify-center rounded-full border border-[#c8ff42]/50 bg-[#c8ff42]/10 text-2xl text-[#c8ff42] shadow-[0_0_30px_rgba(200,255,66,.18)]">
+                <div className="relative flex h-14 w-14 items-center justify-center rounded-full border border-[#2ee59d]/50 bg-[#2ee59d]/10 text-2xl text-[#2ee59d] shadow-[0_0_30px_rgba(46,229,157,.18)]">
                   ✓
                 </div>
               </div>
 
-              <div className="mt-7 font-mono text-[9px] uppercase tracking-[0.22em] text-[#c8ff42]/60">
+              <div className="mt-7 font-mono text-[9px] uppercase tracking-[0.22em] text-[#2ee59d]/60">
                 Deployment Protocol // Complete
               </div>
 
@@ -183,7 +183,7 @@ export default function EventRegistrationForm({
                   <span className="block font-mono text-[7px] uppercase tracking-[0.15em] text-white/20">
                     EVENT
                   </span>
-                  <span className="mt-1 block font-mono text-[9px] text-[#c8ff42]/70">
+                  <span className="mt-1 block font-mono text-[9px] text-[#2ee59d]/70">
                     LOCKED
                   </span>
                 </div>
@@ -192,7 +192,7 @@ export default function EventRegistrationForm({
                   <span className="block font-mono text-[7px] uppercase tracking-[0.15em] text-white/20">
                     SLOT
                   </span>
-                  <span className="mt-1 block font-mono text-[9px] text-[#c8ff42]/70">
+                  <span className="mt-1 block font-mono text-[9px] text-[#2ee59d]/70">
                     RESERVED
                   </span>
                 </div>
@@ -201,7 +201,7 @@ export default function EventRegistrationForm({
                   <span className="block font-mono text-[7px] uppercase tracking-[0.15em] text-white/20">
                     STATUS
                   </span>
-                  <span className="mt-1 block font-mono text-[9px] text-[#c8ff42]/70">
+                  <span className="mt-1 block font-mono text-[9px] text-[#2ee59d]/70">
                     READY
                   </span>
                 </div>
@@ -246,7 +246,7 @@ export default function EventRegistrationForm({
               {/* Form header */}
               <div className="flex flex-col justify-between gap-4 border-b border-white/[0.07] pb-6 sm:flex-row sm:items-end">
                 <div>
-                  <span className="font-mono text-[8px] uppercase tracking-[0.22em] text-[#c8ff42]/60">
+                  <span className="font-mono text-[8px] uppercase tracking-[0.22em] text-[#2ee59d]/60">
                     Event Access Protocol
                   </span>
 
@@ -264,7 +264,7 @@ export default function EventRegistrationForm({
                     REGISTRATION FEE
                   </span>
 
-                  <span className="mt-1 block font-mono text-lg font-bold text-[#c8ff42]">
+                  <span className="mt-1 block font-mono text-lg font-bold text-[#2ee59d]">
                     {event.fee}
                   </span>
                 </div>
@@ -292,7 +292,7 @@ export default function EventRegistrationForm({
                     onClick={() => setIsTeam(false)}
                     className={`group relative overflow-hidden rounded border p-4 text-left transition-all duration-300 ${
                       !isTeam
-                        ? "border-[#c8ff42]/50 bg-[#c8ff42]/[0.07] shadow-[0_0_25px_rgba(200,255,66,.06)]"
+                        ? "border-[#2ee59d]/50 bg-[#2ee59d]/[0.07] shadow-[0_0_25px_rgba(46,229,157,.06)]"
                         : "border-white/[0.08] bg-white/[0.015] hover:border-white/[0.16]"
                     }`}
                   >
@@ -301,7 +301,7 @@ export default function EventRegistrationForm({
                         <span
                           className={`font-mono text-[9px] font-bold uppercase tracking-[0.16em] ${
                             !isTeam
-                              ? "text-[#c8ff42]"
+                              ? "text-[#2ee59d]"
                               : "text-white/40"
                           }`}
                         >
@@ -316,7 +316,7 @@ export default function EventRegistrationForm({
                       <span
                         className={`flex h-7 w-7 items-center justify-center rounded-full border font-mono text-[9px] ${
                           !isTeam
-                            ? "border-[#c8ff42]/50 bg-[#c8ff42]/10 text-[#c8ff42]"
+                            ? "border-[#2ee59d]/50 bg-[#2ee59d]/10 text-[#2ee59d]"
                             : "border-white/10 text-white/20"
                         }`}
                       >
@@ -327,7 +327,7 @@ export default function EventRegistrationForm({
                     {!isTeam && (
                       <motion.div
                         layoutId="mode-indicator"
-                        className="absolute bottom-0 left-0 h-px w-full bg-[#c8ff42] shadow-[0_0_10px_rgba(200,255,66,.7)]"
+                        className="absolute bottom-0 left-0 h-px w-full bg-[#2ee59d] shadow-[0_0_10px_rgba(46,229,157,.7)]"
                       />
                     )}
                   </button>
@@ -338,7 +338,7 @@ export default function EventRegistrationForm({
                     onClick={() => setIsTeam(true)}
                     className={`group relative overflow-hidden rounded border p-4 text-left transition-all duration-300 ${
                       isTeam
-                        ? "border-[#c8ff42]/50 bg-[#c8ff42]/[0.07] shadow-[0_0_25px_rgba(200,255,66,.06)]"
+                        ? "border-[#2ee59d]/50 bg-[#2ee59d]/[0.07] shadow-[0_0_25px_rgba(46,229,157,.06)]"
                         : "border-white/[0.08] bg-white/[0.015] hover:border-white/[0.16]"
                     }`}
                   >
@@ -347,7 +347,7 @@ export default function EventRegistrationForm({
                         <span
                           className={`font-mono text-[9px] font-bold uppercase tracking-[0.16em] ${
                             isTeam
-                              ? "text-[#c8ff42]"
+                              ? "text-[#2ee59d]"
                               : "text-white/40"
                           }`}
                         >
@@ -362,7 +362,7 @@ export default function EventRegistrationForm({
                       <span
                         className={`flex h-7 w-7 items-center justify-center rounded-full border font-mono text-[9px] ${
                           isTeam
-                            ? "border-[#c8ff42]/50 bg-[#c8ff42]/10 text-[#c8ff42]"
+                            ? "border-[#2ee59d]/50 bg-[#2ee59d]/10 text-[#2ee59d]"
                             : "border-white/10 text-white/20"
                         }`}
                       >
@@ -373,7 +373,7 @@ export default function EventRegistrationForm({
                     {isTeam && (
                       <motion.div
                         layoutId="mode-indicator"
-                        className="absolute bottom-0 left-0 h-px w-full bg-[#c8ff42] shadow-[0_0_10px_rgba(200,255,66,.7)]"
+                        className="absolute bottom-0 left-0 h-px w-full bg-[#2ee59d] shadow-[0_0_10px_rgba(46,229,157,.7)]"
                       />
                     )}
                   </button>
@@ -420,13 +420,13 @@ export default function EventRegistrationForm({
                     }}
                     className="overflow-hidden"
                   >
-                    <div className="relative rounded border border-[#c8ff42]/20 bg-black/20 p-5 md:p-6">
+                    <div className="relative rounded border border-[#2ee59d]/20 bg-black/20 p-5 md:p-6">
                       {/* Corner */}
-                      <div className="absolute right-0 top-0 h-7 w-7 border-r border-t border-[#c8ff42]/25" />
+                      <div className="absolute right-0 top-0 h-7 w-7 border-r border-t border-[#2ee59d]/25" />
 
                       <div className="mb-5 flex items-center justify-between">
                         <div>
-                          <span className="font-mono text-[8px] uppercase tracking-[0.2em] text-[#c8ff42]/55">
+                          <span className="font-mono text-[8px] uppercase tracking-[0.2em] text-[#2ee59d]/55">
                             Squad Configuration
                           </span>
 
@@ -459,7 +459,7 @@ export default function EventRegistrationForm({
                               setTeamName(e.target.value)
                             }
                             placeholder="e.g. CyberViper Squad"
-                            className="mt-2 w-full rounded border border-white/[0.08] bg-[#020504]/70 px-4 py-3 font-mono text-sm text-paper outline-none transition-all placeholder:text-white/15 focus:border-[#c8ff42]/50 focus:bg-[#c8ff42]/[0.025] focus:shadow-[0_0_20px_rgba(200,255,66,.05)]"
+                            className="mt-2 w-full rounded border border-white/[0.08] bg-[#020504]/70 px-4 py-3 font-mono text-sm text-paper outline-none transition-all placeholder:text-white/15 focus:border-[#2ee59d]/50 focus:bg-[#2ee59d]/[0.025] focus:shadow-[0_0_20px_rgba(46,229,157,.05)]"
                           />
                         </div>
 
@@ -480,7 +480,7 @@ export default function EventRegistrationForm({
                                 parseInt(e.target.value, 10)
                               )
                             }
-                            className="mt-2 w-full rounded border border-white/[0.08] bg-[#020504]/70 px-4 py-3 font-mono text-sm text-paper outline-none transition-all focus:border-[#c8ff42]/50"
+                            className="mt-2 w-full rounded border border-white/[0.08] bg-[#020504]/70 px-4 py-3 font-mono text-sm text-paper outline-none transition-all focus:border-[#2ee59d]/50"
                           >
                             <option value={2}>2 Operatives</option>
                             <option value={3}>3 Operatives</option>
@@ -495,7 +495,7 @@ export default function EventRegistrationForm({
                                   width: `${(memberCount / 4) * 100}%`,
                                 }}
                                 transition={{ duration: 0.35 }}
-                                className="h-full bg-[#c8ff42] shadow-[0_0_8px_rgba(200,255,66,.5)]"
+                                className="h-full bg-[#2ee59d] shadow-[0_0_8px_rgba(46,229,157,.5)]"
                               />
                             </div>
 
@@ -527,7 +527,7 @@ export default function EventRegistrationForm({
                   type="text"
                   required
                   placeholder="Arjun V."
-                  className="mt-2 w-full rounded border border-white/[0.08] bg-[#020504]/60 px-4 py-3 font-mono text-sm text-paper outline-none transition-all placeholder:text-white/15 focus:border-[#c8ff42]/50 focus:bg-[#c8ff42]/[0.025]"
+                  className="mt-2 w-full rounded border border-white/[0.08] bg-[#020504]/60 px-4 py-3 font-mono text-sm text-paper outline-none transition-all placeholder:text-white/15 focus:border-[#2ee59d]/50 focus:bg-[#2ee59d]/[0.025]"
                 />
               </div>
 
@@ -549,7 +549,7 @@ export default function EventRegistrationForm({
                     type="email"
                     required
                     placeholder="arjun@duk.ac.in"
-                    className="mt-2 w-full rounded border border-white/[0.08] bg-[#020504]/60 px-4 py-3 font-mono text-sm text-paper outline-none transition-all placeholder:text-white/15 focus:border-[#c8ff42]/50 focus:bg-[#c8ff42]/[0.025]"
+                    className="mt-2 w-full rounded border border-white/[0.08] bg-[#020504]/60 px-4 py-3 font-mono text-sm text-paper outline-none transition-all placeholder:text-white/15 focus:border-[#2ee59d]/50 focus:bg-[#2ee59d]/[0.025]"
                   />
                 </div>
 
@@ -566,7 +566,7 @@ export default function EventRegistrationForm({
                     type="tel"
                     required
                     placeholder="+91 98765 43210"
-                    className="mt-2 w-full rounded border border-white/[0.08] bg-[#020504]/60 px-4 py-3 font-mono text-sm text-paper outline-none transition-all placeholder:text-white/15 focus:border-[#c8ff42]/50 focus:bg-[#c8ff42]/[0.025]"
+                    className="mt-2 w-full rounded border border-white/[0.08] bg-[#020504]/60 px-4 py-3 font-mono text-sm text-paper outline-none transition-all placeholder:text-white/15 focus:border-[#2ee59d]/50 focus:bg-[#2ee59d]/[0.025]"
                   />
                 </div>
               </div>
@@ -583,7 +583,7 @@ export default function EventRegistrationForm({
                       Registration Fee
                     </span>
 
-                    <span className="mt-1 block font-mono text-base font-bold text-[#c8ff42]">
+                    <span className="mt-1 block font-mono text-base font-bold text-[#2ee59d]">
                       {event.fee}
                     </span>
                   </div>
@@ -595,7 +595,7 @@ export default function EventRegistrationForm({
 
                 {/* Security notice */}
                 <div className="mt-5 flex items-start gap-3 rounded border border-white/[0.05] bg-black/15 px-4 py-3">
-                  <span className="mt-0.5 text-[10px] text-[#c8ff42]/60">
+                  <span className="mt-0.5 text-[10px] text-[#2ee59d]/60">
                     ◆
                   </span>
 
@@ -621,9 +621,9 @@ export default function EventRegistrationForm({
         </span>
 
         <div className="flex items-center gap-3 font-mono text-[7px] uppercase tracking-[0.18em]">
-          <span className="h-1 w-1 rounded-full bg-[#c8ff42]/70" />
+          <span className="h-1 w-1 rounded-full bg-[#2ee59d]/70" />
           <span className="text-white/20">SECURE CHANNEL</span>
-          <span className="text-[#c8ff42]/40">ONLINE</span>
+          <span className="text-[#2ee59d]/40">ONLINE</span>
         </div>
       </div>
     </div>

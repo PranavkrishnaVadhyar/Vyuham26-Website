@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 
 interface NavItem {
@@ -29,12 +29,53 @@ const navItems: NavItem[] = [
 export default function SideNavRail() {
   const pathname = usePathname();
 
-  if (pathname === "/intro-test" || pathname?.startsWith("/intro-test")) {
-    return null;
-  }
+  const [introPlaying, setIntroPlaying] = useState(() => {
+    if (typeof window === "undefined") return false;
+    if (window.location.pathname.startsWith("/intro")) return true;
+    if (window.location.pathname === "/") {
+      try {
+        if (sessionStorage.getItem("vyuham-intro-dismissed") === "1") {
+          return false;
+        }
+      } catch {
+        // ignore
+      }
+      return true;
+    }
+    return false;
+  });
+
+  useEffect(() => {
+    const handleStart = () => setIntroPlaying(true);
+    const handleComplete = () => setIntroPlaying(false);
+
+    if (pathname === "/") {
+      try {
+        if (sessionStorage.getItem("vyuham-intro-dismissed") === "1") {
+          setIntroPlaying(false);
+        }
+      } catch {
+        // ignore
+      }
+    } else {
+      setIntroPlaying(false);
+    }
+
+    window.addEventListener("vyuham:intro-start", handleStart);
+    window.addEventListener("vyuham:intro-complete", handleComplete);
+
+    return () => {
+      window.removeEventListener("vyuham:intro-start", handleStart);
+      window.removeEventListener("vyuham:intro-complete", handleComplete);
+    };
+  }, [pathname]);
 
   const [open, setOpen] = useState(false);
   const [hovered, setHovered] = useState<string | null>(null);
+
+  if (pathname?.startsWith("/intro") || (pathname === "/" && introPlaying)) {
+    return null;
+  }
 
   const activeItem =
     navItems.find((item) =>

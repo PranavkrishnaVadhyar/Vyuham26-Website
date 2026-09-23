@@ -162,7 +162,7 @@ function TacticalBackground() {
         className="absolute inset-0 opacity-[0.07]"
         style={{
           backgroundImage:
-            "linear-gradient(rgba(200,255,66,0.12) 1px, transparent 1px), linear-gradient(90deg, rgba(200,255,66,0.12) 1px, transparent 1px)",
+            "linear-gradient(rgba(46,229,157,0.12) 1px, transparent 1px), linear-gradient(90deg, rgba(46,229,157,0.12) 1px, transparent 1px)",
           backgroundSize: "72px 72px",
         }}
       />
@@ -223,7 +223,7 @@ function StatusPill({
 }) {
   return (
     <div className="flex items-center gap-2 border border-green/20 bg-green/3 px-3 py-1.5">
-      <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-green shadow-[0_0_8px_rgba(200,255,66,0.8)]" />
+      <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-green shadow-[0_0_8px_rgba(46,229,157,0.8)]" />
 
       <span className="font-mono text-[8px] uppercase tracking-[0.18em] text-green">
         {children}
@@ -479,7 +479,7 @@ function VenuePageContent() {
                 className="absolute inset-0 opacity-[0.08]"
                 style={{
                   backgroundImage:
-                    "linear-gradient(rgba(200,255,66,0.15) 1px, transparent 1px), linear-gradient(90deg, rgba(200,255,66,0.15) 1px, transparent 1px)",
+                    "linear-gradient(rgba(46,229,157,0.15) 1px, transparent 1px), linear-gradient(90deg, rgba(46,229,157,0.15) 1px, transparent 1px)",
                   backgroundSize: "45px 45px",
                 }}
               />
@@ -504,7 +504,7 @@ function VenuePageContent() {
                   repeat: Infinity,
                 }}
               >
-                <div className="relative flex h-24 w-24 items-center justify-center rounded-full border border-green/60 bg-green/4 shadow-[0_0_40px_rgba(200,255,66,0.08)]">
+                <div className="relative flex h-24 w-24 items-center justify-center rounded-full border border-green/60 bg-green/4 shadow-[0_0_40px_rgba(46,229,157,0.08)]">
                   <motion.div
                     className="absolute inset-2 rounded-full border border-green/20"
                     animate={{
@@ -559,7 +559,7 @@ function VenuePageContent() {
                   >
                     <div
                       className={`relative flex h-10 w-10 items-center justify-center rounded-full border transition-all ${selected
-                          ? "border-green bg-green text-ink shadow-[0_0_24px_rgba(200,255,66,0.35)]"
+                          ? "border-green bg-green text-ink shadow-[0_0_24px_rgba(46,229,157,0.35)]"
                           : "border-line bg-ink/90 text-green hover:border-green/50"
                         }`}
                     >

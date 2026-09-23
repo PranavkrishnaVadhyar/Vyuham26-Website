@@ -69,19 +69,19 @@ export default function EventDetailClient({ event }: EventDetailClientProps) {
         ========================================================== */}
 
         <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
-          <div className="absolute left-1/2 top-[8%] h-[560px] w-[560px] -translate-x-1/2 rounded-full bg-[#c8ff42]/[0.035] blur-[150px]" />
+          <div className="absolute left-1/2 top-[8%] h-[560px] w-[560px] -translate-x-1/2 rounded-full bg-[#2ee59d]/[0.035] blur-[150px]" />
 
-          <div className="absolute -left-[220px] top-[40%] h-[480px] w-[480px] rounded-full bg-[#c8ff42]/[0.02] blur-[130px]" />
+          <div className="absolute -left-[220px] top-[40%] h-[480px] w-[480px] rounded-full bg-[#2ee59d]/[0.02] blur-[130px]" />
 
-          <div className="absolute -right-[220px] top-[65%] h-[480px] w-[480px] rounded-full bg-[#c8ff42]/[0.018] blur-[130px]" />
+          <div className="absolute -right-[220px] top-[65%] h-[480px] w-[480px] rounded-full bg-[#2ee59d]/[0.018] blur-[130px]" />
 
           {/* Main grid */}
           <div
             className="absolute inset-0 opacity-[0.055]"
             style={{
               backgroundImage: `
-                linear-gradient(rgba(200,255,66,.45) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(200,255,66,.45) 1px, transparent 1px)
+                linear-gradient(rgba(46,229,157,.45) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(46,229,157,.45) 1px, transparent 1px)
               `,
               backgroundSize: "64px 64px",
             }}
@@ -123,14 +123,14 @@ export default function EventDetailClient({ event }: EventDetailClientProps) {
                 <div className="flex items-center gap-3 font-mono text-[8px] uppercase tracking-[0.18em]">
                   <Link
                     href="/events"
-                    className="text-white/30 no-underline transition-colors hover:text-[#c8ff42]"
+                    className="text-white/30 no-underline transition-colors hover:text-[#2ee59d]"
                   >
                     Events
                   </Link>
 
                   <span className="text-white/15">/</span>
 
-                  <span className="text-[#c8ff42]/60">
+                  <span className="text-[#2ee59d]/60">
                     {event.title}
                   </span>
                 </div>
@@ -153,13 +153,13 @@ export default function EventDetailClient({ event }: EventDetailClientProps) {
               <div className="relative mt-10 overflow-hidden rounded border border-white/[0.08] bg-[#07100c]/65 p-7 backdrop-blur-xl md:p-10">
 
                 {/* Corner brackets */}
-                <div className="absolute left-0 top-0 h-12 w-12 border-l border-t border-[#c8ff42]/35" />
-                <div className="absolute right-0 top-0 h-12 w-12 border-r border-t border-[#c8ff42]/35" />
-                <div className="absolute bottom-0 left-0 h-12 w-12 border-b border-l border-[#c8ff42]/20" />
-                <div className="absolute bottom-0 right-0 h-12 w-12 border-b border-r border-[#c8ff42]/20" />
+                <div className="absolute left-0 top-0 h-12 w-12 border-l border-t border-[#2ee59d]/35" />
+                <div className="absolute right-0 top-0 h-12 w-12 border-r border-t border-[#2ee59d]/35" />
+                <div className="absolute bottom-0 left-0 h-12 w-12 border-b border-l border-[#2ee59d]/20" />
+                <div className="absolute bottom-0 right-0 h-12 w-12 border-b border-r border-[#2ee59d]/20" />
 
                 {/* Ambient glow */}
-                <div className="pointer-events-none absolute right-[10%] top-1/2 h-72 w-72 -translate-y-1/2 rounded-full bg-[#c8ff42]/[0.035] blur-[100px]" />
+                <div className="pointer-events-none absolute right-[10%] top-1/2 h-72 w-72 -translate-y-1/2 rounded-full bg-[#2ee59d]/[0.035] blur-[100px]" />
 
                 <div className="relative">
 
@@ -207,7 +207,7 @@ export default function EventDetailClient({ event }: EventDetailClientProps) {
                       <span className="block font-mono text-[7px] uppercase tracking-[0.18em] text-white/20">
                         EVENT DAY
                       </span>
-                      <span className="mt-1 block font-mono text-xs font-bold text-[#c8ff42]/80">
+                      <span className="mt-1 block font-mono text-xs font-bold text-[#2ee59d]/80">
                         DAY {event.day}
                       </span>
                     </div>
@@ -257,7 +257,7 @@ export default function EventDetailClient({ event }: EventDetailClientProps) {
               <AnimatedSection delay={0.15}>
                 <div className="relative h-full overflow-hidden rounded border border-white/[0.08] bg-[#07100c]/65 p-6 backdrop-blur-xl">
 
-                  <div className="absolute right-0 top-0 h-8 w-8 border-r border-t border-[#c8ff42]/20" />
+                  <div className="absolute right-0 top-0 h-8 w-8 border-r border-t border-[#2ee59d]/20" />
 
                   <Kicker>{"// Event details"}</Kicker>
 
@@ -309,7 +309,7 @@ export default function EventDetailClient({ event }: EventDetailClientProps) {
                         Event Node
                       </span>
 
-                      <span className="text-[#c8ff42]/50">
+                      <span className="text-[#2ee59d]/50">
                         ONLINE
                       </span>
                     </div>
@@ -324,7 +324,7 @@ export default function EventDetailClient({ event }: EventDetailClientProps) {
               <AnimatedSection delay={0.2}>
                 <div className="relative h-full overflow-hidden rounded border border-white/[0.08] bg-[#07100c]/65 p-6 backdrop-blur-xl">
 
-                  <div className="absolute right-0 top-0 h-8 w-8 border-r border-t border-[#c8ff42]/20" />
+                  <div className="absolute right-0 top-0 h-8 w-8 border-r border-t border-[#2ee59d]/20" />
 
                   <Kicker>{"// Rules & guidelines"}</Kicker>
 
@@ -347,7 +347,7 @@ export default function EventDetailClient({ event }: EventDetailClientProps) {
                         }}
                         className="flex items-start gap-3"
                       >
-                        <span className="mt-1 flex h-5 w-5 shrink-0 items-center justify-center rounded border border-[#c8ff42]/20 bg-[#c8ff42]/[0.04] font-mono text-[7px] text-[#c8ff42]/70">
+                        <span className="mt-1 flex h-5 w-5 shrink-0 items-center justify-center rounded border border-[#2ee59d]/20 bg-[#2ee59d]/[0.04] font-mono text-[7px] text-[#2ee59d]/70">
                           {String(i + 1).padStart(2, "0")}
                         </span>
 
@@ -368,14 +368,14 @@ export default function EventDetailClient({ event }: EventDetailClientProps) {
                 <div className="space-y-6">
 
                   {/* Prize */}
-                  <div className="relative overflow-hidden rounded border border-[#c8ff42]/15 bg-[#07100c]/70 p-6 backdrop-blur-xl">
+                  <div className="relative overflow-hidden rounded border border-[#2ee59d]/15 bg-[#07100c]/70 p-6 backdrop-blur-xl">
 
                     <SignalRing
                       className="right-[-10px] top-[-10px] opacity-40"
                       size={90}
                       count={2}
                       duration={3.5}
-                      color="rgba(200,255,66,0.3)"
+                      color="rgba(46,229,157,0.3)"
                     />
 
                     <div className="relative">
@@ -385,7 +385,7 @@ export default function EventDetailClient({ event }: EventDetailClientProps) {
                         Reward Allocation
                       </span>
 
-                      <p className="mt-2 font-display text-2xl font-semibold text-[#c8ff42] [text-shadow:0_0_20px_rgba(200,255,66,.2)]">
+                      <p className="mt-2 font-display text-2xl font-semibold text-[#2ee59d] [text-shadow:0_0_20px_rgba(46,229,157,.2)]">
                         {event.prizes}
                       </p>
                     </div>
@@ -403,10 +403,10 @@ export default function EventDetailClient({ event }: EventDetailClientProps) {
                   {/* Register Block */}
                   {isRegistered ? (
                     <div className="space-y-3">
-                      <div className="flex w-full items-center justify-center gap-2.5 rounded border border-[#c8ff42]/60 bg-[#c8ff42]/10 py-4 font-mono text-xs font-bold uppercase tracking-[0.18em] text-[#c8ff42] shadow-[0_0_25px_rgba(200,255,66,0.15)]">
+                      <div className="flex w-full items-center justify-center gap-2.5 rounded border border-[#2ee59d]/60 bg-[#2ee59d]/10 py-4 font-mono text-xs font-bold uppercase tracking-[0.18em] text-[#2ee59d] shadow-[0_0_25px_rgba(46,229,157,0.15)]">
                         <span className="relative flex h-2 w-2">
-                          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#c8ff42] opacity-75" />
-                          <span className="relative inline-flex h-2 w-2 rounded-full bg-[#c8ff42]" />
+                          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#2ee59d] opacity-75" />
+                          <span className="relative inline-flex h-2 w-2 rounded-full bg-[#2ee59d]" />
                         </span>
                         ✓ REGISTERED SUCCESSFULLY
                       </div>
@@ -415,7 +415,7 @@ export default function EventDetailClient({ event }: EventDetailClientProps) {
                         <span>PASS: VYU26-ACTIVE</span>
                         <Link
                           href="/dashboard"
-                          className="text-[#c8ff42] underline decoration-[#c8ff42]/40 underline-offset-4 transition-colors hover:text-white"
+                          className="text-[#2ee59d] underline decoration-[#2ee59d]/40 underline-offset-4 transition-colors hover:text-white"
                         >
                           View in Dashboard →
                         </Link>
@@ -426,15 +426,15 @@ export default function EventDetailClient({ event }: EventDetailClientProps) {
                       type="button"
                       onClick={handleRegisterClick}
                       disabled={isRegistering}
-                      className="group relative flex w-full cursor-pointer items-center justify-center overflow-hidden border border-[#c8ff42]/50 bg-[#c8ff42]/10 px-6 py-4 font-mono text-xs font-extrabold uppercase tracking-[0.18em] text-[#c8ff42] transition-all duration-300 hover:border-[#c8ff42] hover:bg-[#c8ff42]/20 hover:shadow-[0_0_30px_rgba(200,255,66,0.2)] active:scale-[0.99] disabled:opacity-70"
+                      className="group relative flex w-full cursor-pointer items-center justify-center overflow-hidden border border-[#2ee59d]/50 bg-[#2ee59d]/10 px-6 py-4 font-mono text-xs font-extrabold uppercase tracking-[0.18em] text-[#2ee59d] transition-all duration-300 hover:border-[#2ee59d] hover:bg-[#2ee59d]/20 hover:shadow-[0_0_30px_rgba(46,229,157,0.2)] active:scale-[0.99] disabled:opacity-70"
                     >
                       {/* Button scan */}
-                      <span className="absolute inset-y-0 left-0 w-1/3 -translate-x-full bg-gradient-to-r from-transparent via-[#c8ff42]/30 to-transparent transition-transform duration-700 group-hover:translate-x-[400%]" />
+                      <span className="absolute inset-y-0 left-0 w-1/3 -translate-x-full bg-gradient-to-r from-transparent via-[#2ee59d]/30 to-transparent transition-transform duration-700 group-hover:translate-x-[400%]" />
 
                       <span className="relative z-10 flex items-center gap-2">
                         {isRegistering ? (
                           <>
-                            <span className="inline-block h-3.5 w-3.5 animate-spin rounded-full border-2 border-[#c8ff42] border-t-transparent" />
+                            <span className="inline-block h-3.5 w-3.5 animate-spin rounded-full border-2 border-[#2ee59d] border-t-transparent" />
                             CONFIRMING PROTOCOL...
                           </>
                         ) : (
@@ -461,12 +461,12 @@ export default function EventDetailClient({ event }: EventDetailClientProps) {
 
                 <div className="flex items-center gap-3">
                   <span className="relative flex h-2 w-2">
-                    <span className="absolute h-full w-full animate-ping rounded-full bg-[#c8ff42] opacity-30" />
-                    <span className="relative h-2 w-2 rounded-full bg-[#c8ff42] shadow-[0_0_9px_#c8ff42]" />
+                    <span className="absolute h-full w-full animate-ping rounded-full bg-[#2ee59d] opacity-30" />
+                    <span className="relative h-2 w-2 rounded-full bg-[#2ee59d] shadow-[0_0_9px_#2ee59d]" />
                   </span>
 
                   <div>
-                    <span className="block font-mono text-[8px] uppercase tracking-[0.18em] text-[#c8ff42]/65">
+                    <span className="block font-mono text-[8px] uppercase tracking-[0.18em] text-[#2ee59d]/65">
                       Event Protocol Active
                     </span>
 
@@ -486,14 +486,14 @@ export default function EventDetailClient({ event }: EventDetailClientProps) {
 
                   <span>
                     STATUS:{" "}
-                    <span className="text-[#c8ff42]/50">
+                    <span className="text-[#2ee59d]/50">
                       {event.status}
                     </span>
                   </span>
 
                   <span>
                     ACCESS:{" "}
-                    <span className="text-[#c8ff42]/50">
+                    <span className="text-[#2ee59d]/50">
                       PUBLIC
                     </span>
                   </span>
@@ -524,22 +524,22 @@ export default function EventDetailClient({ event }: EventDetailClientProps) {
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, y: 10 }}
                 transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-                className="relative z-10 w-full max-w-lg overflow-hidden rounded border border-[#c8ff42]/40 bg-[#06100b]/95 p-6 shadow-[0_0_80px_rgba(200,255,66,0.18)] backdrop-blur-2xl md:p-8"
+                className="relative z-10 w-full max-w-lg overflow-hidden rounded border border-[#2ee59d]/40 bg-[#06100b]/95 p-6 shadow-[0_0_80px_rgba(46,229,157,0.18)] backdrop-blur-2xl md:p-8"
               >
                 {/* Corner brackets */}
-                <div className="absolute left-0 top-0 h-6 w-6 border-l-2 border-t-2 border-[#c8ff42]" />
-                <div className="absolute right-0 top-0 h-6 w-6 border-r-2 border-t-2 border-[#c8ff42]" />
-                <div className="absolute bottom-0 left-0 h-6 w-6 border-b-2 border-l-2 border-[#c8ff42]" />
-                <div className="absolute bottom-0 right-0 h-6 w-6 border-b-2 border-r-2 border-[#c8ff42]" />
+                <div className="absolute left-0 top-0 h-6 w-6 border-l-2 border-t-2 border-[#2ee59d]" />
+                <div className="absolute right-0 top-0 h-6 w-6 border-r-2 border-t-2 border-[#2ee59d]" />
+                <div className="absolute bottom-0 left-0 h-6 w-6 border-b-2 border-l-2 border-[#2ee59d]" />
+                <div className="absolute bottom-0 right-0 h-6 w-6 border-b-2 border-r-2 border-[#2ee59d]" />
 
                 {/* Holographic icon */}
-                <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-[#c8ff42]/40 bg-[#c8ff42]/10 text-3xl text-[#c8ff42] shadow-[0_0_30px_rgba(200,255,66,0.3)]">
+                <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-[#2ee59d]/40 bg-[#2ee59d]/10 text-3xl text-[#2ee59d] shadow-[0_0_30px_rgba(46,229,157,0.3)]">
                   ✓
                 </div>
 
                 {/* Status text */}
                 <div className="mt-5 text-center">
-                  <span className="font-mono text-[9px] uppercase tracking-[0.24em] text-[#c8ff42]/70">
+                  <span className="font-mono text-[9px] uppercase tracking-[0.24em] text-[#2ee59d]/70">
                     PROTOCOL CONFIRMED // ENLISTMENT COMPLETE
                   </span>
 
@@ -561,7 +561,7 @@ export default function EventDetailClient({ event }: EventDetailClientProps) {
                   </div>
                   <div className="flex justify-between border-b border-white/[0.06] py-2">
                     <span className="text-white/30 uppercase">EVENT</span>
-                    <span className="text-[#c8ff42]">{event.title}</span>
+                    <span className="text-[#2ee59d]">{event.title}</span>
                   </div>
                   <div className="flex justify-between border-b border-white/[0.06] py-2">
                     <span className="text-white/30 uppercase">TIMING</span>
@@ -569,7 +569,7 @@ export default function EventDetailClient({ event }: EventDetailClientProps) {
                   </div>
                   <div className="flex justify-between pt-2">
                     <span className="text-white/30 uppercase">STATUS</span>
-                    <span className="font-bold text-[#c8ff42]">PASS ACTIVE // SEATS RESERVED</span>
+                    <span className="font-bold text-[#2ee59d]">PASS ACTIVE // SEATS RESERVED</span>
                   </div>
                 </div>
 
@@ -577,7 +577,7 @@ export default function EventDetailClient({ event }: EventDetailClientProps) {
                 <div className="mt-6 flex flex-col gap-3 sm:flex-row">
                   <Link
                     href="/dashboard"
-                    className="flex-1 rounded border border-[#c8ff42] bg-[#c8ff42] py-3 text-center font-mono text-xs font-bold uppercase tracking-[0.16em] text-[#06100b] shadow-[0_0_20px_rgba(200,255,66,0.3)] transition-all hover:bg-[#d8ff66]"
+                    className="flex-1 rounded border border-[#2ee59d] bg-[#2ee59d] py-3 text-center font-mono text-xs font-bold uppercase tracking-[0.16em] text-[#06100b] shadow-[0_0_20px_rgba(46,229,157,0.3)] transition-all hover:bg-[#d8ff66]"
                   >
                     Go to Dashboard →
                   </Link>

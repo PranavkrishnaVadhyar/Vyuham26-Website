@@ -54,7 +54,7 @@ function ScheduleBackground() {
         className="absolute inset-0 opacity-[0.08]"
         style={{
           backgroundImage:
-            "linear-gradient(rgba(200,255,66,0.10) 1px, transparent 1px), linear-gradient(90deg, rgba(200,255,66,0.10) 1px, transparent 1px)",
+            "linear-gradient(rgba(46,229,157,0.10) 1px, transparent 1px), linear-gradient(90deg, rgba(46,229,157,0.10) 1px, transparent 1px)",
           backgroundSize: "72px 72px",
         }}
       />
@@ -283,7 +283,7 @@ function ScheduleContent() {
               </span>
 
               {item.accent && (
-                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-green shadow-[0_0_8px_rgba(200,255,66,0.8)]" />
+                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-green shadow-[0_0_8px_rgba(46,229,157,0.8)]" />
               )}
             </div>
 
@@ -361,7 +361,7 @@ function ScheduleContent() {
                     <>
                       <motion.span
                         layoutId="day-indicator"
-                        className="absolute left-0 top-0 h-0.75 w-20 bg-green shadow-[0_0_14px_rgba(200,255,66,0.5)]"
+                        className="absolute left-0 top-0 h-0.75 w-20 bg-green shadow-[0_0_14px_rgba(46,229,157,0.5)]"
                         transition={{
                           type: "spring",
                           stiffness: 320,
@@ -483,7 +483,7 @@ function ScheduleContent() {
                       setSelectedStream(stream.id)
                     }
                     className={`relative cursor-pointer overflow-hidden border px-3 py-1.5 font-mono text-[9px] uppercase tracking-[0.12em] transition-all ${active
-                        ? "border-green/50 bg-green text-ink shadow-[0_0_16px_rgba(200,255,66,0.18)]"
+                        ? "border-green/50 bg-green text-ink shadow-[0_0_16px_rgba(46,229,157,0.18)]"
                         : "border-line text-muted hover:border-paper/30 hover:text-paper"
                       }`}
                   >
@@ -792,7 +792,7 @@ function ScheduleContent() {
                   className="h-full w-full"
                   style={{
                     backgroundImage:
-                      "linear-gradient(90deg, rgba(200,255,66,0.3) 1px, transparent 1px), linear-gradient(rgba(200,255,66,0.3) 1px, transparent 1px)",
+                      "linear-gradient(90deg, rgba(46,229,157,0.3) 1px, transparent 1px), linear-gradient(rgba(46,229,157,0.3) 1px, transparent 1px)",
                     backgroundSize: "20px 20px",
                   }}
                 />

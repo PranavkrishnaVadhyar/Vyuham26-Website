@@ -133,7 +133,7 @@ export default function GalleryPage() {
             className="absolute left-1/2 top-[18%] h-[600px] w-[600px] -translate-x-1/2 rounded-full"
             style={{
               background:
-                "radial-gradient(circle, rgba(200,255,66,.055), rgba(0,220,255,.018) 38%, transparent 70%)",
+                "radial-gradient(circle, rgba(46,229,157,.055), rgba(0,220,255,.018) 38%, transparent 70%)",
               filter: "blur(30px)",
             }}
             animate={
@@ -191,7 +191,7 @@ export default function GalleryPage() {
                   <div className="flex items-center gap-3">
                     <span className="relative flex h-2 w-2">
                       <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green opacity-50" />
-                      <span className="relative inline-flex h-2 w-2 rounded-full bg-green shadow-[0_0_10px_rgba(200,255,66,.9)]" />
+                      <span className="relative inline-flex h-2 w-2 rounded-full bg-green shadow-[0_0_10px_rgba(46,229,157,.9)]" />
                     </span>
 
                     <span className="font-mono text-[9px] uppercase tracking-[0.25em] text-green">
@@ -218,7 +218,7 @@ export default function GalleryPage() {
 
                     <h1 className="mt-5 max-w-4xl font-display text-[clamp(52px,8vw,108px)] font-semibold leading-[0.82] tracking-[-0.04em]">
                       THE{" "}
-                      <em className="not-italic text-green [text-shadow:0_0_35px_rgba(200,255,66,.18)]">
+                      <em className="not-italic text-green [text-shadow:0_0_35px_rgba(46,229,157,.18)]">
                         GALLERY.
                       </em>
                     </h1>
@@ -291,7 +291,7 @@ export default function GalleryPage() {
                       className="absolute left-1/2 top-1/2 h-48 w-48 -translate-x-1/2 -translate-y-1/2 rounded-full"
                       style={{
                         background:
-                          "radial-gradient(circle, rgba(200,255,66,.14), transparent 70%)",
+                          "radial-gradient(circle, rgba(46,229,157,.14), transparent 70%)",
                       }}
                       animate={
                         reduceMotion
@@ -431,7 +431,7 @@ export default function GalleryPage() {
                               y: -4,
                             }
                       }
-                      className={`group relative overflow-hidden rounded border border-white/10 bg-[#070a0b] transition-all duration-500 hover:border-green/40 hover:shadow-[0_0_35px_rgba(200,255,66,.08)] ${
+                      className={`group relative overflow-hidden rounded border border-white/10 bg-[#070a0b] transition-all duration-500 hover:border-green/40 hover:shadow-[0_0_35px_rgba(46,229,157,.08)] ${
                         isPortrait
                           ? "aspect-[3/4]"
                           : isSquare
@@ -451,7 +451,7 @@ export default function GalleryPage() {
                         className="absolute left-1/2 top-1/2 h-24 w-24 -translate-x-1/2 -translate-y-1/2 rounded-full opacity-40 blur-2xl transition-all duration-700 group-hover:scale-150 group-hover:opacity-70"
                         style={{
                           background:
-                            "radial-gradient(circle, rgba(200,255,66,.22), transparent 70%)",
+                            "radial-gradient(circle, rgba(46,229,157,.22), transparent 70%)",
                         }}
                       />
 

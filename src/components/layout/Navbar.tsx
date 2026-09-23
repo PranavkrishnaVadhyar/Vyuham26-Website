@@ -34,14 +34,14 @@ export default function Navbar() {
       ========================================================== */}
 
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute left-1/2 top-0 h-20 w-80 -translate-x-1/2 bg-[#c8ff42]/[0.025] blur-3xl" />
+        <div className="absolute left-1/2 top-0 h-20 w-80 -translate-x-1/2 bg-[#2ee59d]/[0.025] blur-3xl" />
 
         <div
           className="absolute inset-0 opacity-[0.025]"
           style={{
             backgroundImage: `
-              linear-gradient(rgba(200,255,66,.5) 1px, transparent 1px),
-              linear-gradient(90deg, rgba(200,255,66,.5) 1px, transparent 1px)
+              linear-gradient(rgba(46,229,157,.5) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(46,229,157,.5) 1px, transparent 1px)
             `,
             backgroundSize: "32px 32px",
           }}
@@ -86,7 +86,7 @@ export default function Navbar() {
                 repeat: Infinity,
                 ease: "easeInOut",
               }}
-              className="absolute inset-0 rounded-full border border-[#c8ff42]/20"
+              className="absolute inset-0 rounded-full border border-[#2ee59d]/20"
             />
 
             <div className="absolute inset-1 rounded-full border border-white/[0.05]" />
@@ -98,7 +98,7 @@ export default function Navbar() {
               height={48}
               priority
               loading="eager"
-              className="relative z-10 h-10 w-10 object-contain drop-shadow-[0_0_16px_rgba(200,255,66,.35)] transition-all duration-300 group-hover:scale-105 group-hover:drop-shadow-[0_0_24px_rgba(200,255,66,.55)] md:h-11 md:w-11"
+              className="relative z-10 h-10 w-10 object-contain drop-shadow-[0_0_16px_rgba(46,229,157,.35)] transition-all duration-300 group-hover:scale-105 group-hover:drop-shadow-[0_0_24px_rgba(46,229,157,.55)] md:h-11 md:w-11"
             />
           </div>
 
@@ -109,7 +109,7 @@ export default function Navbar() {
                 VYUHAM
               </span>
 
-              <span className="font-display text-[17px] font-bold tracking-[0.16em] text-[#c8ff42] [text-shadow:0_0_14px_rgba(200,255,66,.3)]">
+              <span className="font-display text-[17px] font-bold tracking-[0.16em] text-[#2ee59d] [text-shadow:0_0_14px_rgba(46,229,157,.3)]">
                 &apos;26
               </span>
             </div>
@@ -135,7 +135,7 @@ export default function Navbar() {
                 {active && (
                   <motion.div
                     layoutId="navbar-active"
-                    className="absolute inset-0 rounded bg-[#c8ff42]/[0.045]"
+                    className="absolute inset-0 rounded bg-[#2ee59d]/[0.045]"
                     transition={{
                       type: "spring",
                       stiffness: 350,
@@ -150,15 +150,15 @@ export default function Navbar() {
                     scaleX: active ? 1 : 0,
                     opacity: active ? 1 : 0,
                   }}
-                  className="absolute bottom-0 left-3 right-3 h-px origin-center bg-[#c8ff42] shadow-[0_0_8px_rgba(200,255,66,.7)]"
+                  className="absolute bottom-0 left-3 right-3 h-px origin-center bg-[#2ee59d] shadow-[0_0_8px_rgba(46,229,157,.7)]"
                 />
 
                 <span className="relative flex items-center gap-2">
                   <span
                     className={`font-mono text-[7px] transition-colors ${
                       active
-                        ? "text-[#c8ff42]/60"
-                        : "text-white/15 group-hover:text-[#c8ff42]/40"
+                        ? "text-[#2ee59d]/60"
+                        : "text-white/15 group-hover:text-[#2ee59d]/40"
                     }`}
                   >
                     {link.code}
@@ -167,7 +167,7 @@ export default function Navbar() {
                   <span
                     className={`font-mono text-[10px] uppercase tracking-[0.13em] transition-colors ${
                       active
-                        ? "text-[#c8ff42]"
+                        ? "text-[#2ee59d]"
                         : "text-white/45 group-hover:text-paper"
                     }`}
                   >
@@ -188,8 +188,8 @@ export default function Navbar() {
           {/* Network status */}
           <div className="mr-1 flex items-center gap-2 border-r border-white/[0.07] pr-4">
             <span className="relative flex h-1.5 w-1.5">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#c8ff42] opacity-40" />
-              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-[#c8ff42] shadow-[0_0_8px_#c8ff42]" />
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#2ee59d] opacity-40" />
+              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-[#2ee59d] shadow-[0_0_8px_#2ee59d]" />
             </span>
 
             <span className="font-mono text-[7px] uppercase tracking-[0.16em] text-white/25">
@@ -201,9 +201,9 @@ export default function Navbar() {
             <div className="flex items-center gap-3">
               <Link
                 href="/dashboard"
-                className="group relative inline-flex items-center gap-2 overflow-hidden border border-[#c8ff42]/40 bg-[#c8ff42]/[0.08] px-3.5 py-2 font-mono text-[9px] font-bold uppercase tracking-[0.15em] text-[#c8ff42] no-underline transition-all duration-300 hover:border-[#c8ff42] hover:bg-[#c8ff42]/[0.16]"
+                className="group relative inline-flex items-center gap-2 overflow-hidden border border-[#2ee59d]/40 bg-[#2ee59d]/[0.08] px-3.5 py-2 font-mono text-[9px] font-bold uppercase tracking-[0.15em] text-[#2ee59d] no-underline transition-all duration-300 hover:border-[#2ee59d] hover:bg-[#2ee59d]/[0.16]"
               >
-                <span className="h-1.5 w-1.5 rounded-full bg-[#c8ff42]" />
+                <span className="h-1.5 w-1.5 rounded-full bg-[#2ee59d]" />
                 <span className="max-w-[120px] truncate">{user?.name || "OPERATIVE"}</span>
                 <span className="text-white/40">// DASHBOARD</span>
               </Link>
@@ -220,17 +220,17 @@ export default function Navbar() {
             <>
               <Link
                 href="/login"
-                className="font-mono text-[9px] font-semibold uppercase tracking-[0.15em] text-white/40 no-underline transition-colors hover:text-[#c8ff42]"
+                className="font-mono text-[9px] font-semibold uppercase tracking-[0.15em] text-white/40 no-underline transition-colors hover:text-[#2ee59d]"
               >
                 Login
               </Link>
 
               <Link
                 href="/signup"
-                className="group relative inline-flex items-center overflow-hidden border border-[#c8ff42]/40 bg-[#c8ff42]/[0.08] px-4 py-2.5 font-mono text-[9px] font-extrabold uppercase tracking-[0.17em] text-[#c8ff42] no-underline transition-all duration-300 hover:border-[#c8ff42]/70 hover:bg-[#c8ff42]/[0.14] hover:shadow-[0_0_25px_rgba(200,255,66,.12)]"
+                className="group relative inline-flex items-center overflow-hidden border border-[#2ee59d]/40 bg-[#2ee59d]/[0.08] px-4 py-2.5 font-mono text-[9px] font-extrabold uppercase tracking-[0.17em] text-[#2ee59d] no-underline transition-all duration-300 hover:border-[#2ee59d]/70 hover:bg-[#2ee59d]/[0.14] hover:shadow-[0_0_25px_rgba(46,229,157,.12)]"
               >
                 {/* Button scan */}
-                <span className="absolute inset-y-0 left-0 w-1/3 -translate-x-full bg-gradient-to-r from-transparent via-[#c8ff42]/20 to-transparent transition-transform duration-700 group-hover:translate-x-[400%]" />
+                <span className="absolute inset-y-0 left-0 w-1/3 -translate-x-full bg-gradient-to-r from-transparent via-[#2ee59d]/20 to-transparent transition-transform duration-700 group-hover:translate-x-[400%]" />
 
                 <span className="relative">
                   Sign Up
@@ -331,15 +331,15 @@ export default function Navbar() {
                 className="pointer-events-none absolute inset-0 opacity-[0.04]"
                 style={{
                   backgroundImage: `
-                    linear-gradient(rgba(200,255,66,.5) 1px, transparent 1px),
-                    linear-gradient(90deg, rgba(200,255,66,.5) 1px, transparent 1px)
+                    linear-gradient(rgba(46,229,157,.5) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(46,229,157,.5) 1px, transparent 1px)
                   `,
                   backgroundSize: "42px 42px",
                 }}
               />
 
               {/* Green atmospheric glow */}
-              <div className="pointer-events-none absolute -right-32 top-10 h-80 w-80 rounded-full bg-[#c8ff42]/[0.04] blur-[100px]" />
+              <div className="pointer-events-none absolute -right-32 top-10 h-80 w-80 rounded-full bg-[#2ee59d]/[0.04] blur-[100px]" />
 
               <div className="relative flex h-full flex-col px-6 pb-8 pt-8">
 
@@ -351,7 +351,7 @@ export default function Navbar() {
                   className="mb-8 flex items-center justify-between border-b border-white/[0.07] pb-5"
                 >
                   <div>
-                    <span className="font-mono text-[8px] uppercase tracking-[0.2em] text-[#c8ff42]/60">
+                    <span className="font-mono text-[8px] uppercase tracking-[0.2em] text-[#2ee59d]/60">
                       VYUHAM&apos;26
                     </span>
 
@@ -361,7 +361,7 @@ export default function Navbar() {
                   </div>
 
                   <div className="flex items-center gap-2">
-                    <span className="h-1.5 w-1.5 rounded-full bg-[#c8ff42] shadow-[0_0_8px_#c8ff42]" />
+                    <span className="h-1.5 w-1.5 rounded-full bg-[#2ee59d] shadow-[0_0_8px_#2ee59d]" />
 
                     <span className="font-mono text-[7px] uppercase tracking-[0.15em] text-white/25">
                       ONLINE
@@ -395,7 +395,7 @@ export default function Navbar() {
                           onClick={() => setMobileOpen(false)}
                           className={`group relative flex items-center justify-between overflow-hidden rounded border px-4 py-4 no-underline transition-all ${
                             active
-                              ? "border-[#c8ff42]/25 bg-[#c8ff42]/[0.06]"
+                              ? "border-[#2ee59d]/25 bg-[#2ee59d]/[0.06]"
                               : "border-transparent hover:border-white/[0.08] hover:bg-white/[0.02]"
                           }`}
                         >
@@ -403,7 +403,7 @@ export default function Navbar() {
                             <span
                               className={`font-mono text-[8px] ${
                                 active
-                                  ? "text-[#c8ff42]/70"
+                                  ? "text-[#2ee59d]/70"
                                   : "text-white/20"
                               }`}
                             >
@@ -413,7 +413,7 @@ export default function Navbar() {
                             <span
                               className={`font-display text-xl font-semibold ${
                                 active
-                                  ? "text-[#c8ff42]"
+                                  ? "text-[#2ee59d]"
                                   : "text-paper"
                               }`}
                             >
@@ -424,7 +424,7 @@ export default function Navbar() {
                           <span
                             className={`font-mono text-sm transition-transform duration-300 group-hover:translate-x-1 ${
                               active
-                                ? "text-[#c8ff42]"
+                                ? "text-[#2ee59d]"
                                 : "text-white/20"
                             }`}
                           >
@@ -432,7 +432,7 @@ export default function Navbar() {
                           </span>
 
                           {active && (
-                            <span className="absolute bottom-0 left-0 h-px w-full bg-[#c8ff42] shadow-[0_0_10px_rgba(200,255,66,.7)]" />
+                            <span className="absolute bottom-0 left-0 h-px w-full bg-[#2ee59d] shadow-[0_0_10px_rgba(46,229,157,.7)]" />
                           )}
                         </Link>
                       </motion.div>
@@ -461,7 +461,7 @@ export default function Navbar() {
                         AUTHENTICATION NODE
                       </span>
 
-                      <span className="text-[#c8ff42]/50">
+                      <span className="text-[#2ee59d]/50">
                         READY
                       </span>
                     </div>
@@ -471,10 +471,10 @@ export default function Navbar() {
                         <Link
                           href="/dashboard"
                           onClick={() => setMobileOpen(false)}
-                          className="flex items-center justify-between rounded border border-[#c8ff42]/40 bg-[#c8ff42]/10 p-3.5 font-mono text-[10px] font-bold uppercase tracking-[0.15em] text-[#c8ff42] no-underline"
+                          className="flex items-center justify-between rounded border border-[#2ee59d]/40 bg-[#2ee59d]/10 p-3.5 font-mono text-[10px] font-bold uppercase tracking-[0.15em] text-[#2ee59d] no-underline"
                         >
                           <div className="flex items-center gap-2">
-                            <span className="h-2 w-2 rounded-full bg-[#c8ff42]" />
+                            <span className="h-2 w-2 rounded-full bg-[#2ee59d]" />
                             <span>{user?.name || "OPERATIVE"} // DASHBOARD</span>
                           </div>
                           <span>→</span>
@@ -496,7 +496,7 @@ export default function Navbar() {
                         <Link
                           href="/login"
                           onClick={() => setMobileOpen(false)}
-                          className="inline-flex items-center justify-center rounded border border-white/[0.1] bg-white/[0.02] px-5 py-3.5 font-mono text-[9px] font-extrabold uppercase tracking-[0.15em] text-paper no-underline transition-all hover:border-[#c8ff42]/40 hover:text-[#c8ff42]"
+                          className="inline-flex items-center justify-center rounded border border-white/[0.1] bg-white/[0.02] px-5 py-3.5 font-mono text-[9px] font-extrabold uppercase tracking-[0.15em] text-paper no-underline transition-all hover:border-[#2ee59d]/40 hover:text-[#2ee59d]"
                         >
                           Login
                         </Link>
@@ -504,7 +504,7 @@ export default function Navbar() {
                         <Link
                           href="/signup"
                           onClick={() => setMobileOpen(false)}
-                          className="inline-flex items-center justify-center rounded border border-[#c8ff42]/40 bg-[#c8ff42]/10 px-5 py-3.5 font-mono text-[9px] font-extrabold uppercase tracking-[0.15em] text-[#c8ff42] no-underline transition-all hover:bg-[#c8ff42]/15"
+                          className="inline-flex items-center justify-center rounded border border-[#2ee59d]/40 bg-[#2ee59d]/10 px-5 py-3.5 font-mono text-[9px] font-extrabold uppercase tracking-[0.15em] text-[#2ee59d] no-underline transition-all hover:bg-[#2ee59d]/15"
                         >
                           Sign Up
                           <span className="ml-2 text-sm">
@@ -520,7 +520,7 @@ export default function Navbar() {
                     <span>FUTURE AWAITS</span>
 
                     <span className="flex items-center gap-2">
-                      <span className="h-1 w-1 rounded-full bg-[#c8ff42]/60" />
+                      <span className="h-1 w-1 rounded-full bg-[#2ee59d]/60" />
                       SYSTEM ONLINE
                     </span>
                   </div>

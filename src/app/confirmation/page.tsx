@@ -19,7 +19,7 @@ export default function ConfirmationPage() {
                 </div>
 
                 <div className="relative z-10">
-                  <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border-2 border-green bg-green/10 text-3xl text-green shadow-[0_0_30px_rgba(200,255,66,0.3)]">
+                  <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border-2 border-green bg-green/10 text-3xl text-green shadow-[0_0_30px_rgba(46,229,157,0.3)]">
                     ✓
                   </div>
 

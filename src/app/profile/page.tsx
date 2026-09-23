@@ -67,7 +67,7 @@ export default function ProfilePage() {
             className="absolute left-1/2 top-[20%] h-[560px] w-[560px] -translate-x-1/2 rounded-full"
             style={{
               background:
-                "radial-gradient(circle, rgba(200,255,66,.06), rgba(0,220,255,.018) 40%, transparent 70%)",
+                "radial-gradient(circle, rgba(46,229,157,.06), rgba(0,220,255,.018) 40%, transparent 70%)",
               filter: "blur(28px)",
             }}
             animate={
@@ -125,7 +125,7 @@ export default function ProfilePage() {
                   <div className="flex items-center gap-3">
                     <span className="relative flex h-2 w-2">
                       <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green opacity-40" />
-                      <span className="relative h-2 w-2 rounded-full bg-green shadow-[0_0_12px_rgba(200,255,66,.9)]" />
+                      <span className="relative h-2 w-2 rounded-full bg-green shadow-[0_0_12px_rgba(46,229,157,.9)]" />
                     </span>
 
                     <span className="font-mono text-[9px] uppercase tracking-[0.25em] text-green">
@@ -149,7 +149,7 @@ export default function ProfilePage() {
 
                     <h1 className="mt-3 font-display text-[42px] font-semibold leading-[0.9] tracking-tight md:text-[64px]">
                       OPERATIVE{" "}
-                      <em className="not-italic text-green [text-shadow:0_0_30px_rgba(200,255,66,.22)]">
+                      <em className="not-italic text-green [text-shadow:0_0_30px_rgba(46,229,157,.22)]">
                         PROFILE
                       </em>
                     </h1>
@@ -293,7 +293,7 @@ export default function ProfilePage() {
                         strokeLinecap="round"
                         style={{
                           filter:
-                            "drop-shadow(0 0 5px rgba(200,255,66,.65))",
+                            "drop-shadow(0 0 5px rgba(46,229,157,.65))",
                         }}
                       />
 
@@ -371,7 +371,7 @@ export default function ProfilePage() {
                       </span>
 
                       <span className="flex items-center gap-2 font-semibold text-green">
-                        <span className="h-1.5 w-1.5 rounded-full bg-green shadow-[0_0_8px_rgba(200,255,66,.7)]" />
+                        <span className="h-1.5 w-1.5 rounded-full bg-green shadow-[0_0_8px_rgba(46,229,157,.7)]" />
                         ACTIVE
                       </span>
                     </div>
@@ -626,7 +626,7 @@ export default function ProfilePage() {
                             animate={{ opacity: 1, x: 0 }}
                             className="flex items-center gap-2 font-mono text-[9px] text-green"
                           >
-                            <span className="h-1.5 w-1.5 rounded-full bg-green shadow-[0_0_8px_rgba(200,255,66,.8)]" />
+                            <span className="h-1.5 w-1.5 rounded-full bg-green shadow-[0_0_8px_rgba(46,229,157,.8)]" />
                             DOSSIER RECORD UPDATED
                           </motion.div>
                         ) : (

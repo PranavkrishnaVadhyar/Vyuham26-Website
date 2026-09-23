@@ -109,8 +109,8 @@ export default function SupportPage() {
             className="absolute inset-0 opacity-[0.035]"
             style={{
               backgroundImage: `
-                linear-gradient(rgba(200,255,66,.45) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(200,255,66,.45) 1px, transparent 1px)
+                linear-gradient(rgba(46,229,157,.45) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(46,229,157,.45) 1px, transparent 1px)
               `,
               backgroundSize: "55px 55px",
             }}
@@ -185,7 +185,7 @@ export default function SupportPage() {
                     </div>
 
                     <div className="mt-3 flex items-center gap-3">
-                      <span className="h-2 w-2 rounded-full bg-green shadow-[0_0_12px_rgba(200,255,66,.9)]" />
+                      <span className="h-2 w-2 rounded-full bg-green shadow-[0_0_12px_rgba(46,229,157,.9)]" />
 
                       <span className="font-mono text-sm font-semibold text-green">
                         ALL SYSTEMS OPERATIONAL
@@ -366,7 +366,7 @@ export default function SupportPage() {
                         }}
                         className="flex min-h-[330px] flex-col items-center justify-center text-center"
                       >
-                        <div className="flex h-16 w-16 items-center justify-center rounded-full border border-green/30 bg-green/5 font-mono text-2xl text-green shadow-[0_0_30px_rgba(200,255,66,.1)]">
+                        <div className="flex h-16 w-16 items-center justify-center rounded-full border border-green/30 bg-green/5 font-mono text-2xl text-green shadow-[0_0_30px_rgba(46,229,157,.1)]">
                           ✓
                         </div>
 
@@ -628,7 +628,7 @@ export default function SupportPage() {
               <div className="mt-7 flex flex-col gap-3 border-t border-line/50 pt-5 sm:flex-row sm:items-center sm:justify-between">
 
                 <div className="flex items-center gap-2">
-                  <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-green shadow-[0_0_8px_rgba(200,255,66,.8)]" />
+                  <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-green shadow-[0_0_8px_rgba(46,229,157,.8)]" />
 
                   <span className="font-mono text-[9px] uppercase tracking-wider text-muted">
                     VYUHAM&apos;26 / SUPPORT NETWORK

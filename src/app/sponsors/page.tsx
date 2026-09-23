@@ -106,8 +106,8 @@ export default function SponsorsPage() {
             className="absolute inset-0 opacity-[0.035]"
             style={{
               backgroundImage: `
-                linear-gradient(rgba(200,255,66,.45) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(200,255,66,.45) 1px, transparent 1px)
+                linear-gradient(rgba(46,229,157,.45) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(46,229,157,.45) 1px, transparent 1px)
               `,
               backgroundSize: "55px 55px",
             }}
@@ -208,7 +208,7 @@ export default function SponsorsPage() {
                         </div>
 
                         <div className="mt-2 h-px bg-line">
-                          <div className="h-full w-full bg-green shadow-[0_0_8px_rgba(200,255,66,.7)]" />
+                          <div className="h-full w-full bg-green shadow-[0_0_8px_rgba(46,229,157,.7)]" />
                         </div>
                       </div>
 
@@ -345,7 +345,7 @@ export default function SponsorsPage() {
 
                                 <div className="absolute inset-[-7px] rounded-full border border-dashed border-green/10" />
 
-                                <div className="h-2 w-2 rounded-full bg-green/40 shadow-[0_0_12px_rgba(200,255,66,.4)]" />
+                                <div className="h-2 w-2 rounded-full bg-green/40 shadow-[0_0_12px_rgba(46,229,157,.4)]" />
                               </div>
 
                               <span className="mt-5 font-mono text-[9px] uppercase tracking-[0.15em] text-muted/60">
@@ -497,7 +497,7 @@ export default function SponsorsPage() {
           <div className="flex flex-col gap-3 border-t border-line/50 pt-5 sm:flex-row sm:items-center sm:justify-between">
 
             <div className="flex items-center gap-2">
-              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-green shadow-[0_0_8px_rgba(200,255,66,.8)]" />
+              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-green shadow-[0_0_8px_rgba(46,229,157,.8)]" />
 
               <span className="font-mono text-[9px] uppercase tracking-wider text-muted">
                 VYUHAM&apos;26 / ALLIANCE NETWORK

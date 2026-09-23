@@ -29,7 +29,7 @@ export default function CertificateGeneratorPage() {
 
             {/* Certificate Canvas Mockup */}
             <AnimatedSection delay={0.15}>
-              <div className="glass-card mt-8 relative overflow-hidden border-2 border-green/50 p-8 text-center md:p-12 shadow-[0_0_40px_rgba(200,255,66,0.1)]">
+              <div className="glass-card mt-8 relative overflow-hidden border-2 border-green/50 p-8 text-center md:p-12 shadow-[0_0_40px_rgba(46,229,157,0.1)]">
                 <div className="border border-line p-8 md:p-10 rounded">
                   <span className="font-mono text-xs text-green tracking-widest block uppercase">
                     DIGITAL UNIVERSITY KERALA — VYUHAM &apos;26

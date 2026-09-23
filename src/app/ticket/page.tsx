@@ -41,7 +41,7 @@ export default function TicketPage() {
             className="absolute left-1/2 top-[20%] h-[600px] w-[600px] -translate-x-1/2 rounded-full"
             style={{
               background:
-                "radial-gradient(circle, rgba(200,255,66,.07), rgba(0,220,255,.018) 40%, transparent 70%)",
+                "radial-gradient(circle, rgba(46,229,157,.07), rgba(0,220,255,.018) 40%, transparent 70%)",
               filter: "blur(30px)",
             }}
             animate={
@@ -97,7 +97,7 @@ export default function TicketPage() {
                 <div className="mb-5 flex items-center justify-center gap-3">
                   <span className="relative flex h-2 w-2">
                     <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green opacity-40" />
-                    <span className="relative h-2 w-2 rounded-full bg-green shadow-[0_0_12px_rgba(200,255,66,.9)]" />
+                    <span className="relative h-2 w-2 rounded-full bg-green shadow-[0_0_12px_rgba(46,229,157,.9)]" />
                   </span>
 
                   <span className="font-mono text-[9px] uppercase tracking-[0.25em] text-green">
@@ -109,7 +109,7 @@ export default function TicketPage() {
 
                 <h1 className="mt-3 font-display text-[40px] font-semibold leading-[0.9] tracking-tight md:text-[52px]">
                   DIGITAL{" "}
-                  <em className="not-italic text-green [text-shadow:0_0_30px_rgba(200,255,66,.2)]">
+                  <em className="not-italic text-green [text-shadow:0_0_30px_rgba(46,229,157,.2)]">
                     TICKET
                   </em>
                 </h1>
@@ -135,7 +135,7 @@ export default function TicketPage() {
 
             <AnimatedSection delay={0.15}>
               <SealResolve>
-                <div className="relative mt-10 overflow-hidden rounded border border-green/20 bg-[#070a0b]/95 shadow-[0_0_60px_rgba(200,255,66,.04)]">
+                <div className="relative mt-10 overflow-hidden rounded border border-green/20 bg-[#070a0b]/95 shadow-[0_0_60px_rgba(46,229,157,.04)]">
 
                   {/* ==================================================
                       TICKET CORNERS
@@ -170,7 +170,7 @@ export default function TicketPage() {
                         </div>
 
                         <div className="mt-1 flex items-center gap-2 font-mono text-[9px] font-bold text-green">
-                          <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-green shadow-[0_0_8px_rgba(200,255,66,.8)]" />
+                          <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-green shadow-[0_0_8px_rgba(46,229,157,.8)]" />
                           VALID
                         </div>
                       </div>
@@ -199,7 +199,7 @@ export default function TicketPage() {
                       className="absolute h-64 w-64 rounded-full"
                       style={{
                         background:
-                          "radial-gradient(circle, rgba(200,255,66,.13), transparent 68%)",
+                          "radial-gradient(circle, rgba(46,229,157,.13), transparent 68%)",
                         filter: "blur(20px)",
                       }}
                       animate={
@@ -241,7 +241,7 @@ export default function TicketPage() {
                       <div className="absolute -bottom-3 -left-3 h-8 w-8 border-b-2 border-l-2 border-green" />
                       <div className="absolute -bottom-3 -right-3 h-8 w-8 border-b-2 border-r-2 border-green" />
 
-                      <div className="rounded-lg border border-green/60 bg-paper p-4 shadow-[0_0_35px_rgba(200,255,66,.18)]">
+                      <div className="rounded-lg border border-green/60 bg-paper p-4 shadow-[0_0_35px_rgba(46,229,157,.18)]">
 
                         <div className="relative flex h-48 w-48 flex-col items-center justify-center overflow-hidden border-2 border-black p-3">
 
@@ -270,7 +270,7 @@ export default function TicketPage() {
                           {/* QR scan beam */}
                           {!reduceMotion && (
                             <motion.div
-                              className="absolute left-0 h-0.5 w-full bg-green shadow-[0_0_10px_rgba(200,255,66,.9)]"
+                              className="absolute left-0 h-0.5 w-full bg-green shadow-[0_0_10px_rgba(46,229,157,.9)]"
                               initial={{ top: "5%" }}
                               animate={{ top: "95%" }}
                               transition={{

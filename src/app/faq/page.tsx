@@ -98,7 +98,7 @@ function FaqItem({
         duration: 0.45,
         delay: Math.min(index * 0.035, 0.3),
       }}
-      className={`group relative border-b border-white/[0.07] ${open ? "border-[#c8ff42]/20" : ""
+      className={`group relative border-b border-white/[0.07] ${open ? "border-[#2ee59d]/20" : ""
         }`}
     >
       {/* Active energy line */}
@@ -109,7 +109,7 @@ function FaqItem({
           opacity: open ? 1 : 0,
         }}
         transition={{ duration: 0.35 }}
-        className="absolute bottom-0 left-0 h-px w-full origin-left bg-[#c8ff42] shadow-[0_0_12px_rgba(200,255,66,.7)]"
+        className="absolute bottom-0 left-0 h-px w-full origin-left bg-[#2ee59d] shadow-[0_0_12px_rgba(46,229,157,.7)]"
       />
 
       <button
@@ -120,7 +120,7 @@ function FaqItem({
       >
         {/* Index */}
         <span
-          className={`w-7 shrink-0 font-mono text-[9px] tracking-[0.15em] transition-colors ${open ? "text-[#c8ff42]" : "text-white/25"
+          className={`w-7 shrink-0 font-mono text-[9px] tracking-[0.15em] transition-colors ${open ? "text-[#2ee59d]" : "text-white/25"
             }`}
         >
           {String(index + 1).padStart(2, "0")}
@@ -130,7 +130,7 @@ function FaqItem({
         <span className="relative flex h-5 w-5 shrink-0 items-center justify-center">
           <span
             className={`absolute h-1.5 w-1.5 rounded-full transition-all duration-300 ${open
-                ? "bg-[#c8ff42] shadow-[0_0_10px_rgba(200,255,66,.9)]"
+                ? "bg-[#2ee59d] shadow-[0_0_10px_rgba(46,229,157,.9)]"
                 : "bg-white/20"
               }`}
           />
@@ -139,7 +139,7 @@ function FaqItem({
             <motion.span
               initial={{ scale: 0, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              className="absolute h-5 w-5 rounded-full border border-[#c8ff42]/30"
+              className="absolute h-5 w-5 rounded-full border border-[#2ee59d]/30"
             />
           )}
         </span>
@@ -147,8 +147,8 @@ function FaqItem({
         {/* Question */}
         <span
           className={`flex-1 font-display text-sm font-semibold tracking-tight transition-colors md:text-base ${open
-              ? "text-[#c8ff42]"
-              : "text-paper group-hover:text-[#c8ff42]"
+              ? "text-[#2ee59d]"
+              : "text-paper group-hover:text-[#2ee59d]"
             }`}
         >
           {question}
@@ -169,8 +169,8 @@ function FaqItem({
             ease: "easeOut",
           }}
           className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full border font-mono text-lg transition-colors ${open
-              ? "border-[#c8ff42]/40 bg-[#c8ff42]/10 text-[#c8ff42]"
-              : "border-white/10 bg-white/[0.02] text-white/40 group-hover:border-[#c8ff42]/30 group-hover:text-[#c8ff42]"
+              ? "border-[#2ee59d]/40 bg-[#2ee59d]/10 text-[#2ee59d]"
+              : "border-white/10 bg-white/[0.02] text-white/40 group-hover:border-[#2ee59d]/30 group-hover:text-[#2ee59d]"
             }`}
         >
           +
@@ -207,7 +207,7 @@ function FaqItem({
             }}
             className="overflow-hidden"
           >
-            <div className="relative ml-[3.1rem] mr-3 mb-7 overflow-hidden rounded border border-[#c8ff42]/10 bg-[#07100c]/70 px-5 py-5 backdrop-blur-sm md:mr-5 md:px-6">
+            <div className="relative ml-[3.1rem] mr-3 mb-7 overflow-hidden rounded border border-[#2ee59d]/10 bg-[#07100c]/70 px-5 py-5 backdrop-blur-sm md:mr-5 md:px-6">
               {/* Answer scanline */}
               <div
                 className="pointer-events-none absolute inset-0 opacity-[0.035]"
@@ -218,8 +218,8 @@ function FaqItem({
               />
 
               <div className="relative">
-                <div className="mb-3 flex items-center gap-2 font-mono text-[8px] uppercase tracking-[0.2em] text-[#c8ff42]/50">
-                  <span className="h-1 w-1 rounded-full bg-[#c8ff42]" />
+                <div className="mb-3 flex items-center gap-2 font-mono text-[8px] uppercase tracking-[0.2em] text-[#2ee59d]/50">
+                  <span className="h-1 w-1 rounded-full bg-[#2ee59d]" />
                   RESPONSE // VERIFIED
                 </div>
 
@@ -252,19 +252,19 @@ export default function FaqPage() {
 
         <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
           {/* Main glow */}
-          <div className="absolute left-1/2 top-[12%] h-[560px] w-[560px] -translate-x-1/2 rounded-full bg-[#c8ff42]/[0.035] blur-[150px]" />
+          <div className="absolute left-1/2 top-[12%] h-[560px] w-[560px] -translate-x-1/2 rounded-full bg-[#2ee59d]/[0.035] blur-[150px]" />
 
-          <div className="absolute -left-[220px] top-[45%] h-[480px] w-[480px] rounded-full bg-[#c8ff42]/[0.025] blur-[130px]" />
+          <div className="absolute -left-[220px] top-[45%] h-[480px] w-[480px] rounded-full bg-[#2ee59d]/[0.025] blur-[130px]" />
 
-          <div className="absolute -right-[220px] top-[70%] h-[480px] w-[480px] rounded-full bg-[#c8ff42]/[0.02] blur-[130px]" />
+          <div className="absolute -right-[220px] top-[70%] h-[480px] w-[480px] rounded-full bg-[#2ee59d]/[0.02] blur-[130px]" />
 
           {/* Technical grid */}
           <div
             className="absolute inset-0 opacity-[0.055]"
             style={{
               backgroundImage: `
-                linear-gradient(rgba(200,255,66,.45) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(200,255,66,.45) 1px, transparent 1px)
+                linear-gradient(rgba(46,229,157,.45) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(46,229,157,.45) 1px, transparent 1px)
               `,
               backgroundSize: "64px 64px",
             }}
@@ -313,8 +313,8 @@ export default function FaqPage() {
                 <div className="mb-8 flex flex-wrap items-center justify-between gap-4 font-mono text-[9px] uppercase tracking-[0.2em] text-white/30">
                   <div className="flex items-center gap-3">
                     <span className="relative flex h-2 w-2">
-                      <span className="absolute h-full w-full animate-ping rounded-full bg-[#c8ff42] opacity-40" />
-                      <span className="relative h-2 w-2 rounded-full bg-[#c8ff42] shadow-[0_0_10px_#c8ff42]" />
+                      <span className="absolute h-full w-full animate-ping rounded-full bg-[#2ee59d] opacity-40" />
+                      <span className="relative h-2 w-2 rounded-full bg-[#2ee59d] shadow-[0_0_10px_#2ee59d]" />
                     </span>
 
                     COMMAND TERMINAL
@@ -357,7 +357,7 @@ export default function FaqPage() {
                 >
                   FREQUENTLY
                   <br />
-                  <em className="not-italic text-[#c8ff42] [text-shadow:0_0_32px_rgba(200,255,66,.28)]">
+                  <em className="not-italic text-[#2ee59d] [text-shadow:0_0_32px_rgba(46,229,157,.28)]">
                     ASKED.
                   </em>
                 </motion.h1>
@@ -368,7 +368,7 @@ export default function FaqPage() {
                   through our{" "}
                   <a
                     href="/contact"
-                    className="text-[#c8ff42] underline-offset-4 transition hover:underline"
+                    className="text-[#2ee59d] underline-offset-4 transition hover:underline"
                   >
                     contact page
                   </a>
@@ -380,7 +380,7 @@ export default function FaqPage() {
                   <span>NETWORK: VYUHAM'26</span>
                   <span>DATABASE: PUBLIC</span>
                   <span>RESPONSES: VERIFIED</span>
-                  <span className="text-[#c8ff42]/50">
+                  <span className="text-[#2ee59d]/50">
                     ACCESS: GRANTED
                   </span>
                 </div>
@@ -403,7 +403,7 @@ export default function FaqPage() {
                       <div className="flex gap-1.5">
                         <span className="h-2 w-2 rounded-full bg-red-400/40" />
                         <span className="h-2 w-2 rounded-full bg-yellow-400/40" />
-                        <span className="h-2 w-2 rounded-full bg-[#c8ff42]/60" />
+                        <span className="h-2 w-2 rounded-full bg-[#2ee59d]/60" />
                       </div>
 
                       <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-white/30">
@@ -411,7 +411,7 @@ export default function FaqPage() {
                       </span>
                     </div>
 
-                    <span className="font-mono text-[8px] uppercase tracking-[0.18em] text-[#c8ff42]/50">
+                    <span className="font-mono text-[8px] uppercase tracking-[0.18em] text-[#2ee59d]/50">
                       CONNECTION: SECURE
                     </span>
                   </div>
@@ -443,7 +443,7 @@ export default function FaqPage() {
                           SYSTEM MONITOR
                         </span>
 
-                        <span className="h-1.5 w-1.5 rounded-full bg-[#c8ff42] shadow-[0_0_8px_#c8ff42]" />
+                        <span className="h-1.5 w-1.5 rounded-full bg-[#2ee59d] shadow-[0_0_8px_#2ee59d]" />
                       </div>
 
                       <div className="space-y-4">
@@ -452,7 +452,7 @@ export default function FaqPage() {
                             <span className="text-white/25">
                               DATABASE
                             </span>
-                            <span className="text-[#c8ff42]/70">
+                            <span className="text-[#2ee59d]/70">
                               100%
                             </span>
                           </div>
@@ -463,7 +463,7 @@ export default function FaqPage() {
                               whileInView={{ width: "100%" }}
                               viewport={{ once: true }}
                               transition={{ duration: 1 }}
-                              className="h-full bg-[#c8ff42] shadow-[0_0_8px_rgba(200,255,66,.6)]"
+                              className="h-full bg-[#2ee59d] shadow-[0_0_8px_rgba(46,229,157,.6)]"
                             />
                           </div>
                         </div>
@@ -473,7 +473,7 @@ export default function FaqPage() {
                             <span className="text-white/25">
                               NETWORK
                             </span>
-                            <span className="text-[#c8ff42]/70">
+                            <span className="text-[#2ee59d]/70">
                               STABLE
                             </span>
                           </div>
@@ -484,7 +484,7 @@ export default function FaqPage() {
                               whileInView={{ width: "96%" }}
                               viewport={{ once: true }}
                               transition={{ duration: 1.1, delay: 0.15 }}
-                              className="h-full bg-[#c8ff42]/70"
+                              className="h-full bg-[#2ee59d]/70"
                             />
                           </div>
                         </div>
@@ -494,7 +494,7 @@ export default function FaqPage() {
                             <span className="text-white/25">
                               RESPONSE
                             </span>
-                            <span className="text-[#c8ff42]/70">
+                            <span className="text-[#2ee59d]/70">
                               READY
                             </span>
                           </div>
@@ -505,7 +505,7 @@ export default function FaqPage() {
                               whileInView={{ width: "100%" }}
                               viewport={{ once: true }}
                               transition={{ duration: 0.9, delay: 0.3 }}
-                              className="h-full bg-[#c8ff42]/50"
+                              className="h-full bg-[#2ee59d]/50"
                             />
                           </div>
                         </div>
@@ -513,10 +513,10 @@ export default function FaqPage() {
                     </div>
 
                     {/* Contact panel */}
-                    <div className="relative overflow-hidden rounded border border-[#c8ff42]/15 bg-[#07100c]/70 p-5 backdrop-blur-xl">
-                      <div className="absolute right-0 top-0 h-16 w-16 border-r border-t border-[#c8ff42]/20" />
+                    <div className="relative overflow-hidden rounded border border-[#2ee59d]/15 bg-[#07100c]/70 p-5 backdrop-blur-xl">
+                      <div className="absolute right-0 top-0 h-16 w-16 border-r border-t border-[#2ee59d]/20" />
 
-                      <span className="font-mono text-[8px] uppercase tracking-[0.2em] text-[#c8ff42]/60">
+                      <span className="font-mono text-[8px] uppercase tracking-[0.2em] text-[#2ee59d]/60">
                         NEED MORE DATA?
                       </span>
 
@@ -551,7 +551,7 @@ export default function FaqPage() {
 
                         <div className="flex justify-between">
                           <span>ENCRYPTION</span>
-                          <span className="text-[#c8ff42]/40">
+                          <span className="text-[#2ee59d]/40">
                             ACTIVE
                           </span>
                         </div>
@@ -569,8 +569,8 @@ export default function FaqPage() {
 
             <AnimatedSection delay={0.3}>
               <div className="mt-8 lg:hidden">
-                <div className="rounded border border-[#c8ff42]/15 bg-[#07100c]/70 p-6 backdrop-blur-xl">
-                  <span className="font-mono text-[8px] uppercase tracking-[0.2em] text-[#c8ff42]/60">
+                <div className="rounded border border-[#2ee59d]/15 bg-[#07100c]/70 p-6 backdrop-blur-xl">
+                  <span className="font-mono text-[8px] uppercase tracking-[0.2em] text-[#2ee59d]/60">
                     NEED MORE DATA?
                   </span>
 

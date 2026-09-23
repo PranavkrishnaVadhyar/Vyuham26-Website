@@ -121,7 +121,7 @@ export default function CheckoutPage() {
                       <motion.span
                         key={grandTotal}
                         initial={reduceMotion ? false : { opacity: 0, scale: 1.3, color: "#a3a3a3" }}
-                        animate={{ opacity: 1, scale: 1, color: "#c8ff42" }}
+                        animate={{ opacity: 1, scale: 1, color: "#2ee59d" }}
                         transition={{ type: "spring", stiffness: 300, damping: 22 }}
                         className="text-green font-bold text-base block"
                       >

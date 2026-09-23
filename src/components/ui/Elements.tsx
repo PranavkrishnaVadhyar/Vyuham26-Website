@@ -26,7 +26,7 @@ export function Button({
 
   const variants = {
     primary:
-      "bg-green text-ink hover:shadow-[0_0_38px_rgba(200,255,66,0.35)] hover:-translate-y-0.5",
+      "bg-green text-ink hover:shadow-[0_0_38px_rgba(46,229,157,0.35)] hover:-translate-y-0.5",
     outline:
       "border border-line text-paper hover:border-green/40 hover:text-green",
     ghost: "text-paper hover:text-green",
@@ -96,7 +96,7 @@ interface ChipProps {
 }
 
 const chipVariants = {
-  live: "border-green/40 text-green shadow-[0_0_8px_rgba(200,255,66,0.2)]",
+  live: "border-green/40 text-green shadow-[0_0_8px_rgba(46,229,157,0.2)]",
   upcoming: "border-emerald/40 text-emerald",
   completed: "border-muted/30 text-muted",
 };

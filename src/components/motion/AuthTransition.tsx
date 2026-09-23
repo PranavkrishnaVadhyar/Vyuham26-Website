@@ -89,8 +89,8 @@ export default function AuthTransition({
               className="absolute inset-0 opacity-[0.045]"
               style={{
                 backgroundImage: `
-                  linear-gradient(rgba(200,255,66,.55) 1px, transparent 1px),
-                  linear-gradient(90deg, rgba(200,255,66,.55) 1px, transparent 1px)
+                  linear-gradient(rgba(46,229,157,.55) 1px, transparent 1px),
+                  linear-gradient(90deg, rgba(46,229,157,.55) 1px, transparent 1px)
                 `,
                 backgroundSize: "55px 55px",
               }}
@@ -107,7 +107,7 @@ export default function AuthTransition({
             {/* horizontal scan */}
             {!reduceMotion && (
               <motion.div
-                className="absolute left-0 right-0 h-px bg-gradient-to-r from-transparent via-green to-transparent shadow-[0_0_20px_rgba(200,255,66,.9)]"
+                className="absolute left-0 right-0 h-px bg-gradient-to-r from-transparent via-green to-transparent shadow-[0_0_20px_rgba(46,229,157,.9)]"
                 animate={{
                   top: ["0%", "100%"],
                   opacity: [0, 1, 0],
@@ -170,7 +170,7 @@ export default function AuthTransition({
 
                 {/* core */}
                 <motion.div
-                  className="absolute left-1/2 top-1/2 flex h-28 w-28 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-green/50 bg-green/[0.04] shadow-[0_0_60px_rgba(200,255,66,.12)]"
+                  className="absolute left-1/2 top-1/2 flex h-28 w-28 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-green/50 bg-green/[0.04] shadow-[0_0_60px_rgba(46,229,157,.12)]"
                   animate={
                     reduceMotion
                       ? {}
@@ -183,7 +183,7 @@ export default function AuthTransition({
                     repeat: Infinity,
                   }}
                 >
-                  <div className="h-12 w-12 rounded-full border border-green/50 bg-green/10 shadow-[0_0_35px_rgba(200,255,66,.3)]" />
+                  <div className="h-12 w-12 rounded-full border border-green/50 bg-green/10 shadow-[0_0_35px_rgba(46,229,157,.3)]" />
                 </motion.div>
 
                 {/* crosshair */}
@@ -236,7 +236,7 @@ export default function AuthTransition({
 
                     <div className="mx-auto mt-5 h-px max-w-xs overflow-hidden bg-green/10">
                       <motion.div
-                        className="h-full bg-green shadow-[0_0_12px_rgba(200,255,66,.9)]"
+                        className="h-full bg-green shadow-[0_0_12px_rgba(46,229,157,.9)]"
                         initial={{ width: "0%" }}
                         animate={{ width: "100%" }}
                         transition={{
@@ -264,7 +264,7 @@ export default function AuthTransition({
                     </h2>
 
                     <div className="mt-5 flex items-center justify-center gap-2 font-mono text-[8px] uppercase tracking-[0.2em] text-green">
-                      <span className="h-1.5 w-1.5 rounded-full bg-green shadow-[0_0_10px_rgba(200,255,66,.9)]" />
+                      <span className="h-1.5 w-1.5 rounded-full bg-green shadow-[0_0_10px_rgba(46,229,157,.9)]" />
                       Identity verified
                     </div>
                   </motion.div>

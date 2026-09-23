@@ -104,8 +104,8 @@ export default function TeamsPage() {
             className="absolute inset-0 opacity-[0.035]"
             style={{
               backgroundImage: `
-                linear-gradient(rgba(200,255,66,.45) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(200,255,66,.45) 1px, transparent 1px)
+                linear-gradient(rgba(46,229,157,.45) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(46,229,157,.45) 1px, transparent 1px)
               `,
               backgroundSize: "55px 55px",
             }}
@@ -183,7 +183,7 @@ export default function TeamsPage() {
                     </div>
 
                     <div className="mt-3 flex items-center gap-2">
-                      <span className="h-1.5 w-1.5 rounded-full bg-green shadow-[0_0_10px_rgba(200,255,66,.8)]" />
+                      <span className="h-1.5 w-1.5 rounded-full bg-green shadow-[0_0_10px_rgba(46,229,157,.8)]" />
                       <span className="font-mono text-[9px] uppercase text-muted">
                         Formation Active
                       </span>
@@ -266,7 +266,7 @@ export default function TeamsPage() {
                           {/* scan beam */}
                           {!reduceMotion && (
                             <motion.div
-                              className="pointer-events-none absolute inset-x-0 h-px bg-green/40 shadow-[0_0_12px_rgba(200,255,66,.8)]"
+                              className="pointer-events-none absolute inset-x-0 h-px bg-green/40 shadow-[0_0_12px_rgba(46,229,157,.8)]"
                               animate={{ top: ["0%", "100%"] }}
                               transition={{
                                 duration: 3.5,
@@ -313,7 +313,7 @@ export default function TeamsPage() {
                             <span
                               className={`h-1.5 w-1.5 rounded-full ${
                                 member.status === "Confirmed"
-                                  ? "bg-green shadow-[0_0_8px_rgba(200,255,66,.8)]"
+                                  ? "bg-green shadow-[0_0_8px_rgba(46,229,157,.8)]"
                                   : "bg-amber-400"
                               }`}
                             />
@@ -369,7 +369,7 @@ export default function TeamsPage() {
 
                     <div className="h-1 overflow-hidden bg-white/5">
                       <motion.div
-                        className="h-full bg-green shadow-[0_0_12px_rgba(200,255,66,.7)]"
+                        className="h-full bg-green shadow-[0_0_12px_rgba(46,229,157,.7)]"
                         initial={{ width: 0 }}
                         animate={{ width: `${capacity}%` }}
                         transition={{ duration: 0.8 }}
@@ -450,7 +450,7 @@ export default function TeamsPage() {
                             className="group relative overflow-hidden border border-line bg-[#080c0a] p-4 transition-all duration-300 hover:border-green/30"
                           >
                             {/* hover energy */}
-                            <div className="absolute inset-y-0 left-0 w-px bg-green opacity-0 shadow-[0_0_15px_rgba(200,255,66,.9)] transition-opacity group-hover:opacity-100" />
+                            <div className="absolute inset-y-0 left-0 w-px bg-green opacity-0 shadow-[0_0_15px_rgba(46,229,157,.9)] transition-opacity group-hover:opacity-100" />
 
                             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 
@@ -657,7 +657,7 @@ export default function TeamsPage() {
                         </h4>
 
                         <div className="mt-3 flex items-center gap-2">
-                          <span className="h-1.5 w-1.5 rounded-full bg-green shadow-[0_0_8px_rgba(200,255,66,.7)]" />
+                          <span className="h-1.5 w-1.5 rounded-full bg-green shadow-[0_0_8px_rgba(46,229,157,.7)]" />
 
                           <span className="font-mono text-[9px] uppercase text-muted">
                             Squad Registered
@@ -731,7 +731,7 @@ export default function TeamsPage() {
               <div className="mt-6 flex flex-col gap-3 border-t border-line/50 pt-5 sm:flex-row sm:items-center sm:justify-between">
 
                 <div className="flex items-center gap-2">
-                  <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-green shadow-[0_0_8px_rgba(200,255,66,.8)]" />
+                  <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-green shadow-[0_0_8px_rgba(46,229,157,.8)]" />
 
                   <span className="font-mono text-[9px] uppercase tracking-wider text-muted">
                     VYUHAM&apos;26 / SQUAD NETWORK

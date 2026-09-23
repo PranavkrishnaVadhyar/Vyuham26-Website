@@ -65,7 +65,7 @@ export default function PhotographyContestPage() {
                   <div
                     className={`group relative overflow-hidden rounded-sm border p-5 transition-all duration-500 ${
                       photo.voted
-                        ? "border-green bg-gradient-to-b from-green/20 to-ink-mid shadow-[0_0_30px_rgba(200,255,66,0.3)]"
+                        ? "border-green bg-gradient-to-b from-green/20 to-ink-mid shadow-[0_0_30px_rgba(46,229,157,0.3)]"
                         : "border-line bg-ink-mid/40 hover:border-green/40"
                     }`}
                   >

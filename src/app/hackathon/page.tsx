@@ -127,7 +127,7 @@ export default function HackathonHubPage() {
                 {/* top metadata */}
                 <div className="mb-5 flex flex-wrap items-center justify-between gap-4">
                   <div className="flex items-center gap-3">
-                    <span className="h-2 w-2 animate-pulse rounded-full bg-green shadow-[0_0_12px_rgba(200,255,66,.9)]" />
+                    <span className="h-2 w-2 animate-pulse rounded-full bg-green shadow-[0_0_12px_rgba(46,229,157,.9)]" />
 
                     <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-green">
                       Build Network Online
@@ -149,7 +149,7 @@ export default function HackathonHubPage() {
 
                     <h1 className="mt-3 font-display text-[42px] font-semibold leading-[0.95] tracking-tight md:text-[68px]">
                       HACKATHON{" "}
-                      <em className="not-italic text-green [text-shadow:0_0_30px_rgba(200,255,66,.25)]">
+                      <em className="not-italic text-green [text-shadow:0_0_30px_rgba(46,229,157,.25)]">
                         HUB
                       </em>
                     </h1>
@@ -240,7 +240,7 @@ export default function HackathonHubPage() {
                 {/* progress bar */}
                 <div className="mt-6 h-px w-full overflow-hidden bg-white/10">
                   <motion.div
-                    className="h-full bg-green shadow-[0_0_12px_rgba(200,255,66,.8)]"
+                    className="h-full bg-green shadow-[0_0_12px_rgba(46,229,157,.8)]"
                     initial={{ width: reduceMotion ? "75%" : "0%" }}
                     animate={{ width: "75%" }}
                     transition={{
@@ -269,7 +269,7 @@ export default function HackathonHubPage() {
                         key={milestone.id}
                         className={`relative rounded border p-4 ${
                           active
-                            ? "border-green/60 bg-green/[0.07] shadow-[0_0_30px_rgba(200,255,66,.08)]"
+                            ? "border-green/60 bg-green/[0.07] shadow-[0_0_30px_rgba(46,229,157,.08)]"
                             : complete
                               ? "border-green/20 bg-green/[0.025]"
                               : "border-white/10 bg-white/[0.015]"
@@ -291,7 +291,7 @@ export default function HackathonHubPage() {
                           <div
                             className={`flex h-8 w-8 items-center justify-center rounded-full border font-mono text-[10px] font-bold ${
                               active
-                                ? "border-green bg-green text-black shadow-[0_0_18px_rgba(200,255,66,.45)]"
+                                ? "border-green bg-green text-black shadow-[0_0_18px_rgba(46,229,157,.45)]"
                                 : complete
                                   ? "border-green/60 bg-green/10 text-green"
                                   : "border-white/15 bg-black text-muted"
@@ -360,7 +360,7 @@ export default function HackathonHubPage() {
 
                   {!reduceMotion && (
                     <motion.div
-                      className="absolute top-1/2 h-1 w-12 -translate-y-1/2 rounded-full bg-green shadow-[0_0_14px_rgba(200,255,66,.9)]"
+                      className="absolute top-1/2 h-1 w-12 -translate-y-1/2 rounded-full bg-green shadow-[0_0_14px_rgba(46,229,157,.9)]"
                       animate={{
                         left: ["0%", "74%", "74%", "0%"],
                         opacity: [0, 1, 1, 0],
@@ -412,7 +412,7 @@ export default function HackathonHubPage() {
                       animate={{ opacity: 1, scale: 1 }}
                       className="py-12 text-center"
                     >
-                      <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-green/50 bg-green/10 text-2xl text-green shadow-[0_0_30px_rgba(200,255,66,.12)]">
+                      <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-green/50 bg-green/10 text-2xl text-green shadow-[0_0_30px_rgba(46,229,157,.12)]">
                         ✓
                       </div>
 
@@ -520,7 +520,7 @@ export default function HackathonHubPage() {
 
                   <div className="absolute right-5 top-5">
                     <span className="flex items-center gap-2 font-mono text-[8px] text-green">
-                      <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-green shadow-[0_0_8px_rgba(200,255,66,.8)]" />
+                      <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-green shadow-[0_0_8px_rgba(46,229,157,.8)]" />
                       ONLINE
                     </span>
                   </div>
@@ -557,7 +557,7 @@ export default function HackathonHubPage() {
                       }}
                     />
 
-                    <div className="relative flex h-8 w-8 items-center justify-center rounded-full bg-green text-black shadow-[0_0_20px_rgba(200,255,66,.5)]">
+                    <div className="relative flex h-8 w-8 items-center justify-center rounded-full bg-green text-black shadow-[0_0_20px_rgba(46,229,157,.5)]">
                       <span className="text-xs">⚡</span>
                     </div>
                   </div>

@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
 import GreenAnime from "@/components/motion/Greenanime2";
 
-let hasCompletedIntroInThisPageLoad = false;
+export let hasCompletedIntroInThisPageLoad = false;
 
 export default function IntroSequence() {
   const reduceMotion = usePrefersReducedMotion();
@@ -30,9 +30,32 @@ export default function IntroSequence() {
     }
 
     setDismissed(true);
+    if (typeof document !== "undefined") {
+      delete document.documentElement.dataset.introActive;
+    }
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("vyuham:intro-complete"));
+    }
   }, []);
 
   const visible = mounted && !dismissed && !reduceMotion;
+
+  useEffect(() => {
+    if (typeof window === "undefined" || typeof document === "undefined") return;
+
+    if (visible) {
+      document.documentElement.dataset.introActive = "true";
+      window.dispatchEvent(new CustomEvent("vyuham:intro-start"));
+    } else {
+      delete document.documentElement.dataset.introActive;
+      window.dispatchEvent(new CustomEvent("vyuham:intro-complete"));
+    }
+
+    return () => {
+      delete document.documentElement.dataset.introActive;
+      window.dispatchEvent(new CustomEvent("vyuham:intro-complete"));
+    };
+  }, [visible]);
 
   if (!visible) return null;
 

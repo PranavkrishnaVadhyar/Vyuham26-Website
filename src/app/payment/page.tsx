@@ -40,7 +40,7 @@ export default function PaymentGatewayPage() {
               <div className="glass-card mt-8 p-6 md:p-8">
                 {status === "success" ? (
                   <div className="py-8 text-center animate-in zoom-in duration-500">
-                    <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border-2 border-green bg-green/20 text-3xl text-green shadow-[0_0_30px_rgba(200,255,66,0.4)]">
+                    <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border-2 border-green bg-green/20 text-3xl text-green shadow-[0_0_30px_rgba(46,229,157,0.4)]">
                       ✓
                     </div>
                     <h2 className="mt-4 font-display text-2xl font-bold text-paper">

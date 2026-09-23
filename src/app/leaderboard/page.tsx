@@ -56,7 +56,7 @@ export default function LeaderboardPage() {
                     <div
                       className={`glass-card flex items-center justify-between p-5 md:p-6 transition-all duration-500 ${
                         team.rank === 1
-                          ? "border-green bg-green/10 shadow-[0_0_24px_rgba(200,255,66,0.15)]"
+                          ? "border-green bg-green/10 shadow-[0_0_24px_rgba(46,229,157,0.15)]"
                           : "border-line"
                       }`}
                     >

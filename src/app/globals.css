@@ -8,14 +8,14 @@
   --deep: #0a2e20;
   --paper: #e8eee9;
   --muted: #94a89a;
-  --green: #c8ff42;
-  --green-dim: rgba(200, 255, 66, 0.35);
+  --green: #2ee59d;
+  --green-dim: rgba(46, 229, 157, 0.35);
   --emerald: #1d9d56;
   --emerald-dark: #0d3826;
   --line: rgba(232, 238, 233, 0.17);
   --line-strong: rgba(232, 238, 233, 0.3);
   --glass: rgba(6, 16, 11, 0.65);
-  --glass-border: rgba(200, 255, 66, 0.12);
+  --glass-border: rgba(46, 229, 157, 0.12);
   --radius: 4px;
   --radius-lg: 12px;
 }
@@ -126,18 +126,18 @@ em {
 }
 
 .glass-card-hover:hover {
-  border-color: rgba(200, 255, 66, 0.3);
-  box-shadow: 0 0 32px rgba(200, 255, 66, 0.08);
+  border-color: rgba(46, 229, 157, 0.3);
+  box-shadow: 0 0 32px rgba(46, 229, 157, 0.08);
   transform: translateY(-4px);
 }
 
 /* ─── Glow Effects ─── */
 .glow-green {
-  box-shadow: 0 0 38px rgba(200, 255, 66, 0.35);
+  box-shadow: 0 0 38px rgba(46, 229, 157, 0.35);
 }
 
 .text-glow-green {
-  text-shadow: 0 0 24px rgba(200, 255, 66, 0.4);
+  text-shadow: 0 0 24px rgba(46, 229, 157, 0.4);
 }
 
 /* ─── Signal Dot ─── */
@@ -161,8 +161,8 @@ em {
   background: repeating-linear-gradient(0deg,
       transparent,
       transparent 2px,
-      rgba(200, 255, 66, 0.015) 2px,
-      rgba(200, 255, 66, 0.015) 4px);
+      rgba(46, 229, 157, 0.015) 2px,
+      rgba(46, 229, 157, 0.015) 4px);
   z-index: 1;
 }
 
@@ -283,15 +283,15 @@ em {
 
 @keyframes energy-bloom {
   0% {
-    box-shadow: 0 0 0 0 rgba(200, 255, 66, 0.6);
+    box-shadow: 0 0 0 0 rgba(46, 229, 157, 0.6);
   }
 
   70% {
-    box-shadow: 0 0 30px 15px rgba(200, 255, 66, 0);
+    box-shadow: 0 0 30px 15px rgba(46, 229, 157, 0);
   }
 
   100% {
-    box-shadow: 0 0 0 0 rgba(200, 255, 66, 0);
+    box-shadow: 0 0 0 0 rgba(46, 229, 157, 0);
   }
 }
 
@@ -326,7 +326,7 @@ em {
   left: 0;
   right: 0;
   height: 3px;
-  background: linear-gradient(90deg, transparent, rgba(200, 255, 66, 0.8), transparent);
+  background: linear-gradient(90deg, transparent, rgba(46, 229, 157, 0.8), transparent);
   animation: scanline-pass 3.5s ease-in-out infinite;
   pointer-events: none;
 }
@@ -347,27 +347,27 @@ em {
 .intro-grid {
   opacity: 0.22;
   background-image:
-    linear-gradient(rgba(200, 255, 66, 0.09) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(200, 255, 66, 0.09) 1px, transparent 1px);
+    linear-gradient(rgba(46, 229, 157, 0.09) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(46, 229, 157, 0.09) 1px, transparent 1px);
   background-size: 42px 42px;
   mask-image: radial-gradient(circle at center, black 0%, transparent 65%);
 }
 
 .intro-core {
-  box-shadow: 0 0 26px 12px rgba(200, 255, 66, 0.5);
+  box-shadow: 0 0 26px 12px rgba(46, 229, 157, 0.5);
 }
 
 .intro-emblem-shell {
-  background: radial-gradient(circle, rgba(200, 255, 66, 0.26), rgba(10, 46, 32, 0.42) 55%, transparent 72%);
-  box-shadow: 0 0 56px rgba(200, 255, 66, 0.52), inset 0 0 26px rgba(200, 255, 66, 0.35);
+  background: radial-gradient(circle, rgba(46, 229, 157, 0.26), rgba(10, 46, 32, 0.42) 55%, transparent 72%);
+  box-shadow: 0 0 56px rgba(46, 229, 157, 0.52), inset 0 0 26px rgba(46, 229, 157, 0.35);
 }
 
 .intro-emblem {
-  filter: drop-shadow(0 0 18px rgba(200, 255, 66, 0.85));
+  filter: drop-shadow(0 0 18px rgba(46, 229, 157, 0.85));
 }
 
 .intro-wordmark {
-  text-shadow: 0 0 32px rgba(200, 255, 66, 0.24);
+  text-shadow: 0 0 32px rgba(46, 229, 157, 0.24);
 }
 
 /* ─── Cinematic Intro (GSAP master-timeline) ─── */
@@ -472,7 +472,7 @@ body:has(.intro-cinema) .side-nav-rail {
   inset: 0;
   pointer-events: none;
   z-index: 20;
-  background: radial-gradient(circle at center, #10b981, #c8ff42 40%, #ffffff 80%);
+  background: radial-gradient(circle at center, #10b981, #2ee59d 40%, #ffffff 80%);
   opacity: 0;
 }
 
@@ -481,11 +481,11 @@ body:has(.intro-cinema) .side-nav-rail {
 
   0%,
   100% {
-    filter: drop-shadow(0 0 12px rgba(200, 255, 66, 0.5));
+    filter: drop-shadow(0 0 12px rgba(46, 229, 157, 0.5));
   }
 
   50% {
-    filter: drop-shadow(0 0 32px rgba(200, 255, 66, 0.9));
+    filter: drop-shadow(0 0 32px rgba(46, 229, 157, 0.9));
   }
 }
 
@@ -520,6 +520,12 @@ body:has(.intro-cinema) .side-nav-rail {
   to {
     transform: translateX(-50%);
   }
+}
+
+/* ─── Hide SideNavRail during Intro Animation ─── */
+html[data-intro-active="true"] .side-nav-rail,
+body[data-intro-active="true"] .side-nav-rail {
+  display: none !important;
 }
 
 /* ─── Reduced Motion ─── */
