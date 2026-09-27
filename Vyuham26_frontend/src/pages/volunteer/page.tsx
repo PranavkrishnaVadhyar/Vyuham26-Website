@@ -278,10 +278,13 @@ export default function VolunteerScannerPage() {
         setCameraActive(true);
 
         // Check if BarcodeDetector is available natively
-        // @ts-expect-error - BarcodeDetector is a standard modern web API in Chrome/Android/Edge
-        if ("BarcodeDetector" in window && typeof window.BarcodeDetector === "function") {
-          // @ts-expect-error - BarcodeDetector typing
-          const detector = new window.BarcodeDetector({ formats: ["qr_code", "code_128", "code_39"] });
+        const anyWin = window as unknown as {
+          BarcodeDetector?: new (options?: { formats: string[] }) => {
+            detect: (source: ImageBitmapSource) => Promise<Array<{ rawValue: string }>>;
+          };
+        };
+        if (typeof anyWin.BarcodeDetector === "function") {
+          const detector = new anyWin.BarcodeDetector({ formats: ["qr_code", "code_128", "code_39"] });
 
           let lastDetected = "";
           let lastTime = 0;
