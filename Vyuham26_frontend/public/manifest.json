@@ -1,0 +1,22 @@
+{
+  "short_name": "VYUHAM'26",
+  "name": "VYUHAM'26 — Digital University Kerala",
+  "icons": [
+    {
+      "src": "/vyuham_logo.svg",
+      "type": "image/svg+xml",
+      "sizes": "192x192 512x512"
+    },
+    {
+      "src": "/vyuham_logo.png",
+      "type": "image/png",
+      "sizes": "192x192 512x512"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#030504",
+  "theme_color": "#18c47c",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "description": "Official digital platform for VYUHAM'26, the national techno-cultural fest of Digital University Kerala (30 OCT – 01 NOV 2026)."
+}

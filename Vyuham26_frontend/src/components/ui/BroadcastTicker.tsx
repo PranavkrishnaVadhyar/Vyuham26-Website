@@ -1,0 +1,210 @@
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useApp } from "@/lib/store";
+
+export default function BroadcastTicker({ visible = true }: { visible?: boolean }) {
+  const { content } = useApp();
+  const [minimized, setMinimized] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  const defaultBulletins = [
+    {
+      id: "b1",
+      category: "TRANSMISSION",
+      title: "DUK TECHNOCITY // VYUHAM'26 THREE-DAY CONVERGENCE OPENS 30 OCT 2026",
+      time: "OFFICIAL FESTIVAL BROADCAST",
+      urgent: false,
+    },
+    {
+      id: "b2",
+      category: "REGISTRATIONS",
+      title: "NATIONAL 24H HACKATHON AT 85% CAPACITY — REGISTER SQUADS BEFORE LOCKOUT",
+      time: "TECH STREAM // PRIZE POOL ₹1,50,000",
+      urgent: true,
+    },
+    {
+      id: "b3",
+      category: "CYBER WARFARE",
+      title: "FLAG HUNT CTF WARZONE QUALIFIERS OPEN FOR ALL REGISTERED OPERATIVES",
+      time: "MAIN CYBER ARENA",
+      urgent: false,
+    },
+    {
+      id: "b4",
+      category: "CAMPUS INTEL",
+      title: "FREE CAMPUS SHUTTLES RUNNING FROM KAZHAKKOOTTAM TO TECHNOCITY",
+      time: "LOGISTICS // TRANSIT DECK",
+      urgent: false,
+    },
+  ];
+
+  const bulletins =
+    content.announcements && content.announcements.length > 0
+      ? content.announcements.map((a, i) => ({
+          id: a.id || `b-${i}`,
+          category: a.pinned ? "PRIORITY" : "BROADCAST",
+          title: a.title,
+          time: a.date || "RECENT INTEL",
+          urgent: Boolean(a.pinned),
+        }))
+      : defaultBulletins;
+
+  useEffect(() => {
+    if (bulletins.length <= 1) return;
+    const interval = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % bulletins.length);
+    }, 6000);
+    return () => clearInterval(interval);
+  }, [bulletins.length]);
+
+  if (!visible) return null;
+
+  if (minimized) {
+    return (
+      <div className="fixed bottom-4 right-4 z-50">
+        <button
+          onClick={() => setMinimized(false)}
+          className="flex items-center gap-2 rounded-full border border-[#18c47c]/30 bg-[#07100c]/90 px-3 py-1.5 font-mono text-[9px] uppercase tracking-[0.18em] text-[#18c47c] shadow-[0_0_20px_rgba(24,196,124,0.25)] backdrop-blur-md transition-all hover:border-[#18c47c] hover:bg-[#07100c]"
+          title="Show Live Festival Ticker"
+        >
+          <span className="relative flex h-2 w-2">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#18c47c] opacity-75" />
+            <span className="relative inline-flex h-2 w-2 rounded-full bg-[#18c47c]" />
+          </span>
+          <span>LIVE INTEL</span>
+        </button>
+      </div>
+    );
+  }
+
+  const active = bulletins[currentIndex] || bulletins[0];
+
+  return (
+    <>
+      <div className="relative z-40 w-full border-b border-[rgba(24,196,124,0.14)] bg-[#030605]/95 backdrop-blur-md">
+        <div className="mx-auto flex h-9 max-w-[1680px] items-center justify-between px-4 sm:px-6 md:px-8 xl:px-10">
+          <div className="flex flex-1 items-center gap-3 overflow-hidden">
+            <div className="flex shrink-0 items-center gap-2">
+              <span className="relative flex h-2 w-2">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#18c47c] opacity-75" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-[#18c47c]" />
+              </span>
+              <span className="font-mono text-[8px] uppercase tracking-[0.24em] text-[#18c47c]">
+                LIVE TRANSMISSION
+              </span>
+              <span className="hidden font-mono text-[8px] text-white/20 sm:inline">//</span>
+            </div>
+
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={active.id}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.35 }}
+                className="flex cursor-pointer items-center gap-2 truncate"
+                onClick={() => setModalOpen(true)}
+              >
+                <span
+                  className={`rounded-xs px-1.5 py-0.5 font-mono text-[7px] uppercase tracking-wider ${
+                    active.urgent
+                      ? "border border-red-500/40 bg-red-950/40 text-red-300"
+                      : "border border-[#18c47c]/30 bg-[#18c47c]/10 text-[#18c47c]"
+                  }`}
+                >
+                  {active.category}
+                </span>
+                <span className="truncate font-mono text-[9px] tracking-wide text-[#cfd8d4] hover:text-white sm:text-[10px]">
+                  {active.title}
+                </span>
+                <span className="hidden font-mono text-[8px] text-[#557767] md:inline">
+                  [{active.time}]
+                </span>
+              </motion.div>
+            </AnimatePresence>
+          </div>
+
+          <div className="flex shrink-0 items-center gap-2 pl-3">
+            <button
+              onClick={() => setModalOpen(true)}
+              className="hidden font-mono text-[8px] tracking-[0.16em] text-[#18c47c] hover:underline sm:inline"
+            >
+              ALL INTEL ({bulletins.length})
+            </button>
+            <span className="hidden text-white/20 sm:inline">|</span>
+            <button
+              onClick={() => setMinimized(true)}
+              aria-label="Minimize broadcast ticker"
+              className="flex h-5 w-5 items-center justify-center rounded font-mono text-[10px] text-white/40 hover:bg-white/5 hover:text-white"
+              title="Minimize ticker"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Bulletins Modal */}
+      <AnimatePresence>
+        {modalOpen && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-4 backdrop-blur-md">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="relative max-h-[85vh] w-full max-w-2xl overflow-hidden rounded-xl border border-[rgba(24,196,124,0.25)] bg-[#07100c]/95 p-6 shadow-[0_0_50px_rgba(24,196,124,0.15)] md:p-8"
+            >
+              <div className="flex items-center justify-between border-b border-white/10 pb-4">
+                <div className="flex items-center gap-3">
+                  <span className="h-2 w-2 rounded-full bg-[#18c47c] shadow-[0_0_10px_rgba(24,196,124,0.8)]" />
+                  <h3 className="font-display text-xl font-bold tracking-tight text-[#f0f9f5]">
+                    CAMPUS BROADCASTS & BULLETIN
+                  </h3>
+                </div>
+                <button
+                  onClick={() => setModalOpen(false)}
+                  className="rounded-lg border border-white/10 px-2.5 py-1 font-mono text-xs text-[#9caaa2] hover:border-white/30 hover:text-white"
+                >
+                  ESC ✕
+                </button>
+              </div>
+
+              <div className="mt-5 max-h-[60vh] space-y-3 overflow-y-auto pr-2">
+                {bulletins.map((b) => (
+                  <div
+                    key={b.id}
+                    className="rounded-lg border border-[rgba(24,196,124,0.12)] bg-[rgba(11,20,16,0.6)] p-4 transition-all hover:border-[rgba(24,196,124,0.3)]"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span
+                        className={`rounded-xs px-2 py-0.5 font-mono text-[8px] uppercase tracking-wider ${
+                          b.urgent
+                            ? "border border-red-500/40 bg-red-950/40 text-red-300"
+                            : "border border-[#18c47c]/30 bg-[#18c47c]/10 text-[#18c47c]"
+                        }`}
+                      >
+                        {b.category}
+                      </span>
+                      <span className="font-mono text-[8px] text-[#557767]">
+                        {b.time}
+                      </span>
+                    </div>
+                    <p className="mt-2 text-sm leading-relaxed text-[#f0f9f5]">
+                      {b.title}
+                    </p>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-6 flex justify-between border-t border-white/10 pt-4 font-mono text-[9px] text-[#557767]">
+                <span>DUK TECHNOCITY FESTIVAL NETWORK</span>
+                <span>30 OCT — 01 NOV 2026</span>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+    </>
+  );
+}
