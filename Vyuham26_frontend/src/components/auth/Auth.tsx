@@ -222,6 +222,27 @@ export function ProfilePanel() {
           </button>
         </header>
 
+        {/* Dashboard Quick Action */}
+        <div className="relative border-b border-[rgba(120,160,145,0.14)] bg-[rgba(24,196,124,0.04)] px-6 py-3">
+          <a
+            href="#/dashboard"
+            onClick={() => {
+              ui.setProfileOpen(false);
+              window.dispatchEvent(new CustomEvent("app:navigate", { detail: "/dashboard" }));
+            }}
+            className="group flex w-full items-center justify-between border border-[rgba(24,196,124,0.35)] bg-[rgba(8,26,18,0.7)] px-4 py-2.5 font-mono text-[10px] tracking-[0.2em] text-[#34d399] transition-all duration-300 hover:border-[#18c47c] hover:bg-[rgba(24,196,124,0.18)] hover:text-[#d7f6e8] hover:shadow-[0_0_16px_rgba(24,196,124,0.25)]"
+          >
+            <div className="flex items-center gap-2.5">
+              <span className="relative flex h-2 w-2">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#18c47c] opacity-60" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-[#18c47c]" />
+              </span>
+              <span className="font-semibold tracking-[0.22em]">GO TO DASHBOARD</span>
+            </div>
+            <span className="text-[#18c47c] transition-transform duration-300 group-hover:translate-x-1">→</span>
+          </a>
+        </div>
+
         <div className="relative flex gap-5 border-b border-[rgba(120,160,145,0.14)] px-6 py-4">
           {(
             [
@@ -337,7 +358,27 @@ export function ProfilePanel() {
         </div>
 
         <footer className="relative flex flex-wrap items-center justify-between gap-3 border-t border-[rgba(120,160,145,0.14)] p-6">
-          <div className="flex items-center gap-4">
+          <div className="flex flex-wrap items-center gap-4">
+            <a
+              href="#/dashboard"
+              onClick={() => {
+                ui.setProfileOpen(false);
+                window.dispatchEvent(new CustomEvent("app:navigate", { detail: "/dashboard" }));
+              }}
+              className="link-trail font-mono text-[9px] tracking-[0.26em] text-[#18c47c] hover:text-[#7fe6b8]"
+            >
+              DASHBOARD ↗
+            </a>
+            <a
+              href="#/profile"
+              onClick={() => {
+                ui.setProfileOpen(false);
+                window.dispatchEvent(new CustomEvent("app:navigate", { detail: "/profile" }));
+              }}
+              className="link-trail font-mono text-[9px] tracking-[0.26em] text-[#8ea79b] hover:text-[#e7f5ee]"
+            >
+              FULL DOSSIER ↗
+            </a>
             {user?.role === "admin" && (
               <a
                 href="#/admin"

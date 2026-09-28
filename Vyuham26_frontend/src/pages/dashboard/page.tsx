@@ -1,780 +1,480 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import type { ReactNode } from "react";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
+import {
+  ArrowUpRight,
+  Check,
+  ChevronRight,
+  Crosshair,
+  Cpu,
+  Gauge,
+  Radio,
+  ScanLine,
+  ShieldCheck,
+  Terminal,
+  Users,
+  Zap,
+} from "lucide-react";
 import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
-import AnimatedSection from "@/components/motion/AnimatedSection";
-import { Kicker, Button, StreamBadge } from "@/components/ui/Elements";
-import { useApp } from "@/lib/store";
-import { events as allEvents } from "@/data/events";
+
+const events = [
+  {
+    stream: "TECH",
+    title: "National Hackathon",
+    venue: "MAIN LAB 01",
+    time: "30 OCT // 10:00 AM",
+    href: "/hackathon",
+    action: "ENTER BUILD ZONE",
+    code: "EVT-001",
+  },
+  {
+    stream: "TECH",
+    title: "CTF Warzone",
+    venue: "CYBER RANGE",
+    time: "31 OCT // 11:30 AM",
+    href: "/ctf",
+    action: "ENTER CTF PORTAL",
+    code: "EVT-002",
+  },
+  {
+    stream: "CULTURE",
+    title: "Battle of the Bands",
+    venue: "OPEN AMPHITHEATRE",
+    time: "31 OCT // 06:00 PM",
+    href: "/events/battle-of-the-bands",
+    action: "VIEW DOSSIER",
+    code: "EVT-003",
+  },
+];
+
+const timeline = [
+  ["30 OCT", "10:00 AM", "National Hackathon", "DAY 01 // IGNITION"],
+  ["31 OCT", "11:30 AM", "CTF Warzone", "DAY 02 // CONVERGENCE"],
+  ["31 OCT", "06:00 PM", "Battle of the Bands", "DAY 02 // MAIN STAGE"],
+] as const;
+
+const stats = [
+  { label: "EVENTS", value: 3, suffix: " REGISTERED", icon: Radio },
+  { label: "SQUADS", value: 2, suffix: " ACTIVE", icon: Users },
+  { label: "PASS", value: 100, suffix: "% VERIFIED", icon: ShieldCheck },
+  { label: "FOOD", value: 450, prefix: "₹", suffix: " CREDITS", icon: Zap },
+];
+
+function Corner({ className = "" }: { className?: string }) {
+  return (
+    <span
+      className={`pointer-events-none absolute h-5 w-5 border-green-400/70 ${className}`}
+    />
+  );
+}
+
+function HudPanel({
+  children,
+  className = "",
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
+  return (
+    <div
+      className={`relative overflow-hidden border border-emerald-400/20 bg-[#06100d]/80 backdrop-blur-xl ${className}`}
+    >
+      <Corner className="left-0 top-0 border-l border-t" />
+      <Corner className="right-0 top-0 border-r border-t" />
+      <Corner className="bottom-0 left-0 border-b border-l" />
+      <Corner className="bottom-0 right-0 border-b border-r" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-emerald-300/70 to-transparent" />
+      {children}
+    </div>
+  );
+}
+
+function Reactor({ reduced }: { reduced: boolean }) {
+  return (
+    <div className="relative h-55 w-55 sm:h-65 sm:w-65">
+      <motion.div
+        className="absolute inset-8 rounded-full border border-emerald-400/20"
+        animate={reduced ? {} : { rotate: 360 }}
+        transition={{ duration: 22, repeat: Infinity, ease: "linear" }}
+      />
+      <motion.div
+        className="absolute inset-12 rounded-full border border-dashed border-cyan-300/25"
+        animate={reduced ? {} : { rotate: -360 }}
+        transition={{ duration: 14, repeat: Infinity, ease: "linear" }}
+      />
+      <motion.div
+        className="absolute inset-16 rounded-full border border-emerald-300/40 shadow-[0_0_40px_rgba(52,211,153,.18)]"
+        animate={reduced ? {} : { scale: [1, 1.06, 1] }}
+        transition={{ duration: 2.8, repeat: Infinity, ease: "easeInOut" }}
+      />
+      <div className="absolute inset-21 rounded-full border border-emerald-200/20 bg-emerald-300/5" />
+      <motion.div
+        className="absolute left-1/2 top-1/2 h-12 w-12 -translate-x-1/2 -translate-y-1/2 rounded-full bg-emerald-300/20 shadow-[0_0_55px_rgba(52,211,153,.55)]"
+        animate={reduced ? {} : { opacity: [0.35, 0.9, 0.35], scale: [0.85, 1.1, 0.85] }}
+        transition={{ duration: 1.8, repeat: Infinity }}
+      />
+      {[0, 72, 144, 216, 288].map((angle) => (
+        <motion.span
+          key={angle}
+          className="absolute left-1/2 top-1/2 h-1.5 w-1.5 rounded-full bg-cyan-300 shadow-[0_0_10px_rgba(103,232,249,.8)]"
+          style={{ transform: `rotate(${angle}deg) translateY(-88px)` }}
+          animate={reduced ? {} : { opacity: [0.2, 1, 0.2] }}
+          transition={{ duration: 2, delay: angle / 360, repeat: Infinity }}
+        />
+      ))}
+      <div className="absolute inset-0 flex flex-col items-center justify-center font-mono text-center">
+        <span className="text-[8px] tracking-[0.4em] text-emerald-300/60">CORE</span>
+        <span className="mt-1 text-xl font-bold tracking-[0.15em] text-white">ONLINE</span>
+        <span className="mt-1 text-[7px] tracking-[0.25em] text-cyan-300/60">VYU-CORE // 01</span>
+      </div>
+    </div>
+  );
+}
+
+function BootSequence({ reduced, onComplete }: { reduced: boolean; onComplete: () => void }) {
+  const [progress, setProgress] = useState(reduced ? 100 : 0);
+
+  useEffect(() => {
+    if (reduced) {
+      onComplete();
+      return;
+    }
+    const timer = window.setInterval(() => {
+      setProgress((p) => {
+        const next = Math.min(100, p + Math.ceil(Math.random() * 7));
+        if (next >= 100) {
+          window.clearInterval(timer);
+          window.setTimeout(onComplete, 550);
+        }
+        return next;
+      });
+    }, 75);
+    return () => window.clearInterval(timer);
+  }, [onComplete, reduced]);
+
+  if (reduced) return null;
+
+  return (
+    <motion.div
+      initial={{ opacity: 1 }}
+      exit={{ opacity: 0, scale: 1.02 }}
+      transition={{ duration: 0.65 }}
+      className="fixed inset-0 z-[100] flex items-center justify-center overflow-hidden bg-[#020504] text-white"
+    >
+      <div className="absolute inset-0 opacity-20 [background-image:linear-gradient(rgba(52,211,153,.25)_1px,transparent_1px),linear-gradient(90deg,rgba(52,211,153,.25)_1px,transparent_1px)] [background-size:50px_50px]" />
+      <motion.div
+        className="absolute left-0 right-0 h-px bg-linear-to-r from-transparent via-emerald-300 to-transparent"
+        animate={{ top: ["0%", "100%"] }}
+        transition={{ duration: 2.8, repeat: Infinity, ease: "linear" }}
+      />
+      <div className="relative w-[min(560px,88vw)] font-mono">
+        <div className="mb-3 flex items-center justify-between text-[9px] tracking-[0.3em] text-emerald-300/60">
+          <span>VYUHAM&apos;26 // COMMAND NETWORK</span>
+          <span>SECURE</span>
+        </div>
+        <div className="border border-emerald-400/25 bg-emerald-400/[0.03] p-6 sm:p-8">
+          <div className="flex items-center gap-3 text-emerald-300">
+            <Cpu className="h-5 w-5" />
+            <span className="text-xs tracking-[0.35em]">SYSTEM INITIALIZATION</span>
+          </div>
+          <div className="mt-8 text-5xl font-black tracking-[0.08em] sm:text-7xl">VYUHAM</div>
+          <div className="mt-1 text-[10px] tracking-[0.45em] text-white/40">OPERATIVE INTERFACE // 26</div>
+          <div className="mt-10 flex items-end justify-between">
+            <div>
+              <div className="text-[8px] tracking-[0.3em] text-white/40">LOADING COMMAND DECK</div>
+              <div className="mt-2 text-2xl text-emerald-300">{String(progress).padStart(3, "0")}%</div>
+            </div>
+            <div className="text-right text-[8px] tracking-[0.22em] text-white/30">
+              <div>AUTH: PASS</div>
+              <div>LINK: STABLE</div>
+              <div>CORE: READY</div>
+            </div>
+          </div>
+          <div className="mt-4 h-1 overflow-hidden bg-white/5">
+            <motion.div className="h-full bg-emerald-300" animate={{ width: `${progress}%` }} />
+          </div>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
 
 export default function DashboardPage() {
   const reduceMotion = usePrefersReducedMotion();
+  const [booting, setBooting] = useState(!reduceMotion);
+  const [activeTab, setActiveTab] = useState<"events" | "squads" | "schedule">("events");
+  const [cursor, setCursor] = useState({ x: 50, y: 50 });
+  const [scan, setScan] = useState(0);
 
-  const [activeTab, setActiveTab] = useState<
-    "events" | "squads" | "schedule"
-  >("events");
+  useEffect(() => {
+    if (reduceMotion) return;
+    const move = (e: MouseEvent) => {
+      setCursor({ x: (e.clientX / window.innerWidth) * 100, y: (e.clientY / window.innerHeight) * 100 });
+    };
+    window.addEventListener("mousemove", move, { passive: true });
+    return () => window.removeEventListener("mousemove", move);
+  }, [reduceMotion]);
 
-  const stats = [
-    {
-      node: "01",
-      label: "REGISTRATIONS",
-      value: "03",
-      detail: "ALL CONFIRMED",
-      status: "green",
-    },
-    {
-      node: "02",
-      label: "SQUADS JOINED",
-      value: "02",
-      detail: "CYBERVIPERS // LEADER",
-      status: "cyan",
-    },
-    {
-      node: "03",
-      label: "PASS STATUS",
-      value: "ACTIVE",
-      detail: "VERIFIED // 30 OCT 2026",
-      status: "green",
-    },
-    {
-      node: "04",
-      label: "FOOD CREDITS",
-      value: "₹450",
-      detail: "WALLET BALANCE",
-      status: "amber",
-    },
-  ];
+  useEffect(() => {
+    if (reduceMotion) return;
+    const id = window.setInterval(() => setScan((v) => (v + 1) % 100), 80);
+    return () => window.clearInterval(id);
+  }, [reduceMotion]);
 
-  const events = [
-    {
-      stream: "tech" as const,
-      title: "National Hackathon",
-      venue: "Main Lab 01",
-      time: "DAY 1 // 10:00 AM",
-      href: "/hackathon",
-      action: "ENTER BUILD ZONE",
-    },
-    {
-      stream: "tech" as const,
-      title: "CTF Warzone",
-      venue: "Cyber Range",
-      time: "DAY 2 // 11:30 AM",
-      href: "/ctf",
-      action: "ENTER CTF PORTAL",
-    },
-    {
-      stream: "culture" as const,
-      title: "Battle of the Bands",
-      venue: "Open Amphitheatre",
-      time: "DAY 2 // 06:00 PM",
-      href: "/events/battle-of-the-bands",
-      action: "VIEW DOSSIER",
-    },
-  ];
-
-  const timeline = [
-    {
-      date: "30 OCT",
-      time: "10:00 AM",
-      title: "National Hackathon",
-      description: "Day 1 kickoff",
-    },
-    {
-      date: "31 OCT",
-      time: "11:30 AM",
-      title: "CTF Warzone",
-      description: "Qualification round",
-    },
-    {
-      date: "31 OCT",
-      time: "06:00 PM",
-      title: "Battle of the Bands",
-      description: "Main stage",
-    },
-  ];
+  const statLabels = useMemo(() => stats, []);
 
   return (
     <>
+      <AnimatePresence>
+        {booting && <BootSequence reduced={reduceMotion} onComplete={() => setBooting(false)} />}
+      </AnimatePresence>
+
       <Navbar />
 
-      <main className="relative min-h-screen flex-1 overflow-hidden bg-[#030705] pt-23 text-paper">
-
-        {/* ============================================================
-            FUTURE ENVIRONMENT
-        ============================================================ */}
+      <main className="relative min-h-screen overflow-hidden bg-[#020604] pt-23 text-white">
+        {/* Global HUD environment */}
         <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
-
-          {/* Main atmospheric core */}
-          <div className="absolute left-1/2 top-[3%] h-175 w-225 -translate-x-1/2 rounded-full bg-green/4.5 blur-[160px]" />
-
-          {/* Secondary glow */}
-          <div className="absolute right-[-15%] top-[45%] h-137.5 w-137.5 rounded-full bg-cyan-400/[0.018] blur-[140px]" />
-
-          {/* Grid */}
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_15%,rgba(16,185,129,.12),transparent_34%),radial-gradient(circle_at_90%_70%,rgba(34,211,238,.05),transparent_28%)]" />
+          <div className="absolute inset-0 opacity-[0.08] [background-image:linear-gradient(rgba(52,211,153,.45)_1px,transparent_1px),linear-gradient(90deg,rgba(52,211,153,.45)_1px,transparent_1px)] [background-size:72px_72px]" />
           <div
-            className="absolute inset-0 opacity-[0.025]"
-            style={{
-              backgroundImage: `
-                linear-gradient(rgba(80,255,150,.8) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(80,255,150,.8) 1px, transparent 1px)
-              `,
-              backgroundSize: "80px 80px",
-            }}
-          />
-
-          {/* Scan beam */}
+            className="absolute inset-0 opacity-[0.11] transition-transform duration-500"
+            style={{ transform: `translate(${(cursor.x - 50) * -0.015}%, ${(cursor.y - 50) * -0.015}%)` }}
+          >
+            <div className="h-full w-full [background-image:linear-gradient(transparent_96%,rgba(255,255,255,.06)_96%)] [background-size:100%_4px]" />
+          </div>
           {!reduceMotion && (
             <motion.div
-              className="absolute left-0 right-0 h-px bg-linear-to-r from-transparent via-green/30 to-transparent"
-              animate={{
-                top: ["0%", "100%"],
-                opacity: [0, 1, 0],
-              }}
-              transition={{
-                duration: 12,
-                repeat: Infinity,
-                ease: "linear",
-              }}
+              className="absolute left-0 right-0 h-px bg-linear-to-r from-transparent via-emerald-300/35 to-transparent"
+              animate={{ top: ["0%", "100%"] }}
+              transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
             />
           )}
-
-          {/* Vertical system rails */}
-          {!reduceMotion && (
-            <>
-              <motion.div
-                className="absolute left-[8%] top-0 h-full w-px bg-linear-to-b from-transparent via-green/10 to-transparent"
-                animate={{ opacity: [0.2, 0.7, 0.2] }}
-                transition={{
-                  duration: 5,
-                  repeat: Infinity,
-                }}
-              />
-
-              <motion.div
-                className="absolute right-[8%] top-0 h-full w-px bg-linear-to-b from-transparent via-green/10 to-transparent"
-                animate={{ opacity: [0.7, 0.2, 0.7] }}
-                transition={{
-                  duration: 6,
-                  repeat: Infinity,
-                }}
-              />
-            </>
-          )}
+          <div className="absolute left-[6%] top-0 h-full w-px bg-linear-to-b from-transparent via-emerald-400/20 to-transparent" />
+          <div className="absolute right-[6%] top-0 h-full w-px bg-linear-to-b from-transparent via-cyan-300/15 to-transparent" />
         </div>
 
-        <section className="relative py-20 md:py-28">
+        <section className="relative z-10 mx-auto w-[min(1440px,calc(100%-28px))] py-8 md:w-[min(1440px,calc(100%-56px))] md:py-12">
+          {/* Top system strip */}
+          <motion.div
+            initial={{ opacity: 0, y: -12 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-4 flex flex-wrap items-center justify-between gap-3 border-y border-emerald-400/15 py-2 font-mono text-[7px] uppercase tracking-[0.28em] text-white/40 sm:text-[8px]"
+          >
+            <span className="flex items-center gap-2 text-emerald-300"><span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-300" />COMMAND LINK ACTIVE</span>
+            <span>CHANNEL // 01</span>
+            <span>UPLINK // STABLE</span>
+            <span>SCAN // {String(scan).padStart(2, "0")}%</span>
+          </motion.div>
 
-          <div className="mx-auto w-[min(1200px,calc(100%-40px))] md:w-[min(1200px,calc(100%-64px))]">
-
-            {/* ========================================================
-                COMMAND HEADER
-            ======================================================== */}
-            <AnimatedSection>
-              <div className="relative overflow-hidden rounded-xl border border-[rgba(24,196,124,0.16)] bg-[rgba(11,20,16,0.6)] backdrop-blur-md p-6 md:p-8">
-
-                {/* Corner brackets */}
-                <div className="absolute left-0 top-0 h-10 w-10 border-l border-t border-green/50" />
-                <div className="absolute right-0 top-0 h-10 w-10 border-r border-t border-green/50" />
-                <div className="absolute bottom-0 left-0 h-10 w-10 border-b border-l border-green/30" />
-                <div className="absolute bottom-0 right-0 h-10 w-10 border-b border-r border-green/30" />
-
-                {/* Energy line */}
-                <div className="absolute left-0 right-0 top-0 h-px bg-linear-to-r from-transparent via-green/70 to-transparent" />
-
-                <div className="flex flex-col justify-between gap-8 md:flex-row md:items-end">
-
-                  {/* TITLE */}
-                  <div>
-
-                    <div className="mb-5 flex items-center gap-3 font-mono text-[9px] uppercase tracking-[0.35em] text-green/70">
-
-                      <span className="relative flex h-2 w-2">
-                        {!reduceMotion && (
-                          <span className="absolute inset-0 animate-ping rounded-full bg-green opacity-50" />
-                        )}
-
-                        <span className="relative h-2 w-2 rounded-full bg-green" />
-                      </span>
-
-                      VYUHAM&apos;26 // OPERATIVE NETWORK
-                    </div>
-
-                    <Kicker>Personal Command Deck</Kicker>
-
-                    <h1 className="mt-4 font-display text-[clamp(42px,6vw,70px)] font-semibold leading-[0.88] tracking-tight">
-                      MY
-                      <br />
-                      <span className="text-green">
-                        <em>DASHBOARD</em>
-                      </span>
-                    </h1>
-
-                    <p className="mt-5 max-w-xl text-sm leading-7 text-muted">
-                      Your personal VYUHAM&apos;26 command interface.
-                      Monitor registrations, squad activity, event access,
-                      and your festival timeline.
-                    </p>
-                  </div>
-
-                  {/* OPERATIVE */}
-                  <div className="w-full max-w-77.5">
-
-                    <div className="border border-green/20 bg-green/2.5 p-5">
-
-                      <div className="flex items-center justify-between font-mono text-[8px] uppercase tracking-[0.25em] text-muted">
-                        <span>OPERATIVE</span>
-                        <span className="text-green">
-                          ONLINE
-                        </span>
-                      </div>
-
-                      <div className="mt-4 flex items-center gap-4">
-
-                        <div className="relative flex h-12 w-12 items-center justify-center rounded-full border border-green/30 bg-green/4">
-
-                          {!reduceMotion && (
-                            <motion.div
-                              className="absolute inset-0 rounded-full border border-green/20"
-                              animate={{
-                                scale: [1, 1.25],
-                                opacity: [0.7, 0],
-                              }}
-                              transition={{
-                                duration: 2,
-                                repeat: Infinity,
-                              }}
-                            />
-                          )}
-
-                          <span className="font-mono text-xs text-green">
-                            AV
-                          </span>
-                        </div>
-
-                        <div className="min-w-0">
-                          <div className="truncate text-sm font-semibold text-paper">
-                            Aromal S S
-                          </div>
-
-                          <div className="mt-1 truncate font-mono text-[8px] tracking-[0.15em] text-muted">
-                            VYU26-OPER-8042
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="mt-5 h-px bg-white/5" />
-
-                      <div className="mt-4 flex justify-between font-mono text-[8px] uppercase tracking-[0.18em]">
-                        <span className="text-muted">
-                          ACCESS LEVEL
-                        </span>
-
-                        <span className="text-green">
-                          OPERATIVE
-                        </span>
-                      </div>
-                    </div>
-
-                    <Button
-                      href="/ticket"
-                      variant="primary"
-                      className="mt-3 w-full justify-center"
-                    >
-                      QR Ticket Pass ↗
-                    </Button>
-                  </div>
+          {/* Command header */}
+          <HudPanel className="p-5 md:p-8 lg:p-10">
+            <div className="grid gap-8 lg:grid-cols-[1.15fr_.85fr] lg:items-center">
+              <div>
+                <div className="flex items-center gap-2 font-mono text-[8px] tracking-[0.32em] text-emerald-300/70">
+                  <Terminal className="h-3 w-3" />
+                  VYUHAM&apos;26 // OPERATIVE NETWORK
                 </div>
-
-                {/* CORE MESSAGE */}
-                <div className="mt-8 flex items-center gap-4 border-t border-white/5 pt-5">
-
-                  <span className="font-mono text-[8px] tracking-[0.3em] text-muted">
-                    SYSTEM MESSAGE
-                  </span>
-
-                  <span className="h-px flex-1 bg-linear-to-r from-green/30 to-transparent" />
-
-                  <span className="font-mono text-[8px] tracking-[0.3em] text-green">
-                    THE FUTURE AWAITS
-                  </span>
-                </div>
-              </div>
-            </AnimatedSection>
-
-            {/* ========================================================
-                LIVE NETWORK BAR
-            ======================================================== */}
-            <AnimatedSection delay={0.08}>
-              <div className="mt-5 flex flex-wrap items-center gap-4 border-y border-green/10 py-3 font-mono text-[8px] uppercase tracking-[0.2em] text-muted">
-
-                <span className="flex items-center gap-2 text-green">
-                  <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-green" />
-                  COMMAND LINK ACTIVE
-                </span>
-
-                <span className="hidden h-3 w-px bg-white/10 sm:block" />
-
-                <span>
-                  03 EVENTS REGISTERED
-                </span>
-
-                <span className="hidden h-3 w-px bg-white/10 sm:block" />
-
-                <span>
-                  02 SQUADS
-                </span>
-
-                <span className="hidden h-3 w-px bg-white/10 sm:block" />
-
-                <span className="ml-auto">
-                  CHANNEL // 01
-                </span>
-              </div>
-            </AnimatedSection>
-
-            {/* ========================================================
-                QUICK STATS
-            ======================================================== */}
-            <AnimatedSection delay={0.12}>
-              <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-
-                {stats.map((stat, index) => (
-                  <motion.div
-                    key={stat.node}
-                    initial={
-                      reduceMotion
-                        ? false
-                        : {
-                          opacity: 0,
-                          y: 20,
-                        }
-                    }
-                    animate={{
-                      opacity: 1,
-                      y: 0,
-                    }}
-                    transition={{
-                      delay: reduceMotion
-                        ? 0
-                        : 0.15 + index * 0.08,
-                    }}
-                    whileHover={
-                      reduceMotion
-                        ? {}
-                        : {
-                          y: -4,
-                        }
-                    }
-                    className="group relative overflow-hidden rounded-xl border border-[rgba(24,196,124,0.16)] bg-[rgba(11,20,16,0.6)] backdrop-blur-md p-5 transition-all duration-300 hover:border-[rgba(24,196,124,0.35)] hover:shadow-[0_8px_30px_rgba(24,196,124,0.1)]"
-                  >
-
-                    {/* Accent line */}
-                    <div
-                      className={`absolute left-0 top-0 h-full w-px ${stat.status === "amber"
-                          ? "bg-amber-400/70"
-                          : stat.status === "cyan"
-                            ? "bg-cyan-400/70"
-                            : "bg-green/70"
-                        }`}
-                    />
-
-                    <div className="flex items-center justify-between">
-
-                      <span className="font-mono text-[8px] tracking-[0.25em] text-muted">
-                        NODE_{stat.node}
-                      </span>
-
-                      <span className="h-1.5 w-1.5 rounded-full bg-green shadow-[0_0_8px_rgba(80,255,150,.8)]" />
-                    </div>
-
-                    <span className="mt-5 block font-mono text-[9px] uppercase tracking-[0.16em] text-muted">
-                      {stat.label}
-                    </span>
-
-                    <strong
-                      className={`mt-2 block font-display text-3xl ${stat.status === "amber"
-                          ? "text-amber-400"
-                          : stat.status === "cyan"
-                            ? "text-cyan-400"
-                            : "text-paper"
-                        }`}
-                    >
-                      {stat.value}
-                    </strong>
-
-                    <span className="mt-2 block truncate font-mono text-[8px] uppercase tracking-[0.12em] text-muted">
-                      {stat.detail}
-                    </span>
-                  </motion.div>
-                ))}
-              </div>
-            </AnimatedSection>
-
-            {/* ========================================================
-                COMMAND MODULE
-            ======================================================== */}
-            <AnimatedSection delay={0.18}>
-              <div className="mt-12">
-
-                {/* TAB NAVIGATION */}
-                <div className="relative overflow-x-auto border-b border-white/10">
-
-                  <div className="flex min-w-max gap-6 font-mono text-[9px] uppercase tracking-[0.16em]">
-
-                    {[
-                      {
-                        id: "events" as const,
-                        label: "MY REGISTERED EVENTS",
-                        count: "03",
-                      },
-                      {
-                        id: "squads" as const,
-                        label: "SQUAD FORMATIONS",
-                        count: "02",
-                      },
-                      {
-                        id: "schedule" as const,
-                        label: "MY TIMELINE",
-                        count: "03",
-                      },
-                    ].map((tab) => (
-                      <button
-                        key={tab.id}
-                        onClick={() => setActiveTab(tab.id)}
-                        className={`relative pb-4 transition-all ${activeTab === tab.id
-                            ? "text-green"
-                            : "text-muted hover:text-paper"
-                          }`}
-                      >
-                        {tab.label} ({tab.count})
-
-                        {activeTab === tab.id && (
-                          <motion.span
-                            layoutId="dashboard-tab"
-                            className="absolute bottom-0 left-0 right-0 h-px bg-green shadow-[0_0_10px_rgba(80,255,150,.7)]"
-                          />
-                        )}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* TAB CONTENT */}
-                <div className="mt-6">
-
-                  <AnimatePresence mode="wait">
-
-                    {/* ==================================================
-                        EVENTS
-                    ================================================== */}
-                    {activeTab === "events" && (
-                      <motion.div
-                        key="events"
-                        initial={
-                          reduceMotion
-                            ? false
-                            : {
-                              opacity: 0,
-                              y: 14,
-                            }
-                        }
-                        animate={{
-                          opacity: 1,
-                          y: 0,
-                        }}
-                        exit={
-                          reduceMotion
-                            ? { opacity: 0 }
-                            : {
-                              opacity: 0,
-                              y: -8,
-                            }
-                        }
-                        transition={{
-                          duration: 0.3,
-                          ease: "easeOut",
-                        }}
-                        className="grid grid-cols-1 gap-5 md:grid-cols-3"
-                      >
-
-                        {events.map((event, index) => (
-                          <motion.div
-                            key={event.title}
-                            whileHover={
-                              reduceMotion
-                                ? {}
-                                : {
-                                  y: -5,
-                                }
-                            }
-                            className="group relative overflow-hidden border border-white/10 bg-[#07100c]/75 p-6 backdrop-blur-xl"
-                          >
-
-                            <div className="absolute left-0 top-0 h-full w-px bg-green/60 shadow-[0_0_12px_rgba(80,255,150,.5)]" />
-
-                            {/* top */}
-                            <div className="flex items-center justify-between gap-3">
-
-                              <StreamBadge stream={event.stream} />
-
-                              <span className="font-mono text-[8px] uppercase tracking-[0.12em] text-green">
-                                ● CONFIRMED
-                              </span>
-                            </div>
-
-                            <div className="mt-5 font-mono text-[8px] tracking-[0.2em] text-muted">
-                              EVENT_NODE_0{index + 1}
-                            </div>
-
-                            <h3 className="mt-2 font-display text-xl font-semibold leading-tight">
-                              {event.title}
-                            </h3>
-
-                            <p className="mt-3 font-mono text-[9px] uppercase tracking-widest text-muted">
-                              {event.venue}
-                            </p>
-
-                            <div className="mt-1 font-mono text-[9px] uppercase tracking-widest text-green/80">
-                              {event.time}
-                            </div>
-
-                            <div className="mt-6 flex items-center justify-between border-t border-white/5 pt-4">
-
-                              <Link
-                                href={event.href}
-                                className="font-mono text-[9px] uppercase tracking-[0.12em] text-green no-underline transition-all hover:translate-x-1"
-                              >
-                                {event.action} →
-                              </Link>
-
-                              <span className="text-2xl text-white/4">
-                                0{index + 1}
-                              </span>
-                            </div>
-                          </motion.div>
-                        ))}
-                      </motion.div>
-                    )}
-
-                    {/* ==================================================
-                        SQUADS
-                    ================================================== */}
-                    {activeTab === "squads" && (
-                      <motion.div
-                        key="squads"
-                        initial={
-                          reduceMotion
-                            ? false
-                            : {
-                              opacity: 0,
-                              y: 14,
-                            }
-                        }
-                        animate={{
-                          opacity: 1,
-                          y: 0,
-                        }}
-                        exit={
-                          reduceMotion
-                            ? { opacity: 0 }
-                            : {
-                              opacity: 0,
-                              y: -8,
-                            }
-                        }
-                        transition={{
-                          duration: 0.3,
-                        }}
-                        className="space-y-5"
-                      >
-
-                        <div className="relative overflow-hidden border border-white/10 bg-[#07100c]/75 p-6 backdrop-blur-xl md:p-7">
-
-                          <div className="absolute left-0 top-0 h-full w-px bg-green/70" />
-
-                          <div className="flex flex-col justify-between gap-6 md:flex-row md:items-center">
-
-                            <div>
-
-                              <div className="flex items-center gap-3">
-                                <span className="font-mono text-[8px] tracking-[0.25em] text-green">
-                                  SQUAD_NODE_01
-                                </span>
-
-                                <span className="font-mono text-[8px] text-green">
-                                  ● LEADER
-                                </span>
-                              </div>
-
-                              <h3 className="mt-3 font-display text-2xl font-semibold">
-                                CyberVipers
-                              </h3>
-
-                              <p className="mt-2 max-w-xl font-mono text-[9px] leading-6 text-muted">
-                                3 MEMBERS // AROMAL S., NEHA S., ROHAN K.
-                                <br />
-                                LINKED OPERATIONS // HACKATHON + CTF
-                              </p>
-                            </div>
-
-                            <Button href="/teams" variant="outline">
-                              Manage Squad →
-                            </Button>
-                          </div>
-
-                          <div className="mt-6 flex flex-wrap gap-2 border-t border-white/5 pt-5">
-                            {["AROMAL S.", "NEHA S.", "ROHAN K."].map(
-                              (member, index) => (
-                                <div
-                                  key={member}
-                                  className="border border-white/5 bg-black/20 px-3 py-2 font-mono text-[8px] uppercase tracking-[0.12em] text-muted"
-                                >
-                                  <span className="mr-2 text-green">
-                                    0{index + 1}
-                                  </span>
-                                  {member}
-                                </div>
-                              )
-                            )}
-                          </div>
-                        </div>
-
-                        <div className="border border-dashed border-white/10 bg-black/10 p-6 text-center">
-
-                          <div className="font-mono text-[8px] uppercase tracking-[0.25em] text-muted">
-                            SQUAD NETWORK
-                          </div>
-
-                          <div className="mt-3 font-display text-xl text-white/30">
-                            02 ACTIVE FORMATIONS
-                          </div>
-                        </div>
-                      </motion.div>
-                    )}
-
-                    {/* ==================================================
-                        TIMELINE
-                    ================================================== */}
-                    {activeTab === "schedule" && (
-                      <motion.div
-                        key="schedule"
-                        initial={
-                          reduceMotion
-                            ? false
-                            : {
-                              opacity: 0,
-                              y: 14,
-                            }
-                        }
-                        animate={{
-                          opacity: 1,
-                          y: 0,
-                        }}
-                        exit={
-                          reduceMotion
-                            ? { opacity: 0 }
-                            : {
-                              opacity: 0,
-                              y: -8,
-                            }
-                        }
-                        transition={{
-                          duration: 0.3,
-                        }}
-                        className="relative border border-white/10 bg-[#07100c]/75 p-6 backdrop-blur-xl md:p-8"
-                      >
-
-                        {/* Timeline rail */}
-                        <div className="absolute bottom-8 left-9.25 top-8 w-px bg-green/15 md:left-11.25" />
-
-                        <div className="space-y-8">
-
-                          {timeline.map((item, index) => (
-                            <div
-                              key={`${item.date}-${item.time}`}
-                              className="relative flex gap-5 md:gap-7"
-                            >
-
-                              <div className="relative z-10 flex h-8 w-8 shrink-0 items-center justify-center border border-green/30 bg-[#07100c] font-mono text-[8px] text-green md:h-10 md:w-10">
-                                0{index + 1}
-                              </div>
-
-                              <div className="min-w-0 flex-1 border-b border-white/5 pb-6">
-
-                                <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-4">
-
-                                  <span className="font-mono text-[9px] font-bold tracking-[0.15em] text-green">
-                                    {item.date} // {item.time}
-                                  </span>
-
-                                  <span className="hidden h-1 w-1 rounded-full bg-green sm:block" />
-
-                                  <span className="font-mono text-[8px] uppercase tracking-[0.15em] text-muted">
-                                    TIMELINE NODE
-                                  </span>
-                                </div>
-
-                                <h3 className="mt-2 font-display text-lg font-semibold">
-                                  {item.title}
-                                </h3>
-
-                                <p className="mt-1 font-mono text-[9px] uppercase tracking-[0.12em] text-muted">
-                                  {item.description}
-                                </p>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              </div>
-            </AnimatedSection>
-
-            {/* ========================================================
-                SYSTEM FOOTER
-            ======================================================== */}
-            <AnimatedSection delay={0.35}>
-              <div className="mt-16 flex flex-col items-center text-center">
-
-                <div className="flex w-full max-w-xl items-center gap-4">
-
-                  <span className="h-px flex-1 bg-linear-to-r from-transparent to-green/20" />
-
-                  <span className="font-mono text-[8px] tracking-[0.3em] text-green/50">
-                    COMMAND DECK ONLINE
-                  </span>
-
-                  <span className="h-px flex-1 bg-linear-to-l from-transparent to-green/20" />
-                </div>
-
                 <motion.div
-                  className="mt-6 font-display text-xl uppercase tracking-[0.3em] text-white/15 md:text-2xl"
-                  animate={
-                    reduceMotion
-                      ? {}
-                      : {
-                        opacity: [0.15, 0.4, 0.15],
-                      }
-                  }
-                  transition={{
-                    duration: 3,
-                    repeat: Infinity,
-                  }}
+                  initial={reduceMotion ? false : { opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.15 }}
+                  className="mt-5"
                 >
-                  THE FUTURE AWAITS
+                  <div className="font-mono text-[9px] uppercase tracking-[0.4em] text-white/35">PERSONAL COMMAND</div>
+                  <h1 className="mt-2 max-w-3xl font-display text-[clamp(48px,8vw,104px)] font-black uppercase leading-[0.8] tracking-[-0.04em]">
+                    COMMAND
+                    <br />
+                    <span className="text-emerald-300">DECK</span>
+                  </h1>
+                  <p className="mt-7 max-w-xl text-sm leading-7 text-white/45">
+                    Operative interface for registrations, squad operations, festival access and live event telemetry.
+                  </p>
                 </motion.div>
 
-                <div className="mt-3 font-mono text-[7px] tracking-[0.35em] text-muted">
-                  VYUHAM&apos;26 // OPERATIVE NETWORK // END
+                <div className="mt-8 flex flex-wrap gap-3">
+                  <Link
+                    href="/ticket"
+                    className="group inline-flex items-center gap-3 border border-emerald-300 bg-emerald-300 px-5 py-3 font-mono text-[9px] font-bold uppercase tracking-[0.18em] text-black transition hover:bg-white"
+                  >
+                    <ScanLine className="h-4 w-4" />
+                    Open QR Pass
+                    <ArrowUpRight className="h-4 w-4 transition-transform group-hover:-translate-y-1 group-hover:translate-x-1" />
+                  </Link>
+                  <Link
+                    href="/events"
+                    className="inline-flex items-center gap-3 border border-white/15 px-5 py-3 font-mono text-[9px] uppercase tracking-[0.18em] text-white/70 transition hover:border-emerald-300/50 hover:text-white"
+                  >
+                    Event Directory <ChevronRight className="h-4 w-4" />
+                  </Link>
                 </div>
               </div>
-            </AnimatedSection>
+
+              <div className="relative flex min-h-70 items-center justify-center border border-white/5 bg-black/20">
+                <div className="absolute left-3 top-3 font-mono text-[7px] tracking-[0.3em] text-white/25">REACTOR STATUS</div>
+                <div className="absolute right-3 top-3 flex items-center gap-2 font-mono text-[7px] text-emerald-300/60"><span className="h-1 w-1 rounded-full bg-emerald-300" />ONLINE</div>
+                <Reactor reduced={reduceMotion} />
+                <div className="absolute bottom-3 left-3 font-mono text-[7px] text-white/20">TEMP 31.7C</div>
+                <div className="absolute bottom-3 right-3 font-mono text-[7px] text-white/20">LOAD 18.4%</div>
+              </div>
+            </div>
+
+            <div className="mt-8 grid grid-cols-2 border-t border-white/5 pt-5 md:grid-cols-4">
+              {["OPERATIVE // ONLINE", "ACCESS // VERIFIED", "NETWORK // SECURE", "FESTIVAL // 30 OCT — 01 NOV"].map((x) => (
+                <div key={x} className="border-r border-white/5 px-3 py-2 font-mono text-[7px] tracking-[0.2em] text-white/30 last:border-0">{x}</div>
+              ))}
+            </div>
+          </HudPanel>
+
+          {/* Telemetry stats */}
+          <div className="mt-5 grid grid-cols-2 gap-px border border-emerald-400/15 bg-emerald-400/10 lg:grid-cols-4">
+            {statLabels.map((stat, i) => {
+              const Icon = stat.icon;
+              return (
+                <motion.div
+                  key={stat.label}
+                  initial={reduceMotion ? false : { opacity: 0, y: 14 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.25 + i * 0.08 }}
+                  className="group relative bg-[#06100d]/90 p-5 transition hover:bg-[#0a1813] md:p-6"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="font-mono text-[7px] tracking-[0.25em] text-white/30">NODE_0{i + 1}</span>
+                    <Icon className="h-4 w-4 text-emerald-300/50 transition group-hover:text-emerald-300" />
+                  </div>
+                  <div className="mt-6 font-mono text-[8px] tracking-[0.22em] text-white/35">{stat.label}</div>
+                  <div className="mt-1 font-display text-3xl font-bold tracking-tight text-white md:text-4xl">
+                    {stat.prefix}{stat.value}{stat.suffix}
+                  </div>
+                  <div className="mt-4 h-px bg-linear-to-r from-emerald-300/40 to-transparent" />
+                  <div className="mt-3 font-mono text-[7px] uppercase tracking-[0.16em] text-emerald-300/50">TELEMETRY NOMINAL</div>
+                </motion.div>
+              );
+            })}
+          </div>
+
+          {/* Main command modules */}
+          <div className="mt-8 grid gap-5 xl:grid-cols-[1.65fr_.75fr]">
+            <HudPanel className="min-h-130 p-5 md:p-7">
+              <div className="flex flex-wrap items-center justify-between gap-4 border-b border-white/5 pb-5">
+                <div>
+                  <div className="flex items-center gap-2 font-mono text-[8px] tracking-[0.3em] text-emerald-300"><Crosshair className="h-3.5 w-3.5" />MISSION CONTROL</div>
+                  <h2 className="mt-2 font-display text-2xl font-bold uppercase tracking-tight">Operative Modules</h2>
+                </div>
+                <div className="font-mono text-[7px] tracking-[0.25em] text-white/25">3 NODES // ALL CONFIRMED</div>
+              </div>
+
+              <div className="mt-5 flex gap-5 overflow-x-auto border-b border-white/5 font-mono text-[8px] uppercase tracking-[0.18em]">
+                {(["events", "squads", "schedule"] as const).map((tab) => (
+                  <button
+                    key={tab}
+                    onClick={() => setActiveTab(tab)}
+                    className={`relative pb-4 transition ${activeTab === tab ? "text-emerald-300" : "text-white/30 hover:text-white"}`}
+                  >
+                    {tab === "events" ? "REGISTERED EVENTS" : tab === "squads" ? "SQUAD NETWORK" : "FESTIVAL TIMELINE"}
+                    {activeTab === tab && <motion.span layoutId="dash-tab" className="absolute bottom-0 left-0 right-0 h-px bg-emerald-300 shadow-[0_0_12px_rgba(52,211,153,.8)]" />}
+                  </button>
+                ))}
+              </div>
+
+              <div className="mt-6">
+                <AnimatePresence mode="wait">
+                  {activeTab === "events" && (
+                    <motion.div key="events" initial={{ opacity: 0, x: 12 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -12 }} className="space-y-3">
+                      {events.map((event, index) => (
+                        <motion.div key={event.code} whileHover={reduceMotion ? {} : { x: 5 }} className="group relative overflow-hidden border border-white/8 bg-black/20 p-5 transition hover:border-emerald-300/35">
+                          <motion.div className="absolute inset-y-0 left-0 w-px bg-emerald-300" initial={{ scaleY: 0 }} whileInView={{ scaleY: 1 }} viewport={{ once: true }} />
+                          {!reduceMotion && <motion.div className="absolute inset-y-0 w-24 bg-linear-to-r from-transparent via-emerald-300/10 to-transparent" animate={{ x: ["-120px", "900px"] }} transition={{ duration: 3.5, repeat: Infinity, delay: index * 0.7 }} />}
+                          <div className="relative flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
+                            <div className="min-w-0">
+                              <div className="flex items-center gap-3 font-mono text-[7px] tracking-[0.25em] text-emerald-300/70"><span>{event.code}</span><span className="h-1 w-1 rounded-full bg-emerald-300" />CONFIRMED</div>
+                              <h3 className="mt-2 font-display text-xl font-bold uppercase">{event.title}</h3>
+                              <div className="mt-2 flex flex-wrap gap-x-5 gap-y-1 font-mono text-[8px] tracking-[0.15em] text-white/30"><span>{event.venue}</span><span>{event.time}</span><span>{event.stream}</span></div>
+                            </div>
+                            <Link href={event.href} className="shrink-0 border border-white/10 px-4 py-3 font-mono text-[8px] tracking-[0.15em] text-white/60 transition hover:border-emerald-300 hover:text-emerald-300">{event.action} →</Link>
+                          </div>
+                        </motion.div>
+                      ))}
+                    </motion.div>
+                  )}
+
+                  {activeTab === "squads" && (
+                    <motion.div key="squads" initial={{ opacity: 0, x: 12 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -12 }} className="space-y-4">
+                      <div className="relative overflow-hidden border border-emerald-300/20 bg-black/20 p-6">
+                        <div className="flex flex-col justify-between gap-5 md:flex-row md:items-center">
+                          <div>
+                            <div className="font-mono text-[8px] tracking-[0.3em] text-emerald-300">SQUAD_NODE_01 // LEADER</div>
+                            <h3 className="mt-2 font-display text-3xl font-bold uppercase">CyberVipers</h3>
+                            <p className="mt-2 font-mono text-[8px] leading-6 tracking-[0.12em] text-white/35">3 MEMBERS // AROMAL S. // NEHA S. // ROHAN K.<br />LINKED OPERATIONS // HACKATHON + CTF</p>
+                          </div>
+                          <Link href="/teams" className="border border-emerald-300/30 px-4 py-3 font-mono text-[8px] tracking-[0.15em] text-emerald-300 hover:bg-emerald-300 hover:text-black">MANAGE SQUAD →</Link>
+                        </div>
+                        <div className="mt-6 grid grid-cols-3 gap-2 border-t border-white/5 pt-5">
+                          {["AROMAL S.", "NEHA S.", "ROHAN K."].map((member, i) => <div key={member} className="border border-white/5 bg-white/[0.02] p-3 font-mono text-[7px] tracking-[0.12em] text-white/45"><span className="mr-2 text-emerald-300">0{i + 1}</span>{member}</div>)}
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between border border-dashed border-white/10 p-5 font-mono text-[8px] tracking-[0.2em] text-white/25"><span>NETWORK FORMATIONS</span><span className="text-emerald-300/60">02 ACTIVE</span></div>
+                    </motion.div>
+                  )}
+
+                  {activeTab === "schedule" && (
+                    <motion.div key="schedule" initial={{ opacity: 0, x: 12 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -12 }} className="relative space-y-2">
+                      <div className="absolute bottom-8 left-4 top-8 w-px bg-linear-to-b from-emerald-300/50 via-emerald-300/10 to-transparent" />
+                      {timeline.map((item, i) => (
+                        <div key={item[0] + item[1]} className="relative flex gap-5 py-4">
+                          <div className="relative z-10 mt-1 flex h-8 w-8 shrink-0 items-center justify-center border border-emerald-300/40 bg-[#06100d] font-mono text-[7px] text-emerald-300">0{i + 1}</div>
+                          <div><div className="font-mono text-[8px] tracking-[0.18em] text-emerald-300">{item[0]} // {item[1]}</div><h3 className="mt-1 font-display text-lg font-bold uppercase">{item[2]}</h3><p className="mt-1 font-mono text-[7px] tracking-[0.18em] text-white/30">{item[3]}</p></div>
+                        </div>
+                      ))}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            </HudPanel>
+
+            {/* Right side telemetry */}
+            <div className="space-y-5">
+              <HudPanel className="p-5 md:p-6">
+                <div className="flex items-center justify-between font-mono text-[7px] tracking-[0.25em] text-white/30"><span>OPERATIVE PROFILE</span><span className="text-emerald-300">ONLINE</span></div>
+                <div className="mt-6 flex items-center gap-4">
+                  <div className="relative flex h-16 w-16 items-center justify-center rounded-full border border-emerald-300/30 bg-emerald-300/5 font-mono text-sm text-emerald-300">AV</div>
+                  <div><div className="font-display text-xl font-bold">Aromal S S</div><div className="mt-1 font-mono text-[7px] tracking-[0.18em] text-white/30">VYU26-OPER-8042</div></div>
+                </div>
+                <div className="mt-6 grid grid-cols-2 gap-px bg-white/5"><div className="bg-black/30 p-3"><div className="font-mono text-[7px] text-white/25">ACCESS</div><div className="mt-1 text-xs text-emerald-300">OPERATIVE</div></div><div className="bg-black/30 p-3"><div className="font-mono text-[7px] text-white/25">CLEARANCE</div><div className="mt-1 text-xs text-cyan-300">LEVEL 04</div></div></div>
+              </HudPanel>
+
+              <HudPanel className="p-5 md:p-6">
+                <div className="flex items-center gap-2 font-mono text-[8px] tracking-[0.28em] text-cyan-300"><Gauge className="h-3.5 w-3.5" />LIVE TELEMETRY</div>
+                <div className="mt-6 space-y-4">
+                  {[['NETWORK', 92], ['ACCESS', 100], ['SYNC', 87], ['UPLINK', 96]].map(([label, value]) => (
+                    <div key={label as string}>
+                      <div className="flex justify-between font-mono text-[7px] tracking-[0.2em] text-white/35"><span>{label as string}</span><span>{value}%</span></div>
+                      <div className="mt-2 h-1 bg-white/5"><motion.div initial={{ width: 0 }} animate={{ width: `${value}%` }} transition={{ duration: 1.1, delay: 0.4 }} className="h-full bg-linear-to-r from-emerald-400 to-cyan-300" /></div>
+                    </div>
+                  ))}
+                </div>
+              </HudPanel>
+
+              <Link href="/ticket" className="group block">
+                <HudPanel className="p-5 transition hover:border-emerald-300/50 md:p-6">
+                  <div className="flex items-center justify-between font-mono text-[7px] tracking-[0.25em] text-white/30"><span>SECURE ACCESS</span><span className="text-emerald-300">VERIFIED</span></div>
+                  <div className="mt-5 flex items-center justify-between gap-4">
+                    <div><div className="font-display text-2xl font-bold uppercase">QR PASS</div><div className="mt-1 font-mono text-[7px] tracking-[0.18em] text-white/30">GENERATE EVENT ACCESS TOKEN</div></div>
+                    <div className="relative flex h-14 w-14 items-center justify-center border border-emerald-300/30"><div className="h-8 w-8 bg-[linear-gradient(90deg,#fff_10%,transparent_10%_20%,#fff_20%_30%,transparent_30%_45%,#fff_45%_55%,transparent_55%_70%,#fff_70%)] opacity-70" /><motion.div className="absolute inset-x-0 h-px bg-emerald-300 shadow-[0_0_8px_rgba(52,211,153,.9)]" animate={reduceMotion ? {} : { top: ["15%", "85%", "15%"] }} transition={{ duration: 2, repeat: Infinity }} /></div>
+                  </div>
+                </HudPanel>
+              </Link>
+            </div>
+          </div>
+
+          {/* Footer telemetry */}
+          <div className="mt-8 flex flex-col items-center justify-center border-t border-white/5 pt-8 text-center">
+            <div className="flex w-full max-w-2xl items-center gap-4"><span className="h-px flex-1 bg-linear-to-r from-transparent to-emerald-300/20" /><span className="font-mono text-[7px] tracking-[0.35em] text-emerald-300/50">COMMAND DECK ONLINE</span><span className="h-px flex-1 bg-linear-to-l from-transparent to-emerald-300/20" /></div>
+            <div className="mt-4 flex items-center gap-3 font-mono text-[7px] tracking-[0.25em] text-white/20"><Check className="h-3 w-3 text-emerald-300/50" /> ALL SYSTEMS NOMINAL <span>•</span> THE FUTURE AWAITS <span>•</span> VYUHAM&apos;26</div>
           </div>
         </section>
       </main>

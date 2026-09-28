@@ -1,17 +1,38 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { cn } from "@/utils/cn";
 import { homepage, navLinks } from "@/data/content";
 import { useApp } from "@/lib/store";
 import { scrollToId, scrollToTop } from "@/lib/scroll";
 import { startAmbience, stopAmbience } from "@/lib/sound";
 import BroadcastTicker from "@/components/ui/BroadcastTicker";
+import { toast } from "@/components/ui/Toaster";
 
 export default function Nav({ visible = true }: { visible?: boolean }) {
-  const { user, ui } = useApp();
+  const { user, ui, logout } = useApp();
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState("home");
   const [hidden, setHidden] = useState(false);
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+  const profileMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!profileMenuOpen) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (profileMenuRef.current && !profileMenuRef.current.contains(e.target as Node)) {
+        setProfileMenuOpen(false);
+      }
+    };
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setProfileMenuOpen(false);
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [profileMenuOpen]);
 
   useEffect(() => {
     let lastScrollY = typeof window !== "undefined" ? window.scrollY : 0;
@@ -282,13 +303,169 @@ export default function Nav({ visible = true }: { visible?: boolean }) {
             </button>
 
             {user ? (
-              <button
-                onClick={() => ui.setProfileOpen(true)}
-                className="hidden items-center gap-2 border border-[rgba(120,160,145,0.25)] px-3 py-[7px] font-mono text-[9px] tracking-[0.24em] text-[#c6e5d8] transition-colors duration-500 hover:border-[rgba(24,196,124,0.6)] sm:flex"
-              >
-                <span className="h-[5px] w-[5px] rounded-full bg-[#18c47c]" />
-                {user.name.split(" ")[0]}
-              </button>
+              <div className="relative hidden sm:block" ref={profileMenuRef}>
+                <button
+                  onClick={() => setProfileMenuOpen((prev) => !prev)}
+                  className={cn(
+                    "flex items-center gap-2 border px-3 py-[7px] font-mono text-[9px] tracking-[0.24em] transition-all duration-300",
+                    profileMenuOpen
+                      ? "border-[#18c47c] bg-[rgba(24,196,124,0.12)] text-[#e7f5ee] shadow-[0_0_12px_rgba(24,196,124,0.3)]"
+                      : "border-[rgba(120,160,145,0.25)] bg-[rgba(6,16,12,0.4)] text-[#c6e5d8] hover:border-[rgba(24,196,124,0.6)] hover:bg-[rgba(24,196,124,0.06)]"
+                  )}
+                  aria-expanded={profileMenuOpen}
+                  aria-haspopup="true"
+                >
+                  <span className="h-[5px] w-[5px] rounded-full bg-[#18c47c] animate-pulse" />
+                  <span>{user.name.split(" ")[0]}</span>
+                  <span
+                    className={cn(
+                      "text-[7px] text-[#6f8b80] transition-transform duration-300",
+                      profileMenuOpen ? "rotate-180 text-[#18c47c]" : ""
+                    )}
+                  >
+                    ▼
+                  </span>
+                </button>
+
+                {/* Cyber Dropdown Menu */}
+                {profileMenuOpen && (
+                  <div
+                    className="absolute right-0 top-[calc(100%+8px)] z-[110] w-[275px] overflow-hidden border border-[rgba(24,196,124,0.3)] bg-[#040806] shadow-[0_12px_40px_rgba(0,0,0,0.8),0_0_24px_rgba(24,196,124,0.12)] backdrop-blur-2xl"
+                    style={{ animationDuration: "180ms" }}
+                  >
+                    <div className="grain pointer-events-none absolute inset-0 opacity-40" />
+
+                    {/* Operative Header */}
+                    <div className="relative border-b border-[rgba(120,160,145,0.15)] bg-gradient-to-b from-[rgba(24,196,124,0.08)] to-transparent p-3.5">
+                      <div className="flex items-center justify-between">
+                        <span className="font-mono text-[8px] uppercase tracking-[0.24em] text-[#18c47c]">
+                          ● {user.role?.toUpperCase() || "PARTICIPANT"}
+                        </span>
+                        <span className="font-mono text-[8px] tracking-wider text-[#4f6f61]">
+                          ONLINE
+                        </span>
+                      </div>
+                      <p className="mt-1 font-mono text-[12px] font-semibold tracking-wide text-[#f0f9f5] truncate">
+                        {user.name}
+                      </p>
+                      <p className="font-mono text-[9px] tracking-wider text-[#7d9a8d] truncate">
+                        {user.email}
+                      </p>
+                    </div>
+
+                    {/* Primary Action: MOVE TO DASHBOARD */}
+                    <div className="p-2 border-b border-[rgba(120,160,145,0.12)]">
+                      <button
+                        onClick={() => {
+                          setProfileMenuOpen(false);
+                          go("dashboard");
+                        }}
+                        className="group flex w-full items-center justify-between border border-[rgba(24,196,124,0.4)] bg-[rgba(10,36,24,0.6)] px-3 py-2.5 font-mono text-[9px] tracking-[0.22em] text-[#34d399] transition-all duration-300 hover:border-[#18c47c] hover:bg-[rgba(24,196,124,0.22)] hover:text-[#d7f6e8] hover:shadow-[0_0_14px_rgba(24,196,124,0.3)]"
+                      >
+                        <span className="flex items-center gap-2">
+                          <span className="text-[11px] leading-none text-[#18c47c]">⊞</span>
+                          <span className="font-bold">DASHBOARD</span>
+                        </span>
+                        <span className="text-[#18c47c] transition-transform duration-300 group-hover:translate-x-1">
+                          →
+                        </span>
+                      </button>
+                    </div>
+
+                    {/* Secondary Navigation Options */}
+                    <div className="relative p-1.5 space-y-0.5 font-mono text-[9px] tracking-[0.2em]">
+                      <button
+                        onClick={() => {
+                          setProfileMenuOpen(false);
+                          ui.setProfileOpen(true);
+                        }}
+                        className="flex w-full items-center justify-between px-3 py-2 text-left text-[#b5d3c6] transition-colors hover:bg-[rgba(24,196,124,0.08)] hover:text-[#e7f5ee]"
+                      >
+                        <span className="flex items-center gap-2">
+                          <span className="text-[#18c47c]">◈</span>
+                          <span>EVENT SLOTS & SAVED</span>
+                        </span>
+                        <span className="text-[8px] text-[#4f6f61]">DRAWER</span>
+                      </button>
+
+                      <button
+                        onClick={() => {
+                          setProfileMenuOpen(false);
+                          go("profile");
+                        }}
+                        className="flex w-full items-center justify-between px-3 py-2 text-left text-[#b5d3c6] transition-colors hover:bg-[rgba(24,196,124,0.08)] hover:text-[#e7f5ee]"
+                      >
+                        <span className="flex items-center gap-2">
+                          <span className="text-[#18c47c]">☵</span>
+                          <span>OPERATIVE DOSSIER</span>
+                        </span>
+                        <span className="text-[8px] text-[#4f6f61]">↗</span>
+                      </button>
+
+                      <button
+                        onClick={() => {
+                          setProfileMenuOpen(false);
+                          go("ticket");
+                        }}
+                        className="flex w-full items-center justify-between px-3 py-2 text-left text-[#b5d3c6] transition-colors hover:bg-[rgba(24,196,124,0.08)] hover:text-[#e7f5ee]"
+                      >
+                        <span className="flex items-center gap-2">
+                          <span className="text-[#18c47c]">🎫</span>
+                          <span>MY QR CREDENTIAL</span>
+                        </span>
+                        <span className="text-[8px] text-[#4f6f61]">↗</span>
+                      </button>
+
+                      {user.role === "admin" && (
+                        <button
+                          onClick={() => {
+                            setProfileMenuOpen(false);
+                            go("admin");
+                          }}
+                          className="flex w-full items-center justify-between px-3 py-2 text-left text-[#8be7ba] transition-colors hover:bg-[rgba(24,196,124,0.12)] hover:text-[#e7f5ee]"
+                        >
+                          <span className="flex items-center gap-2">
+                            <span>⚡</span>
+                            <span>ADMIN CONSOLE</span>
+                          </span>
+                          <span className="text-[8px] text-[#18c47c]">↗</span>
+                        </button>
+                      )}
+
+                      {(user.role === "volunteer" || user.role === "admin") && (
+                        <button
+                          onClick={() => {
+                            setProfileMenuOpen(false);
+                            go("volunteer");
+                          }}
+                          className="flex w-full items-center justify-between px-3 py-2 text-left text-cyan-400 transition-colors hover:bg-cyan-950/40 hover:text-cyan-300"
+                        >
+                          <span className="flex items-center gap-2">
+                            <span>📲</span>
+                            <span>VOLUNTEER SCANNER</span>
+                          </span>
+                          <span className="text-[8px] text-cyan-400">↗</span>
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Footer: Sign Out */}
+                    <div className="relative border-t border-[rgba(120,160,145,0.12)] p-2">
+                      <button
+                        onClick={() => {
+                          setProfileMenuOpen(false);
+                          logout();
+                          toast("Signed out.", "warn");
+                        }}
+                        className="flex w-full items-center justify-between px-3 py-1.5 font-mono text-[9px] tracking-[0.24em] text-[#7d9a8d] transition-colors hover:bg-[rgba(242,169,138,0.08)] hover:text-[#f2a98a]"
+                      >
+                        <span>SIGN OUT</span>
+                        <span className="text-[10px]">⎋</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
             ) : (
               <>
                 <button
@@ -381,24 +558,70 @@ export default function Nav({ visible = true }: { visible?: boolean }) {
         {/* Mobile Bottom actions */}
         <div className="relative z-10 pt-4">
           <div className="flex gap-3">
-            <button
-              onClick={() => {
-                setOpen(false);
-                ui.setAuthOpen("login");
-              }}
-              className="btn-cine flex-1 justify-center py-2.5 text-[10px]"
-            >
-              LOGIN
-            </button>
-            <button
-              onClick={() => {
-                setOpen(false);
-                ui.setAuthOpen("signup");
-              }}
-              className="btn-cine btn-cine--solid flex-1 justify-center py-2.5 text-[10px]"
-            >
-              REGISTER
-            </button>
+            {user ? (
+              <div className="flex w-full flex-col gap-2">
+                <div className="flex items-center justify-between border border-[rgba(120,160,145,0.18)] bg-[rgba(6,16,12,0.6)] px-3 py-2">
+                  <div className="flex items-center gap-2">
+                    <span className="h-2 w-2 rounded-full bg-[#18c47c] animate-pulse" />
+                    <span className="font-mono text-[10px] tracking-wider text-[#e7f5ee]">{user.name}</span>
+                  </div>
+                  <span className="font-mono text-[8px] tracking-widest text-[#18c47c] uppercase">
+                    {user.role || "OPERATIVE"}
+                  </span>
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => {
+                      setOpen(false);
+                      go("dashboard");
+                    }}
+                    className="btn-cine btn-cine--solid flex-1 justify-center py-2.5 text-[10px]"
+                  >
+                    DASHBOARD →
+                  </button>
+                  <button
+                    onClick={() => {
+                      setOpen(false);
+                      ui.setProfileOpen(true);
+                    }}
+                    className="btn-cine flex-1 justify-center py-2.5 text-[10px]"
+                  >
+                    PROFILE
+                  </button>
+                </div>
+                <button
+                  onClick={() => {
+                    setOpen(false);
+                    logout();
+                    toast("Signed out.", "warn");
+                  }}
+                  className="font-mono text-[9px] tracking-[0.24em] text-[#6f8b80] hover:text-[#f2a98a] py-1 text-center"
+                >
+                  SIGN OUT
+                </button>
+              </div>
+            ) : (
+              <>
+                <button
+                  onClick={() => {
+                    setOpen(false);
+                    ui.setAuthOpen("login");
+                  }}
+                  className="btn-cine flex-1 justify-center py-2.5 text-[10px]"
+                >
+                  LOGIN
+                </button>
+                <button
+                  onClick={() => {
+                    setOpen(false);
+                    ui.setAuthOpen("signup");
+                  }}
+                  className="btn-cine btn-cine--solid flex-1 justify-center py-2.5 text-[10px]"
+                >
+                  REGISTER
+                </button>
+              </>
+            )}
           </div>
           <p className="mt-4 text-center font-mono text-[8px] tracking-[0.2em] text-[#3f6152]">
             30 OCT — 01 NOV 2026 · TECHNOCITY KERALA

@@ -160,22 +160,33 @@ export default function ProfilePage() {
                     </p>
                   </div>
 
-                  {/* ID block */}
-                  <div className="relative overflow-hidden rounded border border-green/20 bg-green/[0.025] px-5 py-4">
+                  {/* Quick dashboard & ID action cluster */}
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                    <Button
+                      href="/dashboard"
+                      variant="primary"
+                      className="justify-center !px-4 !py-2.5 font-mono !text-[11px] tracking-wider"
+                    >
+                      ENTER DASHBOARD →
+                    </Button>
 
-                    <div className="absolute inset-y-0 left-0 w-px bg-green/60" />
+                    {/* ID block */}
+                    <div className="relative overflow-hidden rounded border border-green/20 bg-green/[0.025] px-5 py-4">
 
-                    <div className="font-mono text-[8px] uppercase tracking-[0.2em] text-muted">
-                      VYUHAM Identity
-                    </div>
+                      <div className="absolute inset-y-0 left-0 w-px bg-green/60" />
 
-                    <div className="mt-1 font-mono text-sm font-semibold text-green">
-                      {profile.vyuhamId}
-                    </div>
+                      <div className="font-mono text-[8px] uppercase tracking-[0.2em] text-muted">
+                        VYUHAM Identity
+                      </div>
 
-                    <div className="mt-2 flex items-center gap-2 font-mono text-[8px] text-muted">
-                      <span className="h-1.5 w-1.5 rounded-full bg-green" />
-                      IDENTITY VERIFIED
+                      <div className="mt-1 font-mono text-sm font-semibold text-green">
+                        {profile.vyuhamId}
+                      </div>
+
+                      <div className="mt-2 flex items-center gap-2 font-mono text-[8px] text-muted">
+                        <span className="h-1.5 w-1.5 rounded-full bg-green" />
+                        IDENTITY VERIFIED
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -377,14 +388,24 @@ export default function ProfilePage() {
                     </div>
                   </div>
 
-                  {/* Ticket */}
-                  <Button
-                    href="/ticket"
-                    variant="outline"
-                    className="mt-7 w-full justify-center"
-                  >
-                    VIEW QR CREDENTIAL ↗
-                  </Button>
+                  {/* Actions */}
+                  <div className="mt-7 flex flex-col gap-2.5">
+                    <Button
+                      href="/dashboard"
+                      variant="primary"
+                      className="w-full justify-center"
+                    >
+                      ENTER DASHBOARD →
+                    </Button>
+
+                    <Button
+                      href="/ticket"
+                      variant="outline"
+                      className="w-full justify-center"
+                    >
+                      VIEW QR CREDENTIAL ↗
+                    </Button>
+                  </div>
                 </div>
               </AnimatedSection>
 
