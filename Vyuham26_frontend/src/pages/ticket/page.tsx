@@ -10,13 +10,28 @@ import AnimatedSection from "@/components/motion/AnimatedSection";
 import SealResolve from "@/components/motion/SealResolve";
 import { Kicker, Button } from "@/components/ui/Elements";
 import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
+import Link from "next/link";
+import { useAuth } from "@/context/AuthContext";
 
 export default function TicketPage() {
+  const { user, isAuthenticated } = useAuth();
   const reduceMotion = usePrefersReducedMotion();
   const [downloaded, setDownloaded] = useState(false);
 
+  const operativeName = user ? user.name : "Aromal S S";
+  const passId = user
+    ? user.id.includes("USR")
+      ? user.id.replace("USR", "QR")
+      : `VYU26-QR-${user.id.toUpperCase()}`
+    : "VYU26-QR-904812";
+  const venueOrCollege = user?.college ? `${user.college.toUpperCase()} / TECHNOCITY` : "DUK CAMPUS / TECHNOCITY";
+  const accessLevel = user?.role === "admin" ? "COMMAND / ALL-ACCESS" : user?.role === "volunteer" ? "STAFF / FIELD-ACCESS" : "ALL-ACCESS";
+
   const handleDownload = () => {
     setDownloaded(true);
+    setTimeout(() => {
+      window.print();
+    }, 300);
 
     setTimeout(() => {
       setDownloaded(false);
@@ -87,6 +102,32 @@ export default function TicketPage() {
 
         <section className="py-16 md:py-24">
           <div className="mx-auto w-[min(620px,calc(100%-32px))] md:w-[min(620px,calc(100%-48px))]">
+
+            {!isAuthenticated && (
+              <div className="mb-8 flex flex-wrap items-center justify-between gap-4 rounded border border-green/30 bg-green/5 p-4 font-mono text-xs text-green backdrop-blur-md">
+                <div className="flex items-center gap-2.5">
+                  <span className="relative flex h-2 w-2">
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green opacity-60" />
+                    <span className="relative inline-flex h-2 w-2 rounded-full bg-green" />
+                  </span>
+                  <span>GUEST SIMULATION // Sign in to materialize your official personalized QR pass.</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Link
+                    href="/login"
+                    className="rounded border border-green/60 bg-green px-3.5 py-1.5 font-bold text-black transition hover:bg-white"
+                  >
+                    SIGN IN →
+                  </Link>
+                  <Link
+                    href="/signup"
+                    className="rounded border border-white/20 px-3.5 py-1.5 text-white transition hover:border-green hover:text-green"
+                  >
+                    REGISTER
+                  </Link>
+                </div>
+              </div>
+            )}
 
             {/* ========================================================
                 HEADER
@@ -193,7 +234,7 @@ export default function TicketPage() {
                       </span>
 
                       <span className="font-mono text-[9px] text-green">
-                        VYU26-QR-904812
+                        {passId}
                       </span>
                     </div>
                   </div>
@@ -325,21 +366,21 @@ export default function TicketPage() {
                       <div className="flex items-center justify-between border-b border-white/5 pb-3">
                         <span className="text-muted">OPERATIVE</span>
                         <strong className="text-paper">
-                          Aromal S S
+                          {operativeName}
                         </strong>
                       </div>
 
                       <div className="flex items-center justify-between border-b border-white/5 pb-3">
                         <span className="text-muted">PASS ID</span>
                         <strong className="text-green">
-                          VYU26-QR-904812
+                          {passId}
                         </strong>
                       </div>
 
                       <div className="flex items-center justify-between border-b border-white/5 pb-3">
                         <span className="text-muted">ACCESS LEVEL</span>
                         <strong className="text-paper">
-                          ALL-ACCESS
+                          {accessLevel}
                         </strong>
                       </div>
 
@@ -351,9 +392,9 @@ export default function TicketPage() {
                       </div>
 
                       <div className="flex items-center justify-between">
-                        <span className="text-muted">VENUE</span>
+                        <span className="text-muted">CAMPUS / VENUE</span>
                         <strong className="text-paper">
-                          DUK CAMPUS / TECHNOCITY
+                          {venueOrCollege}
                         </strong>
                       </div>
                     </div>

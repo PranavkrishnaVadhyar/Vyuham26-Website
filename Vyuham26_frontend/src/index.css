@@ -15,10 +15,39 @@
   --color-mint: #6ff2b8;
   --color-cyanic: #5ff3d2;
   --color-warm: #f2c98a;
+  --color-paper: #e8eee9;
+  --color-muted: #94a89a;
+  --color-green: #2ee59d;
+  --color-green-dim: rgba(46, 229, 157, 0.35);
+  --color-ink-light: #08170f;
+  --color-ink-mid: #0b2014;
+  --color-deep: #0a2e20;
+  --color-line: rgba(232, 238, 233, 0.17);
+  --color-line-strong: rgba(232, 238, 233, 0.3);
+  --color-glass: rgba(6, 16, 11, 0.65);
+  --color-glass-border: rgba(46, 229, 157, 0.12);
 
   --font-display: "Archivo", "Helvetica Neue", Arial, sans-serif;
   --font-body: "Inter", system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
+}
+
+/* ─── Glassmorphism Cards ─── */
+.glass-card {
+  background: rgba(6, 16, 11, 0.65);
+  border: 1px solid rgba(46, 229, 157, 0.12);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.glass-card-hover {
+  transition: border-color 0.3s, box-shadow 0.3s, transform 0.3s;
+}
+
+.glass-card-hover:hover {
+  border-color: rgba(46, 229, 157, 0.3);
+  box-shadow: 0 0 32px rgba(46, 229, 157, 0.08);
+  transform: translateY(-4px);
 }
 
 :root {

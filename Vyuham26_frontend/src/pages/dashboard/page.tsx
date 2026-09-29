@@ -21,14 +21,16 @@ import {
 import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import { useAuth } from "@/context/AuthContext";
+import { events as catalogEvents } from "@/data/events";
 
-const events = [
+const defaultEvents = [
   {
     stream: "TECH",
     title: "National Hackathon",
     venue: "MAIN LAB 01",
     time: "30 OCT // 10:00 AM",
-    href: "/hackathon",
+    href: "/events/hackathon",
     action: "ENTER BUILD ZONE",
     code: "EVT-001",
   },
@@ -37,7 +39,7 @@ const events = [
     title: "CTF Warzone",
     venue: "CYBER RANGE",
     time: "31 OCT // 11:30 AM",
-    href: "/ctf",
+    href: "/events/ctf",
     action: "ENTER CTF PORTAL",
     code: "EVT-002",
   },
@@ -46,7 +48,7 @@ const events = [
     title: "Battle of the Bands",
     venue: "OPEN AMPHITHEATRE",
     time: "31 OCT // 06:00 PM",
-    href: "/events/battle-of-the-bands",
+    href: "/events/battle-of-bands",
     action: "VIEW DOSSIER",
     code: "EVT-003",
   },
@@ -57,13 +59,6 @@ const timeline = [
   ["31 OCT", "11:30 AM", "CTF Warzone", "DAY 02 // CONVERGENCE"],
   ["31 OCT", "06:00 PM", "Battle of the Bands", "DAY 02 // MAIN STAGE"],
 ] as const;
-
-const stats = [
-  { label: "EVENTS", value: 3, suffix: " REGISTERED", icon: Radio },
-  { label: "SQUADS", value: 2, suffix: " ACTIVE", icon: Users },
-  { label: "PASS", value: 100, suffix: "% VERIFIED", icon: ShieldCheck },
-  { label: "FOOD", value: 450, prefix: "₹", suffix: " CREDITS", icon: Zap },
-];
 
 function Corner({ className = "" }: { className?: string }) {
   return (
@@ -205,11 +200,58 @@ function BootSequence({ reduced, onComplete }: { reduced: boolean; onComplete: (
 }
 
 export default function DashboardPage() {
+  const { user, isAuthenticated } = useAuth();
   const reduceMotion = usePrefersReducedMotion();
   const [booting, setBooting] = useState(!reduceMotion);
   const [activeTab, setActiveTab] = useState<"events" | "squads" | "schedule">("events");
   const [cursor, setCursor] = useState({ x: 50, y: 50 });
   const [scan, setScan] = useState(0);
+
+  const initials = useMemo(() => {
+    if (!user?.name) return "OP";
+    return (
+      user.name
+        .split(" ")
+        .filter(Boolean)
+        .slice(0, 2)
+        .map((n) => n[0].toUpperCase())
+        .join("") || "OP"
+    );
+  }, [user]);
+
+  const registeredEventsList = useMemo(() => {
+    if (user && user.registeredEvents && user.registeredEvents.length > 0) {
+      return user.registeredEvents.map((slugOrId, index) => {
+        const cleanSlug = slugOrId.replace(/^ev-/, "").toLowerCase();
+        const matched =
+          catalogEvents.find(
+            (e) =>
+              e.slug.toLowerCase() === cleanSlug ||
+              e.title.toLowerCase() === slugOrId.toLowerCase()
+          ) || null;
+        return {
+          stream: (matched?.stream || "TECH").toUpperCase(),
+          title: matched?.title || slugOrId.replace(/^ev-/, "").replace(/-/g, " ").toUpperCase(),
+          venue: (matched?.venue || "MAIN CAMPUS ARENA").toUpperCase(),
+          time: matched ? `DAY 0${matched.day} // ${matched.time}` : "30 OCT // 10:00 AM",
+          href: matched ? `/events/${matched.slug}` : `/events`,
+          action: "VIEW DOSSIER",
+          code: `EVT-${String(index + 1).padStart(3, "0")}`,
+        };
+      });
+    }
+    return defaultEvents;
+  }, [user]);
+
+  const statLabels = useMemo(() => {
+    const eventCount = user ? user.registeredEvents.length : 3;
+    return [
+      { label: "EVENTS", value: eventCount, suffix: " REGISTERED", icon: Radio },
+      { label: "SQUADS", value: user?.role === "admin" ? 4 : 2, suffix: " ACTIVE", icon: Users },
+      { label: "PASS", value: 100, suffix: "% VERIFIED", icon: ShieldCheck },
+      { label: "FOOD", value: 450, prefix: "₹", suffix: " CREDITS", icon: Zap },
+    ];
+  }, [user]);
 
   useEffect(() => {
     if (reduceMotion) return;
@@ -225,8 +267,6 @@ export default function DashboardPage() {
     const id = window.setInterval(() => setScan((v) => (v + 1) % 100), 80);
     return () => window.clearInterval(id);
   }, [reduceMotion]);
-
-  const statLabels = useMemo(() => stats, []);
 
   return (
     <>
@@ -270,6 +310,32 @@ export default function DashboardPage() {
             <span>UPLINK // STABLE</span>
             <span>SCAN // {String(scan).padStart(2, "0")}%</span>
           </motion.div>
+
+          {!isAuthenticated && (
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-3 border border-emerald-400/25 bg-emerald-950/40 p-3.5 font-mono text-[9px] tracking-wider text-emerald-300 backdrop-blur-md">
+              <div className="flex items-center gap-2.5">
+                <span className="relative flex h-2 w-2">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
+                </span>
+                <span>GUEST RECON MODE // Authenticate to connect your personal identity, registered slots, and digital QR pass.</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <Link
+                  href="/login"
+                  className="border border-emerald-400/60 bg-emerald-400 px-3 py-1 font-bold text-black transition hover:bg-white"
+                >
+                  SIGN IN →
+                </Link>
+                <Link
+                  href="/signup"
+                  className="border border-white/20 px-3 py-1 text-white/80 transition hover:border-emerald-300 hover:text-white"
+                >
+                  REGISTER
+                </Link>
+              </div>
+            </div>
+          )}
 
           {/* Command header */}
           <HudPanel className="p-5 md:p-8 lg:p-10">
@@ -385,8 +451,8 @@ export default function DashboardPage() {
                 <AnimatePresence mode="wait">
                   {activeTab === "events" && (
                     <motion.div key="events" initial={{ opacity: 0, x: 12 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -12 }} className="space-y-3">
-                      {events.map((event, index) => (
-                        <motion.div key={event.code} whileHover={reduceMotion ? {} : { x: 5 }} className="group relative overflow-hidden border border-white/8 bg-black/20 p-5 transition hover:border-emerald-300/35">
+                      {registeredEventsList.map((event, index) => (
+                        <motion.div key={event.code + event.title} whileHover={reduceMotion ? {} : { x: 5 }} className="group relative overflow-hidden border border-white/8 bg-black/20 p-5 transition hover:border-emerald-300/35">
                           <motion.div className="absolute inset-y-0 left-0 w-px bg-emerald-300" initial={{ scaleY: 0 }} whileInView={{ scaleY: 1 }} viewport={{ once: true }} />
                           {!reduceMotion && <motion.div className="absolute inset-y-0 w-24 bg-linear-to-r from-transparent via-emerald-300/10 to-transparent" animate={{ x: ["-120px", "900px"] }} transition={{ duration: 3.5, repeat: Infinity, delay: index * 0.7 }} />}
                           <div className="relative flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
@@ -399,6 +465,14 @@ export default function DashboardPage() {
                           </div>
                         </motion.div>
                       ))}
+
+                      {user && user.registeredEvents.length === 0 && (
+                        <div className="border border-dashed border-emerald-400/25 bg-emerald-950/20 p-6 text-center">
+                          <div className="font-mono text-[9px] uppercase tracking-[0.2em] text-emerald-300">NO EVENT SLOTS RESERVED YET</div>
+                          <p className="mt-2 text-xs text-white/40">Browse our 48 technical, cultural, and gaming competitions to secure your operative slots.</p>
+                          <Link href="/events" className="mt-4 inline-block border border-emerald-400/40 bg-emerald-400/10 px-4 py-2 font-mono text-[8px] uppercase tracking-widest text-emerald-300 hover:bg-emerald-300 hover:text-black transition">BROWSE EVENT DIRECTORY →</Link>
+                        </div>
+                      )}
                     </motion.div>
                   )}
 
@@ -409,12 +483,12 @@ export default function DashboardPage() {
                           <div>
                             <div className="font-mono text-[8px] tracking-[0.3em] text-emerald-300">SQUAD_NODE_01 // LEADER</div>
                             <h3 className="mt-2 font-display text-3xl font-bold uppercase">CyberVipers</h3>
-                            <p className="mt-2 font-mono text-[8px] leading-6 tracking-[0.12em] text-white/35">3 MEMBERS // AROMAL S. // NEHA S. // ROHAN K.<br />LINKED OPERATIONS // HACKATHON + CTF</p>
+                            <p className="mt-2 font-mono text-[8px] leading-6 tracking-[0.12em] text-white/35">3 MEMBERS // {user ? user.name.toUpperCase() : "AROMAL S."} // NEHA S. // ROHAN K.<br />LINKED OPERATIONS // HACKATHON + CTF</p>
                           </div>
                           <Link href="/teams" className="border border-emerald-300/30 px-4 py-3 font-mono text-[8px] tracking-[0.15em] text-emerald-300 hover:bg-emerald-300 hover:text-black">MANAGE SQUAD →</Link>
                         </div>
                         <div className="mt-6 grid grid-cols-3 gap-2 border-t border-white/5 pt-5">
-                          {["AROMAL S.", "NEHA S.", "ROHAN K."].map((member, i) => <div key={member} className="border border-white/5 bg-white/[0.02] p-3 font-mono text-[7px] tracking-[0.12em] text-white/45"><span className="mr-2 text-emerald-300">0{i + 1}</span>{member}</div>)}
+                          {[user ? user.name.toUpperCase() : "AROMAL S.", "NEHA S.", "ROHAN K."].map((member, i) => <div key={member} className="border border-white/5 bg-white/[0.02] p-3 font-mono text-[7px] tracking-[0.12em] text-white/45"><span className="mr-2 text-emerald-300">0{i + 1}</span>{member}</div>)}
                         </div>
                       </div>
                       <div className="flex items-center justify-between border border-dashed border-white/10 p-5 font-mono text-[8px] tracking-[0.2em] text-white/25"><span>NETWORK FORMATIONS</span><span className="text-emerald-300/60">02 ACTIVE</span></div>
@@ -439,12 +513,31 @@ export default function DashboardPage() {
             {/* Right side telemetry */}
             <div className="space-y-5">
               <HudPanel className="p-5 md:p-6">
-                <div className="flex items-center justify-between font-mono text-[7px] tracking-[0.25em] text-white/30"><span>OPERATIVE PROFILE</span><span className="text-emerald-300">ONLINE</span></div>
-                <div className="mt-6 flex items-center gap-4">
-                  <div className="relative flex h-16 w-16 items-center justify-center rounded-full border border-emerald-300/30 bg-emerald-300/5 font-mono text-sm text-emerald-300">AV</div>
-                  <div><div className="font-display text-xl font-bold">Aromal S S</div><div className="mt-1 font-mono text-[7px] tracking-[0.18em] text-white/30">VYU26-OPER-8042</div></div>
+                <div className="flex items-center justify-between font-mono text-[7px] tracking-[0.25em] text-white/30">
+                  <span>OPERATIVE PROFILE</span>
+                  <span className="text-emerald-300">{user ? "AUTHENTICATED" : "GUEST SIM"}</span>
                 </div>
-                <div className="mt-6 grid grid-cols-2 gap-px bg-white/5"><div className="bg-black/30 p-3"><div className="font-mono text-[7px] text-white/25">ACCESS</div><div className="mt-1 text-xs text-emerald-300">OPERATIVE</div></div><div className="bg-black/30 p-3"><div className="font-mono text-[7px] text-white/25">CLEARANCE</div><div className="mt-1 text-xs text-cyan-300">LEVEL 04</div></div></div>
+                <div className="mt-6 flex items-center gap-4">
+                  <div className="relative flex h-16 w-16 items-center justify-center rounded-full border border-emerald-300/30 bg-emerald-300/5 font-mono text-sm text-emerald-300">
+                    {initials}
+                  </div>
+                  <div>
+                    <div className="font-display text-xl font-bold">{user ? user.name : "Guest Operative"}</div>
+                    <div className="mt-1 font-mono text-[7px] tracking-[0.18em] text-white/30">
+                      {user ? user.id : "VYU26-GUEST-MODE"}
+                    </div>
+                  </div>
+                </div>
+                <div className="mt-6 grid grid-cols-2 gap-px bg-white/5">
+                  <div className="bg-black/30 p-3">
+                    <div className="font-mono text-[7px] text-white/25">ACCESS</div>
+                    <div className="mt-1 text-xs text-emerald-300">{user?.role ? user.role.toUpperCase() : "OPERATIVE"}</div>
+                  </div>
+                  <div className="bg-black/30 p-3">
+                    <div className="font-mono text-[7px] text-white/25">CLEARANCE</div>
+                    <div className="mt-1 text-xs text-cyan-300">{user?.role === "admin" ? "LEVEL 07 // CORE" : user?.role === "volunteer" ? "LEVEL 05 // FIELD" : "LEVEL 04 // OPERATIVE"}</div>
+                  </div>
+                </div>
               </HudPanel>
 
               <HudPanel className="p-5 md:p-6">

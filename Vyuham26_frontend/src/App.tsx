@@ -315,11 +315,7 @@ function Router() {
       return <Site />;
     }
 
-    if (route === "/about") {
-      if (typeof window !== "undefined") {
-        window.location.hash = "/#about";
-        window.dispatchEvent(new Event("app:navigate"));
-      }
+    if (route === "/about" || route === "/gallery" || route === "/streams") {
       return <Site />;
     }
     if (route === "/events") return <EventsPage />;
@@ -328,13 +324,6 @@ function Router() {
       return <EventDetailRoute slug={slug} />;
     }
     if (route === "/schedule") return <SchedulePage />;
-    if (route === "/gallery") {
-      if (typeof window !== "undefined") {
-        window.location.hash = "/#gallery";
-        window.dispatchEvent(new Event("app:navigate"));
-      }
-      return <Site />;
-    }
     if (route === "/photography") return <PhotographyPage />;
     if (route === "/venue") return <VenuePage />;
     if (route === "/sponsors") return <SponsorsPage />;

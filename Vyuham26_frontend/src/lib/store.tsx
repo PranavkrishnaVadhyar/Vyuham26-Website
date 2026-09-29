@@ -24,6 +24,7 @@ import type {
   CheckInRecord,
 } from "@/data/types";
 import { useLocalState } from "./hooks";
+import { useAuth } from "@/context/AuthContext";
 
 /**
  * Single source of truth for every editable piece of content.
@@ -113,6 +114,7 @@ const seedContent: Content = {
 const uid = (p: string) => `${p}-${Math.random().toString(36).slice(2, 8)}`;
 
 export function AppProvider({ children }: { children: ReactNode }) {
+  const auth = useAuth();
   const [content, setContent] = useLocalState<Content>("vyuham26:content:v4", seedContent);
   const [users, setUsers] = useLocalState<UserAccount[]>("vyuham26:users:v1", seedUsers);
   const [registrations, setRegistrations] = useLocalState<Registration[]>(
@@ -134,6 +136,56 @@ export function AppProvider({ children }: { children: ReactNode }) {
   ]);
   const [saved, setSaved] = useLocalState<string[]>("vyuham26:saved:v1", []);
   const [userId, setUserId] = useLocalState<string | null>("vyuham26:session:v1", null);
+
+  // Bidirectional sync with AuthContext
+  useEffect(() => {
+    if (!auth.isReady) return;
+
+    if (auth.user) {
+      const authEmail = auth.user.email.toLowerCase().trim();
+      const existing = users.find(
+        (u) => u.id === auth.user?.id || u.email.toLowerCase().trim() === authEmail
+      );
+
+      if (existing) {
+        if (userId !== existing.id) {
+          setUserId(existing.id);
+        }
+        if (
+          existing.name !== auth.user.name ||
+          (auth.user.college && existing.college !== auth.user.college) ||
+          (auth.user.role && existing.role !== auth.user.role)
+        ) {
+          setUsers((prev) =>
+            prev.map((u) =>
+              u.id === existing.id
+                ? {
+                    ...u,
+                    name: auth.user!.name,
+                    college: auth.user!.college || u.college,
+                    role: (auth.user!.role as any) || u.role,
+                  }
+                : u
+            )
+          );
+        }
+      } else {
+        const newAcc: UserAccount = {
+          id: auth.user.id,
+          name: auth.user.name,
+          email: auth.user.email,
+          password: "password",
+          college: auth.user.college || "Digital University Kerala",
+          role: (auth.user.role as any) || "user",
+          joined: new Date().toISOString().slice(0, 10),
+        };
+        setUsers((prev) => [...prev, newAcc]);
+        setUserId(newAcc.id);
+      }
+    } else if (userId !== null) {
+      setUserId(null);
+    }
+  }, [auth.user, auth.isReady]);
 
   // Invalidate any legacy cached content (e.g. from v1 containing old South Campus / Hyderabad strings)
   useEffect(() => {
@@ -233,20 +285,26 @@ export function AppProvider({ children }: { children: ReactNode }) {
     saved,
 
     login: (email, password) => {
+      const cleanEmail = email.trim().toLowerCase();
       const found = users.find(
-        (u) => u.email.toLowerCase() === email.trim().toLowerCase() && u.password === password,
+        (u) => u.email.toLowerCase() === cleanEmail && u.password === password,
       );
       if (!found) return { ok: false, message: "No signal. Check your credentials." };
       setUserId(found.id);
+      auth.login(found.email, found.name);
+      if (found.college || found.role) {
+        auth.updateUser({ college: found.college, role: found.role });
+      }
       return { ok: true, message: `Welcome back, ${found.name.split(" ")[0]}.` };
     },
     signup: (name, email, password, college) => {
-      if (users.some((u) => u.email.toLowerCase() === email.trim().toLowerCase()))
+      const cleanEmail = email.trim().toLowerCase();
+      if (users.some((u) => u.email.toLowerCase() === cleanEmail))
         return { ok: false, message: "That email is already in the system." };
       const account: UserAccount = {
         id: uid("u"),
         name: name.toUpperCase(),
-        email: email.trim(),
+        email: cleanEmail,
         password,
         college,
         role: "user",
@@ -254,9 +312,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
       };
       setUsers((u) => [...u, account]);
       setUserId(account.id);
+      auth.signup({
+        name: account.name,
+        email: account.email,
+        college: account.college,
+      });
       return { ok: true, message: "Access granted." };
     },
-    logout: () => setUserId(null),
+    logout: () => {
+      setUserId(null);
+      auth.logout();
+    },
     removeUser: (id) => {
       setUsers((u) => u.filter((x) => x.id !== id));
       setRegistrations((r) => r.filter((x) => x.userId !== id));
@@ -285,6 +351,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         ...c,
         events: c.events.map((e) => (e.id === eventId ? { ...e, registered: e.registered + 1 } : e)),
       }));
+      auth.registerForEvent(eventId);
       return { ok: true, message: full ? `Waitlisted — ${ev.name}` : `Confirmed — ${ev.name}` };
     },
     unregister: (eventId) => {
@@ -296,6 +363,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
           e.id === eventId ? { ...e, registered: Math.max(0, e.registered - 1) } : e,
         ),
       }));
+      auth.unregisterEvent(eventId);
     },
     toggleSave: (eventId) =>
       setSaved((s) => (s.includes(eventId) ? s.filter((x) => x !== eventId) : [...s, eventId])),

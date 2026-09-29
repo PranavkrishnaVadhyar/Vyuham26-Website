@@ -340,13 +340,19 @@ export default function EventsPage() {
   /* Keyboard shortcut for search */
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
-      if (e.key === "/" && document.activeElement?.tagName !== "INPUT") {
+      const active = document.activeElement as HTMLElement | null;
+      const isTyping =
+        active &&
+        (active.tagName === "INPUT" ||
+          active.tagName === "TEXTAREA" ||
+          active.tagName === "SELECT" ||
+          active.isContentEditable);
+
+      if (isTyping) return;
+
+      if (e.key === "/") {
         e.preventDefault();
         document.getElementById("event-search-input")?.focus();
-      }
-      if (e.code === "Space" && document.activeElement?.tagName !== "INPUT") {
-        e.preventDefault();
-        setPaused((v) => !v);
       }
     };
     window.addEventListener("keydown", handleKey);

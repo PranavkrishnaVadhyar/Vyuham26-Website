@@ -28,16 +28,18 @@ function Digit({ value }: { value: number }) {
 function Unit({ value, label, pad = 2 }: { value: number; label: string; pad?: number }) {
   const digits = String(Math.max(0, value)).padStart(pad, "0").split("").map(Number);
   return (
-    <div className="flex flex-col items-center">
+    <div className="flex flex-col items-center min-w-0 shrink-0">
       <div
-        className="t-cond flex text-[17vw] leading-[0.82] text-[#f2fbf6] md:text-[8.4vw]"
-        style={{ textShadow: "0 0 70px rgba(24,196,124,0.22)" }}
+        className="t-cond flex text-[10vw] sm:text-[12.5vw] md:text-[7vw] lg:text-[7.8vw] leading-[0.82] text-[#f2fbf6] tracking-tight"
+        style={{ textShadow: "0 0 60px rgba(24,196,124,0.25)" }}
       >
         {digits.map((d, i) => (
           <Digit key={i} value={d} />
         ))}
       </div>
-      <span className="mt-3 font-mono text-[8px] tracking-[0.36em] text-[#5b7b6e] md:text-[10px]">{label}</span>
+      <span className="mt-2.5 sm:mt-3 font-mono text-[7.5px] sm:text-[9px] md:text-[10px] tracking-[0.2em] sm:tracking-[0.28em] md:tracking-[0.36em] text-[#5b7b6e]">
+        {label}
+      </span>
     </div>
   );
 }
@@ -54,7 +56,7 @@ export default function Countdown() {
   }, [left.total]);
 
   return (
-    <section id="countdown" className="relative w-full overflow-hidden px-5 py-28 md:py-44">
+    <section id="countdown" className="relative w-full overflow-hidden px-4 sm:px-5 py-24 sm:py-28 md:py-44">
       {/* energy field */}
       <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
         <div
@@ -88,13 +90,14 @@ export default function Countdown() {
           </h2>
         </FocusIn>
 
-        <div className="mt-12 flex flex-wrap items-start justify-center gap-x-4 gap-y-8 md:gap-x-10">
-          <Unit value={left.days} label="DAYS" pad={3} />
-          <span className="t-cond hidden text-[8.4vw] leading-[0.82] text-[#1e4638] md:block">:</span>
+        {/* 4-digit countdown counter — strictly non-wrapping on all mobile screens */}
+        <div className="mt-10 sm:mt-14 flex flex-nowrap items-start justify-center gap-2 sm:gap-4 md:gap-7 lg:gap-9">
+          <Unit value={left.days} label="DAYS" pad={left.days >= 100 ? 3 : 2} />
+          <span className="t-cond flex text-[6.5vw] sm:text-[8vw] md:text-[5.5vw] lg:text-[6.5vw] leading-[0.82] text-[#1e4638] select-none pt-1 sm:pt-1.5 md:pt-2" aria-hidden="true">:</span>
           <Unit value={left.hours} label="HOURS" />
-          <span className="t-cond hidden text-[8.4vw] leading-[0.82] text-[#1e4638] md:block">:</span>
+          <span className="t-cond flex text-[6.5vw] sm:text-[8vw] md:text-[5.5vw] lg:text-[6.5vw] leading-[0.82] text-[#1e4638] select-none pt-1 sm:pt-1.5 md:pt-2" aria-hidden="true">:</span>
           <Unit value={left.minutes} label="MINUTES" />
-          <span className="t-cond hidden text-[8.4vw] leading-[0.82] text-[#1e4638] md:block">:</span>
+          <span className="t-cond flex text-[6.5vw] sm:text-[8vw] md:text-[5.5vw] lg:text-[6.5vw] leading-[0.82] text-[#1e4638] select-none pt-1 sm:pt-1.5 md:pt-2" aria-hidden="true">:</span>
           <Unit value={left.seconds} label="SECONDS" />
         </div>
 

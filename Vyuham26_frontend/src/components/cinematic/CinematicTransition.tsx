@@ -47,10 +47,10 @@ export default function CinematicTransition({ routeKey, children }: TransitionPr
 
       <motion.div
         key={routeKey}
-        initial={reduced ? { opacity: 1 } : { opacity: 0, filter: "blur(4px)", y: 6 }}
-        animate={{ opacity: 1, filter: "blur(0px)", y: 0 }}
-        exit={{ opacity: 0, filter: "blur(3px)" }}
-        transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.22, ease: "easeOut" }}
         className="w-full"
       >
         {children}
