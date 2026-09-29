@@ -191,7 +191,7 @@ function EventCard({
           />
 
           {/* Content layout */}
-          <div className="relative z-10 flex h-full flex-col justify-between p-5 sm:p-6">
+          <div className="relative z-10 flex h-full flex-col justify-between p-4 sm:p-6">
             <div className="flex items-start justify-between">
               <div>
                 <div
@@ -200,14 +200,14 @@ function EventCard({
                 >
                   {stream}
                 </div>
-                <div className="mt-1 font-mono text-[7px] tracking-[0.16em] text-white/35">
+                <div className="mt-0.5 sm:mt-1 font-mono text-[7px] tracking-[0.16em] text-white/35">
                   PROTOCOL {String(index + 1).padStart(2, "0")} /{" "}
                   {String(total).padStart(2, "0")}
                 </div>
               </div>
 
               <div
-                className="flex h-8 w-8 items-center justify-center rounded-lg border text-xs shadow-inner"
+                className="flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-lg border text-xs shadow-inner"
                 style={{
                   borderColor: theme.border,
                   color: theme.accent,
@@ -219,17 +219,17 @@ function EventCard({
             </div>
 
             <div>
-              <div className="mb-2 h-px w-8 bg-white/30" />
+              <div className="mb-1.5 sm:mb-2 h-px w-8 bg-white/30" />
 
-              <h3 className="line-clamp-1 font-display text-[clamp(22px,2.4vw,32px)] font-bold leading-none tracking-tight text-white group-hover:text-emerald-200">
+              <h3 className="line-clamp-1 font-display text-[clamp(18px,2.2vw,32px)] font-bold leading-tight tracking-tight text-white group-hover:text-emerald-200">
                 {event.title}
               </h3>
 
-              <p className="mt-2 line-clamp-2 text-[10px] leading-relaxed text-white/55">
+              <p className="mt-1 sm:mt-2 line-clamp-2 text-[10px] leading-relaxed text-white/55">
                 {event.description}
               </p>
 
-              <div className="mt-4 flex items-center justify-between border-t border-white/10 pt-3">
+              <div className="mt-2.5 sm:mt-4 flex items-center justify-between border-t border-white/10 pt-2 sm:pt-3">
                 <span className="font-mono text-[8px] uppercase tracking-[0.15em] text-white/50">
                   DAY {event.day} · {event.time}
                 </span>
@@ -259,9 +259,9 @@ function EventCard({
         >
           <div className="absolute inset-0 bg-[#020504]/90" />
 
-          <div className="relative z-10 flex h-full flex-col justify-between p-5">
+          <div className="relative z-10 flex h-full flex-col justify-between p-4 sm:p-5">
             <div>
-              <div className="flex items-center justify-between border-b border-white/10 pb-2.5">
+              <div className="flex items-center justify-between border-b border-white/10 pb-2">
                 <span
                   className="font-mono text-[7px] uppercase tracking-[0.24em]"
                   style={{ color: theme.accent }}
@@ -273,11 +273,11 @@ function EventCard({
                 </span>
               </div>
 
-              <div className="mt-3 font-display text-lg font-bold text-white">
+              <div className="mt-2.5 font-display text-base sm:text-lg font-bold text-white">
                 {event.title}
               </div>
 
-              <div className="mt-3 space-y-2 font-mono text-[8px] uppercase tracking-[0.14em] text-white/45">
+              <div className="mt-2 sm:mt-3 space-y-1.5 sm:space-y-2 font-mono text-[8px] uppercase tracking-[0.14em] text-white/45">
                 <div className="flex justify-between">
                   <span>VENUE</span>
                   <span className="truncate text-white/70">{event.venue}</span>
@@ -294,7 +294,7 @@ function EventCard({
             </div>
 
             <div
-              className="border-t pt-2.5 text-center font-mono text-[7px] uppercase tracking-[0.2em]"
+              className="border-t pt-2 sm:pt-2.5 text-center font-mono text-[7px] uppercase tracking-[0.2em]"
               style={{ borderColor: theme.border, color: theme.accent }}
             >
               CLICK TO VIEW SPECIFICATION →
@@ -320,6 +320,7 @@ export default function EventsPage() {
   const [paused, setPaused] = useState(false);
 
   const [metrics, setMetrics] = useState({ cardW: 340, cardH: 215 });
+  const [isMobile, setIsMobile] = useState(false);
 
   const cardsRef = useRef<(HTMLDivElement | null)[]>([]);
   const frameRef = useRef<number | null>(null);
@@ -396,11 +397,14 @@ export default function EventsPage() {
   useEffect(() => {
     const updateMetrics = () => {
       const w = window.innerWidth;
-      const isMobile = w < 640;
-      const cardW = isMobile
-        ? Math.round(clamp(w * 0.62, 220, 290))
+      const mobile = w < 640;
+      setIsMobile(mobile);
+      const cardW = mobile
+        ? Math.round(clamp(w * 0.78, 260, 310))
         : Math.round(clamp(w * 0.22, 260, 340));
-      const cardH = Math.round(cardW / 1.58);
+      const cardH = mobile
+        ? Math.round(clamp(cardW / 1.48, 185, 215))
+        : Math.round(cardW / 1.58);
       setMetrics({ cardW, cardH });
     };
 
@@ -435,26 +439,56 @@ export default function EventsPage() {
     targetProgressRef.current += e.deltaY * scrollSpeed;
   }, []);
 
-  /* Touch drag support */
-  const touchRef = useRef<{ startX: number; lastX: number } | null>(null);
+  /* Touch drag support with directional swipe detection & snap-to-card */
+  const touchRef = useRef<{
+    startX: number;
+    startY: number;
+    lastX: number;
+    moved: boolean;
+  } | null>(null);
 
   const handleTouchStart = useCallback((e: React.TouchEvent<HTMLDivElement>) => {
     const touch = e.touches[0];
-    touchRef.current = { startX: touch.clientX, lastX: touch.clientX };
+    touchRef.current = {
+      startX: touch.clientX,
+      startY: touch.clientY,
+      lastX: touch.clientX,
+      moved: false,
+    };
   }, []);
 
   const handleTouchMove = useCallback((e: React.TouchEvent<HTMLDivElement>) => {
     if (!touchRef.current) return;
     const touch = e.touches[0];
     const dx = touch.clientX - touchRef.current.lastX;
+    const totalX = Math.abs(touch.clientX - touchRef.current.startX);
+    const totalY = Math.abs(touch.clientY - touchRef.current.startY);
+
+    if (totalX > 8 && totalX > totalY) {
+      touchRef.current.moved = true;
+      // Dragging right = orbit backward, left = orbit forward
+      targetProgressRef.current -= dx * 0.005;
+    }
     touchRef.current.lastX = touch.clientX;
-    // Dragging right = orbit backward, left = orbit forward
-    targetProgressRef.current -= dx * 0.008;
   }, []);
 
   const handleTouchEnd = useCallback(() => {
+    if (touchRef.current?.moved) {
+      targetProgressRef.current = Math.round(targetProgressRef.current);
+    }
     touchRef.current = null;
   }, []);
+
+  /* Auto-advance one card every 4.5s on mobile when active & not touched */
+  useEffect(() => {
+    if (paused) return;
+    const interval = setInterval(() => {
+      if (window.innerWidth < 640 && !touchRef.current) {
+        targetProgressRef.current = Math.round(targetProgressRef.current) + 1;
+      }
+    }, 4500);
+    return () => clearInterval(interval);
+  }, [paused]);
 
   /* Global mouse position for parallax tilt only */
   useEffect(() => {
@@ -481,16 +515,11 @@ export default function EventsPage() {
   }, []);
 
   /*
-   * HORIZONTAL RING CAROUSEL — driven by mouse X + scroll wheel + touch
+   * 3D HORIZONTAL RING CAROUSEL
    *
-   * Cards are placed around a horizontal circle using sin/cos.
-   * When the mouse is inside the stage, the mouse X position
-   * drives orbital rotation speed (move right = rotate forward,
-   * move left = rotate backward). Mouse scroll wheel also orbits.
-   * When outside or paused, a gentle auto-rotation continues.
-   *
-   * Cards scale up, move forward (Z), and become fully opaque when
-   * facing the viewer. Cards behind the ring fade and shrink.
+   * Mobile: 3D perspective cover-flow focusing cleanly on the center card
+   * with side neighbors gracefully tucked behind without text collisions.
+   * Desktop: Full orbital 3D cylinder driven by mouse X + scroll wheel + touch.
    */
   useEffect(() => {
     const tick = (time: number) => {
@@ -510,21 +539,23 @@ export default function EventsPage() {
         return;
       }
 
-      // Drive rotation from mouse when inside the stage
+      const isMobile = window.innerWidth < 640;
+
+      // Drive rotation from mouse when inside the stage (desktop)
       if (pointer.insideStage && !paused) {
         // stageMouseX: -1 (left edge) to +1 (right edge)
         // Speed proportional to how far from center the cursor is
         const speed = pointer.stageMouseX * 2.2; // cards/sec at edge
         targetProgressRef.current += speed * delta;
-      } else if (!paused) {
-        // Gentle auto-rotate when mouse is not on the stage
+      } else if (!paused && !isMobile) {
+        // Gentle auto-rotate on desktop when mouse is not on the stage
         targetProgressRef.current += delta * 0.18;
       }
 
       // Smooth approach to target (inertia)
       progressRef.current += (targetProgressRef.current - progressRef.current) * 0.1;
 
-      // Ring geometry
+      // Ring geometry for desktop
       const ringRadius = Math.min(window.innerWidth * 0.36, 420);
 
       cardsRef.current.forEach((card, index) => {
@@ -539,6 +570,42 @@ export default function EventsPage() {
         if (angle > Math.PI) angle -= 2 * Math.PI;
         if (angle < -Math.PI) angle += 2 * Math.PI;
 
+        if (isMobile) {
+          const cardOffset = angle / anglePerCard;
+          const dist = Math.abs(cardOffset);
+
+          // On mobile, only render the active center card and immediate neighbors
+          if (dist > 1.35) {
+            card.style.visibility = "hidden";
+            card.style.opacity = "0";
+            card.style.pointerEvents = "none";
+            return;
+          }
+
+          card.style.visibility = "visible";
+          card.style.pointerEvents = dist < 0.6 ? "auto" : "none";
+
+          const normDist = Math.min(1, dist);
+          const scale = 1 - normDist * 0.18;
+          const opacity = clamp(1 - normDist * 0.65, 0, 1);
+          const x = cardOffset * (metrics.cardW * 0.58);
+          const z = (1 - normDist) * 50 - 30;
+          const rotY = -cardOffset * 22;
+          const tiltX = -pointer.y * 4 * (1 - normDist);
+
+          card.style.zIndex = String(Math.round(500 - dist * 150));
+          card.style.opacity = String(opacity);
+          card.style.transform =
+            `translateX(${x.toFixed(1)}px) ` +
+            `translateY(0px) ` +
+            `translateZ(${z.toFixed(1)}px) ` +
+            `rotateY(${rotY.toFixed(1)}deg) ` +
+            `rotateX(${tiltX.toFixed(1)}deg) ` +
+            `scale(${scale.toFixed(3)})`;
+          return;
+        }
+
+        // DESKTOP RING GEOMETRY
         // Position on the ring
         const x = Math.sin(angle) * ringRadius;
         const z = Math.cos(angle) * ringRadius;
@@ -550,10 +617,12 @@ export default function EventsPage() {
         if (depthFactor < -0.3) {
           card.style.visibility = "hidden";
           card.style.opacity = "0";
+          card.style.pointerEvents = "none";
           return;
         }
 
         card.style.visibility = "visible";
+        card.style.pointerEvents = "auto";
 
         // Scale: front card is 1.0, side cards shrink
         const scale = 0.65 + Math.max(0, depthFactor) * 0.35;
@@ -594,7 +663,7 @@ export default function EventsPage() {
       }
       lastTimeRef.current = null;
     };
-  }, [carouselEvents.length, paused]);
+  }, [carouselEvents.length, paused, metrics.cardW]);
 
   /* Prevent default wheel on the stage element (needs native event for passive: false) */
   useEffect(() => {
@@ -606,11 +675,11 @@ export default function EventsPage() {
   }, []);
 
   const stepNext = () => {
-    targetProgressRef.current += 1;
+    targetProgressRef.current = Math.round(targetProgressRef.current) + 1;
   };
 
   const stepPrev = () => {
-    targetProgressRef.current -= 1;
+    targetProgressRef.current = Math.round(targetProgressRef.current) - 1;
   };
 
   return (
@@ -660,7 +729,8 @@ export default function EventsPage() {
 
             <p className="mx-auto mt-4 max-w-xl text-[12px] leading-relaxed text-[#8da69c] md:text-[14px]">
               48 Competitions, challenges, and cultural arenas across 4 streams.
-              Scroll or move your cursor to orbit through the 3D arena.
+              <span className="hidden sm:inline"> Scroll or move your cursor to orbit through the 3D arena.</span>
+              <span className="sm:hidden"> Swipe or tap controls to orbit protocols.</span>
             </p>
 
             {/* Quick Stat Badges */}
@@ -682,13 +752,14 @@ export default function EventsPage() {
         <section className="relative z-20 my-8 mx-auto w-full max-w-[1360px] px-4">
           <div
             ref={stageRef}
-            className="relative mx-auto h-[420px] md:h-[480px] w-full max-w-[1100px] overflow-hidden rounded-3xl border border-white/[0.06] bg-black/30"
+            className="relative mx-auto h-[380px] sm:h-[420px] md:h-[480px] w-full max-w-[1100px] overflow-hidden rounded-3xl border border-white/[0.06] bg-black/30"
             style={{
               perspective: "1200px",
               perspectiveOrigin: "50% 50%",
               ["--event-card-w" as string]: `${metrics.cardW}px`,
               ["--event-card-h" as string]: `${metrics.cardH}px`,
               cursor: "grab",
+              touchAction: "pan-y",
             }}
             onMouseMove={handleStageMouseMove}
             onMouseEnter={handleStageMouseEnter}
@@ -737,12 +808,13 @@ export default function EventsPage() {
             </div>
 
             {/* Edge vignettes */}
-            <div className="pointer-events-none absolute inset-y-0 left-0 w-28 bg-gradient-to-r from-[#020504] to-transparent" />
-            <div className="pointer-events-none absolute inset-y-0 right-0 w-28 bg-gradient-to-l from-[#020504] to-transparent" />
+            <div className="pointer-events-none absolute inset-y-0 left-0 w-8 sm:w-28 bg-gradient-to-r from-[#020504] to-transparent" />
+            <div className="pointer-events-none absolute inset-y-0 right-0 w-8 sm:w-28 bg-gradient-to-l from-[#020504] to-transparent" />
 
-            {/* Mouse hint overlay */}
+            {/* Mouse/Swipe hint overlay */}
             <div className="pointer-events-none absolute inset-x-0 bottom-4 flex items-center justify-center gap-3 font-mono text-[8px] uppercase tracking-[0.22em] text-emerald-300/40">
-              <span>← SCROLL OR MOVE CURSOR TO ORBIT →</span>
+              <span className="hidden sm:inline">← SCROLL OR MOVE CURSOR TO ORBIT →</span>
+              <span className="sm:hidden">← SWIPE TO BROWSE PROTOCOLS →</span>
             </div>
           </div>
 
@@ -786,12 +858,12 @@ export default function EventsPage() {
           id="registry-controls"
           className="relative z-30 mt-8 border-y border-white/[0.08] bg-[#030705]/95 backdrop-blur-xl"
         >
-          <div className="mx-auto w-[min(1360px,calc(100%-32px))] py-6 md:w-[min(1360px,calc(100%-64px))]">
+          <div className="mx-auto w-[min(1360px,calc(100%-32px))] py-5 sm:py-6 md:w-[min(1360px,calc(100%-64px))]">
             {/* Top row: Stream tabs & Day tabs */}
-            <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex flex-col gap-3.5 sm:gap-5 lg:flex-row lg:items-center lg:justify-between">
               {/* Streams */}
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="mr-1 font-mono text-[8px] uppercase tracking-[0.24em] text-[#55786b]">
+              <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1 -mx-4 px-4 sm:mx-0 sm:px-0 sm:flex-wrap">
+                <span className="mr-1 shrink-0 font-mono text-[8px] uppercase tracking-[0.24em] text-[#55786b]">
                   STREAM:
                 </span>
                 {streams.map((s) => {
@@ -802,7 +874,7 @@ export default function EventsPage() {
                       key={s}
                       type="button"
                       onClick={() => setActiveStream(s)}
-                      className="rounded-lg border px-3.5 py-1.5 font-mono text-[9px] uppercase tracking-[0.16em] transition-all"
+                      className="shrink-0 rounded-lg border px-3.5 py-1.5 font-mono text-[9px] uppercase tracking-[0.16em] transition-all"
                       style={{
                         borderColor: active
                           ? theme.border
@@ -819,7 +891,7 @@ export default function EventsPage() {
                 <button
                   type="button"
                   onClick={() => setSavedOnly((v) => !v)}
-                  className={`rounded-lg border px-3 py-1.5 font-mono text-[9px] uppercase tracking-[0.16em] transition-all ${
+                  className={`shrink-0 rounded-lg border px-3 py-1.5 font-mono text-[9px] uppercase tracking-[0.16em] transition-all ${
                     savedOnly
                       ? "border-amber-400/50 bg-amber-400/10 text-amber-300"
                       : "border-white/[0.08] bg-white/[0.02] text-white/40 hover:text-white/70"
@@ -830,8 +902,8 @@ export default function EventsPage() {
               </div>
 
               {/* Days */}
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="mr-1 font-mono text-[8px] uppercase tracking-[0.24em] text-[#55786b]">
+              <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1 -mx-4 px-4 sm:mx-0 sm:px-0 sm:flex-wrap">
+                <span className="mr-1 shrink-0 font-mono text-[8px] uppercase tracking-[0.24em] text-[#55786b]">
                   TIMELINE:
                 </span>
                 {days.map((d) => {
@@ -841,7 +913,7 @@ export default function EventsPage() {
                       key={d}
                       type="button"
                       onClick={() => setActiveDay(d)}
-                      className={`rounded-lg border px-3 py-1.5 font-mono text-[9px] uppercase tracking-[0.16em] transition-all ${
+                      className={`shrink-0 rounded-lg border px-3 py-1.5 font-mono text-[9px] uppercase tracking-[0.16em] transition-all ${
                         active
                           ? "border-emerald-500/50 bg-emerald-500/10 text-emerald-300"
                           : "border-white/[0.08] bg-white/[0.02] text-white/40 hover:text-white/70"
@@ -855,27 +927,36 @@ export default function EventsPage() {
             </div>
 
             {/* Search Input Bar */}
-            <div className="relative mt-5">
+            <div className="relative mt-4 sm:mt-5">
               <input
                 id="event-search-input"
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="SEARCH 48 EVENTS BY TITLE, VENUE, OR KEYWORD... (PRESS '/' TO FOCUS)"
-                className="h-12 w-full rounded-xl border border-white/10 bg-black/50 pl-11 pr-10 font-mono text-[10px] uppercase tracking-[0.16em] text-white outline-none placeholder:text-white/25 focus:border-emerald-500/50 focus:bg-emerald-950/20 transition-all"
+                placeholder={
+                  isMobile
+                    ? "SEARCH 48 EVENTS..."
+                    : "SEARCH 48 EVENTS BY TITLE, VENUE, OR KEYWORD..."
+                }
+                className="h-11 sm:h-12 w-full rounded-xl border border-white/10 bg-black/50 pl-10 sm:pl-11 pr-20 sm:pr-24 font-mono text-[9px] sm:text-[10px] uppercase tracking-[0.14em] sm:tracking-[0.16em] text-white outline-none placeholder:text-white/30 focus:border-emerald-500/50 focus:bg-emerald-950/20 transition-all"
               />
-              <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 font-mono text-emerald-400 text-sm">
+              <span className="pointer-events-none absolute left-3.5 sm:left-4 top-1/2 -translate-y-1/2 font-mono text-emerald-400 text-xs sm:text-sm">
                 ◈
               </span>
-              {search && (
-                <button
-                  type="button"
-                  onClick={() => setSearch("")}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 font-mono text-xs text-white/40 hover:text-white"
-                >
-                  ✕
-                </button>
-              )}
+              <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5 sm:gap-2">
+                <kbd className="hidden sm:inline-flex items-center rounded border border-white/10 bg-white/[0.04] px-1.5 py-0.5 font-mono text-[9px] text-white/40">
+                  /
+                </kbd>
+                {search && (
+                  <button
+                    type="button"
+                    onClick={() => setSearch("")}
+                    className="font-mono text-xs text-white/40 hover:text-white p-1"
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         </section>
