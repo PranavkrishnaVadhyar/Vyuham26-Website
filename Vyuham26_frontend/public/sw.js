@@ -83,8 +83,8 @@ self.addEventListener("fetch", (event) => {
         caches.open(CACHE_NAME).then((cache) => cache.put(request, responseClone));
         return networkResponse;
       }).catch(() => {
-        // Offline fallback
-        return null;
+        // Offline fallback - return valid Response instead of null to prevent TypeError
+        return new Response("", { status: 503, statusText: "Offline Service Unavailable" });
       });
     })
   );

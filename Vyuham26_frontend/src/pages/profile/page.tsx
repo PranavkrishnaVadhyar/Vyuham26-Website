@@ -1,26 +1,43 @@
-"use client";
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import Link from "next/link";
 
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import AnimatedSection from "@/components/motion/AnimatedSection";
 import { Kicker, Button, StreamBadge } from "@/components/ui/Elements";
 import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
+import { useAuth } from "@/context/AuthContext";
+import { toast } from "@/components/ui/Toaster";
 
 export default function ProfilePage() {
+  const { user, updateUser, isAuthenticated } = useAuth();
   const reduceMotion = usePrefersReducedMotion();
 
   const [profile, setProfile] = useState({
-    name: "Aromal S S",
-    email: "aromal.s24@duk.ac.in",
-    college: "Digital University Kerala",
-    phone: "+91 98470 12345",
-    degree: "M.Tech Cyber Security",
-    year: "2024–2026",
-    vyuhamId: "VYU26-OPER-8042",
+    name: user?.name || "Aromal S S",
+    email: user?.email || "aromal.s24@duk.ac.in",
+    college: user?.college || "Digital University Kerala",
+    phone: user?.phone || "+91 98470 12345",
+    degree: user?.degree || "M.Tech Cyber Security",
+    year: user?.year || "2024–2026",
+    vyuhamId: user?.id || "VYU26-OPER-8042",
   });
+
+  useEffect(() => {
+    if (user) {
+      setProfile((prev) => ({
+        ...prev,
+        name: user.name,
+        email: user.email,
+        college: user.college || prev.college,
+        phone: user.phone || prev.phone,
+        degree: user.degree || prev.degree,
+        year: user.year || prev.year,
+        vyuhamId: user.id,
+      }));
+    }
+  }, [user]);
 
   const [saved, setSaved] = useState(false);
 
@@ -41,11 +58,21 @@ export default function ProfilePage() {
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
 
+    updateUser({
+      name: profile.name,
+      email: profile.email,
+      college: profile.college,
+      phone: profile.phone,
+      degree: profile.degree,
+      year: profile.year,
+    });
+
     setSaved(true);
+    toast("Personnel dossier synchronized with central command.", "ok");
 
     setTimeout(() => {
       setSaved(false);
-    }, 3000);
+    }, 3500);
   };
 
   return (
@@ -112,6 +139,32 @@ export default function ProfilePage() {
 
         <section className="py-16 md:py-24">
           <div className="mx-auto w-[min(1100px,calc(100%-32px))] md:w-[min(1100px,calc(100%-64px))]">
+
+            {!isAuthenticated && (
+              <div className="mb-8 flex flex-wrap items-center justify-between gap-4 rounded border border-green/30 bg-green/5 p-4 font-mono text-xs text-green backdrop-blur-md">
+                <div className="flex items-center gap-2.5">
+                  <span className="relative flex h-2 w-2">
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green opacity-60" />
+                    <span className="relative inline-flex h-2 w-2 rounded-full bg-green" />
+                  </span>
+                  <span>PREVIEW MODE // Sign in or register to link and synchronize your official operative dossier.</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Link
+                    href="/login"
+                    className="rounded border border-green/60 bg-green px-3.5 py-1.5 font-bold text-black transition hover:bg-white"
+                  >
+                    SIGN IN →
+                  </Link>
+                  <Link
+                    href="/signup"
+                    className="rounded border border-white/20 px-3.5 py-1.5 text-white transition hover:border-green hover:text-green"
+                  >
+                    REGISTER
+                  </Link>
+                </div>
+              </div>
+            )}
 
             {/* ========================================================
                 HEADER
@@ -349,7 +402,7 @@ export default function ProfilePage() {
                     <StreamBadge stream="tech" />
 
                     <span className="rounded border border-green/20 bg-green/[0.04] px-2.5 py-1 font-mono text-[9px] uppercase tracking-wider text-green">
-                      VERIFIED OPERATIVE
+                      {user?.role ? user.role.toUpperCase() : "VERIFIED OPERATIVE"}
                     </span>
                   </div>
 
@@ -362,7 +415,7 @@ export default function ProfilePage() {
                       </span>
 
                       <span className="font-semibold text-paper">
-                        03
+                        {String(user ? user.registeredEvents.length : 3).padStart(2, "0")}
                       </span>
                     </div>
 

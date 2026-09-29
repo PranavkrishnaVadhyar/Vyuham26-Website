@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { cn } from "@/utils/cn";
 import { homepage, navLinks } from "@/data/content";
 import { useApp } from "@/lib/store";
@@ -14,7 +15,23 @@ export default function Nav({ visible = true }: { visible?: boolean }) {
   const [active, setActive] = useState("home");
   const [hidden, setHidden] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const profileMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (open) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [open]);
 
   useEffect(() => {
     if (!profileMenuOpen) return;
@@ -102,20 +119,25 @@ export default function Nav({ visible = true }: { visible?: boolean }) {
     };
   }, []);
 
-  useEffect(() => {
-    const hash = window.location.hash;
-    const isHome =
-      !hash ||
-      hash === "#" ||
-      hash === "#/" ||
-      hash.startsWith("#streams") ||
-      hash.startsWith("#gallery") ||
-      hash.startsWith("#about") ||
-      hash.startsWith("#/#") ||
-      (window.location.pathname === "/" && (!hash || hash.startsWith("#")));
+  const checkIsHome = () => {
+    if (typeof window === "undefined") return true;
+    const path = window.location.pathname;
+    const hash = window.location.hash.replace(/^#\/?/, "").split("?")[0].split("/")[0];
 
+    // If pathname is not "/" (e.g. /events, /dashboard), it is definitely NOT home
+    if (path && path !== "/") {
+      return false;
+    }
+    // If pathname is "/", but hash points to an inner page (e.g. #/events, #/dashboard)
+    if (hash && hash !== "" && hash !== "home" && hash !== "streams" && hash !== "gallery" && hash !== "about") {
+      return false;
+    }
+    return true;
+  };
+
+  useEffect(() => {
     // Only run home-page section intersection observer when on the home page
-    if (!isHome) return;
+    if (!checkIsHome()) return;
 
     const ids = navLinks.map((l) => l.id);
     const io = new IntersectionObserver(
@@ -138,43 +160,44 @@ export default function Nav({ visible = true }: { visible?: boolean }) {
     setHidden(false);
 
     if (id === "home") {
-      const hash = window.location.hash;
-      const isHome =
-        !hash ||
-        hash === "#" ||
-        hash === "#/" ||
-        hash.startsWith("#streams") ||
-        hash.startsWith("#gallery") ||
-        hash.startsWith("#about") ||
-        (window.location.pathname === "/" && (!hash || hash.startsWith("#")));
+      const isHome = checkIsHome();
 
       if (isHome) {
+        if (window.location.hash && window.location.hash !== "#/" && window.location.hash !== "#" && window.location.hash !== "") {
+          window.location.hash = "/";
+          window.dispatchEvent(new CustomEvent("app:navigate", { detail: "/" }));
+        }
         scrollToTop();
       } else {
+        try {
+          if (window.location.pathname !== "/") {
+            window.history.pushState(null, "", "/");
+          }
+        } catch {}
         window.location.hash = "/";
-        window.dispatchEvent(new Event("app:navigate"));
+        window.dispatchEvent(new CustomEvent("app:navigate", { detail: "/" }));
         window.scrollTo({ top: 0, behavior: "smooth" });
+        setTimeout(() => {
+          scrollToTop();
+        }, 120);
       }
       return;
     }
 
     // Homepage sections: streams, gallery, about
     if (id === "streams" || id === "gallery" || id === "about") {
-      const hash = window.location.hash;
-      const isHome =
-        !hash ||
-        hash === "#" ||
-        hash === "#/" ||
-        hash.startsWith("#streams") ||
-        hash.startsWith("#gallery") ||
-        hash.startsWith("#about") ||
-        (window.location.pathname === "/" && (!hash || hash.startsWith("#")));
+      const isHome = checkIsHome();
 
       if (isHome && document.getElementById(id)) {
         scrollToId(id, -30);
       } else {
+        try {
+          if (window.location.pathname !== "/") {
+            window.history.pushState(null, "", "/");
+          }
+        } catch {}
         window.location.hash = `/#${id}`;
-        window.dispatchEvent(new Event("app:navigate"));
+        window.dispatchEvent(new CustomEvent("app:navigate", { detail: `/#${id}` }));
         setTimeout(() => {
           scrollToId(id, -30);
         }, 150);
@@ -182,10 +205,14 @@ export default function Nav({ visible = true }: { visible?: boolean }) {
       return;
     }
 
-    // Direct pages with dedicated routes (events, venue, schedule, sponsors, contact)
-    // directly to their respective pages in /pages
+    // Direct pages with dedicated routes (events, venue, schedule, sponsors, contact, dashboard, profile, ticket)
+    try {
+      if (window.location.pathname !== "/") {
+        window.history.pushState(null, "", `/${id}`);
+      }
+    } catch {}
     window.location.hash = `/${id}`;
-    window.dispatchEvent(new Event("app:navigate"));
+    window.dispatchEvent(new CustomEvent("app:navigate", { detail: `/${id}` }));
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -211,7 +238,7 @@ export default function Nav({ visible = true }: { visible?: boolean }) {
           isHidden
             ? "-translate-y-full opacity-0 pointer-events-none"
             : "translate-y-0 opacity-100 pointer-events-auto",
-          scrolled ? "bg-[rgba(3,6,5,0.85)] backdrop-blur-xl" : "bg-transparent",
+          open || scrolled ? "bg-[rgba(2,5,4,0.96)] backdrop-blur-2xl" : "bg-transparent",
         )}
         style={{ transitionTimingFunction: "cubic-bezier(0.16,1,0.3,1)" }}
       >
@@ -512,122 +539,130 @@ export default function Nav({ visible = true }: { visible?: boolean }) {
         />
       </header>
 
-      {/* Mobile full-screen cinematic menu */}
-      <div
-        className={cn(
-          "fixed inset-0 z-[88] flex flex-col justify-between overflow-y-auto bg-[rgba(2,5,4,0.96)] backdrop-blur-2xl transition-all duration-700 lg:hidden px-6 pt-24 pb-8",
-          open ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0",
-        )}
-        style={{ transitionTimingFunction: "cubic-bezier(0.16,1,0.3,1)" }}
-      >
-        <div className="grain pointer-events-none absolute inset-0 overflow-hidden" />
-
-        {/* Mobile Header info */}
-        <div className="relative z-10 flex items-center justify-between border-b border-[rgba(120,160,145,0.12)] pb-4">
-          <div className="flex items-center gap-2">
-            <img src="/vyuham_logo.svg" alt="VYUHAM'26" className="h-6 w-6 object-contain" onError={(e) => { (e.target as HTMLImageElement).src = "/vyuham_logo.png"; }} />
-            <span className="font-mono text-[9px] tracking-[0.24em] text-emerald-400">DIGITAL UNIVERSITY KERALA</span>
-          </div>
-          <button
-            onClick={openTerminal}
-            className="flex items-center gap-1.5 border border-emerald-500/40 bg-emerald-950/40 px-2 py-1 font-mono text-[9px] text-emerald-400"
-          >
-            <span>CONSOLE</span>
-          </button>
-        </div>
-
-        {/* Mobile Nav Links */}
-        <nav className="relative z-10 flex flex-col gap-1 py-4">
-          {navLinks.map((l, i) => (
-            <button
-              key={l.id}
-              onClick={() => go(l.id)}
-              className="t-cond border-b border-[rgba(120,160,145,0.1)] py-3 text-left text-[7vw] leading-none text-[#e5f4ed] transition-all duration-500 hover:text-emerald-400"
-              style={{
-                transform: open ? "translateY(0)" : "translateY(24px)",
-                opacity: open ? 1 : 0,
-                transitionDelay: `${0.04 * i + 0.08}s`,
-              }}
+      {/* Mobile full-screen cinematic menu via Portal */}
+      {mounted && typeof document !== "undefined"
+        ? createPortal(
+            <div
+              className={cn(
+                "fixed inset-0 z-[88] flex flex-col justify-between overflow-y-auto bg-[rgba(2,5,4,0.98)] backdrop-blur-2xl transition-all duration-500 lg:hidden px-6 pt-28 pb-8",
+                open ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0",
+              )}
+              style={{ transitionTimingFunction: "cubic-bezier(0.16,1,0.3,1)" }}
             >
-              <span className="mr-3 font-mono text-[10px] align-super text-[#3f6355]">0{i + 1}</span>
-              {l.label}
-            </button>
-          ))}
-        </nav>
+              <div className="grain pointer-events-none absolute inset-0 overflow-hidden" />
 
-        {/* Mobile Bottom actions */}
-        <div className="relative z-10 pt-4">
-          <div className="flex gap-3">
-            {user ? (
-              <div className="flex w-full flex-col gap-2">
-                <div className="flex items-center justify-between border border-[rgba(120,160,145,0.18)] bg-[rgba(6,16,12,0.6)] px-3 py-2">
-                  <div className="flex items-center gap-2">
-                    <span className="h-2 w-2 rounded-full bg-[#18c47c] animate-pulse" />
-                    <span className="font-mono text-[10px] tracking-wider text-[#e7f5ee]">{user.name}</span>
-                  </div>
-                  <span className="font-mono text-[8px] tracking-widest text-[#18c47c] uppercase">
-                    {user.role || "OPERATIVE"}
+              {/* Mobile Tactical Sub-header */}
+              <div className="relative z-10 flex items-center justify-between border-b border-[rgba(120,160,145,0.14)] pb-3">
+                <div className="flex items-center gap-2">
+                  <span className="h-1.5 w-1.5 rounded-full bg-[#18c47c] animate-pulse" />
+                  <span className="font-mono text-[9px] tracking-[0.24em] text-emerald-400">
+                    DIGITAL UNIVERSITY KERALA
                   </span>
                 </div>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => {
-                      setOpen(false);
-                      go("dashboard");
-                    }}
-                    className="btn-cine btn-cine--solid flex-1 justify-center py-2.5 text-[10px]"
-                  >
-                    DASHBOARD →
-                  </button>
-                  <button
-                    onClick={() => {
-                      setOpen(false);
-                      ui.setProfileOpen(true);
-                    }}
-                    className="btn-cine flex-1 justify-center py-2.5 text-[10px]"
-                  >
-                    PROFILE
-                  </button>
-                </div>
-                <button
-                  onClick={() => {
-                    setOpen(false);
-                    logout();
-                    toast("Signed out.", "warn");
-                  }}
-                  className="font-mono text-[9px] tracking-[0.24em] text-[#6f8b80] hover:text-[#f2a98a] py-1 text-center"
-                >
-                  SIGN OUT
-                </button>
+                <span className="font-mono text-[8px] tracking-[0.2em] text-[#5b7b6e]">
+                  SYSTEM NAV // 2026
+                </span>
               </div>
-            ) : (
-              <>
-                <button
-                  onClick={() => {
-                    setOpen(false);
-                    ui.setAuthOpen("login");
-                  }}
-                  className="btn-cine flex-1 justify-center py-2.5 text-[10px]"
-                >
-                  LOGIN
-                </button>
-                <button
-                  onClick={() => {
-                    setOpen(false);
-                    ui.setAuthOpen("signup");
-                  }}
-                  className="btn-cine btn-cine--solid flex-1 justify-center py-2.5 text-[10px]"
-                >
-                  REGISTER
-                </button>
-              </>
-            )}
-          </div>
-          <p className="mt-4 text-center font-mono text-[8px] tracking-[0.2em] text-[#3f6152]">
-            30 OCT — 01 NOV 2026 · TECHNOCITY KERALA
-          </p>
-        </div>
-      </div>
+
+              {/* Mobile Nav Links */}
+              <nav className="relative z-10 flex flex-col gap-1 py-4">
+                {navLinks.map((l, i) => (
+                  <button
+                    key={l.id}
+                    onClick={() => go(l.id)}
+                    className="t-cond border-b border-[rgba(120,160,145,0.1)] py-3 text-left text-[7vw] leading-none text-[#e5f4ed] transition-all duration-500 hover:text-emerald-400"
+                    style={{
+                      transform: open ? "translateY(0)" : "translateY(24px)",
+                      opacity: open ? 1 : 0,
+                      transitionDelay: `${0.04 * i + 0.08}s`,
+                    }}
+                  >
+                    <span className="mr-3 font-mono text-[10px] align-super text-[#3f6355]">
+                      0{i + 1}
+                    </span>
+                    {l.label}
+                  </button>
+                ))}
+              </nav>
+
+              {/* Mobile Bottom actions */}
+              <div className="relative z-10 pt-4">
+                <div className="flex gap-3">
+                  {user ? (
+                    <div className="flex w-full flex-col gap-2">
+                      <div className="flex items-center justify-between border border-[rgba(120,160,145,0.18)] bg-[rgba(6,16,12,0.6)] px-3 py-2">
+                        <div className="flex items-center gap-2">
+                          <span className="h-2 w-2 rounded-full bg-[#18c47c] animate-pulse" />
+                          <span className="font-mono text-[10px] tracking-wider text-[#e7f5ee]">
+                            {user.name}
+                          </span>
+                        </div>
+                        <span className="font-mono text-[8px] tracking-widest text-[#18c47c] uppercase">
+                          {user.role || "OPERATIVE"}
+                        </span>
+                      </div>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => {
+                            setOpen(false);
+                            go("dashboard");
+                          }}
+                          className="btn-cine btn-cine--solid flex-1 justify-center py-2.5 text-[10px]"
+                        >
+                          DASHBOARD →
+                        </button>
+                        <button
+                          onClick={() => {
+                            setOpen(false);
+                            ui.setProfileOpen(true);
+                          }}
+                          className="btn-cine flex-1 justify-center py-2.5 text-[10px]"
+                        >
+                          PROFILE
+                        </button>
+                      </div>
+                      <button
+                        onClick={() => {
+                          setOpen(false);
+                          logout();
+                          toast("Signed out.", "warn");
+                        }}
+                        className="font-mono text-[9px] tracking-[0.24em] text-[#6f8b80] hover:text-[#f2a98a] py-1 text-center"
+                      >
+                        SIGN OUT
+                      </button>
+                    </div>
+                  ) : (
+                    <>
+                      <button
+                        onClick={() => {
+                          setOpen(false);
+                          ui.setAuthOpen("login");
+                        }}
+                        className="btn-cine flex-1 justify-center py-2.5 text-[10px]"
+                      >
+                        LOGIN
+                      </button>
+                      <button
+                        onClick={() => {
+                          setOpen(false);
+                          ui.setAuthOpen("signup");
+                        }}
+                        className="btn-cine btn-cine--solid flex-1 justify-center py-2.5 text-[10px]"
+                      >
+                        REGISTER
+                      </button>
+                    </>
+                  )}
+                </div>
+                <p className="mt-4 text-center font-mono text-[8px] tracking-[0.2em] text-[#3f6152]">
+                  30 OCT — 01 NOV 2026 · TECHNOCITY KERALA
+                </p>
+              </div>
+            </div>,
+            document.body,
+          )
+        : null}
     </>
   );
 }
