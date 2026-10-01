@@ -4,6 +4,7 @@ import { useApp } from "@/lib/store";
 import { useIsMobile, useReducedMotion } from "@/lib/hooks";
 import { MagneticButton } from "@/components/cinematic/Interactive";
 import { scrollToId } from "@/lib/scroll";
+import Logo from "@/components/ui/Logo";
 
 /* ---------- geometry: icosahedron ---------- */
 const PHI = (1 + Math.sqrt(5)) / 2;
@@ -233,13 +234,10 @@ export default function FinalReveal() {
             {/* Festival Emblem Logo */}
             <div className="mx-auto mb-4 flex items-center justify-center">
               <div className="relative flex h-14 w-14 items-center justify-center sm:h-16 sm:w-16 md:h-20 md:w-20">
-                <img
-                  src="/vyuham_logo.svg"
+                <Logo
+                  size="md"
                   alt="VYUHAM'26 Emblem"
                   className="relative z-10 h-14 w-14 object-contain drop-shadow-[0_0_24px_rgba(24,196,124,0.65)] transition-transform duration-700 hover:scale-105 sm:h-16 sm:w-16 md:h-20 md:w-20"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = "/vyuham_logo.png";
-                  }}
                 />
               </div>
             </div>

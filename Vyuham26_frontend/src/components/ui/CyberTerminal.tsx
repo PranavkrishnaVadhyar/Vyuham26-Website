@@ -702,7 +702,7 @@ Type 'help' to see the available VYUHAM’26 commands.`,
                   e.stopPropagation();
                   setIsOpen(false);
                 }}
-                className="rounded px-2.5 py-1 text-white/40 transition-colors hover:bg-white/10 hover:text-emerald-300 cursor-pointer text-sm font-bold"
+                className="flex h-8 w-8 min-h-[32px] min-w-[32px] items-center justify-center rounded text-white/40 transition-colors hover:bg-white/10 hover:text-emerald-300 cursor-pointer text-base font-bold"
                 aria-label="Close terminal"
               >
                 ×

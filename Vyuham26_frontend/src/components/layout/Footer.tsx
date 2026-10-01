@@ -3,6 +3,7 @@ import { navLinks } from "@/data/content";
 import { scrollToId, scrollToTop } from "@/lib/scroll";
 import { FocusIn } from "@/components/cinematic/Reveal";
 import { toast } from "@/components/ui/Toaster";
+import Logo from "@/components/ui/Logo";
 
 export default function Footer() {
   const { content, ui } = useApp();
@@ -48,13 +49,9 @@ export default function Footer() {
         <div className="lg:col-span-2">
           <div className="flex items-center gap-3">
             <div className="relative flex h-10 w-10 items-center justify-center">
-              <img
-                src="/vyuham_logo.svg"
-                alt="VYUHAM'26"
+              <Logo
+                size="sm"
                 className="relative z-10 h-10 w-10 object-contain drop-shadow-[0_0_12px_rgba(24,196,124,0.5)]"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).src = "/vyuham_logo.png";
-                }}
               />
             </div>
             <button onClick={scrollToTop} className="t-cond text-[32px] leading-none text-[#f0f9f5] md:text-[40px]">

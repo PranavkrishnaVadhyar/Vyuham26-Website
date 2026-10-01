@@ -6,6 +6,7 @@ import { useApp } from "@/lib/store";
 import { scrollToId, scrollToTop } from "@/lib/scroll";
 import { startAmbience, stopAmbience } from "@/lib/sound";
 import BroadcastTicker from "@/components/ui/BroadcastTicker";
+import Logo from "@/components/ui/Logo";
 import { toast } from "@/components/ui/Toaster";
 
 export default function Nav({ visible = true }: { visible?: boolean }) {
@@ -254,13 +255,9 @@ export default function Nav({ visible = true }: { visible?: boolean }) {
           {/* Logo & Brand mark */}
           <button onClick={() => go("home")} className="group flex items-center gap-2.5" aria-label="VYUHAM 26 home">
             <div className="relative flex h-8 w-8 items-center justify-center md:h-9 md:w-9">
-              <img
-                src="/vyuham_logo.svg"
-                alt="VYUHAM'26 Logo"
+              <Logo
+                size="sm"
                 className="relative z-10 h-8 w-8 object-contain drop-shadow-[0_0_12px_rgba(24,196,124,0.5)] transition-transform duration-500 group-hover:scale-110 md:h-9 md:w-9"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).src = "/vyuham_logo.png";
-                }}
               />
             </div>
             <div className="flex items-baseline gap-1.5">
@@ -282,7 +279,7 @@ export default function Nav({ visible = true }: { visible?: boolean }) {
                 onClick={() => go(l.id)}
                 data-active={active === l.id}
                 className={cn(
-                  "link-trail font-mono text-[10px] tracking-[0.24em] transition-colors duration-500",
+                  "link-trail inline-flex items-center min-h-[36px] px-1.5 py-1 font-mono text-[10px] tracking-[0.24em] transition-colors duration-500",
                   active === l.id ? "text-[#c9f3e0]" : "text-[#7f978d] hover:text-[#dff6ec]",
                 )}
               >
@@ -292,12 +289,12 @@ export default function Nav({ visible = true }: { visible?: boolean }) {
           </nav>
 
           {/* Right cluster */}
-          <div className="flex items-center gap-2 sm:gap-3 md:gap-4">
+          <div className="flex items-center gap-2 sm:gap-2.5 md:gap-3">
             {/* Global CMD Terminal trigger */}
             <button
               onClick={openTerminal}
               aria-label="Open Command Terminal"
-              className="group flex items-center gap-1.5 border border-[rgba(24,196,124,0.35)] bg-[rgba(8,26,18,0.5)] px-2.5 py-[5px] font-mono text-[10px] tracking-[0.16em] text-[#18c47c] transition-all duration-300 hover:border-[#18c47c] hover:bg-[rgba(24,196,124,0.14)] hover:shadow-[0_0_16px_rgba(24,196,124,0.35)]"
+              className="group flex min-h-[36px] items-center gap-1.5 border border-[rgba(24,196,124,0.35)] bg-[rgba(8,26,18,0.5)] px-3 py-1.5 font-mono text-[10px] tracking-[0.16em] text-[#18c47c] transition-all duration-300 hover:border-[#18c47c] hover:bg-[rgba(24,196,124,0.14)] hover:shadow-[0_0_16px_rgba(24,196,124,0.35)]"
               title="Open Command Terminal (Ctrl + K)"
             >
               <span className="h-1.5 w-1.5 rounded-full bg-[#18c47c] animate-pulse" />
@@ -311,7 +308,7 @@ export default function Nav({ visible = true }: { visible?: boolean }) {
             <button
               onClick={toggleSound}
               aria-label={ui.sound ? "Mute ambience" : "Play ambience"}
-              className="group flex h-8 items-center gap-[3px] px-1"
+              className="group flex h-9 min-h-[36px] min-w-[36px] items-center justify-center gap-[3px] rounded px-2 hover:bg-white/5 transition-colors"
               title={ui.sound ? "Sound on" : "Sound off"}
             >
               {[0, 1, 2, 3].map((i) => (
@@ -334,7 +331,7 @@ export default function Nav({ visible = true }: { visible?: boolean }) {
                 <button
                   onClick={() => setProfileMenuOpen((prev) => !prev)}
                   className={cn(
-                    "flex items-center gap-2 border px-3 py-[7px] font-mono text-[9px] tracking-[0.24em] transition-all duration-300",
+                    "flex min-h-[36px] items-center gap-2 border px-3 py-1.5 font-mono text-[9px] tracking-[0.24em] transition-all duration-300",
                     profileMenuOpen
                       ? "border-[#18c47c] bg-[rgba(24,196,124,0.12)] text-[#e7f5ee] shadow-[0_0_12px_rgba(24,196,124,0.3)]"
                       : "border-[rgba(120,160,145,0.25)] bg-[rgba(6,16,12,0.4)] text-[#c6e5d8] hover:border-[rgba(24,196,124,0.6)] hover:bg-[rgba(24,196,124,0.06)]"
@@ -484,7 +481,7 @@ export default function Nav({ visible = true }: { visible?: boolean }) {
                           logout();
                           toast("Signed out.", "warn");
                         }}
-                        className="flex w-full items-center justify-between px-3 py-1.5 font-mono text-[9px] tracking-[0.24em] text-[#7d9a8d] transition-colors hover:bg-[rgba(242,169,138,0.08)] hover:text-[#f2a98a]"
+                        className="flex w-full items-center justify-between px-3 py-2 min-h-[36px] font-mono text-[9px] tracking-[0.24em] text-[#7d9a8d] transition-colors hover:bg-[rgba(242,169,138,0.08)] hover:text-[#f2a98a]"
                       >
                         <span>SIGN OUT</span>
                         <span className="text-[10px]">⎋</span>
@@ -497,13 +494,13 @@ export default function Nav({ visible = true }: { visible?: boolean }) {
               <>
                 <button
                   onClick={() => ui.setAuthOpen("login")}
-                  className="link-trail hidden font-mono text-[10px] tracking-[0.26em] text-[#93aba1] transition-colors duration-500 hover:text-[#dff6ec] sm:block"
+                  className="link-trail hidden font-mono text-[10px] tracking-[0.26em] text-[#93aba1] transition-colors duration-500 hover:text-[#dff6ec] sm:inline-flex items-center min-h-[36px] px-2.5"
                 >
                   LOGIN
                 </button>
                 <button
                   onClick={() => ui.setAuthOpen("signup")}
-                  className="hidden border border-[rgba(24,196,124,0.4)] bg-[rgba(10,40,28,0.35)] px-3.5 py-[6px] font-mono text-[9px] tracking-[0.26em] text-[#d7f6e8] transition-all duration-500 hover:border-[rgba(24,196,124,0.9)] hover:bg-[rgba(16,64,44,0.5)] sm:block"
+                  className="hidden border border-[rgba(24,196,124,0.4)] bg-[rgba(10,40,28,0.35)] px-3.5 py-1.5 min-h-[36px] font-mono text-[9px] tracking-[0.26em] text-[#d7f6e8] transition-all duration-500 hover:border-[rgba(24,196,124,0.9)] hover:bg-[rgba(16,64,44,0.5)] sm:inline-flex items-center justify-center"
                 >
                   REGISTER
                 </button>
@@ -513,7 +510,7 @@ export default function Nav({ visible = true }: { visible?: boolean }) {
             {/* Mobile menu button */}
             <button
               onClick={() => setOpen((o) => !o)}
-              className="flex h-8 w-8 flex-col items-center justify-center gap-[5px] lg:hidden"
+              className="flex h-9 w-9 min-h-[36px] min-w-[36px] flex-col items-center justify-center gap-[5px] rounded hover:bg-white/5 transition-colors lg:hidden"
               aria-label="Menu"
             >
               <span
@@ -556,11 +553,11 @@ export default function Nav({ visible = true }: { visible?: boolean }) {
                 <div className="flex items-center gap-2">
                   <span className="h-1.5 w-1.5 rounded-full bg-[#18c47c] animate-pulse" />
                   <span className="font-mono text-[9px] tracking-[0.24em] text-emerald-400">
-                    DIGITAL UNIVERSITY KERALA
+                    VYUHAM'26 // DUK
                   </span>
                 </div>
-                <span className="font-mono text-[8px] tracking-[0.2em] text-[#5b7b6e]">
-                  SYSTEM NAV // 2026
+                <span className="font-mono text-[8px] tracking-[0.2em] text-[#4f6f61]">
+                  SYSTEM SECURE
                 </span>
               </div>
 
@@ -627,7 +624,7 @@ export default function Nav({ visible = true }: { visible?: boolean }) {
                           logout();
                           toast("Signed out.", "warn");
                         }}
-                        className="font-mono text-[9px] tracking-[0.24em] text-[#6f8b80] hover:text-[#f2a98a] py-1 text-center"
+                        className="font-mono text-[9px] tracking-[0.24em] text-[#6f8b80] hover:text-[#f2a98a] py-2 min-h-[36px] flex items-center justify-center text-center"
                       >
                         SIGN OUT
                       </button>

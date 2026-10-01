@@ -157,7 +157,7 @@ export default function BroadcastTicker({ visible = true }: { visible?: boolean 
           <div className="flex shrink-0 items-center gap-2 pl-3">
             <button
               onClick={() => setModalOpen(true)}
-              className="hidden font-mono text-[8px] tracking-[0.16em] text-[#18c47c] hover:underline sm:inline"
+              className="hidden font-mono text-[9px] tracking-[0.16em] text-[#18c47c] hover:underline sm:inline-flex items-center min-h-[28px] px-1.5"
             >
               ALL INTEL ({bulletins.length})
             </button>
@@ -165,7 +165,7 @@ export default function BroadcastTicker({ visible = true }: { visible?: boolean 
             <button
               onClick={() => setMinimized(true)}
               aria-label="Minimize broadcast ticker"
-              className="flex h-5 w-5 items-center justify-center rounded font-mono text-[10px] text-white/40 hover:bg-white/5 hover:text-white"
+              className="flex h-7 w-7 min-h-[28px] min-w-[28px] items-center justify-center rounded font-mono text-xs text-white/50 hover:bg-white/10 hover:text-white transition-colors"
               title="Minimize ticker"
             >
               ✕

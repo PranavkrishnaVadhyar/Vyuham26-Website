@@ -9,16 +9,38 @@
       content="VYUHAM'26 — A cinematic journey into the future. Technology, Culture, Gaming and Impact converge. 30 OCT – 01 NOV 2026. The future awaits."
     />
     <title>VYUHAM'26 — The Future Awaits</title>
+
+    <!-- Open Graph Meta Tags (Item #5) -->
+    <meta property="og:title" content="VYUHAM'26 — The Future Awaits" />
+    <meta property="og:description" content="A cinematic journey into the future. Technology, Culture, Gaming and Impact converge. 30 OCT – 01 NOV 2026." />
+    <meta property="og:image" content="/og-image.png" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="VYUHAM'26" />
+
+    <!-- Twitter Card Meta Tags (Item #5) -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="VYUHAM'26 — The Future Awaits" />
+    <meta name="twitter:description" content="Technology, Culture, Gaming and Impact converge. 30 OCT – 01 NOV 2026." />
+    <meta name="twitter:image" content="/og-image.png" />
+
+    <!-- Font Loading Strategy (Item #3) — preconnect first, then preload critical font, then load all -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <link rel="icon" type="image/svg+xml" href="/vyuham_logo.svg" />
-    <link rel="manifest" href="/manifest.json" />
+    <link
+      rel="preload"
+      as="style"
+      href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,100..900;1,62..125,100..900&display=swap"
+    />
     <link
       href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,100..900;1,62..125,100..900&family=Inter:wght@200..700&family=JetBrains+Mono:wght@200;300;400;500&display=swap"
       rel="stylesheet"
     />
+
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <!-- Item #1: Use optimized small PNG for favicon instead of 1.6MB SVG -->
+    <link rel="icon" type="image/png" href="/vyuham_logo_sm.png" />
+    <link rel="manifest" href="/manifest.json" />
   </head>
   <body>
     <div id="root"></div>

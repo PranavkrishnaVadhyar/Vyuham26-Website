@@ -1,14 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
+import { getAppPath, navigate } from "@/lib/router";
 
-export function getAppPath(): string {
-  if (typeof window === "undefined") return "/";
-  const hash = window.location.hash;
-  if (hash && hash.startsWith("#/")) {
-    return hash.slice(1).split("?")[0] || "/";
-  }
-  const path = window.location.pathname;
-  return path || "/";
-}
+export { getAppPath };
 
 export function usePathname(): string {
   const [pathname, setPathname] = useState(getAppPath);
@@ -30,15 +23,11 @@ export function usePathname(): string {
 
 export function useRouter() {
   const push = useCallback((href: string) => {
-    const cleanHref = href.startsWith("#") ? href.slice(1) : href;
-    window.location.hash = cleanHref.startsWith("/") ? cleanHref : `/${cleanHref}`;
-    window.dispatchEvent(new CustomEvent("app:navigate", { detail: cleanHref }));
+    navigate(href);
   }, []);
 
   const replace = useCallback((href: string) => {
-    const cleanHref = href.startsWith("#") ? href.slice(1) : href;
-    window.location.hash = cleanHref.startsWith("/") ? cleanHref : `/${cleanHref}`;
-    window.dispatchEvent(new CustomEvent("app:navigate", { detail: cleanHref }));
+    navigate(href, { replace: true });
   }, []);
 
   const back = useCallback(() => window.history.back(), []);
@@ -77,6 +66,5 @@ export function useSearchParams(): URLSearchParams {
 }
 
 export function notFound() {
-  window.location.hash = "/404";
-  window.dispatchEvent(new CustomEvent("app:navigate", { detail: "/404" }));
+  navigate("/404");
 }
