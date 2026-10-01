@@ -101,7 +101,7 @@ export function useInView<T extends HTMLElement>(options?: IntersectionObserverI
           setInView(false);
         }
       },
-      { rootMargin: "0px 0px -12% 0px", threshold: 0.15, ...options },
+      { rootMargin: "0px 0px 40px 0px", threshold: 0.05, ...options },
     );
     io.observe(node);
     return () => io.disconnect();

@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState, Suspense } from "react";
+import { useEffect, useMemo, useRef, useState, Suspense } from "react";
+import * as THREE from "three";
 import { useSearchParams } from "next/navigation";
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
 import Link from "next/link";
@@ -30,16 +31,20 @@ const streamFilters = [
 
 const streamAccent: Record<string, string> = {
   tech: "text-green border-green/30 bg-green/5",
+  technology: "text-green border-green/30 bg-green/5",
   culture: "text-purple-300 border-purple-400/30 bg-purple-400/5",
   gaming: "text-cyan-300 border-cyan-400/30 bg-cyan-400/5",
   management: "text-amber-300 border-amber-400/30 bg-amber-400/5",
+  impact: "text-emerald-300 border-emerald-400/30 bg-emerald-400/5",
 };
 
 const streamGlow: Record<string, string> = {
   tech: "group-hover:border-green/40",
+  technology: "group-hover:border-green/40",
   culture: "group-hover:border-purple-400/40",
   gaming: "group-hover:border-cyan-400/40",
   management: "group-hover:border-amber-400/40",
+  impact: "group-hover:border-emerald-400/40",
 };
 
 function ScheduleBackground() {
@@ -129,6 +134,101 @@ function ScheduleBackground() {
   );
 }
 
+function ThreeSignal() {
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 100);
+    camera.position.set(0, 0, 8.5);
+    const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true, powerPreference: "high-performance" });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setClearColor(0x000000, 0);
+
+    const group = new THREE.Group();
+    scene.add(group);
+    const green = new THREE.Color(0x18c47c);
+    const cyan = new THREE.Color(0x62d9ff);
+    const core = new THREE.Mesh(new THREE.IcosahedronGeometry(0.78, 2), new THREE.MeshBasicMaterial({ color: green, wireframe: true, transparent: true, opacity: 0.32 }));
+    const ring = new THREE.Mesh(new THREE.TorusGeometry(1.45, 0.012, 8, 128), new THREE.MeshBasicMaterial({ color: cyan, transparent: true, opacity: 0.42 }));
+    const ringTwo = new THREE.Mesh(new THREE.TorusGeometry(1.92, 0.008, 8, 128), new THREE.MeshBasicMaterial({ color: green, transparent: true, opacity: 0.2 }));
+    ring.rotation.set(0.95, 0.2, -0.35);
+    ringTwo.rotation.set(-0.6, 0.8, 0.2);
+    group.add(core, ring, ringTwo);
+
+    const points = new Float32Array(28 * 3);
+    for (let i = 0; i < 28; i += 1) {
+      const angle = (i / 28) * Math.PI * 2;
+      const radius = 2.15 + (i % 3) * 0.13;
+      points[i * 3] = Math.cos(angle) * radius;
+      points[i * 3 + 1] = Math.sin(angle) * radius;
+      points[i * 3 + 2] = ((i % 5) - 2) * 0.08;
+    }
+    const pointGeometry = new THREE.BufferGeometry();
+    pointGeometry.setAttribute("position", new THREE.BufferAttribute(points, 3));
+    const satellites = new THREE.Points(pointGeometry, new THREE.PointsMaterial({ color: green, size: 0.055, transparent: true, opacity: 0.8 }));
+    group.add(satellites);
+
+    const resize = () => {
+      const { width, height } = canvas.getBoundingClientRect();
+      if (!width || !height) return;
+      renderer.setSize(width, height, false);
+      camera.aspect = width / height;
+      camera.updateProjectionMatrix();
+    };
+    const observer = new ResizeObserver(resize);
+    observer.observe(canvas);
+    resize();
+
+    let pointerX = 0;
+    let pointerY = 0;
+    const onPointerMove = (event: PointerEvent) => {
+      const rect = canvas.getBoundingClientRect();
+      pointerX = ((event.clientX - rect.left) / rect.width - 0.5) * 0.45;
+      pointerY = ((event.clientY - rect.top) / rect.height - 0.5) * 0.3;
+    };
+    canvas.addEventListener("pointermove", onPointerMove);
+
+    let frame = 0;
+    const animate = () => {
+      const elapsed = performance.now() * 0.001;
+      if (!reducedMotion) {
+        core.rotation.x = elapsed * 0.16;
+        core.rotation.y = elapsed * 0.25;
+        ring.rotation.z = elapsed * 0.18;
+        ringTwo.rotation.x = -elapsed * 0.12;
+        satellites.rotation.z = -elapsed * 0.08;
+        group.rotation.y += (pointerX - group.rotation.y) * 0.025;
+        group.rotation.x += (-pointerY - group.rotation.x) * 0.025;
+      }
+      renderer.render(scene, camera);
+      frame = requestAnimationFrame(animate);
+    };
+    animate();
+
+    return () => {
+      cancelAnimationFrame(frame);
+      observer.disconnect();
+      canvas.removeEventListener("pointermove", onPointerMove);
+      pointGeometry.dispose();
+      core.geometry.dispose();
+      (core.material as THREE.Material).dispose();
+      ring.geometry.dispose();
+      (ring.material as THREE.Material).dispose();
+      ringTwo.geometry.dispose();
+      (ringTwo.material as THREE.Material).dispose();
+      (satellites.material as THREE.Material).dispose();
+      renderer.dispose();
+    };
+  }, []);
+
+  return <canvas ref={canvasRef} aria-hidden="true" className="pointer-events-auto absolute -right-10 -top-24 hidden h-[360px] w-[360px] opacity-80 md:block lg:-right-4 lg:-top-28 lg:h-[430px] lg:w-[430px]" />;
+}
+
 function SignalBars({
   active,
   total,
@@ -137,11 +237,11 @@ function SignalBars({
   total: number;
 }) {
   return (
-    <div className="flex items-end gap-0.75">
+    <div className="flex items-end gap-[3px]">
       {Array.from({ length: total }).map((_, i) => (
         <motion.span
           key={i}
-          className={`w-0.75 ${i < active ? "bg-green" : "bg-line"
+          className={`w-[3px] ${i < active ? "bg-green" : "bg-line"
             }`}
           style={{
             height: `${5 + i * 3}px`,
@@ -191,6 +291,8 @@ function ScheduleContent() {
   const [currentTime, setCurrentTime] =
     useState("");
 
+  const searchInputRef = useRef<HTMLInputElement | null>(null);
+
   useEffect(() => {
     const updateClock = () => {
       setCurrentTime(
@@ -210,14 +312,49 @@ function ScheduleContent() {
     return () => clearInterval(interval);
   }, []);
 
+  useEffect(() => {
+    const day = parseInt(searchParams.get("day") || "1", 10);
+    if (day >= 1 && day <= 3) {
+      setActiveDay(day as 1 | 2 | 3);
+    }
+  }, [searchParams]);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "/" && document.activeElement !== searchInputRef.current) {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+      } else if (e.key === "Escape" && document.activeElement === searchInputRef.current) {
+        setSearchQuery("");
+        searchInputRef.current?.blur();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
+  const handleDayChange = (day: 1 | 2 | 3) => {
+    setActiveDay(day);
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      url.searchParams.set("day", String(day));
+      window.history.replaceState({}, "", url.toString());
+    }
+  };
+
   const dayEvents = useMemo(() => {
     return events
       .filter((event) => event.day === activeDay)
-      .filter(
-        (event) =>
-          selectedStream === "all" ||
-          event.stream === selectedStream
-      )
+      .filter((event) => {
+        if (selectedStream === "all") return true;
+        if (selectedStream === "tech") {
+          return event.stream === "tech" || event.stream === "technology";
+        }
+        if (selectedStream === "management") {
+          return event.stream === "management" || event.stream === "impact";
+        }
+        return event.stream === selectedStream;
+      })
       .filter((event) => {
         const query = searchQuery.toLowerCase().trim();
 
@@ -226,7 +363,9 @@ function ScheduleContent() {
         return (
           event.title.toLowerCase().includes(query) ||
           event.venue.toLowerCase().includes(query) ||
-          event.description.toLowerCase().includes(query)
+          event.description.toLowerCase().includes(query) ||
+          event.stream.toLowerCase().includes(query) ||
+          event.time.toLowerCase().includes(query)
         );
       })
       .sort((a, b) => a.time.localeCompare(b.time));
@@ -306,6 +445,7 @@ function ScheduleContent() {
         </Kicker>
 
         <div className="relative mt-4">
+          <ThreeSignal />
           <div className="absolute -left-5 top-0 hidden h-full w-px bg-linear-to-b from-green/60 via-green/10 to-transparent md:block" />
 
           <h1 className="font-display text-[clamp(48px,7vw,100px)] font-semibold leading-[0.82] tracking-[-0.04em]">
@@ -352,7 +492,7 @@ function ScheduleContent() {
               return (
                 <button
                   key={day}
-                  onClick={() => setActiveDay(day)}
+                  onClick={() => handleDayChange(day)}
                   className={`group relative cursor-pointer border-line px-5 py-6 text-left transition-all md:not-last:border-r ${isActive
                       ? "bg-[rgba(24,196,124,0.08)]"
                       : "bg-[#0b1410]/50 hover:bg-[#0b1410]/80"
@@ -362,7 +502,7 @@ function ScheduleContent() {
                     <>
                       <motion.span
                         layoutId="day-indicator"
-                        className="absolute left-0 top-0 h-0.75 w-20 bg-green shadow-[0_0_14px_rgba(46,229,157,0.5)]"
+                        className="absolute left-0 top-0 h-[3px] w-20 bg-green shadow-[0_0_14px_rgba(46,229,157,0.5)]"
                         transition={{
                           type: "spring",
                           stiffness: 320,
@@ -518,8 +658,9 @@ function ScheduleContent() {
               </div>
 
               <input
+                ref={searchInputRef}
                 type="text"
-                placeholder="SEARCH PROTOCOL..."
+                placeholder="SEARCH PROTOCOL... (PRESS /)"
                 value={searchQuery}
                 onChange={(e) =>
                   setSearchQuery(e.target.value)
@@ -622,13 +763,15 @@ function ScheduleContent() {
                     <div className="group relative">
                       {/* Timeline node */}
                       <motion.div
-                        className={`absolute -left-9.25 top-7 h-3 w-3 rounded-full border bg-ink md:-left-12.25 ${event.stream === "culture"
+                        className={`absolute -left-[34px] top-7 h-3 w-3 rounded-full border bg-ink md:-left-[46px] ${event.stream === "culture"
                             ? "border-purple-300"
                             : event.stream === "gaming"
                               ? "border-cyan-300"
                               : event.stream === "management"
                                 ? "border-amber-300"
-                                : "border-green"
+                                : event.stream === "impact"
+                                  ? "border-emerald-300"
+                                  : "border-green"
                           }`}
                         whileHover={{
                           scale: 1.5,
@@ -642,7 +785,7 @@ function ScheduleContent() {
 
                       {/* Node pulse */}
                       <motion.div
-                        className="absolute -left-8.5 top-7.5 h-1.5 w-1.5 rounded-full bg-green md:-left-11.5"
+                        className="absolute -left-[31px] top-7.5 h-1.5 w-1.5 rounded-full bg-green md:-left-[43px]"
                         animate={{
                           opacity: [0.25, 1, 0.25],
                           scale: [0.8, 1.2, 0.8],
@@ -767,7 +910,9 @@ function ScheduleContent() {
                                 ? "bg-cyan-300"
                                 : event.stream === "management"
                                   ? "bg-amber-300"
-                                  : "bg-green"
+                                  : event.stream === "impact"
+                                    ? "bg-emerald-300"
+                                    : "bg-green"
                             }`}
                         />
                       </Link>
@@ -896,7 +1041,7 @@ export default function SchedulePage() {
     <>
       <Navbar />
 
-      <main className="relative flex-1 overflow-hidden pt-23">
+      <main className="relative flex-1 overflow-hidden pt-24">
         <section className="relative py-16 md:py-24 lg:py-32">
           <Suspense
             fallback={

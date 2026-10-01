@@ -57,7 +57,7 @@ export default function AnimatedSection({
       whileInView="visible"
       viewport={{
         once: true,
-        margin: "-100px",
+        margin: "40px",
       }}
       variants={variants}
       className={className}
