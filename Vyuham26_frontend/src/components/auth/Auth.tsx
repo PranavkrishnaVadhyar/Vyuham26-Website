@@ -26,10 +26,12 @@ export function AuthModal() {
     return () => window.removeEventListener("keydown", onKey);
   }, [ui]);
 
-  const submit = (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     const res =
-      mode === "login" ? login(email, password) : signup(name || "PARTICIPANT", email, password, college);
+      mode === "login"
+        ? await login(email, password)
+        : await signup(name || "PARTICIPANT", email, password, college);
     if (res.ok) {
       ui.setAuthOpen(false);
       toast(res.message);

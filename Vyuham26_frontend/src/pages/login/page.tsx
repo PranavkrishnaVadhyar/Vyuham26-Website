@@ -22,29 +22,34 @@ function LoginContent() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [errorMsg, setErrorMsg] = useState("");
 
   const [status, setStatus] = useState<
     "idle" | "verifying" | "success"
   >("idle");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
+    setErrorMsg("");
     setStatus("verifying");
 
-    setTimeout(() => {
-      login(email);
-      setStatus("success");
+    const res = await login(email, password);
+    if (res && res.success === false) {
+      setStatus("idle");
+      setErrorMsg(res.error || "Authentication failed. Check your access code.");
+      return;
+    }
 
-      setTimeout(() => {
-        if (redirectUrl) {
-          const dest = eventSlug ? `${redirectUrl}?registered=true` : redirectUrl;
-          router.push(dest);
-        } else {
-          router.push("/dashboard");
-        }
-      }, 1000);
-    }, 1200);
+    setStatus("success");
+
+    setTimeout(() => {
+      if (redirectUrl) {
+        const dest = eventSlug ? `${redirectUrl}?registered=true` : redirectUrl;
+        router.push(dest);
+      } else {
+        router.push("/dashboard");
+      }
+    }, 1000);
   };
 
   const inputClasses =
@@ -440,6 +445,13 @@ function LoginContent() {
                             className={inputClasses}
                           />
                         </div>
+
+                        {/* ERROR */}
+                        {errorMsg && (
+                          <div className="border border-red-500/30 bg-red-500/10 p-3 font-mono text-[9px] uppercase tracking-wider text-red-400">
+                            {errorMsg}
+                          </div>
+                        )}
 
                         {/* VERIFYING */}
                         {status === "verifying" && (

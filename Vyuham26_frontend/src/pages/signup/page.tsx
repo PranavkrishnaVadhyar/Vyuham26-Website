@@ -42,7 +42,7 @@ function SignupContent() {
      REGISTER
   ============================================================= */
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     setError("");
@@ -66,23 +66,29 @@ function SignupContent() {
 
     setStatus("registering");
 
-    setTimeout(() => {
-      signup({
-        name: formData.name,
-        email: formData.email,
-        college: formData.college,
-        phone: formData.phone,
-      });
-      setStatus("success");
+    const res = await signup({
+      name: formData.name,
+      email: formData.email,
+      password: formData.password,
+      college: formData.college,
+      phone: formData.phone,
+    });
 
-      /*
-       * Let the success screen appear briefly,
-       * then launch the cinematic transition.
-       */
-      setTimeout(() => {
-        setAuthTransition(true);
-      }, 700);
-    }, 1400);
+    if (res && res.success === false) {
+      setStatus("idle");
+      setError(res.error || "REGISTRATION REJECTED BY CENTRAL COMMAND.");
+      return;
+    }
+
+    setStatus("success");
+
+    /*
+     * Let the success screen appear briefly,
+     * then launch the cinematic transition.
+     */
+    setTimeout(() => {
+      setAuthTransition(true);
+    }, 700);
   };
 
   /* =============================================================
