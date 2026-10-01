@@ -1,0 +1,145 @@
+================================================================================
+          VYUHAM '26 — FRONTEND TO BACKEND INTEGRATION GUIDE
+================================================================================
+
+This document outlines the step-by-step roadmap to connect the React/Vite 
+frontend (Vyuham26_frontend) with the FastAPI/Supabase backend (vyuham-backend).
+
+--------------------------------------------------------------------------------
+ARCHITECTURE OVERVIEW
+--------------------------------------------------------------------------------
+- Frontend: React 19 + Vite (Runs on http://localhost:5173)
+- Backend:  FastAPI + SQLAlchemy + asyncpg (Runs on http://localhost:8000)
+- Database: Supabase PostgreSQL
+- Auth:     Supabase Auth (JWT verified by FastAPI using Bearer tokens)
+
+Authentication Flow:
+  1. User signs up / logs in via Supabase in the frontend.
+  2. Frontend gets the Supabase access token (JWT).
+  3. Frontend sends API requests to FastAPI with:
+     Authorization: Bearer <supabase_access_token>
+  4. FastAPI validates token, retrieves/creates the user Profile, and 
+     handles event registrations and teams.
+
+--------------------------------------------------------------------------------
+PHASE 1: PREREQUISITES (SUPABASE SETUP)
+--------------------------------------------------------------------------------
+1. Go to https://supabase.com and create a project (e.g., "vyuham-26").
+2. Under Project Settings -> API, collect:
+   - Project URL (SUPABASE_URL)
+   - Anon / Public Key (for frontend)
+   - Service Role Key (for backend)
+   - JWT Secret (Project Settings -> API -> JWT Settings)
+3. Under Project Settings -> Database, collect:
+   - Connection String (URI with asyncpg / postgresql format)
+
+--------------------------------------------------------------------------------
+PHASE 2: BACKEND CONFIGURATION & FIXES (vyuham-backend)
+--------------------------------------------------------------------------------
+
+[ ] STEP 2.1: CREATE THE BACKEND .env FILE
+    In `c:\Users\nb200\Documents\Vyuham26-Website\vyuham-backend`, create `.env`:
+    
+    DATABASE_URL=postgresql://postgres:[YOUR-PASSWORD]@db.[YOUR-PROJECT-REF].supabase.co:5432/postgres
+    SUPABASE_URL=https://[YOUR-PROJECT-REF].supabase.co
+    SUPABASE_JWT_SECRET=[YOUR-PROJECT-JWT-SECRET]
+    SUPABASE_SERVICE_ROLE_KEY=[YOUR-SERVICE-ROLE-KEY]
+    FRONTEND_ORIGINS=http://localhost:5173,http://127.0.0.1:5173
+
+[ ] STEP 2.2: FIX CORS IN BACKEND CONFIG
+    File: `vyuham-backend/app/core/config.py`
+    Ensure `frontend_origins` default includes port 5173:
+    frontend_origins: str = "http://localhost:5173,http://127.0.0.1:5173,http://localhost:5500"
+
+[ ] STEP 2.3: ADD `slug` TO EVENT MODEL & SCHEMAS
+    The frontend routes by slug (/events/hackathon-36), while backend only has UUID.
+    File: `vyuham-backend/app/modules/events/models.py`
+    - Add: slug: Mapped[str] = mapped_column(String(100), unique=True, index=True)
+    File: `vyuham-backend/app/modules/events/schemas.py`
+    - Add `slug: str` to EventCreate, EventUpdate, and EventOut.
+
+[ ] STEP 2.4: ALIGN STREAM ENUMS
+    Frontend streams: 'tech', 'culture', 'gaming', 'impact'
+    Backend enum: `app/modules/events/models.py`
+    - Update EventStream to: tech, culture, gaming, impact (or map them).
+
+[ ] STEP 2.5: ADD `degree` AND `year` TO PROFILE
+    File: `vyuham-backend/app/modules/auth/models.py` & `schemas.py`
+    - Add `degree: Mapped[str | None]` and `year: Mapped[str | None]` to Profile model.
+    - Add them to ProfileOut and ProfileUpdate schemas so the frontend profile page
+      can sync degree and academic year with the database.
+
+[ ] STEP 2.6: PYTHON VIRTUAL ENVIRONMENT & DEPENDENCIES
+    In terminal (under `vyuham-backend` folder):
+      python -m venv .venv
+      .venv\Scripts\activate
+      pip install -r requirements.txt
+
+[ ] STEP 2.7: CREATE TABLES & SEED 48 REAL EVENTS
+    Run table creation and populate with the 48 official events from frontend:
+      python -m scripts.create_tables
+      python -m scripts.seed_events
+
+[ ] STEP 2.8: RUN THE BACKEND SERVER
+    Start the FastAPI server:
+      uvicorn app.main:app --reload --port 8000
+
+    Verify by visiting: http://localhost:8000/docs (Swagger UI)
+
+--------------------------------------------------------------------------------
+PHASE 3: FRONTEND INTEGRATION (Vyuham26_frontend)
+--------------------------------------------------------------------------------
+
+[ ] STEP 3.1: INSTALL SUPABASE CLIENT
+    In terminal (under `Vyuham26_frontend` folder):
+      npm install @supabase/supabase-js
+
+[ ] STEP 3.2: CREATE FRONTEND .env FILE
+    In `Vyuham26_frontend`, create `.env`:
+      VITE_API_URL=http://localhost:8000
+      VITE_SUPABASE_URL=https://[YOUR-PROJECT-REF].supabase.co
+      VITE_SUPABASE_ANON_KEY=[YOUR-SUPABASE-ANON-KEY]
+
+[ ] STEP 3.3: CREATE SUPABASE CLIENT INSTANCE
+    Create `src/lib/supabase.ts`:
+      import { createClient } from "@supabase/supabase-js";
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+      export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+[ ] STEP 3.4: CREATE API CLIENT HELPER
+    Create `src/lib/api.ts`:
+      A standard fetch wrapper that retrieves the current Supabase session token:
+      const { data: { session } } = await supabase.auth.getSession();
+      headers['Authorization'] = `Bearer ${session?.access_token}`;
+
+[ ] STEP 3.5: WIRE AUTHCONTEXT WITH REAL SUPABASE & BACKEND
+    Update `src/context/AuthContext.tsx`:
+      - login(): calls supabase.auth.signInWithPassword({ email, password })
+      - signup(): calls supabase.auth.signUp({ email, password, options: { data: { name } } })
+      - onAuthStateChange(): fetches verified profile from `GET http://localhost:8000/auth/me`
+      - updateUser(): calls `PATCH http://localhost:8000/auth/me`
+      - logout(): calls supabase.auth.signOut()
+
+[ ] STEP 3.6: WIRE EVENT REGISTRATION & DASHBOARD
+    - When clicking "REGISTER PROTOCOL" on an event page:
+      Call `POST http://localhost:8000/registrations` with { event_id, team_id }.
+    - In Dashboard & Profile pages:
+      Fetch official registered events from `GET http://localhost:8000/registrations/me`.
+
+[ ] STEP 3.7: WIRE TEAMS MODULE (FOR SQUAD/HACKATHON EVENTS)
+    - Team creation: `POST http://localhost:8000/teams` -> generates unique invite code.
+    - Join team: `POST http://localhost:8000/teams/join` with invite code.
+
+--------------------------------------------------------------------------------
+PHASE 4: TESTING CHECKLIST
+--------------------------------------------------------------------------------
+1. Sign up a new user on http://localhost:5173.
+2. Confirm user appears in Supabase Auth and a Profile row exists in PostgreSQL.
+3. Update Profile details (College, Degree, Year) on `/profile` and verify DB updates.
+4. Register for a Solo event -> verify registration in `/registrations/me` & dashboard.
+5. Create a Team for Hackathon 36 -> invite teammate using code -> verify both registered.
+
+================================================================================
+Guide generated on: 2026-09-29
+================================================================================

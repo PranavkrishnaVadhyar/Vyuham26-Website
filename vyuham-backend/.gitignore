@@ -1,9 +1,56 @@
-.venv
-.env
-README.md
-/frontend
+# ==============================================================================
+# VYUHAM BACKEND (FastAPI / Python) GITIGNORE
+# ==============================================================================
 
-# Python cache directories and compiled bytecode
+# Environment Variables & Secrets
+.env
+.env.*
+env
+env.*
+*.env
+!.env.example
+!*.env.example
+
+# Virtual Environments
+.venv/
+.venv*/
+venv/
+venv*/
+env/
+ENV/
+
+# Python Cache & Bytecode
 __pycache__/
 *.py[cod]
 *$py.class
+*.so
+.Python
+
+# Build & Packaging
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Testing & Coverage
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+
+# SQLite / Local DBs
+*.sqlite3
+*.db
+
+# Logs
+logs/
+*.log
+
+# Editor & OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
