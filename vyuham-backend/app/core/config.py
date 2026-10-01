@@ -8,9 +8,9 @@ class Settings(BaseSettings):
     supabase_url: str
     supabase_jwt_secret: str
     supabase_service_role_key: str
-    frontend_origins: str = "http://127.0.0.1:5500,http://localhost:5500"
+    frontend_origins: str = "http://localhost:5173,http://127.0.0.1:5173,http://localhost:5500,http://127.0.0.1:5500"
 
-    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
+    model_config = SettingsConfigDict(env_file=(".env", "env"), env_file_encoding="utf-8", extra="ignore")
 
     @property
     def allowed_frontend_origins(self) -> list[str]:

@@ -8,7 +8,14 @@ from app.core.db import get_db
 from app.core.deps import require_role
 from app.modules.auth.models import Profile
 from app.modules.events.schemas import EventCreate, EventOut, EventUpdate
-from app.modules.events.service import create_event, delete_event, get_event, list_events, update_event
+from app.modules.events.service import (
+    create_event,
+    delete_event,
+    get_event,
+    get_event_by_slug,
+    list_events,
+    update_event,
+)
 
 router = APIRouter(prefix="/events", tags=["events"])
 
@@ -18,9 +25,18 @@ async def read_events(db: Annotated[AsyncSession, Depends(get_db)]) -> list:
     return await list_events(db)
 
 
+@router.get("/by-slug/{slug}", response_model=EventOut)
+async def read_event_by_slug(slug: str, db: Annotated[AsyncSession, Depends(get_db)]) -> object:
+    return await get_event_by_slug(db, slug)
+
+
 @router.get("/{event_id}", response_model=EventOut)
-async def read_event(event_id: UUID, db: Annotated[AsyncSession, Depends(get_db)]) -> object:
-    return await get_event(db, event_id)
+async def read_event(event_id: str, db: Annotated[AsyncSession, Depends(get_db)]) -> object:
+    try:
+        parsed_id = UUID(event_id)
+        return await get_event(db, parsed_id)
+    except ValueError:
+        return await get_event_by_slug(db, event_id)
 
 
 @router.post("", response_model=EventOut, status_code=status.HTTP_201_CREATED)

@@ -20,6 +20,14 @@ async def get_event(db: AsyncSession, event_id: UUID) -> Event:
     return event
 
 
+async def get_event_by_slug(db: AsyncSession, slug: str) -> Event:
+    result = await db.scalars(select(Event).where(Event.slug == slug))
+    event = result.first()
+    if event is None:
+        raise ResourceNotFoundError("Event")
+    return event
+
+
 async def create_event(db: AsyncSession, data: EventCreate) -> Event:
     event = Event(**data.model_dump())
     db.add(event)
