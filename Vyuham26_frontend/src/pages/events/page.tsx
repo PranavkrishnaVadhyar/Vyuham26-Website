@@ -48,23 +48,23 @@ const streamTheme: Record<
     icon: "✦",
     name: "GAMING",
   },
-  impact: {
-    accent: "#b4e8c8",
-    soft: "rgba(180,232,200,.09)",
-    border: "rgba(180,232,200,.28)",
-    icon: "⊹",
-    name: "IMPACT",
-  },
   management: {
     accent: "#b4e8c8",
     soft: "rgba(180,232,200,.09)",
     border: "rgba(180,232,200,.28)",
     icon: "⊹",
-    name: "IMPACT",
+    name: "MANAGEMENT",
+  },
+  impact: {
+    accent: "#b4e8c8",
+    soft: "rgba(180,232,200,.09)",
+    border: "rgba(180,232,200,.28)",
+    icon: "⊹",
+    name: "MANAGEMENT",
   },
 };
 
-const streams = ["all", "tech", "culture", "gaming", "impact"] as const;
+const streams = ["all", "tech", "culture", "gaming", "management"] as const;
 const days = ["all", "1", "2", "3"] as const;
 
 const clamp = (value: number, min: number, max: number) =>
@@ -84,8 +84,9 @@ const normalizeOffset = (offset: number, count: number) => {
 };
 
 function getStream(event: (typeof events)[number]) {
-  return event.stream === "management" ? "impact" : event.stream;
+  return event.stream === "impact" ? "management" : event.stream;
 }
+
 
 /* ==========================================================================
    3D CYLINDER CARD

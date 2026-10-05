@@ -1,4 +1,5 @@
-export type StreamId = "technology" | "culture" | "gaming" | "impact";
+export type StreamId = "technology" | "culture" | "gaming" | "management" | "impact";
+
 
 export interface Stream {
   id: StreamId;

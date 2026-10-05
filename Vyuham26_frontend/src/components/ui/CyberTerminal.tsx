@@ -44,8 +44,9 @@ const HELP_TEXT = `VYUHAM’26 TERMINAL
 EXPLORE
   events        - Explore festival events
   schedule      - Festival journey
-  streams       - Technology / Culture / Gaming / Impact
+  streams       - Technology / Culture / Gaming / Management
   about         - Discover VYUHAM’26
+
   venue         - Explore the festival venue
   gallery       - Open the cinematic gallery
 
@@ -248,8 +249,8 @@ Discover competitions, experiences and challenges across the four streams.
 03  GAMING
     Challenge the limits.
 
-04  IMPACT
-    Create change that matters.`,
+04  MANAGEMENT
+    Lead, strategize, build empires.`,
             "/events",
             "Explore all events →"
           );
@@ -287,8 +288,8 @@ Express what defines us.
 GAMING
 Challenge the limits.
 
-IMPACT
-Create change that matters.`,
+MANAGEMENT
+Lead, strategize, build empires.`,
             "/#streams",
             "Explore the four streams →"
           );
@@ -298,7 +299,8 @@ Create change that matters.`,
           addOutput(
             `VYUHAM’26
 
-A convergence of technology, culture, gaming and impact —
+A convergence of technology, culture, gaming and management —
+
 bringing together ideas, creativity, competition and people
 shaping what comes next.
 

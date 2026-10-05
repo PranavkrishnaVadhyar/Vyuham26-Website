@@ -12,8 +12,9 @@ const FILTERS: { id: StreamId | "all"; label: string }[] = [
   { id: "technology", label: "TECHNOLOGY" },
   { id: "culture", label: "CULTURE" },
   { id: "gaming", label: "GAMING" },
-  { id: "impact", label: "IMPACT" },
+  { id: "management", label: "MANAGEMENT" },
 ];
+
 
 function statusStyle(s: FestEvent["status"]) {
   if (s === "full") return { color: "#f2c98a", label: "WAITLIST" };

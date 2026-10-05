@@ -20,7 +20,7 @@ export const homepage = {
   year: "'26",
   edition: "EDITION VII",
   institution: "DIGITAL UNIVERSITY KERALA",
-  kicker: "TECHNOLOGY • CULTURE • GAMING • IMPACT",
+  kicker: "TECHNOLOGY • CULTURE • GAMING • MANAGEMENT",
   tagline: "THE FUTURE AWAITS.",
   openingLine: "THE WORLD IS CHANGING.",
   dates: "30 OCT — 01 NOV 2026",
@@ -30,7 +30,8 @@ export const homepage = {
   secondaryCta: "EXPLORE EVENTS",
   finalCta: "ENTER THE FUTURE",
   about:
-    "A convergence of technology, culture, gaming and impact at Digital University Kerala — bringing together ideas, creativity, competition and people shaping what comes next.",
+    "A convergence of technology, culture, gaming and management at Digital University Kerala — bringing together ideas, creativity, competition and people shaping what comes next.",
+
   aboutSupport:
     "Three days. Four streams. One signal. VYUHAM'26 is built by students for the generation that refuses to wait for permission to build the future.",
   awakeningTitle: "THE FUTURE IS ALREADY HERE.",
@@ -78,7 +79,7 @@ export const introChapters = [
   { key: "tech", word: "TECHNOLOGY", sub: "BUILT AFTER MIDNIGHT", image: MEDIA.electronics, hold: 950 },
   { key: "culture", word: "CULTURE", sub: "LOUD AND UNAPOLOGETIC", image: MEDIA.dancers, hold: 820 },
   { key: "gaming", word: "GAMING", sub: "NO SECOND CHANCES", image: MEDIA.esports, hold: 700 },
-  { key: "impact", word: "IMPACT", sub: "WHAT REMAINS AFTER", image: MEDIA.impactField, hold: 620 },
+  { key: "management", word: "MANAGEMENT", sub: "STRATEGY & EXECUTION", image: MEDIA.impactField, hold: 620 },
 ];
 
 /* ------------------------------------------------------------------ */
@@ -135,12 +136,12 @@ export const streams: Stream[] = [
     node: { x: 0.2, y: 0.78 },
   },
   {
-    id: "impact",
+    id: "management",
     index: "04",
-    name: "IMPACT",
-    line: "Create change that matters.",
+    name: "MANAGEMENT",
+    line: "Lead, strategize, build empires.",
     description:
-      "Ideas that leave the campus gates. Policy, climate, access — engineered into something people can actually use.",
+      "Venture pitch battles, boardroom crisis simulations, corporate strategizing and operational leadership challenges.",
     accent: "#6ff2b8",
     glow: "rgba(111,242,184,0.45)",
     image: MEDIA.impactTeam,
@@ -151,6 +152,7 @@ export const streams: Stream[] = [
     node: { x: 0.8, y: 0.8 },
   },
 ];
+
 
 /* ------------------------------------------------------------------ */
 /*  SCHEDULE / JOURNEY                                                 */
