@@ -10,6 +10,7 @@ import React, {
 } from "react";
 import { supabase } from "@/lib/supabase";
 import { authApi, registrationsApi } from "@/lib/api";
+import { SITE_CONFIG } from "@/config/site";
 
 export interface AuthUser {
   id: string;
@@ -206,6 +207,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = useCallback(
     async (email: string, password?: string, name?: string): Promise<AuthResult> => {
+      if (!SITE_CONFIG.REG_OPEN) {
+        return { success: false, error: "Registration and login are coming soon." };
+      }
       const cleanEmail = email.trim().toLowerCase();
 
       // 1. Try Supabase Auth if password is provided
@@ -345,6 +349,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       year?: string;
       role?: "user" | "volunteer" | "event_head" | "admin";
     }): Promise<AuthResult> => {
+      if (!SITE_CONFIG.REG_OPEN) {
+        return { success: false, error: "Registration is coming soon." };
+      }
       const cleanEmail = details.email.trim().toLowerCase();
 
       // 1. Try Supabase signUp if password is provided
@@ -465,6 +472,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const registerForEvent = useCallback(
     (eventSlug: string) => {
+      if (!SITE_CONFIG.REG_OPEN) {
+        return { success: false, alreadyRegistered: false };
+      }
       if (!user) {
         return { success: false, alreadyRegistered: false };
       }

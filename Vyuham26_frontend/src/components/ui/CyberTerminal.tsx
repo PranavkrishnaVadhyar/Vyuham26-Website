@@ -9,6 +9,7 @@ import {
 import Link from "@/shims/next-link";
 import { lockScroll } from "@/lib/scroll";
 import { useApp } from "@/lib/store";
+import { SITE_CONFIG } from "@/config/site";
 
 interface HistoryItem {
   type: "input" | "output" | "system" | "error" | "ascii";
@@ -333,53 +334,103 @@ competitions, performances and experiences.`,
           break;
 
         case "register":
-          addOutput(
-            `[REGISTRATION]
+          if (!SITE_CONFIG.REG_OPEN) {
+            addOutput(
+              `[REGISTRATION]
+
+Registration is coming soon! All public festival pages remain open.`,
+              "/events",
+              "Explore events directory →"
+            );
+          } else {
+            addOutput(
+              `[REGISTRATION]
 
 Choose an event and become part of the VYUHAM’26 journey.`,
-            "/register",
-            "Explore registration →"
-          );
+              "/register",
+              "Explore registration →"
+            );
+          }
           break;
 
         case "login":
-          addOutput(
-            `[LOGIN]
+          if (!SITE_CONFIG.REG_OPEN) {
+            addOutput(
+              `[LOGIN]
+
+Operative authentication is currently locked. Coming soon!`,
+              "/schedule",
+              "View festival schedule →"
+            );
+          } else {
+            addOutput(
+              `[LOGIN]
 
 Access your VYUHAM’26 participant account.`,
-            "/login",
-            "Open login →"
-          );
+              "/login",
+              "Open login →"
+            );
+          }
           break;
 
         case "signup":
-          addOutput(
-            `[CREATE ACCOUNT]
+          if (!SITE_CONFIG.REG_OPEN) {
+            addOutput(
+              `[CREATE ACCOUNT]
+
+Account creation is currently locked. Coming soon!`,
+              "/events",
+              "Browse events →"
+            );
+          } else {
+            addOutput(
+              `[CREATE ACCOUNT]
 
 Create your VYUHAM’26 participant profile.`,
-            "/signup",
-            "Create account →"
-          );
+              "/signup",
+              "Create account →"
+            );
+          }
           break;
 
         case "dashboard":
-          addOutput(
-            `[PARTICIPANT DASHBOARD]
+          if (!SITE_CONFIG.REG_OPEN) {
+            addOutput(
+              `[PARTICIPANT DASHBOARD]
+
+Dashboard access is coming soon alongside registration launch.`,
+              "/schedule",
+              "View schedule →"
+            );
+          } else {
+            addOutput(
+              `[PARTICIPANT DASHBOARD]
 
 View registrations, tickets, certificates and festival activity.`,
-            "/dashboard",
-            "Open dashboard →"
-          );
+              "/dashboard",
+              "Open dashboard →"
+            );
+          }
           break;
 
         case "profile":
-          addOutput(
-            `[PROFILE]
+          if (!SITE_CONFIG.REG_OPEN) {
+            addOutput(
+              `[PROFILE]
+
+Profile management will open when registration launches.`,
+              "/about",
+              "Learn about Vyuham →"
+            );
+          } else {
+            addOutput(
+              `[PROFILE]
 
 Manage your participant information and VYUHAM activity.`,
-            "/profile",
-            "Open profile →"
-          );
+              "/profile",
+              "Open profile →"
+            );
+          }
           break;
 
         case "admin":

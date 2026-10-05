@@ -7,6 +7,7 @@ import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
 import { Button } from "@/components/ui/Elements";
 import { Event } from "@/data/events";
 import { useAuth } from "@/context/AuthContext";
+import { SITE_CONFIG } from "@/config/site";
 
 export default function EventRegistrationForm({
   event,
@@ -23,11 +24,15 @@ export default function EventRegistrationForm({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!SITE_CONFIG.REG_OPEN) {
+      return;
+    }
     if (isAuthenticated) {
       registerForEvent(event.slug);
     }
     setSubmitted(true);
   };
+
 
   return (
     <div className="relative mt-8 overflow-hidden rounded border border-white/[0.08] bg-[#07100c]/80 shadow-[0_0_60px_rgba(0,0,0,.25)] backdrop-blur-xl">
@@ -588,10 +593,17 @@ export default function EventRegistrationForm({
                     </span>
                   </div>
 
-                  <Button type="submit" variant="primary">
-                    Confirm & Add to Loadout →
-                  </Button>
+                  {!SITE_CONFIG.REG_OPEN ? (
+                    <Button type="button" variant="outline" disabled className="cursor-not-allowed border-amber-500/40 text-amber-400 opacity-75">
+                      REGISTRATION COMING SOON
+                    </Button>
+                  ) : (
+                    <Button type="submit" variant="primary">
+                      Confirm & Add to Loadout →
+                    </Button>
+                  )}
                 </div>
+
 
                 {/* Security notice */}
                 <div className="mt-5 flex items-start gap-3 rounded border border-white/[0.05] bg-black/15 px-4 py-3">

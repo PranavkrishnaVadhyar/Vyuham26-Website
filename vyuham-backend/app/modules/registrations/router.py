@@ -4,6 +4,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.config import is_registration_open
 from app.core.db import get_db
 from app.core.deps import get_current_user, require_role
 from app.modules.auth.models import Profile
@@ -26,12 +27,18 @@ async def post_registration(
     current_user: Annotated[Profile, Depends(get_current_user)],
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> object:
+    if not is_registration_open():
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Registration is coming soon",
+        )
     try:
         return await register_for_event(db, data.event_id, current_user, data.team_id)
     except PermissionError as exc:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc)) from exc
     except ValueError as exc:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
+
 
 
 @router.get("/me", response_model=list[RegistrationOut])

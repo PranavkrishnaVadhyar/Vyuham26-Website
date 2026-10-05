@@ -4,6 +4,7 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import AnimatedSection from "@/components/motion/AnimatedSection";
 import { Kicker, Button, StreamBadge } from "@/components/ui/Elements";
+import { SITE_CONFIG } from "@/config/site";
 
 export default function QualifiersPage() {
   return (
@@ -23,9 +24,16 @@ export default function QualifiersPage() {
                     Online qualification brackets for flagship events. Secure your spot in the finals before on-ground fest dates.
                   </p>
                 </div>
-                <Button href="/register" variant="primary">
-                  Register for Qualifiers →
-                </Button>
+                {SITE_CONFIG.REG_OPEN ? (
+                  <Button href="/register" variant="primary">
+                    Register for Qualifiers →
+                  </Button>
+                ) : (
+                  <span className="inline-flex items-center justify-center border border-amber-500/40 bg-amber-500/10 px-4 py-2.5 font-mono text-xs font-bold uppercase tracking-[0.16em] text-amber-300 shadow-[0_0_12px_rgba(245,158,11,0.15)]">
+                    <span className="h-1.5 w-1.5 rounded-full bg-amber-400 animate-pulse mr-2" />
+                    REGISTRATION COMING SOON
+                  </span>
+                )}
               </div>
             </AnimatedSection>
 

@@ -8,6 +8,7 @@ import { startAmbience, stopAmbience } from "@/lib/sound";
 import BroadcastTicker from "@/components/ui/BroadcastTicker";
 import Logo from "@/components/ui/Logo";
 import { toast } from "@/components/ui/Toaster";
+import { SITE_CONFIG } from "@/config/site";
 
 export default function Nav({ visible = true }: { visible?: boolean }) {
   const { user, ui, logout } = useApp();
@@ -326,7 +327,12 @@ export default function Nav({ visible = true }: { visible?: boolean }) {
               ))}
             </button>
 
-            {user ? (
+            {!SITE_CONFIG.REG_OPEN ? (
+              <span className="hidden sm:inline-flex items-center gap-1.5 border border-amber-500/40 bg-amber-500/10 px-3 py-1 font-mono text-[9px] font-bold tracking-[0.22em] text-amber-300 shadow-[0_0_12px_rgba(245,158,11,0.15)]">
+                <span className="h-1.5 w-1.5 rounded-full bg-amber-400 animate-pulse" />
+                COMING SOON
+              </span>
+            ) : user ? (
               <div className="relative hidden sm:block" ref={profileMenuRef}>
                 <button
                   onClick={() => setProfileMenuOpen((prev) => !prev)}
@@ -585,7 +591,12 @@ export default function Nav({ visible = true }: { visible?: boolean }) {
               {/* Mobile Bottom actions */}
               <div className="relative z-10 pt-4">
                 <div className="flex gap-3">
-                  {user ? (
+                  {!SITE_CONFIG.REG_OPEN ? (
+                    <div className="flex w-full items-center justify-center border border-amber-500/40 bg-amber-500/10 py-3 font-mono text-[10px] font-bold tracking-[0.24em] text-amber-300 shadow-[0_0_14px_rgba(245,158,11,0.2)]">
+                      <span className="h-2 w-2 rounded-full bg-amber-400 animate-pulse mr-2.5" />
+                      REGISTRATION COMING SOON
+                    </div>
+                  ) : user ? (
                     <div className="flex w-full flex-col gap-2">
                       <div className="flex items-center justify-between border border-[rgba(120,160,145,0.18)] bg-[rgba(6,16,12,0.6)] px-3 py-2">
                         <div className="flex items-center gap-2">

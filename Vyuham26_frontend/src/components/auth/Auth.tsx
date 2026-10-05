@@ -3,6 +3,7 @@ import { cn } from "@/utils/cn";
 import { useApp } from "@/lib/store";
 import { toast } from "@/components/ui/Toaster";
 import { MEDIA } from "@/data/media";
+import { SITE_CONFIG } from "@/config/site";
 
 /* ================================================================== */
 /*  AUTH MODAL                                                         */
@@ -28,6 +29,10 @@ export function AuthModal() {
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!SITE_CONFIG.REG_OPEN) {
+      setErr("Registration & login are currently closed. Coming soon!");
+      return;
+    }
     const res =
       mode === "login"
         ? await login(email, password)

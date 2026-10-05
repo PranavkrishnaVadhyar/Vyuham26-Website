@@ -5,6 +5,7 @@ import { Kicker, Button } from "@/components/ui/Elements";
 import { PageEntranceGate } from "@/components/motion/PageEntrance";
 import CountdownTimer from "@/components/ui/CountdownTimer";
 import SignalRing from "@/components/motion/SignalRing";
+import { SITE_CONFIG } from "@/config/site";
 
 import {
   useEffect,
@@ -287,6 +288,9 @@ export default function CtaSection({
   ========================================================= */
 
   const handleAccess = () => {
+    if (!SITE_CONFIG.REG_OPEN) {
+      return;
+    }
     setAccessGranted(true);
     setTimeout(() => {
       window.location.href = "/register";
@@ -475,9 +479,18 @@ export default function CtaSection({
                     whileInView={{ opacity: 1 }}
                     viewport={{ once: true }}
                   >
-                    {cfg.labels.statusRows.map((row) => (
-                      <SystemStatus key={row.label} label={row.label} value={row.value} accentRgb={cfg.accentRgb} />
-                    ))}
+                    {!SITE_CONFIG.REG_OPEN ? (
+                      <>
+                        <SystemStatus label="REGISTRATION" value="COMING SOON" accentRgb={cfg.accentRgb} />
+                        <SystemStatus label="EVENT CHANNEL" value="ACTIVE" accentRgb={cfg.accentRgb} />
+                        <SystemStatus label="TEMPORAL LINK" value="STABLE" accentRgb={cfg.accentRgb} />
+                        <SystemStatus label="ACCESS" value="STANDBY" accentRgb={cfg.accentRgb} />
+                      </>
+                    ) : (
+                      cfg.labels.statusRows.map((row) => (
+                        <SystemStatus key={row.label} label={row.label} value={row.value} accentRgb={cfg.accentRgb} />
+                      ))
+                    )}
                   </motion.div>
 
                   {/* ACCESS BUTTON */}
@@ -494,17 +507,26 @@ export default function CtaSection({
                       <button
                         type="button"
                         onClick={handleAccess}
+                        disabled={!SITE_CONFIG.REG_OPEN}
                         aria-label="Register for Vyuham '26"
                         style={{
                           borderColor: c(0.5),
-                          backgroundColor: `rgb(${cfg.accentRgb})`,
-                          color: cfg.bg,
+                          backgroundColor: !SITE_CONFIG.REG_OPEN ? "rgba(245,158,11,0.2)" : `rgb(${cfg.accentRgb})`,
+                          color: !SITE_CONFIG.REG_OPEN ? "#fbbf24" : cfg.bg,
                         }}
-                        className="group relative overflow-hidden border px-6 py-3 font-mono text-[10px] font-semibold tracking-[0.18em] transition-all duration-300 hover:shadow-[0_0_30px_var(--tw-shadow-color)]"
+                        className={`group relative overflow-hidden border px-6 py-3 font-mono text-[10px] font-semibold tracking-[0.18em] transition-all duration-300 ${
+                          !SITE_CONFIG.REG_OPEN
+                            ? "cursor-default border-amber-500/40 text-amber-300 shadow-[0_0_15px_rgba(245,158,11,0.2)]"
+                            : "hover:shadow-[0_0_30px_var(--tw-shadow-color)]"
+                        }`}
                       >
                         <span className="absolute inset-0 -translate-x-full bg-white/30 transition-transform duration-500 group-hover:translate-x-full" />
                         <span className="relative z-10">
-                          {accessGranted ? cfg.labels.buttonGrantedLabel : cfg.labels.buttonLabel}
+                          {!SITE_CONFIG.REG_OPEN
+                            ? "COMING SOON"
+                            : accessGranted
+                            ? cfg.labels.buttonGrantedLabel
+                            : cfg.labels.buttonLabel}
                         </span>
                       </button>
                     </motion.div>
@@ -521,8 +543,12 @@ export default function CtaSection({
                     transition={{ duration: 0.8, repeat: accessGranted ? Infinity : 0 }}
                   >
                     <span className="text-white/20">{cfg.labels.statusPrefix}</span>
-                    <span style={{ color: `rgb(${cfg.accentRgb})` }} className="ml-2">
-                      {accessGranted ? cfg.labels.statusGranted : cfg.labels.statusIdle}
+                    <span style={{ color: !SITE_CONFIG.REG_OPEN ? "#fbbf24" : `rgb(${cfg.accentRgb})` }} className="ml-2">
+                      {!SITE_CONFIG.REG_OPEN
+                        ? "REGISTRATION LAUNCHING SOON"
+                        : accessGranted
+                        ? cfg.labels.statusGranted
+                        : cfg.labels.statusIdle}
                     </span>
                   </motion.div>
 

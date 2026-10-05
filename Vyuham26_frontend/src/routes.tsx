@@ -7,6 +7,8 @@ import AnimatedSection from "@/components/motion/AnimatedSection";
 import { Kicker, StreamBadge } from "@/components/ui/Elements";
 import Link from "next/link";
 import EventRegistrationForm from "@/components/forms/EventRegistrationForm";
+import { SITE_CONFIG } from "@/config/site";
+import RegistrationComingSoon from "@/components/ui/RegistrationComingSoon";
 
 /* ------------------------------------------------------------------ */
 /*  Dynamic Module Loaders                                            */
@@ -101,6 +103,9 @@ export function EventDetailRoute({ params }: { params?: { slug?: string } }) {
 }
 
 export function RegisterSlugRoute({ params }: { params?: { slug?: string } }) {
+  if (!SITE_CONFIG.REG_OPEN) {
+    return <RegistrationComingSoon />;
+  }
   const slug = params?.slug || "";
   const event = getEventBySlug(slug) || events.find((e) => e.slug === slug) || events[0];
   return (
@@ -158,6 +163,7 @@ export interface RouteConfig {
   isHomeSite?: boolean;
   requiresAdmin?: boolean;
   requiresAuth?: boolean;
+  requiresRegistrationOpen?: boolean;
   exact?: boolean;
 }
 
@@ -193,13 +199,13 @@ export const routes: RouteConfig[] = [
   { id: "leaderboard", pattern: "/leaderboard", component: LeaderboardPage },
   { id: "results", pattern: "/results", component: ResultsPage },
   { id: "certificates", pattern: "/certificates", component: CertificatesPage },
-  { id: "ticket", pattern: "/ticket", component: TicketPage },
+  { id: "ticket", pattern: "/ticket", component: TicketPage, requiresRegistrationOpen: true },
   { id: "volunteer", pattern: ["/volunteer", "/checkin"], component: VolunteerScannerPage },
 
   // Commerce, Food & Operations
-  { id: "checkout", pattern: "/checkout", component: CheckoutPage },
-  { id: "payment", pattern: "/payment", component: PaymentPage },
-  { id: "receipt", pattern: "/receipt", component: ReceiptPage },
+  { id: "checkout", pattern: "/checkout", component: CheckoutPage, requiresRegistrationOpen: true },
+  { id: "payment", pattern: "/payment", component: PaymentPage, requiresRegistrationOpen: true },
+  { id: "receipt", pattern: "/receipt", component: ReceiptPage, requiresRegistrationOpen: true },
   { id: "confirmation", pattern: "/confirmation", component: ConfirmationPage },
   { id: "food", pattern: "/food", component: FoodPage },
   { id: "food-topup", pattern: "/food/topup", component: FoodTopupPage },
@@ -207,13 +213,13 @@ export const routes: RouteConfig[] = [
   { id: "food-vendor", pattern: "/food/vendor", component: FoodVendorPage },
 
   // Auth, Profile & Teams
-  { id: "teams", pattern: "/teams", component: TeamsPage },
-  { id: "login", pattern: "/login", component: LoginPage },
-  { id: "signup", pattern: "/signup", component: SignupPage },
-  { id: "dashboard", pattern: "/dashboard", component: DashboardPage },
-  { id: "profile", pattern: "/profile", component: ProfilePage },
-  { id: "register", pattern: "/register", component: RegisterPage },
-  { id: "register-slug", pattern: "/register/:slug", component: RegisterSlugRoute },
+  { id: "teams", pattern: "/teams", component: TeamsPage, requiresRegistrationOpen: true },
+  { id: "login", pattern: "/login", component: LoginPage, requiresRegistrationOpen: true },
+  { id: "signup", pattern: "/signup", component: SignupPage, requiresRegistrationOpen: true },
+  { id: "dashboard", pattern: "/dashboard", component: DashboardPage, requiresRegistrationOpen: true },
+  { id: "profile", pattern: "/profile", component: ProfilePage, requiresRegistrationOpen: true },
+  { id: "register", pattern: "/register", component: RegisterPage, requiresRegistrationOpen: true },
+  { id: "register-slug", pattern: "/register/:slug", component: RegisterSlugRoute, requiresRegistrationOpen: true },
 
   // Restricted Administrative Control Center
   { id: "admin-analytics", pattern: "/admin/analytics", component: AdminAnalyticsPage, requiresAdmin: true },
@@ -288,6 +294,10 @@ export function RouteRenderer({ routePath, adminUnlocked, siteComponent: Site }:
 
   if (route.requiresAdmin && !adminUnlocked) {
     return <NotFoundPage />;
+  }
+
+  if (route.requiresRegistrationOpen && !SITE_CONFIG.REG_OPEN) {
+    return <RegistrationComingSoon />;
   }
 
   const Component = route.component;

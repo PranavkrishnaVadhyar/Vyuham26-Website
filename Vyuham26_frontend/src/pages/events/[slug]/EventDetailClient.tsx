@@ -14,6 +14,7 @@ import { type Event } from "@/data/events";
 import { useAuth } from "@/context/AuthContext";
 import { registrationsApi, eventsApi, teamsApi, type TeamRecord } from "@/lib/api";
 import { toast } from "@/components/ui/Toaster";
+import { SITE_CONFIG } from "@/config/site";
 
 interface EventDetailClientProps {
   event: Event;
@@ -50,6 +51,7 @@ export default function EventDetailClient({ event }: EventDetailClientProps) {
 
   // Check if redirected back after authenticating with intent to register
   useEffect(() => {
+    if (!SITE_CONFIG.REG_OPEN) return;
     if (searchParams.get("registered") === "true" && isAuthenticated) {
       registerForEvent(event.slug);
       setShowSuccessModal(true);
@@ -57,6 +59,11 @@ export default function EventDetailClient({ event }: EventDetailClientProps) {
   }, [searchParams, isAuthenticated, event.slug, registerForEvent]);
 
   const handleRegisterClick = async () => {
+    if (!SITE_CONFIG.REG_OPEN) {
+      toast("Event registration is coming soon!", "info");
+      return;
+    }
+
     if (!isAuthenticated) {
       // User is not signed in: move to sign in page
       router.push(`/login?redirect=/events/${event.slug}&event=${event.slug}`);
@@ -511,14 +518,23 @@ export default function EventDetailClient({ event }: EventDetailClientProps) {
                       <button
                         type="button"
                         onClick={handleRegisterClick}
-                        disabled={isRegistering}
-                        className="group relative flex w-full cursor-pointer items-center justify-center overflow-hidden border border-[#2ee59d]/50 bg-[#2ee59d]/10 px-6 py-4 font-mono text-xs font-extrabold uppercase tracking-[0.18em] text-[#2ee59d] transition-all duration-300 hover:border-[#2ee59d] hover:bg-[#2ee59d]/20 hover:shadow-[0_0_30px_rgba(46,229,157,0.2)] active:scale-[0.99] disabled:opacity-70"
+                        disabled={isRegistering || !SITE_CONFIG.REG_OPEN}
+                        className={`group relative flex w-full cursor-pointer items-center justify-center overflow-hidden border px-6 py-4 font-mono text-xs font-extrabold uppercase tracking-[0.18em] transition-all duration-300 ${
+                          !SITE_CONFIG.REG_OPEN
+                            ? "border-amber-500/40 bg-amber-500/10 text-amber-300 hover:border-amber-400 hover:bg-amber-500/20 shadow-[0_0_20px_rgba(245,158,11,0.15)]"
+                            : "border-[#2ee59d]/50 bg-[#2ee59d]/10 text-[#2ee59d] hover:border-[#2ee59d] hover:bg-[#2ee59d]/20 hover:shadow-[0_0_30px_rgba(46,229,157,0.2)] active:scale-[0.99] disabled:opacity-70"
+                        }`}
                       >
                       {/* Button scan */}
                       <span className="absolute inset-y-0 left-0 w-1/3 -translate-x-full bg-gradient-to-r from-transparent via-[#2ee59d]/30 to-transparent transition-transform duration-700 group-hover:translate-x-[400%]" />
 
                       <span className="relative z-10 flex items-center gap-2">
-                        {isRegistering ? (
+                        {!SITE_CONFIG.REG_OPEN ? (
+                          <>
+                            <span className="h-2 w-2 rounded-full bg-amber-400 animate-pulse" />
+                            COMING SOON
+                          </>
+                        ) : isRegistering ? (
                           <>
                             <span className="inline-block h-3.5 w-3.5 animate-spin rounded-full border-2 border-[#2ee59d] border-t-transparent" />
                             CONFIRMING PROTOCOL...

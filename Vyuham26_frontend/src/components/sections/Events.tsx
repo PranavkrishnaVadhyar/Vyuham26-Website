@@ -5,6 +5,7 @@ import { FocusIn, MaskReveal } from "@/components/cinematic/Reveal";
 import { DepthImage, MagneticButton } from "@/components/cinematic/Interactive";
 import { toast } from "@/components/ui/Toaster";
 import type { FestEvent, StreamId } from "@/data/types";
+import { SITE_CONFIG } from "@/config/site";
 
 const FILTERS: { id: StreamId | "all"; label: string }[] = [
   { id: "all", label: "ALL" },
@@ -46,6 +47,10 @@ export default function Events() {
   const rows = useMemo(() => list.filter((e) => e.id !== featured?.id), [list, featured]);
 
   const onRegister = (e: FestEvent) => {
+    if (!SITE_CONFIG.REG_OPEN) {
+      toast("Event registration is coming soon!", "info");
+      return;
+    }
     if (!user) {
       ui.setAuthOpen("login");
       toast("Sign in to hold a slot.", "warn");
@@ -153,7 +158,11 @@ export default function Events() {
               </dl>
               <div className="mt-8 flex flex-wrap items-center gap-3">
                 <MagneticButton variant="solid" onClick={() => onRegister(featured)}>
-                  {isRegistered(featured.id) ? "REGISTERED ✓" : "REGISTER"}
+                  {!SITE_CONFIG.REG_OPEN
+                    ? "COMING SOON"
+                    : isRegistered(featured.id)
+                    ? "REGISTERED ✓"
+                    : "REGISTER"}
                 </MagneticButton>
                 <button
                   onClick={() => toggleSave(featured.id)}
@@ -272,7 +281,11 @@ export default function Events() {
                             variant={isRegistered(e.id) ? "ghost" : "solid"}
                             onClick={() => onRegister(e)}
                           >
-                            {isRegistered(e.id) ? "REGISTERED ✓" : "REGISTER"}
+                            {!SITE_CONFIG.REG_OPEN
+                              ? "COMING SOON"
+                              : isRegistered(e.id)
+                              ? "REGISTERED ✓"
+                              : "REGISTER"}
                           </MagneticButton>
                           <button
                             onClick={() => toggleSave(e.id)}
@@ -345,12 +358,19 @@ export default function Events() {
             >
               All Events Directory →
             </a>
-            <a
-              href="/register"
-              className="inline-flex items-center justify-center bg-[#18c47c] px-5 py-2.5 font-mono text-[9px] font-bold uppercase tracking-[0.22em] text-[#030504] shadow-[0_0_20px_rgba(24,196,124,0.35)] transition-all hover:bg-[#2ee59d]"
-            >
-              Registration Hub →
-            </a>
+            {SITE_CONFIG.REG_OPEN ? (
+              <a
+                href="/register"
+                className="inline-flex items-center justify-center bg-[#18c47c] px-5 py-2.5 font-mono text-[9px] font-bold uppercase tracking-[0.22em] text-[#030504] shadow-[0_0_20px_rgba(24,196,124,0.35)] transition-all hover:bg-[#2ee59d]"
+              >
+                Registration Hub →
+              </a>
+            ) : (
+              <span className="inline-flex items-center justify-center border border-amber-500/40 bg-amber-500/10 px-4 py-2.5 font-mono text-[9px] font-bold uppercase tracking-[0.22em] text-amber-300 shadow-[0_0_12px_rgba(245,158,11,0.15)]">
+                <span className="h-1.5 w-1.5 rounded-full bg-amber-400 animate-pulse mr-2" />
+                REGISTRATION COMING SOON
+              </span>
+            )}
           </div>
         </div>
       </div>

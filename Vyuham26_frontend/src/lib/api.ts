@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabase";
+import { SITE_CONFIG } from "@/config/site";
 
 export const API_BASE_URL =
   import.meta.env.VITE_API_URL ||
@@ -174,11 +175,15 @@ export const eventsApi = {
 
 export const registrationsApi = {
   listMine: () => apiFetch<RegistrationRecord[]>("/registrations/me"),
-  register: (payload: { event_id: string; team_id?: string }) =>
-    apiFetch<RegistrationRecord>("/registrations", {
+  register: (payload: { event_id: string; team_id?: string }) => {
+    if (!SITE_CONFIG.REG_OPEN) {
+      throw new ApiError("Registration is coming soon", 403);
+    }
+    return apiFetch<RegistrationRecord>("/registrations", {
       method: "POST",
       body: JSON.stringify(payload),
-    }),
+    });
+  },
   cancel: (registrationId: string) =>
     apiFetch<void>(`/registrations/${registrationId}`, {
       method: "DELETE",
@@ -205,16 +210,24 @@ export interface TeamRecord {
 export const teamsApi = {
   listMine: () => apiFetch<TeamRecord[]>("/teams/me"),
   getById: (teamId: string) => apiFetch<TeamRecord>(`/teams/${teamId}`),
-  create: (data: { name: string }) =>
-    apiFetch<TeamRecord>("/teams", {
+  create: (data: { name: string }) => {
+    if (!SITE_CONFIG.REG_OPEN) {
+      throw new ApiError("Registration is coming soon", 403);
+    }
+    return apiFetch<TeamRecord>("/teams", {
       method: "POST",
       body: JSON.stringify(data),
-    }),
-  join: (invite_code: string) =>
-    apiFetch<TeamRecord>("/teams/join", {
+    });
+  },
+  join: (invite_code: string) => {
+    if (!SITE_CONFIG.REG_OPEN) {
+      throw new ApiError("Registration is coming soon", 403);
+    }
+    return apiFetch<TeamRecord>("/teams/join", {
       method: "POST",
       body: JSON.stringify({ invite_code: invite_code.trim().toUpperCase() }),
-    }),
+    });
+  },
 };
 
 /* ================================================================== */

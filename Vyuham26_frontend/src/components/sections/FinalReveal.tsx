@@ -5,6 +5,7 @@ import { useIsMobile, useReducedMotion } from "@/lib/hooks";
 import { MagneticButton } from "@/components/cinematic/Interactive";
 import { scrollToId } from "@/lib/scroll";
 import Logo from "@/components/ui/Logo";
+import { SITE_CONFIG } from "@/config/site";
 
 /* ---------- geometry: icosahedron ---------- */
 const PHI = (1 + Math.sqrt(5)) / 2;
@@ -258,13 +259,23 @@ export default function FinalReveal() {
           </p>
 
           <div className="fin-cta mt-12 flex flex-col items-center gap-4 sm:flex-row">
-            <MagneticButton
-              variant="solid"
-              onClick={() => (user ? ui.setProfileOpen(true) : ui.setAuthOpen("signup"))}
-            >
-              {hp.finalCta}
-              <span className="text-[#7dffc4]">→</span>
-            </MagneticButton>
+            {!SITE_CONFIG.REG_OPEN ? (
+              <MagneticButton
+                variant="solid"
+                onClick={() => scrollToId("events")}
+              >
+                REGISTRATION COMING SOON
+                <span className="text-[#f59e0b]">●</span>
+              </MagneticButton>
+            ) : (
+              <MagneticButton
+                variant="solid"
+                onClick={() => (user ? ui.setProfileOpen(true) : ui.setAuthOpen("signup"))}
+              >
+                {hp.finalCta}
+                <span className="text-[#7dffc4]">→</span>
+              </MagneticButton>
+            )}
             <button
               onClick={() => scrollToId("events")}
               className="link-trail font-mono text-[10px] tracking-[0.28em] text-[#7d9a8d] transition-colors duration-500 hover:text-[#dff6ec]"
