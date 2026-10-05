@@ -100,7 +100,7 @@ async function fetchBackendProfile(): Promise<Partial<AuthUser> | null> {
           if (r.event_slug) items.push(r.event_slug);
           if (r.event_id) {
             items.push(r.event_id);
-            const matched = localEvents.find((e) => e.id === r.event_id || e.slug === r.event_slug);
+            const matched = localEvents.find((e) => (e.id && e.id === r.event_id) || e.slug === r.event_slug);
             if (matched && !items.includes(matched.slug)) {
               items.push(matched.slug);
             }
@@ -111,6 +111,7 @@ async function fetchBackendProfile(): Promise<Partial<AuthUser> | null> {
     } catch {
       // ignore – registrations endpoint may not exist yet
     }
+
 
 
     return {
@@ -494,13 +495,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       const cleanTarget = eventSlugOrId.trim().toLowerCase();
       const matchedEvent = localEvents.find(
-        (e) => e.slug.toLowerCase() === cleanTarget || e.id.toLowerCase() === cleanTarget
+        (e) => e.slug.toLowerCase() === cleanTarget || (e.id && e.id.toLowerCase() === cleanTarget)
       );
 
       const toAdd = [cleanTarget];
       if (matchedEvent) {
         toAdd.push(matchedEvent.slug.toLowerCase());
-        toAdd.push(matchedEvent.id.toLowerCase());
+        if (matchedEvent.id) {
+          toAdd.push(matchedEvent.id.toLowerCase());
+        }
       }
 
       if (user.registeredEvents.some((e) => toAdd.includes(e.toLowerCase()))) {
@@ -526,12 +529,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!user) return;
       const cleanTarget = eventSlugOrId.trim().toLowerCase();
       const matchedEvent = localEvents.find(
-        (e) => e.slug.toLowerCase() === cleanTarget || e.id.toLowerCase() === cleanTarget
+        (e) => e.slug.toLowerCase() === cleanTarget || (e.id && e.id.toLowerCase() === cleanTarget)
       );
       const toRemove = [cleanTarget];
       if (matchedEvent) {
         toRemove.push(matchedEvent.slug.toLowerCase());
-        toRemove.push(matchedEvent.id.toLowerCase());
+        if (matchedEvent.id) {
+          toRemove.push(matchedEvent.id.toLowerCase());
+        }
       }
 
       const updatedEvents = user.registeredEvents.filter(
@@ -555,19 +560,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return true;
       }
       const matchedEvent = localEvents.find(
-        (e) => e.slug.toLowerCase() === cleanTarget || e.id.toLowerCase() === cleanTarget
+        (e) => e.slug.toLowerCase() === cleanTarget || (e.id && e.id.toLowerCase() === cleanTarget)
       );
       if (matchedEvent) {
         return user.registeredEvents.some(
           (e) =>
             e.toLowerCase() === matchedEvent.slug.toLowerCase() ||
-            e.toLowerCase() === matchedEvent.id.toLowerCase()
+            (matchedEvent.id && e.toLowerCase() === matchedEvent.id.toLowerCase())
         );
       }
       return false;
     },
     [user]
   );
+
 
 
   return (
