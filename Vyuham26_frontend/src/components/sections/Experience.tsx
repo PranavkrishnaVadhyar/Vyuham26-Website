@@ -9,7 +9,7 @@ import type { GalleryItem } from "@/data/types";
 
 const spanClass: Record<GalleryItem["span"], string> = {
   wide: "md:col-span-2 aspect-[16/9]",
-  tall: "md:row-span-2 aspect-[3/4] md:aspect-auto",
+  tall: "md:row-span-2 aspect-[3/4] md:aspect-auto min-h-[360px]",
   std: "aspect-[4/3]",
 };
 
@@ -78,50 +78,48 @@ export default function Experience() {
 
       {/* gallery */}
       <div ref={grid} className="mt-12 grid grid-cols-1 gap-3 md:grid-cols-3 md:gap-4">
-        {items.map((g, i) => (
-          <FocusIn key={g.id} delay={Math.min(i * 0.05, 0.35)} y={22} blur={10} className={cn("tile", spanClass[g.span])}>
-            <button
-              onClick={() => setActive(g)}
-              className="group relative block h-full w-full overflow-hidden bg-[#070b09]"
-            >
-              <div className="tile-media absolute inset-0 will-change-transform">
-                {g.type === "video" ? (
+        {items.map((g, i) => {
+          const mediaUrl = g.type === "video" ? g.poster ?? g.src : g.src;
+          return (
+            <FocusIn key={g.id} delay={Math.min(i * 0.05, 0.35)} y={22} blur={10} className={cn("tile", spanClass[g.span])}>
+              <button
+                onClick={() => setActive(g)}
+                className="group relative block h-full w-full overflow-hidden bg-[#070b09]"
+              >
+                <div className="tile-media absolute inset-0 will-change-transform">
                   <img
-                    src={g.poster ?? g.src}
+                    src={mediaUrl}
+                    alt=""
+                    aria-hidden="true"
+                    className="absolute inset-0 h-full w-full object-cover blur-md opacity-25 scale-110"
+                  />
+                  <img
+                    src={mediaUrl}
                     alt={g.caption}
                     loading="lazy"
                     decoding="async"
-                    className="h-full w-full object-cover transition-transform duration-[1600ms] group-hover:scale-[1.06]"
-                    style={{ filter: "saturate(0.35) contrast(1.22) brightness(0.45)" }}
+                    className="relative h-full w-full object-cover transition-transform duration-[1600ms] group-hover:scale-[1.05]"
+                    style={{ filter: "saturate(0.4) contrast(1.2) brightness(0.5)" }}
                   />
-                ) : (
-                  <img
-                    src={g.src}
-                    alt={g.caption}
-                    loading="lazy"
-                    decoding="async"
-                    className="h-full w-full object-cover transition-transform duration-[1600ms] group-hover:scale-[1.06]"
-                    style={{ filter: "saturate(0.35) contrast(1.22) brightness(0.45)" }}
-                  />
-                )}
-              </div>
-              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[rgba(2,6,4,0.92)] via-transparent to-transparent" />
-              <div className="light-leak pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-1000 group-hover:opacity-100" />
-              <div className="absolute inset-x-0 bottom-0 flex items-end justify-between p-4">
-                <div className="text-left">
-                  <p className="font-mono text-[8px] tracking-[0.3em] text-[#18c47c]">{g.tag}</p>
-                  <p className="mt-1 font-mono text-[10px] tracking-[0.18em] text-[#d6ece2]">{g.caption}</p>
                 </div>
-                {g.type === "video" && (
-                  <span className="flex h-8 w-8 items-center justify-center rounded-full border border-[rgba(24,196,124,0.5)] text-[9px] text-[#9fe9c6]">
-                    ▶
-                  </span>
-                )}
-              </div>
-              <div className="absolute inset-0 border border-[rgba(120,160,145,0.1)] transition-colors duration-700 group-hover:border-[rgba(24,196,124,0.4)]" />
-            </button>
-          </FocusIn>
-        ))}
+                <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[rgba(2,6,4,0.92)] via-transparent to-transparent" />
+                <div className="light-leak pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-1000 group-hover:opacity-100" />
+                <div className="absolute inset-x-0 bottom-0 flex items-end justify-between p-4">
+                  <div className="text-left">
+                    <p className="font-mono text-[8px] tracking-[0.3em] text-[#18c47c]">{g.tag}</p>
+                    <p className="mt-1 font-mono text-[10px] tracking-[0.18em] text-[#d6ece2]">{g.caption}</p>
+                  </div>
+                  {g.type === "video" && (
+                    <span className="flex h-8 w-8 items-center justify-center rounded-full border border-[rgba(24,196,124,0.5)] text-[9px] text-[#9fe9c6]">
+                      ▶
+                    </span>
+                  )}
+                </div>
+                <div className="absolute inset-0 border border-[rgba(120,160,145,0.1)] transition-colors duration-700 group-hover:border-[rgba(24,196,124,0.4)]" />
+              </button>
+            </FocusIn>
+          );
+        })}
       </div>
 
       {/* lightbox */}
@@ -134,7 +132,7 @@ export default function Experience() {
       >
         {active && (
           <figure
-            className="relative max-h-[86vh] w-full max-w-[1200px]"
+            className="relative max-h-[88vh] w-full max-w-[1200px] flex flex-col items-center justify-center"
             onClick={(e) => e.stopPropagation()}
           >
             {active.type === "video" ? (
@@ -145,12 +143,16 @@ export default function Experience() {
                 autoPlay
                 loop
                 playsInline
-                className="max-h-[78vh] w-full bg-black object-contain"
+                className="max-h-[80vh] w-full bg-black object-contain rounded-lg shadow-2xl"
               />
             ) : (
-              <img src={active.src} alt={active.caption} className="max-h-[78vh] w-full object-contain" />
+              <img
+                src={active.src}
+                alt={active.caption}
+                className="max-h-[80vh] w-full object-contain rounded-lg bg-black/60 shadow-2xl"
+              />
             )}
-            <figcaption className="mt-4 flex items-center justify-between">
+            <figcaption className="mt-4 flex w-full items-center justify-between px-2">
               <span className="font-mono text-[10px] tracking-[0.22em] text-[#cfe8dc]">{active.caption}</span>
               <span className="font-mono text-[9px] tracking-[0.3em] text-[#18c47c]">{active.tag}</span>
             </figcaption>

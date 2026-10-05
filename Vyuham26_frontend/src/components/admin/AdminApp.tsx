@@ -122,6 +122,75 @@ export default function AdminApp() {
   const [volCollege, setVolCollege] = useState("");
   const [volStation, setVolStation] = useState("Gate 1 - Main Entrance");
 
+  // Gallery auto-allocation modal state
+  const [galleryModalOpen, setGalleryModalOpen] = useState(false);
+  const [mediaUrl, setMediaUrl] = useState("");
+  const [mediaCaption, setMediaCaption] = useState("");
+  const [mediaTag, setMediaTag] = useState("CAMPUS");
+  const [mediaSpan, setMediaSpan] = useState<"auto" | "wide" | "tall" | "std">("auto");
+  const [detectedSpan, setDetectedSpan] = useState<"wide" | "tall" | "std">("std");
+  const [detectedInfo, setDetectedInfo] = useState<string>("");
+
+  const handleMediaUrlChange = (url: string) => {
+    setMediaUrl(url);
+    if (!url.trim()) {
+      setDetectedInfo("");
+      return;
+    }
+    const isVid = /\.mp4|\.webm/i.test(url);
+    if (isVid) {
+      setDetectedSpan("wide");
+      setDetectedInfo("Video detected → Auto-allocated: WIDE (16:9)");
+      return;
+    }
+    const img = new Image();
+    img.onload = () => {
+      const ratio = img.naturalWidth / img.naturalHeight;
+      let span: "wide" | "tall" | "std" = "std";
+      let desc = `${img.naturalWidth}×${img.naturalHeight}px (Ratio: ${ratio.toFixed(2)}) → `;
+      if (ratio >= 1.35) {
+        span = "wide";
+        desc += "Auto-allocated: WIDE (Landscape 16:9)";
+      } else if (ratio <= 0.85) {
+        span = "tall";
+        desc += "Auto-allocated: TALL (Portrait 3:4)";
+      } else {
+        span = "std";
+        desc += "Auto-allocated: STANDARD (4:3)";
+      }
+      setDetectedSpan(span);
+      setDetectedInfo(desc);
+    };
+    img.onerror = () => {
+      setDetectedSpan("std");
+      setDetectedInfo("Default allocation: STANDARD (4:3)");
+    };
+    img.src = url;
+  };
+
+  const handleSaveGalleryMedia = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!mediaUrl.trim()) {
+      toast("Please enter an image or video URL.", "warn");
+      return;
+    }
+    const finalSpan = mediaSpan === "auto" ? detectedSpan : mediaSpan;
+    app.addGalleryItem({
+      id: `g-${Math.random().toString(36).slice(2, 7)}`,
+      type: /\.mp4|\.webm/i.test(mediaUrl) ? "video" : "image",
+      src: mediaUrl.trim(),
+      caption: mediaCaption.trim() || "FESTIVAL CAPTURE",
+      tag: mediaTag.toUpperCase() || "CAMPUS",
+      span: finalSpan,
+    });
+    toast(`Media added with ${finalSpan.toUpperCase()} layout allocation.`, "ok");
+    setGalleryModalOpen(false);
+    setMediaUrl("");
+    setMediaCaption("");
+    setDetectedInfo("");
+    setMediaSpan("auto");
+  };
+
   const handleEnrollVolunteer = (e: React.FormEvent) => {
     e.preventDefault();
     if (!volName.trim() || !volEmail.trim() || !volPw) {
@@ -683,34 +752,25 @@ export default function AdminApp() {
                 title={`Gallery (${content.gallery.length})`}
                 action={
                   <button
-                    onClick={() => {
-                      const src = window.prompt("Image or video URL");
-                      if (!src) return;
-                      app.addGalleryItem({
-                        id: `g-${Math.random().toString(36).slice(2, 7)}`,
-                        type: /\.mp4|\.webm/i.test(src) ? "video" : "image",
-                        src,
-                        caption: "NEW CAPTURE",
-                        tag: "CAMPUS",
-                        span: "std",
-                      });
-                      toast("Media added.");
-                    }}
+                    onClick={() => setGalleryModalOpen(true)}
                     className="font-mono text-[9px] tracking-[0.24em] text-[#18c47c] hover:text-[#7dffc4]"
                   >
-                    + ADD MEDIA
+                    + ADD MEDIA (AUTO-FIT)
                   </button>
                 }
               >
                 <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
                   {content.gallery.map((g) => (
-                    <div key={g.id} className="group relative aspect-[4/3] overflow-hidden border border-[rgba(120,160,145,0.16)]">
+                    <div key={g.id} className="group relative aspect-[4/3] overflow-hidden border border-[rgba(120,160,145,0.16)] bg-[#030605]">
                       <img
                         src={g.poster ?? g.src}
                         alt={g.caption}
                         loading="lazy"
-                        className="h-full w-full object-cover opacity-70"
+                        className="h-full w-full object-cover opacity-75 transition-opacity group-hover:opacity-95"
                       />
+                      <div className="absolute left-2 top-2 rounded bg-black/80 px-1.5 py-0.5 font-mono text-[7px] tracking-wider text-[#18c47c] border border-[#18c47c]/30">
+                        {g.span.toUpperCase()}
+                      </div>
                       <div className="absolute inset-x-0 bottom-0 bg-[rgba(3,6,5,0.85)] p-2">
                         <p className="truncate font-mono text-[8px] tracking-[0.18em] text-[#b9d3c7]">{g.caption}</p>
                       </div>
@@ -719,7 +779,7 @@ export default function AdminApp() {
                           app.removeGalleryItem(g.id);
                           toast("Media removed.", "warn");
                         }}
-                        className="absolute right-2 top-2 bg-[rgba(3,6,5,0.8)] px-2 py-1 font-mono text-[8px] tracking-[0.2em] text-[#f2a98a] opacity-0 transition-opacity group-hover:opacity-100"
+                        className="absolute right-2 top-2 bg-[rgba(3,6,5,0.8)] px-2 py-1 font-mono text-[8px] tracking-[0.2em] text-[#f2a98a] opacity-0 transition-opacity group-hover:opacity-100 hover:text-red-400"
                       >
                         DELETE
                       </button>
@@ -1046,6 +1106,106 @@ export default function AdminApp() {
                   ASSIGN & ENROL VOLUNTEER
                 </button>
                 <button type="button" onClick={() => setVolModalOpen(false)} className="btn-cine">
+                  CANCEL
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Gallery Media Upload & Auto-Allocation Modal */}
+      {galleryModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 px-4 backdrop-blur-md">
+          <div className="w-full max-w-[560px] border border-emerald-500/40 bg-[#060e0a] p-6 shadow-2xl">
+            <div className="flex items-center justify-between border-b border-emerald-500/20 pb-3">
+              <div>
+                <span className="font-mono text-xs font-bold tracking-[0.2em] text-emerald-400">
+                  ADD GALLERY MEDIA (AUTO-ALLOCATE)
+                </span>
+                <p className="font-mono text-[9px] text-[#6f8b80] mt-0.5">
+                  Inspects aspect ratio to display the full image without cropping.
+                </p>
+              </div>
+              <button onClick={() => setGalleryModalOpen(false)} className="text-sm text-muted hover:text-white">
+                ✕
+              </button>
+            </div>
+            <form onSubmit={handleSaveGalleryMedia} className="mt-5 space-y-4">
+              <Input
+                label="Image / Video URL"
+                value={mediaUrl}
+                onChange={handleMediaUrlChange}
+              />
+
+              {detectedInfo && (
+                <div className="rounded border border-emerald-500/30 bg-emerald-950/40 p-2.5 font-mono text-[9px] text-emerald-300">
+                  <div className="flex items-center gap-2">
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                    <span>{detectedInfo}</span>
+                  </div>
+                </div>
+              )}
+
+              {mediaUrl && (
+                <div className="relative aspect-[16/9] w-full overflow-hidden rounded border border-white/10 bg-black">
+                  <img
+                    src={mediaUrl}
+                    alt="Preview"
+                    className="h-full w-full object-contain"
+                    onError={(e) => {
+                      (e.target as HTMLElement).style.display = "none";
+                    }}
+                  />
+                  <div className="absolute right-2 top-2 rounded bg-black/80 px-2 py-0.5 font-mono text-[8px] text-emerald-400 border border-emerald-500/40">
+                    ALLOCATION: {(mediaSpan === "auto" ? detectedSpan : mediaSpan).toUpperCase()}
+                  </div>
+                </div>
+              )}
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <Input label="Caption / Title" value={mediaCaption} onChange={setMediaCaption} />
+                <div>
+                  <label className="block font-mono text-[9px] tracking-[0.24em] text-[#4f6f61]">
+                    ZONE / TAG
+                  </label>
+                  <select
+                    value={mediaTag}
+                    onChange={(e) => setMediaTag(e.target.value)}
+                    className="mt-1 w-full border border-[rgba(120,160,145,0.18)] bg-[#030605] px-3 py-2 font-mono text-[11px] text-[#eef8f3] outline-none"
+                  >
+                    <option value="CAMPUS">CAMPUS</option>
+                    <option value="ARENA">ARENA</option>
+                    <option value="STAGE">STAGE</option>
+                    <option value="LABS">LABS</option>
+                    <option value="AFTERSHOCK">AFTERSHOCK</option>
+                    <option value="NIGHT MARKET">NIGHT MARKET</option>
+                    <option value="KEYNOTE">KEYNOTE</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block font-mono text-[9px] tracking-[0.24em] text-[#4f6f61]">
+                  GRID SPAN LAYOUT
+                </label>
+                <select
+                  value={mediaSpan}
+                  onChange={(e) => setMediaSpan(e.target.value as any)}
+                  className="mt-1 w-full border border-[rgba(120,160,145,0.18)] bg-[#030605] px-3 py-2 font-mono text-[11px] text-[#eef8f3] outline-none"
+                >
+                  <option value="auto">AUTO-ALLOCATE (RECOMMENDED)</option>
+                  <option value="wide">WIDE (16:9 Landscape - 2 Columns)</option>
+                  <option value="tall">TALL (3:4 Portrait - 2 Rows)</option>
+                  <option value="std">STANDARD (4:3 Classic)</option>
+                </select>
+              </div>
+
+              <div className="mt-6 flex gap-3 pt-2">
+                <button type="submit" className="btn-cine btn-cine--solid flex-1 justify-center">
+                  SAVE TO GALLERY
+                </button>
+                <button type="button" onClick={() => setGalleryModalOpen(false)} className="btn-cine">
                   CANCEL
                 </button>
               </div>
