@@ -55,24 +55,30 @@ export default function ProfilePage() {
     (filledCount / fields.length) * 100
   );
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    updateUser({
-      name: profile.name,
-      email: profile.email,
-      college: profile.college,
-      phone: profile.phone,
-      degree: profile.degree,
-      year: profile.year,
-    });
+    try {
+      await updateUser({
+        name: profile.name,
+        college: profile.college,
+        phone: profile.phone,
+        degree: profile.degree,
+        year: profile.year,
+      });
 
-    setSaved(true);
-    toast("Personnel dossier synchronized with central command.", "ok");
+      setSaved(true);
+      toast("Personnel dossier synchronized with central command.", "ok");
 
-    setTimeout(() => {
-      setSaved(false);
-    }, 3500);
+      setTimeout(() => {
+        setSaved(false);
+      }, 3500);
+    } catch (err: any) {
+      toast(
+        `Synchronization failed: ${err?.message || "Network error"}`,
+        "error"
+      );
+    }
   };
 
   return (

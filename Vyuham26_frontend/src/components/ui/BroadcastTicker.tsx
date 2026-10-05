@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useApp } from "@/lib/store";
+import { announcementsApi, type AnnouncementRecord } from "@/lib/api";
 
 export default function BroadcastTicker({ visible = true }: { visible?: boolean }) {
   const { content } = useApp();
@@ -9,9 +10,22 @@ export default function BroadcastTicker({ visible = true }: { visible?: boolean 
   const [modalOpen, setModalOpen] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [mounted, setMounted] = useState(false);
+  const [remoteAnnouncements, setRemoteAnnouncements] = useState<AnnouncementRecord[]>([]);
 
   useEffect(() => {
     setMounted(true);
+    const fetchBulletins = () => {
+      announcementsApi.list()
+        .then((data) => {
+          if (Array.isArray(data) && data.length > 0) {
+            setRemoteAnnouncements(data);
+          }
+        })
+        .catch(() => {});
+    };
+    fetchBulletins();
+    const poll = setInterval(fetchBulletins, 30000);
+    return () => clearInterval(poll);
   }, []);
 
   useEffect(() => {
@@ -66,7 +80,15 @@ export default function BroadcastTicker({ visible = true }: { visible?: boolean 
   ];
 
   const bulletins =
-    content.announcements && content.announcements.length > 0
+    remoteAnnouncements.length > 0
+      ? remoteAnnouncements.map((a, i) => ({
+          id: a.id || `b-${i}`,
+          category: a.category || (a.pinned ? "PRIORITY" : "BROADCAST"),
+          title: a.title,
+          time: a.created_at || "LIVE TRANSMISSION",
+          urgent: Boolean(a.urgent || a.pinned),
+        }))
+      : content.announcements && content.announcements.length > 0
       ? content.announcements.map((a, i) => ({
           id: a.id || `b-${i}`,
           category: a.pinned ? "PRIORITY" : "BROADCAST",

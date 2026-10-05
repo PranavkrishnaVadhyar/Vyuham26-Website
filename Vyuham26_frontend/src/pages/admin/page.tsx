@@ -1,25 +1,36 @@
-"use client";
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import AnimatedSection from "@/components/motion/AnimatedSection";
 import { Kicker, Button } from "@/components/ui/Elements";
+import { useAuth } from "@/context/AuthContext";
+import { adminApi, type AdminStatsResponse } from "@/lib/api";
 
 export default function AdminDashboardPage() {
+  const { user } = useAuth();
   const reduceMotion = usePrefersReducedMotion();
   const [filter, setFilter] = useState<"all" | "tech" | "culture" | "gaming">("all");
+  const [stats, setStats] = useState<AdminStatsResponse | null>(null);
 
-  const metrics = {
-    all: { totalRegs: "2,480", totalRevenue: "₹6,84,000", totalCheckins: "1,890", activeEvents: 32 },
-    tech: { totalRegs: "1,120", totalRevenue: "₹3,40,000", totalCheckins: "890", activeEvents: 12 },
-    culture: { totalRegs: "840", totalRevenue: "₹2,10,000", totalCheckins: "620", activeEvents: 10 },
-    gaming: { totalRegs: "520", totalRevenue: "₹1,34,000", totalCheckins: "380", activeEvents: 10 },
+  useEffect(() => {
+    adminApi.getStats().then((data) => setStats(data)).catch(() => {});
+  }, []);
+
+  const rawMetrics = stats ? stats[filter] : {
+    total_registrations: 2480,
+    total_revenue: 684000,
+    total_checkins: 1890,
+    active_events: 32,
   };
 
-  const currentMetrics = metrics[filter];
+  const currentMetrics = {
+    totalRegs: rawMetrics.total_registrations.toLocaleString("en-IN"),
+    totalRevenue: "₹" + rawMetrics.total_revenue.toLocaleString("en-IN"),
+    totalCheckins: rawMetrics.total_checkins.toLocaleString("en-IN"),
+    activeEvents: rawMetrics.active_events,
+  };
 
   return (
     <>

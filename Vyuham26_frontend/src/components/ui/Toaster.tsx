@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-export type ToastTone = "ok" | "warn" | "info";
+export type ToastTone = "ok" | "warn" | "info" | "error";
 
 export function toast(message: string, tone: ToastTone = "ok") {
   window.dispatchEvent(new CustomEvent("vyuham:toast", { detail: { message, tone } }));
@@ -39,6 +39,8 @@ export default function Toaster() {
                 ? "rgba(24,196,124,0.35)"
                 : t.tone === "warn"
                 ? "rgba(242,201,138,0.35)"
+                : t.tone === "error"
+                ? "rgba(239,68,68,0.4)"
                 : "rgba(56,189,248,0.35)",
             animation: "toastIn .6s cubic-bezier(0.16,1,0.3,1) both",
           }}
@@ -51,6 +53,8 @@ export default function Toaster() {
                   ? "#18c47c"
                   : t.tone === "warn"
                   ? "#f2c98a"
+                  : t.tone === "error"
+                  ? "#ef4444"
                   : "#38bdf8",
             }}
           />

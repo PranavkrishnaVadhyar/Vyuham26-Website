@@ -1,12 +1,14 @@
-"use client";
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import AnimatedSection from "@/components/motion/AnimatedSection";
 import { Kicker, Button } from "@/components/ui/Elements";
+import { useAuth } from "@/context/AuthContext";
+import { teamsApi, type TeamRecord } from "@/lib/api";
+import { toast } from "@/components/ui/Toaster";
+import Link from "next/link";
 
 interface SquadMember {
   id: string;
@@ -17,71 +19,125 @@ interface SquadMember {
 }
 
 export default function TeamsPage() {
+  const { user, isAuthenticated } = useAuth();
   const reduceMotion = usePrefersReducedMotion();
 
-  const squadName = "CyberVipers";
+  const [teams, setTeams] = useState<TeamRecord[]>([]);
+  const [activeTeam, setActiveTeam] = useState<TeamRecord | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const [inviteEmail, setInviteEmail] = useState("");
-  const [inviteSent, setInviteSent] = useState(false);
+  // Form states
+  const [createName, setCreateName] = useState("");
+  const [joinCode, setJoinCode] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [copied, setCopied] = useState(false);
 
-  const [members, setMembers] = useState<SquadMember[]>([
-    {
-      id: "1",
-      name: "Aromal S S",
-      role: "Leader",
-      email: "aromal@duk.ac.in",
-      status: "Confirmed",
-    },
-    {
-      id: "2",
-      name: "Neha Suresh",
-      role: "Member",
-      email: "neha@duk.ac.in",
-      status: "Confirmed",
-    },
-    {
-      id: "3",
-      name: "Rohan K.",
-      role: "Member",
-      email: "rohan@gmail.com",
-      status: "Invited",
-    },
-  ]);
+  const loadSquads = async () => {
+    if (!isAuthenticated) return;
+    setLoading(true);
+    try {
+      const list = await teamsApi.listMine();
+      if (Array.isArray(list)) {
+        setTeams(list);
+        if (list.length > 0) {
+          try {
+            const detailed = await teamsApi.getById(list[0].id);
+            setActiveTeam(detailed || list[0]);
+          } catch {
+            setActiveTeam(list[0]);
+          }
+        } else {
+          setActiveTeam(null);
+        }
+      }
+    } catch (err: any) {
+      console.warn("Failed to fetch squads:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  const handleInvite = (e: React.FormEvent) => {
+  useEffect(() => {
+    loadSquads();
+  }, [isAuthenticated]);
+
+  const selectSquad = async (team: TeamRecord) => {
+    try {
+      const detailed = await teamsApi.getById(team.id);
+      setActiveTeam(detailed || team);
+    } catch {
+      setActiveTeam(team);
+    }
+  };
+
+  const handleCreateSquad = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!createName.trim()) return;
 
-    if (!inviteEmail) return;
-
-    const newMember: SquadMember = {
-      id: String(Date.now()),
-      name: inviteEmail.split("@")[0],
-      role: "Member",
-      email: inviteEmail,
-      status: "Invited",
-    };
-
-    setMembers((prev) => [...prev, newMember]);
-    setInviteEmail("");
-    setInviteSent(true);
-
-    setTimeout(() => {
-      setInviteSent(false);
-    }, 2500);
+    setIsSubmitting(true);
+    try {
+      const created = await teamsApi.create({ name: createName.trim() });
+      toast(`Squad "${created.name}" created! Invite Code: ${created.invite_code}`, "ok");
+      setCreateName("");
+      await loadSquads();
+    } catch (err: any) {
+      toast(`Failed to create squad: ${err?.message || "Error"}`, "error");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const removeMember = (id: string) => {
-    setMembers((prev) => prev.filter((m) => m.id !== id));
+  const handleJoinSquad = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!joinCode.trim()) return;
+
+    setIsSubmitting(true);
+    try {
+      const joined = await teamsApi.join(joinCode.trim().toUpperCase());
+      toast(`Successfully joined squad "${joined.name}"!`, "ok");
+      setJoinCode("");
+      await loadSquads();
+    } catch (err: any) {
+      toast(`Invalid invite code or squad full: ${err?.message || "Error"}`, "error");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const confirmedCount = members.filter(
-    (member) => member.status === "Confirmed"
-  ).length;
+  const copyInviteCode = () => {
+    if (activeTeam?.invite_code) {
+      navigator.clipboard.writeText(activeTeam.invite_code);
+      setCopied(true);
+      toast(`Invite code ${activeTeam.invite_code} copied to clipboard!`, "ok");
+      setTimeout(() => setCopied(false), 3000);
+    }
+  };
 
-  const invitedCount = members.filter(
-    (member) => member.status === "Invited"
-  ).length;
+  const removeMember = (_memberId: string) => {
+    toast("Operative roster lock is in effect. Squad modifications must be coordinated with the event desk.", "warn");
+  };
 
+  const squadName = activeTeam?.name || "CyberVipers";
+  const members: SquadMember[] = activeTeam?.members && activeTeam.members.length > 0
+    ? activeTeam.members.map((m, idx) => ({
+        id: m.user_id,
+        name: m.name || m.email.split("@")[0].toUpperCase(),
+        role: idx === 0 || m.user_id === activeTeam.created_by ? "Leader" : "Member",
+        email: m.email,
+        status: "Confirmed",
+      }))
+    : [
+        {
+          id: user?.id || "1",
+          name: user?.name || "OPERATIVE",
+          role: "Leader",
+          email: user?.email || "operative@vyuham26.in",
+          status: "Confirmed",
+        },
+      ];
+
+  const confirmedCount = members.filter((m) => m.status === "Confirmed").length;
+  const invitedCount = members.filter((m) => m.status === "Invited").length;
   const capacity = Math.min((members.length / 4) * 100, 100);
 
   return (
@@ -172,20 +228,48 @@ export default function TeamsPage() {
                     </p>
                   </div>
 
-                  {/* squad ID */}
-                  <div className="min-w-[220px] border border-green/20 bg-black/30 p-4">
-                    <div className="font-mono text-[9px] uppercase tracking-[0.2em] text-muted">
-                      SQUAD IDENTIFIER
+                  {/* squad ID & Invite Code */}
+                  <div className="min-w-[240px] border border-green/20 bg-black/40 p-4">
+                    <div className="flex items-center justify-between font-mono text-[9px] uppercase tracking-[0.2em] text-muted">
+                      <span>INVITE CODE</span>
+                      {activeTeam && (
+                        <button
+                          onClick={copyInviteCode}
+                          className="text-[9px] text-green hover:underline cursor-pointer"
+                        >
+                          {copied ? "COPIED ✓" : "COPY CODE 📋"}
+                        </button>
+                      )}
                     </div>
 
-                    <div className="mt-2 font-mono text-sm font-semibold tracking-wider text-green">
-                      SQD-VYU-9021
+                    <div className="mt-2 font-mono text-base font-bold tracking-widest text-green">
+                      {activeTeam?.invite_code || "ENLIST TO VIEW"}
                     </div>
+
+                    {teams.length > 1 && (
+                      <div className="mt-2.5 border-t border-white/10 pt-2">
+                        <label className="block font-mono text-[8px] uppercase tracking-wider text-muted">SWITCH SQUAD:</label>
+                        <select
+                          value={activeTeam?.id || ""}
+                          onChange={(e) => {
+                            const found = teams.find((t) => t.id === e.target.value);
+                            if (found) selectSquad(found);
+                          }}
+                          className="mt-1 w-full bg-[#080c0a] border border-green/30 px-2 py-1 font-mono text-[10px] text-paper outline-none"
+                        >
+                          {teams.map((t) => (
+                            <option key={t.id} value={t.id}>
+                              {t.name} ({t.invite_code})
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    )}
 
                     <div className="mt-3 flex items-center gap-2">
                       <span className="h-1.5 w-1.5 rounded-full bg-green shadow-[0_0_10px_rgba(46,229,157,.8)]" />
                       <span className="font-mono text-[9px] uppercase text-muted">
-                        Formation Active
+                        {activeTeam ? "Formation Active" : "No Squad Selected"}
                       </span>
                     </div>
                   </div>
@@ -521,51 +605,73 @@ export default function TeamsPage() {
                     </div>
 
                     {/* =================================================
-                        INVITE SYSTEM
+                        SQUAD FORMATION & JOIN CONTROLS
                     ================================================= */}
 
-                    <form
-                      onSubmit={handleInvite}
-                      className="mt-7 border-t border-line/60 pt-6"
-                    >
-                      <div className="flex flex-col gap-4">
+                    <div className="mt-7 border-t border-line/60 pt-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-                        <div>
-                          <label className="font-mono text-[9px] uppercase tracking-[0.2em] text-muted">
-                            Add Operative
-                          </label>
-
-                          <p className="mt-1 text-xs text-muted">
-                            Send a secure squad invitation to another participant.
-                          </p>
-                        </div>
-
-                        <div className="flex flex-col gap-3 sm:flex-row">
-
-                          <div className="relative flex-1">
-                            <span className="absolute left-3 top-1/2 -translate-y-1/2 font-mono text-xs text-[#18c47c]">
-                              @
-                            </span>
-
-                            <input
-                              type="email"
-                              value={inviteEmail}
-                              onChange={(e) => setInviteEmail(e.target.value)}
-                              placeholder="teammate@university.edu"
-                              className="w-full rounded-lg border border-[rgba(24,196,124,0.16)] bg-[#0b1410]/80 py-3 pl-10 pr-4 font-mono text-xs text-[#f0f9f5] placeholder:text-[#9caaa2]/50 focus:border-[#18c47c]/50 focus:outline-none"
-                            />
+                        {/* CREATE SQUAD */}
+                        <form onSubmit={handleCreateSquad} className="border border-green/20 bg-black/30 p-5 rounded">
+                          <div className="font-mono text-[9px] uppercase tracking-[0.2em] text-green">
+                            Form New Squad
                           </div>
+                          <p className="mt-1 text-xs text-muted">
+                            Establish a squad and get an official invite code.
+                          </p>
 
-                          <Button
-                            type="submit"
-                            variant="primary"
-                            className="justify-center sm:min-w-[150px]"
-                          >
-                            {inviteSent ? "✓ SENT" : "SEND INVITE +"}
-                          </Button>
-                        </div>
+                          <div className="mt-4 flex flex-col gap-3">
+                            <input
+                              type="text"
+                              value={createName}
+                              onChange={(e) => setCreateName(e.target.value)}
+                              placeholder="e.g. QuantumGlitch"
+                              required
+                              className="w-full rounded border border-white/10 bg-[#0b1410] py-2.5 px-3 font-mono text-xs text-paper focus:border-green/50 focus:outline-none"
+                            />
+                            <Button
+                              type="submit"
+                              variant="primary"
+                              disabled={isSubmitting || !createName.trim()}
+                              className="justify-center"
+                            >
+                              {isSubmitting ? "INITIALIZING..." : "ESTABLISH SQUAD →"}
+                            </Button>
+                          </div>
+                        </form>
+
+                        {/* JOIN SQUAD BY CODE */}
+                        <form onSubmit={handleJoinSquad} className="border border-white/10 bg-black/30 p-5 rounded">
+                          <div className="font-mono text-[9px] uppercase tracking-[0.2em] text-paper">
+                            Enlist Via Invite Code
+                          </div>
+                          <p className="mt-1 text-xs text-muted">
+                            Enter the 8-character invite code from your squad leader.
+                          </p>
+
+                          <div className="mt-4 flex flex-col gap-3">
+                            <input
+                              type="text"
+                              value={joinCode}
+                              onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
+                              placeholder="e.g. K9X2LM4Q"
+                              maxLength={8}
+                              required
+                              className="w-full rounded border border-white/10 bg-[#0b1410] py-2.5 px-3 font-mono text-xs uppercase tracking-widest text-green focus:border-green/50 focus:outline-none"
+                            />
+                            <Button
+                              type="submit"
+                              variant="outline"
+                              disabled={isSubmitting || !joinCode.trim()}
+                              className="justify-center"
+                            >
+                              {isSubmitting ? "CONNECTING..." : "JOIN SQUAD ↗"}
+                            </Button>
+                          </div>
+                        </form>
+
                       </div>
-                    </form>
+                    </div>
                   </div>
                 </div>
               </AnimatedSection>

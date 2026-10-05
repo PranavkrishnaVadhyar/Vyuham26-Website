@@ -1,12 +1,42 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import AnimatedSection from "@/components/motion/AnimatedSection";
 import { Kicker, Button } from "@/components/ui/Elements";
+import { useAuth } from "@/context/AuthContext";
+import { paymentsApi, type ReceiptData } from "@/lib/api";
 
 export default function ReceiptPage() {
+  const searchParams = useSearchParams();
+  const { user } = useAuth();
+  const [receipt, setReceipt] = useState<ReceiptData | null>(null);
+
+  const txnRef = searchParams.get("ref") || "TXN-VYU-984021";
+
+  useEffect(() => {
+    paymentsApi.getReceipt(txnRef)
+      .then((data) => setReceipt(data))
+      .catch(() => {});
+  }, [txnRef]);
+
   const handlePrint = () => {
     window.print();
   };
+
+  const attendeeName = receipt?.attendee_name && receipt.attendee_name !== "OPERATIVE" ? receipt.attendee_name : (user?.name || "Aromal S S");
+  const institution = user?.college || receipt?.college || "Digital University Kerala";
+  const vyuhamId = (user?.vyuham_id || user?.vyuhamId) || (user?.id ? `VYU26-OPER-${user.id.slice(0, 4).toUpperCase()}` : "VYU26-OPER-8042");
+  const totalPaid = receipt?.total_amount || 1130;
+  const receiptNo = receipt?.receipt_no || `REC-2026-${txnRef.slice(-5)}`;
+  const timestamp = receipt?.timestamp || "30 OCT 2026, 10:14 IST";
+  const items = receipt?.items || [
+    { title: "National Hackathon 36 (Squad: CyberVipers)", fee: 500, stream: "TECH" },
+    { title: "CTF Warzone (Squad: CyberVipers)", fee: 300, stream: "TECH" },
+    { title: "AI Arena Machine Learning Challenge", fee: 300, stream: "TECH" },
+  ];
 
   return (
     <>
@@ -43,23 +73,23 @@ export default function ReceiptPage() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 font-mono text-xs border-b border-line/60 pb-6">
                   <div>
                     <span className="text-muted block text-[10px]">RECEIPT NO:</span>
-                    <strong className="text-paper text-sm">REC-2026-90421</strong>
+                    <strong className="text-paper text-sm">{receiptNo}</strong>
                   </div>
                   <div>
                     <span className="text-muted block text-[10px]">TRANSACTION TIMESTAMP:</span>
-                    <strong className="text-paper text-sm">30 OCT 2026, 10:14 IST</strong>
+                    <strong className="text-paper text-sm">{timestamp}</strong>
                   </div>
                   <div>
                     <span className="text-muted block text-[10px]">PARTICIPANT / OPERATIVE:</span>
-                    <strong className="text-paper">Aromal S S</strong>
+                    <strong className="text-paper">{attendeeName}</strong>
                   </div>
                   <div>
                     <span className="text-muted block text-[10px]">INSTITUTION:</span>
-                    <strong className="text-green">Digital University Kerala</strong>
+                    <strong className="text-green">{institution}</strong>
                   </div>
                   <div>
                     <span className="text-muted block text-[10px]">VYUHAM ID:</span>
-                    <strong className="text-green">VYU26-OPER-8042</strong>
+                    <strong className="text-green">{vyuhamId}</strong>
                   </div>
                   <div>
                     <span className="text-muted block text-[10px]">PAYMENT METHOD:</span>
@@ -72,18 +102,12 @@ export default function ReceiptPage() {
                     REGISTERED MODULES & ENTRY PASSES
                   </h3>
                   <div className="space-y-3 font-mono text-xs">
-                    <div className="flex justify-between border-b border-line/30 pb-2">
-                      <span className="text-paper">National Hackathon 36 (Squad: CyberVipers)</span>
-                      <span className="text-green">₹500</span>
-                    </div>
-                    <div className="flex justify-between border-b border-line/30 pb-2">
-                      <span className="text-paper">CTF Warzone (Squad: CyberVipers)</span>
-                      <span className="text-green">₹300</span>
-                    </div>
-                    <div className="flex justify-between border-b border-line/30 pb-2">
-                      <span className="text-paper">AI Arena Machine Learning Challenge</span>
-                      <span className="text-green">₹300</span>
-                    </div>
+                    {items.map((item, idx) => (
+                      <div key={idx} className="flex justify-between border-b border-line/30 pb-2">
+                        <span className="text-paper">{item.title}</span>
+                        <span className="text-green">₹{item.fee}</span>
+                      </div>
+                    ))}
                     <div className="flex justify-between text-muted pt-1">
                       <span>Gateway Service & Security Verification Fee</span>
                       <span>₹30</span>
@@ -93,7 +117,7 @@ export default function ReceiptPage() {
 
                 <div className="border-t border-line pt-4 flex justify-between items-center font-mono">
                   <span className="text-sm font-bold text-paper">TOTAL AMOUNT PAID:</span>
-                  <span className="text-2xl font-bold text-green">₹1,130</span>
+                  <span className="text-2xl font-bold text-green">₹{totalPaid}</span>
                 </div>
 
                 <div className="flex flex-col sm:flex-row gap-3 pt-4 print:hidden">

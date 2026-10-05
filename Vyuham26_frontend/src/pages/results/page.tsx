@@ -1,5 +1,4 @@
-"use client";
-
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
 import Navbar from "@/components/layout/Navbar";
@@ -7,36 +6,70 @@ import Footer from "@/components/layout/Footer";
 import AnimatedSection from "@/components/motion/AnimatedSection";
 import SignalRing from "@/components/motion/SignalRing";
 import { Kicker, Button, StreamBadge } from "@/components/ui/Elements";
+import { adminApi, type EventResultRecord } from "@/lib/api";
 
 export default function ResultsWinnersPage() {
   const reduceMotion = usePrefersReducedMotion();
+  const [resultsList, setResultsList] = useState<EventResultRecord[]>([]);
 
-  const results = [
+  useEffect(() => {
+    adminApi.getResults()
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) {
+          setResultsList(data);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const fallbackResults = [
     {
-      event: "National Hackathon",
+      event_id: "hackathon",
+      event_name: "National Hackathon",
       stream: "tech",
-      first: "CyberVipers (Digital University Kerala)",
-      second: "ByteBusters (IIT Madras)",
-      third: "NullPointer Squad (NIT Calicut)",
-      prize: "₹50,000",
+      first_place: "CyberVipers (Digital University Kerala)",
+      second_place: "ByteBusters (IIT Madras)",
+      third_place: "NullPointer Squad (NIT Calicut)",
+      prize_distributed: "₹50,000",
+      published_at: "31 OCT 2026",
     },
     {
-      event: "CTF Warzone",
+      event_id: "ctf",
+      event_name: "CTF Warzone",
       stream: "tech",
-      first: "QuantumGlitch (CET Trivandrum)",
-      second: "CyberVipers (Digital University Kerala)",
-      third: "BinaryKnights (CUSAT)",
-      prize: "₹40,000",
+      first_place: "QuantumGlitch (CET Trivandrum)",
+      second_place: "CyberVipers (Digital University Kerala)",
+      third_place: "BinaryKnights (CUSAT)",
+      prize_distributed: "₹40,000",
+      published_at: "31 OCT 2026",
     },
     {
-      event: "Battle of the Bands",
+      event_id: "battle-of-bands",
+      event_name: "Battle of the Bands",
       stream: "culture",
-      first: "Echo Horizon",
-      second: "Resonance Project",
-      third: "Velvet Groove",
-      prize: "₹35,000",
+      first_place: "Echo Horizon",
+      second_place: "Resonance Project",
+      third_place: "Velvet Groove",
+      prize_distributed: "₹35,000",
+      published_at: "31 OCT 2026",
     },
   ];
+
+  const results = resultsList.length > 0 ? resultsList.map(r => ({
+    event: r.event_name,
+    stream: r.stream as any,
+    first: r.first_place,
+    second: r.second_place,
+    third: r.third_place || "TBA",
+    prize: r.prize_distributed || "₹50,000",
+  })) : fallbackResults.map(r => ({
+    event: r.event_name,
+    stream: r.stream as any,
+    first: r.first_place,
+    second: r.second_place,
+    third: r.third_place,
+    prize: r.prize_distributed,
+  }));
 
   return (
     <>

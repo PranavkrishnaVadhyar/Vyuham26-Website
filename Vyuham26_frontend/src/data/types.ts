@@ -80,7 +80,7 @@ export interface UserAccount {
   name: string;
   email: string;
   password: string;
-  role: "user" | "admin" | "volunteer";
+  role: "user" | "admin" | "volunteer" | "event_head";
   college?: string;
   station?: string;
   joined: string;
