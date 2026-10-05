@@ -6,4 +6,5 @@ pydantic-settings
 PyJWT[crypto]
 python-multipart
 sqladmin
+itsdangerous
 email-validator
