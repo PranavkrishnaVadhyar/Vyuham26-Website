@@ -13,6 +13,7 @@ from app.modules.teams.router import router as teams_router
 from app.modules.registrations.router import router as registrations_router
 from app.modules.hackathon.router import router as hackathon_router
 from app.modules.ctf.router import router as ctf_router
+from app.modules.announcements.router import router as announcements_router
 from app.admin import configure_admin
 
 
@@ -37,4 +38,5 @@ app.include_router(teams_router)
 app.include_router(registrations_router)
 app.include_router(hackathon_router)
 app.include_router(ctf_router)
+app.include_router(announcements_router)
 configure_admin(app)

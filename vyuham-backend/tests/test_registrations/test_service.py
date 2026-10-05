@@ -1,5 +1,6 @@
 import unittest
 from types import SimpleNamespace
+from unittest.mock import patch
 from uuid import uuid4
 
 from fastapi import HTTPException
@@ -40,7 +41,7 @@ class FakeSession:
 
 class RegistrationServiceTests(unittest.IsolatedAsyncioTestCase):
     async def test_register_solo_event(self):
-        event = SimpleNamespace(registration_type=RegistrationType.solo, team_size_min=None, team_size_max=None)
+        event = SimpleNamespace(registration_type=RegistrationType.solo, team_size_min=None, team_size_max=None, slug="solo-event")
         user = SimpleNamespace(id=uuid4())
         db = FakeSession(gets=[event], scalars=[None])
 
@@ -56,32 +57,45 @@ class RegistrationServiceTests(unittest.IsolatedAsyncioTestCase):
 
         self.assertIsNone(request.team_id)
 
+    async def test_registration_closed_returns_http_403(self):
+        request = RegistrationCreate(event_id=uuid4())
+        db = FakeSession()
+
+        with patch("app.modules.registrations.router.is_registration_open", return_value=False):
+            with self.assertRaises(HTTPException) as raised:
+                await post_registration(request, SimpleNamespace(id=uuid4()), db)
+
+        self.assertEqual(raised.exception.status_code, 403)
+        self.assertIn("coming soon", raised.exception.detail)
+
     async def test_solo_registration_rejects_supplied_team_id_with_http_400(self):
-        event = SimpleNamespace(registration_type=RegistrationType.solo, team_size_min=None, team_size_max=None)
+        event = SimpleNamespace(registration_type=RegistrationType.solo, team_size_min=None, team_size_max=None, slug="solo-event")
         # The valid team ID is deliberately supplied. The service must reject based on
         # the event type before it attempts any team lookup or membership check.
         request = RegistrationCreate(event_id=uuid4(), team_id=uuid4())
         db = FakeSession(gets=[event])
 
-        with self.assertRaises(HTTPException) as raised:
-            await post_registration(request, SimpleNamespace(id=uuid4()), db)
+        with patch("app.modules.registrations.router.is_registration_open", return_value=True):
+            with self.assertRaises(HTTPException) as raised:
+                await post_registration(request, SimpleNamespace(id=uuid4()), db)
 
         self.assertEqual(raised.exception.status_code, 400)
         self.assertEqual(db.commits, 0)
 
     async def test_team_registration_without_team_id_returns_http_400(self):
-        event = SimpleNamespace(registration_type=RegistrationType.team, team_size_min=2, team_size_max=4)
+        event = SimpleNamespace(registration_type=RegistrationType.team, team_size_min=2, team_size_max=4, slug="team-event")
         request = RegistrationCreate(event_id=uuid4())
         db = FakeSession(gets=[event])
 
-        with self.assertRaises(HTTPException) as raised:
-            await post_registration(request, SimpleNamespace(id=uuid4()), db)
+        with patch("app.modules.registrations.router.is_registration_open", return_value=True):
+            with self.assertRaises(HTTPException) as raised:
+                await post_registration(request, SimpleNamespace(id=uuid4()), db)
 
         self.assertEqual(raised.exception.status_code, 400)
         self.assertEqual(db.commits, 0)
 
     async def test_register_team_within_size_range(self):
-        event = SimpleNamespace(registration_type=RegistrationType.team, team_size_min=2, team_size_max=4)
+        event = SimpleNamespace(registration_type=RegistrationType.team, team_size_min=2, team_size_max=4, slug="team-event")
         team = SimpleNamespace()
         user = SimpleNamespace(id=uuid4())
         db = FakeSession(gets=[event, team], scalars=[uuid4(), 3, None])

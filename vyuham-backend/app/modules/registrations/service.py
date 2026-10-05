@@ -87,7 +87,7 @@ async def register_for_event(
         await db.rollback()
         raise ValueError("This user or team is already registered for this event") from None
     await db.refresh(registration)
-    registration.event_slug = event.slug
+    registration.event_slug = getattr(event, "slug", None)
     return registration
 
 

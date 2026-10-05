@@ -407,7 +407,7 @@ export default function SponsorsPage() {
                 ["01", "VISIBILITY", "Reach a diverse student and technology audience."],
                 ["02", "ENGAGEMENT", "Connect directly with participants and creators."],
                 ["03", "BRAND", "Build meaningful presence across the festival."],
-                ["04", "management", "Support innovation and emerging talent."],
+                ["04", "MANAGEMENT", "Support innovation and emerging talent."],
               ].map(([code, title, description], index) => (
                 <AnimatedSection
                   key={code}

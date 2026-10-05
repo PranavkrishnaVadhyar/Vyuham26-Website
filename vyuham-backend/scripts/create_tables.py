@@ -8,6 +8,7 @@ from app.modules.teams import models as team_models  # noqa: F401
 from app.modules.registrations import models as registration_models  # noqa: F401
 from app.modules.hackathon import models as hackathon_models  # noqa: F401
 from app.modules.ctf import models as ctf_models  # noqa: F401
+from app.modules.announcements import models as announcement_models  # noqa: F401
 
 MIGRATION_SQLS = [
     # Enum updates for event_stream if type already exists in Postgres

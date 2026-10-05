@@ -115,7 +115,7 @@ const uid = (p: string) => `${p}-${Math.random().toString(36).slice(2, 8)}`;
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const auth = useAuth();
-  const [content, setContent] = useLocalState<Content>("vyuham26:content:v4", seedContent);
+  const [content, setContent] = useLocalState<Content>("vyuham26:content:v5", seedContent);
   const [users, setUsers] = useLocalState<UserAccount[]>("vyuham26:users:v1", seedUsers);
   const [registrations, setRegistrations] = useLocalState<Registration[]>(
     "vyuham26:regs:v1",
@@ -187,19 +187,25 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   }, [auth.user, auth.isReady]);
 
-  // Invalidate any legacy cached content (e.g. from v1 containing old South Campus / Hyderabad strings)
+  // Invalidate any legacy cached content (e.g. from v1..v4 containing old streams or locations)
   useEffect(() => {
     try {
       localStorage.removeItem("vyuham26:content:v1");
       localStorage.removeItem("vyuham26:content:v2");
       localStorage.removeItem("vyuham26:content:v3");
+      localStorage.removeItem("vyuham26:content:v4");
     } catch {}
+    const hasOldImpactStream = content.streams.some(
+      (s) => s.id === "impact" || s.name.toUpperCase() === "IMPACT"
+    );
     if (
+      hasOldImpactStream ||
       content.homepage.location !== seedHomepage.location ||
       content.homepage.dates !== seedHomepage.dates
     ) {
       setContent((c) => ({
         ...c,
+        streams: seedStreams,
         homepage: {
           ...c.homepage,
           dates: seedHomepage.dates,
@@ -208,7 +214,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         },
       }));
     }
-  }, [content.homepage.location, content.homepage.dates, setContent]);
+  }, [content.streams, content.homepage.location, content.homepage.dates, setContent]);
 
   const [authOpen, setAuthOpen] = useState<false | "login" | "signup">(false);
   const [profileOpen, setProfileOpen] = useState(false);
