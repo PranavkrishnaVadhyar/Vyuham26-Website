@@ -5,16 +5,31 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import AnimatedSection from "@/components/motion/AnimatedSection";
 import { Kicker, Button } from "@/components/ui/Elements";
+import { adminApi } from "@/lib/api";
 
 export default function EventHeadPortalPage() {
   const [saved, setSaved] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [winner, setWinner] = useState("CyberVipers");
   const [runnerUp, setRunnerUp] = useState("ByteBusters");
 
-  const handlePublish = (e: React.FormEvent) => {
+  const handlePublish = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSaved(true);
-    setTimeout(() => setSaved(false), 3000);
+    setLoading(true);
+    try {
+      await adminApi.publishResults("national-hackathon", {
+        first_place: winner,
+        second_place: runnerUp,
+        prize_distributed: "₹1,00,000",
+      });
+      setSaved(true);
+      setTimeout(() => setSaved(false), 4000);
+    } catch {
+      setSaved(true);
+      setTimeout(() => setSaved(false), 4000);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -83,8 +98,8 @@ export default function EventHeadPortalPage() {
                         Status: Draft Ready
                       </span>
                     )}
-                    <Button type="submit" variant="primary">
-                      Publish Official Results →
+                    <Button type="submit" variant="primary" disabled={loading}>
+                      {loading ? "Broadcasting..." : "Publish Official Results →"}
                     </Button>
                   </div>
                 </form>

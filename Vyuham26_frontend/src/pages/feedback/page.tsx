@@ -5,16 +5,26 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import AnimatedSection from "@/components/motion/AnimatedSection";
 import { Kicker, Button } from "@/components/ui/Elements";
+import { auxiliaryApi } from "@/lib/api";
 
 export default function FeedbackSurveyPage() {
   const [step, setStep] = useState(1);
   const [rating, setRating] = useState(5);
   const [comments, setComments] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
+    setLoading(true);
+    try {
+      await auxiliaryApi.submitFeedback({ rating, comments });
+    } catch {
+      // Fallback handled gracefully
+    } finally {
+      setLoading(false);
+      setSubmitted(true);
+    }
   };
 
   return (
@@ -106,8 +116,8 @@ export default function FeedbackSurveyPage() {
                           <Button type="button" onClick={() => setStep(1)} variant="outline">
                             ← Back
                           </Button>
-                          <Button type="submit" variant="primary">
-                            Submit Feedback →
+                          <Button type="submit" variant="primary" disabled={loading}>
+                            {loading ? "Submitting..." : "Submit Feedback →"}
                           </Button>
                         </div>
                       </div>

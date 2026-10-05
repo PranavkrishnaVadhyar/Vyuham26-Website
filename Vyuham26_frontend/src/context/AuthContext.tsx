@@ -19,7 +19,7 @@ export interface AuthUser {
   phone?: string;
   degree?: string;
   year?: string;
-  role?: "user" | "admin" | "volunteer";
+  role: "user" | "volunteer" | "event_head" | "admin";
   registeredEvents: string[];
   vyuham_id?: string;
   vyuhamId?: string;
@@ -43,7 +43,7 @@ interface AuthContextType {
     phone?: string;
     degree?: string;
     year?: string;
-    role?: "user" | "admin" | "volunteer";
+    role?: "user" | "volunteer" | "event_head" | "admin";
   }) => Promise<AuthResult>;
   updateUser: (patch: Partial<AuthUser>) => Promise<void>;
   logout: () => Promise<void>;
@@ -73,9 +73,22 @@ function saveUserToStorage(user: AuthUser | null) {
   }
 }
 
+/** Normalise the backend role string to frontend union type */
+function normalizeRole(raw: string | undefined | null): AuthUser["role"] {
+  if (!raw) return "user";
+  const lower = raw.toLowerCase();
+  if (lower === "participant") return "user";
+  if (lower === "event_head") return "event_head";
+  if (lower === "volunteer") return "volunteer";
+  if (lower === "admin") return "admin";
+  return "user";
+}
+
 async function fetchBackendProfile(): Promise<Partial<AuthUser> | null> {
   try {
     const profile = await authApi.getMe();
+
+    // Fetch registrations separately – failure is non-fatal
     let registeredSlugs: string[] = [];
     try {
       const myRegs = await registrationsApi.listMine();
@@ -83,17 +96,18 @@ async function fetchBackendProfile(): Promise<Partial<AuthUser> | null> {
         registeredSlugs = myRegs.map((r: any) => r.event_slug || r.event_id);
       }
     } catch {
-      // ignore
+      // ignore – registrations endpoint may not exist yet
     }
+
     return {
       id: profile.id,
       name: profile.name || "OPERATIVE",
       email: profile.email,
-      college: profile.college,
-      phone: profile.phone,
-      degree: profile.degree,
-      year: profile.year,
-      role: profile.role || "user",
+      college: profile.college || "",
+      phone: profile.phone || "",
+      degree: profile.degree || "",
+      year: profile.year || "",
+      role: normalizeRole(profile.role),
       vyuham_id: profile.vyuham_id || profile.vyuhamId,
       vyuhamId: profile.vyuhamId || profile.vyuham_id,
       registeredEvents: registeredSlugs,
@@ -138,7 +152,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               phone: backendProfile.phone || prev?.phone || "",
               degree: backendProfile.degree || prev?.degree || "B.Tech Computer Science",
               year: backendProfile.year || prev?.year || "2024–2028",
-              role: (backendProfile.role as any) || prev?.role || "user",
+              role: backendProfile.role || prev?.role || "user",
               registeredEvents: backendProfile.registeredEvents?.length
                 ? backendProfile.registeredEvents
                 : prev?.registeredEvents || [],
@@ -168,7 +182,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               phone: backendProfile.phone || prev?.phone || "",
               degree: backendProfile.degree || prev?.degree || "B.Tech Computer Science",
               year: backendProfile.year || prev?.year || "2024–2028",
-              role: (backendProfile.role as any) || prev?.role || "user",
+              role: backendProfile.role || prev?.role || "user",
               registeredEvents: backendProfile.registeredEvents?.length
                 ? backendProfile.registeredEvents
                 : prev?.registeredEvents || [],
@@ -254,7 +268,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       let existingPhone: string | undefined = undefined;
       let existingDegree: string | undefined = "B.Tech Computer Science";
       let existingYear: string | undefined = "2024–2028";
-      let existingRole: "user" | "admin" | "volunteer" = "user";
+      let existingRole: AuthUser["role"] = "user";
 
       if (existingRaw) {
         try {
@@ -329,7 +343,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       phone?: string;
       degree?: string;
       year?: string;
-      role?: "user" | "admin" | "volunteer";
+      role?: "user" | "volunteer" | "event_head" | "admin";
     }): Promise<AuthResult> => {
       const cleanEmail = details.email.trim().toLowerCase();
 

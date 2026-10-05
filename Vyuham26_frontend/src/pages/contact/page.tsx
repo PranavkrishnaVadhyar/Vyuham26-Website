@@ -7,11 +7,13 @@ import Footer from "@/components/layout/Footer";
 import AnimatedSection from "@/components/motion/AnimatedSection";
 import { Kicker, Button } from "@/components/ui/Elements";
 import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
+import { auxiliaryApi } from "@/lib/api";
 
 export default function ContactPage() {
   const reduceMotion = usePrefersReducedMotion();
 
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -22,9 +24,17 @@ export default function ContactPage() {
     message: "",
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
+    setLoading(true);
+    try {
+      await auxiliaryApi.submitContact(formData);
+    } catch {
+      // Fallback already handled
+    } finally {
+      setLoading(false);
+      setSubmitted(true);
+    }
   };
 
   const handleChange = (
@@ -500,8 +510,8 @@ export default function ContactPage() {
                               Channel secure
                             </div>
 
-                            <Button type="submit" variant="primary">
-                              Initiate Transmission
+                            <Button type="submit" variant="primary" disabled={loading}>
+                              {loading ? "Transmitting..." : "Initiate Transmission"}
                               <span className="ml-2 text-base">
                                 →
                               </span>

@@ -23,6 +23,7 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { useAuth } from "@/context/AuthContext";
 import { events as catalogEvents } from "@/data/events";
+import { registrationsApi, eventsApi, type EventRecord, type RegistrationRecord } from "@/lib/api";
 
 const defaultEvents = [
   {
@@ -207,6 +208,23 @@ export default function DashboardPage() {
   const [cursor, setCursor] = useState({ x: 50, y: 50 });
   const [scan, setScan] = useState(0);
 
+  const [myRegistrations, setMyRegistrations] = useState<RegistrationRecord[]>([]);
+  const [allEvents, setAllEvents] = useState<EventRecord[]>([]);
+  const [loadingRegs, setLoadingRegs] = useState(true);
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    Promise.all([
+      registrationsApi.listMine().catch(() => [] as RegistrationRecord[]),
+      eventsApi.list().catch(() => [] as EventRecord[]),
+    ])
+      .then(([regs, evList]) => {
+        if (Array.isArray(regs)) setMyRegistrations(regs);
+        if (Array.isArray(evList)) setAllEvents(evList);
+      })
+      .finally(() => setLoadingRegs(false));
+  }, [isAuthenticated]);
+
   const initials = useMemo(() => {
     if (!user?.name) return "OP";
     return (
@@ -220,10 +238,32 @@ export default function DashboardPage() {
   }, [user]);
 
   const registeredEventsList = useMemo(() => {
+    // 1. If we have live registrations from the backend API
+    if (myRegistrations.length > 0) {
+      return myRegistrations.map((reg, index) => {
+        const matched =
+          allEvents.find((e) => e.id === reg.event_id) ||
+          catalogEvents.find((e) => (e as any).id === reg.event_id || e.slug === reg.event_id) ||
+          null;
+        return {
+          stream: (matched?.stream || "TECH").toUpperCase(),
+          title: matched ? (matched.title || (matched as any).name) : `OPERATION // ${reg.event_id.slice(0, 8)}`,
+          venue: (matched?.venue || "MAIN CAMPUS ARENA").toUpperCase(),
+          time: matched ? `DAY 0${matched.day || 1} // ${matched.time || "TBA"}` : "30 OCT // 10:00 AM",
+          href: matched ? `/events/${matched.slug}` : `/events`,
+          action: "VIEW DOSSIER",
+          code: reg.ticket_code || `EVT-${String(index + 1).padStart(3, "0")}`,
+          status: reg.status,
+        };
+      });
+    }
+
+    // 2. Fallback to AuthContext registered events
     if (user && user.registeredEvents && user.registeredEvents.length > 0) {
       return user.registeredEvents.map((slugOrId, index) => {
         const cleanSlug = slugOrId.replace(/^ev-/, "").toLowerCase();
         const matched =
+          allEvents.find((e) => e.slug.toLowerCase() === cleanSlug || e.id === slugOrId) ||
           catalogEvents.find(
             (e) =>
               e.slug.toLowerCase() === cleanSlug ||
@@ -231,27 +271,29 @@ export default function DashboardPage() {
           ) || null;
         return {
           stream: (matched?.stream || "TECH").toUpperCase(),
-          title: matched?.title || slugOrId.replace(/^ev-/, "").replace(/-/g, " ").toUpperCase(),
+          title: matched ? (matched.title || (matched as any).name) : slugOrId.replace(/^ev-/, "").replace(/-/g, " ").toUpperCase(),
           venue: (matched?.venue || "MAIN CAMPUS ARENA").toUpperCase(),
-          time: matched ? `DAY 0${matched.day} // ${matched.time}` : "30 OCT // 10:00 AM",
+          time: matched ? `DAY 0${matched.day || 1} // ${matched.time || "10:00 AM"}` : "30 OCT // 10:00 AM",
           href: matched ? `/events/${matched.slug}` : `/events`,
           action: "VIEW DOSSIER",
           code: `EVT-${String(index + 1).padStart(3, "0")}`,
+          status: "confirmed",
         };
       });
     }
+
     return defaultEvents;
-  }, [user]);
+  }, [myRegistrations, allEvents, user]);
 
   const statLabels = useMemo(() => {
-    const eventCount = user ? user.registeredEvents.length : 3;
+    const eventCount = myRegistrations.length > 0 ? myRegistrations.length : (user ? user.registeredEvents.length : 3);
     return [
       { label: "EVENTS", value: eventCount, suffix: " REGISTERED", icon: Radio },
       { label: "SQUADS", value: user?.role === "admin" ? 4 : 2, suffix: " ACTIVE", icon: Users },
       { label: "PASS", value: 100, suffix: "% VERIFIED", icon: ShieldCheck },
       { label: "FOOD", value: 450, prefix: "₹", suffix: " CREDITS", icon: Zap },
     ];
-  }, [user]);
+  }, [myRegistrations, user]);
 
   useEffect(() => {
     if (reduceMotion) return;

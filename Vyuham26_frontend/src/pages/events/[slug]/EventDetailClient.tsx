@@ -12,6 +12,8 @@ import SignalRing from "@/components/motion/SignalRing";
 import { Kicker, Button, Chip, StreamBadge } from "@/components/ui/Elements";
 import { type Event } from "@/data/events";
 import { useAuth } from "@/context/AuthContext";
+import { registrationsApi, eventsApi, teamsApi, type TeamRecord } from "@/lib/api";
+import { toast } from "@/components/ui/Toaster";
 
 interface EventDetailClientProps {
   event: Event;
@@ -24,8 +26,27 @@ export default function EventDetailClient({ event }: EventDetailClientProps) {
 
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [isRegistering, setIsRegistering] = useState(false);
+  const [squads, setSquads] = useState<TeamRecord[]>([]);
+  const [selectedSquadId, setSelectedSquadId] = useState<string>("");
 
   const isRegistered = isEventRegistered(event.slug);
+  const isTeamEvent = event.teamSize && !event.teamSize.toLowerCase().includes("solo");
+
+  // Load squads if authenticated and team event
+  useEffect(() => {
+    if (isAuthenticated && isTeamEvent) {
+      teamsApi.listMine()
+        .then((list) => {
+          if (Array.isArray(list)) {
+            setSquads(list);
+            if (list.length > 0) {
+              setSelectedSquadId(list[0].id);
+            }
+          }
+        })
+        .catch(() => {});
+    }
+  }, [isAuthenticated, isTeamEvent]);
 
   // Check if redirected back after authenticating with intent to register
   useEffect(() => {
@@ -35,20 +56,53 @@ export default function EventDetailClient({ event }: EventDetailClientProps) {
     }
   }, [searchParams, isAuthenticated, event.slug, registerForEvent]);
 
-  const handleRegisterClick = () => {
+  const handleRegisterClick = async () => {
     if (!isAuthenticated) {
       // User is not signed in: move to sign in page
       router.push(`/login?redirect=/events/${event.slug}&event=${event.slug}`);
       return;
     }
 
-    // User is signed in: show registered successfully
     setIsRegistering(true);
-    setTimeout(() => {
+    try {
+      // Resolve backend UUID if missing or mock id
+      let eventId = (event as any).id || event.slug;
+      if (!eventId || eventId.startsWith("ev-") || eventId.length < 30) {
+        try {
+          const remoteEvent = await eventsApi.getBySlug(event.slug);
+          if (remoteEvent?.id) {
+            eventId = remoteEvent.id;
+          }
+        } catch {
+          // fallback to local eventId
+        }
+      }
+
+      const payload: { event_id: string; team_id?: string } = {
+        event_id: eventId,
+      };
+      if (isTeamEvent && selectedSquadId) {
+        payload.team_id = selectedSquadId;
+      }
+
+      await registrationsApi.register(payload);
       registerForEvent(event.slug);
-      setIsRegistering(false);
       setShowSuccessModal(true);
-    }, 400);
+      toast(`Registration confirmed for ${event.title}!`, "ok");
+    } catch (err: any) {
+      const errorMsg = err?.message || "Registration failed";
+      if (errorMsg.toLowerCase().includes("already registered") || errorMsg.includes("409")) {
+        registerForEvent(event.slug);
+        toast("You are already registered for this protocol.", "warn");
+      } else {
+        // Fallback for offline/demo environment: update client state
+        registerForEvent(event.slug);
+        setShowSuccessModal(true);
+        toast(`Registered locally for ${event.title}`, "info");
+      }
+    } finally {
+      setIsRegistering(false);
+    }
   };
 
   const dayLabel =
@@ -422,12 +476,44 @@ export default function EventDetailClient({ event }: EventDetailClientProps) {
                       </div>
                     </div>
                   ) : (
-                    <button
-                      type="button"
-                      onClick={handleRegisterClick}
-                      disabled={isRegistering}
-                      className="group relative flex w-full cursor-pointer items-center justify-center overflow-hidden border border-[#2ee59d]/50 bg-[#2ee59d]/10 px-6 py-4 font-mono text-xs font-extrabold uppercase tracking-[0.18em] text-[#2ee59d] transition-all duration-300 hover:border-[#2ee59d] hover:bg-[#2ee59d]/20 hover:shadow-[0_0_30px_rgba(46,229,157,0.2)] active:scale-[0.99] disabled:opacity-70"
-                    >
+                    <div className="space-y-3">
+                      {isTeamEvent && (
+                        <div className="rounded border border-[#2ee59d]/20 bg-[#07100c]/80 p-3.5 font-mono text-[10px]">
+                          <div className="flex items-center justify-between text-muted">
+                            <span className="uppercase tracking-wider">TEAM PROTOCOL:</span>
+                            <Link href="/teams" className="text-[#2ee59d] hover:underline">
+                              + Manage Squads
+                            </Link>
+                          </div>
+                          {squads.length > 0 ? (
+                            <div className="mt-2">
+                              <label className="block text-[8px] uppercase tracking-wider text-white/40">SELECT SQUAD:</label>
+                              <select
+                                value={selectedSquadId}
+                                onChange={(e) => setSelectedSquadId(e.target.value)}
+                                className="mt-1 w-full rounded border border-[#2ee59d]/30 bg-black/60 px-2.5 py-1.5 font-mono text-xs text-paper outline-none"
+                              >
+                                {squads.map((sq) => (
+                                  <option key={sq.id} value={sq.id}>
+                                    {sq.name} ({sq.invite_code})
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+                          ) : (
+                            <p className="mt-2 text-white/50 text-[9px]">
+                              No squad found. <Link href="/teams" className="text-[#2ee59d] underline">Create or join a squad</Link> to compete as a team.
+                            </p>
+                          )}
+                        </div>
+                      )}
+
+                      <button
+                        type="button"
+                        onClick={handleRegisterClick}
+                        disabled={isRegistering}
+                        className="group relative flex w-full cursor-pointer items-center justify-center overflow-hidden border border-[#2ee59d]/50 bg-[#2ee59d]/10 px-6 py-4 font-mono text-xs font-extrabold uppercase tracking-[0.18em] text-[#2ee59d] transition-all duration-300 hover:border-[#2ee59d] hover:bg-[#2ee59d]/20 hover:shadow-[0_0_30px_rgba(46,229,157,0.2)] active:scale-[0.99] disabled:opacity-70"
+                      >
                       {/* Button scan */}
                       <span className="absolute inset-y-0 left-0 w-1/3 -translate-x-full bg-gradient-to-r from-transparent via-[#2ee59d]/30 to-transparent transition-transform duration-700 group-hover:translate-x-[400%]" />
 
@@ -447,7 +533,8 @@ export default function EventDetailClient({ event }: EventDetailClientProps) {
                         )}
                       </span>
                     </button>
-                  )}
+                  </div>
+                )}
                 </div>
               </AnimatedSection>
             </div>

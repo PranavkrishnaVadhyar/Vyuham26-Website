@@ -1,21 +1,53 @@
-"use client";
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import AnimatedSection from "@/components/motion/AnimatedSection";
 import { Kicker, Button } from "@/components/ui/Elements";
+import { paymentsApi, type PaymentOrder } from "@/lib/api";
+import { toast } from "@/components/ui/Toaster";
 
 export default function PaymentGatewayPage() {
+  const searchParams = useSearchParams();
   const [method, setMethod] = useState<"upi" | "card" | "netbanking">("upi");
   const [status, setStatus] = useState<"idle" | "pending" | "success">("idle");
+  const [order, setOrder] = useState<PaymentOrder | null>(null);
+  const [txnRef, setTxnRef] = useState<string>("TXN-VYU-984021");
 
-  const handlePayment = (e: React.FormEvent) => {
+  useEffect(() => {
+    try {
+      const activeRaw = sessionStorage.getItem("vyuham_active_payment");
+      if (activeRaw) {
+        const parsed = JSON.parse(activeRaw);
+        setOrder(parsed);
+        if (parsed.transaction_ref) {
+          setTxnRef(parsed.transaction_ref);
+        }
+      }
+    } catch {}
+
+    const refFromUrl = searchParams.get("ref");
+    if (refFromUrl) {
+      setTxnRef(refFromUrl);
+    }
+  }, [searchParams]);
+
+  const totalAmount = order?.total_amount || 1230;
+
+  const handlePayment = async (e: React.FormEvent) => {
     e.preventDefault();
     setStatus("pending");
-    setTimeout(() => {
+
+    try {
+      const refToVerify = txnRef || `TXN-VYU-${Math.floor(100000 + Math.random() * 900000)}`;
+      await paymentsApi.verifyPayment(refToVerify);
+      setTxnRef(refToVerify);
       setStatus("success");
-    }, 2000);
+      toast("Payment verified! Registrations confirmed.", "ok");
+    } catch (err: any) {
+      setStatus("idle");
+      toast(err?.message || "Verification failed. Please retry.", "error");
+    }
   };
 
   return (
@@ -47,13 +79,13 @@ export default function PaymentGatewayPage() {
                       PAYMENT VERIFIED
                     </h2>
                     <p className="mt-2 text-xs font-mono text-muted">
-                      TRANSACTION REF: <strong className="text-green">TXN-VYU-984021</strong>
+                      TRANSACTION REF: <strong className="text-green">{txnRef}</strong>
                     </p>
                     <div className="mt-6 flex justify-center gap-4">
-                      <Button href="/receipt" variant="outline">
+                      <Button href={`/receipt?ref=${txnRef}`} variant="outline">
                         View Receipt
                       </Button>
-                      <Button href="/confirmation" variant="primary">
+                      <Button href={`/confirmation?ref=${txnRef}`} variant="primary">
                         Mission Confirmation →
                       </Button>
                     </div>
@@ -62,7 +94,7 @@ export default function PaymentGatewayPage() {
                   <form onSubmit={handlePayment} className="space-y-5">
                     <div className="rounded border border-line bg-ink-mid/40 p-4 flex justify-between items-center font-mono text-sm">
                       <span className="text-muted">TOTAL DUE:</span>
-                      <span className="font-bold text-green text-lg">₹1,230</span>
+                      <span className="font-bold text-green text-lg">₹{totalAmount}</span>
                     </div>
 
                     <div>
@@ -138,7 +170,7 @@ export default function PaymentGatewayPage() {
                       className="w-full justify-center"
                       disabled={status === "pending"}
                     >
-                      {status === "pending" ? "VERIFYING..." : "PAY & VERIFY (₹1,230)"}
+                      {status === "pending" ? "VERIFYING..." : `PAY & VERIFY (₹${totalAmount})`}
                     </Button>
                   </form>
                 )}

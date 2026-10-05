@@ -1,6 +1,4 @@
-"use client";
-
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useMotionValue, useSpring, useTransform } from "framer-motion";
 import { motion } from "framer-motion";
 
@@ -12,20 +10,33 @@ import { Kicker, Button } from "@/components/ui/Elements";
 import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
+import { registrationsApi, type RegistrationRecord } from "@/lib/api";
 
 export default function TicketPage() {
   const { user, isAuthenticated } = useAuth();
   const reduceMotion = usePrefersReducedMotion();
   const [downloaded, setDownloaded] = useState(false);
+  const [latestRegistration, setLatestRegistration] = useState<RegistrationRecord | null>(null);
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    registrationsApi.listMine()
+      .then((regs) => {
+        if (Array.isArray(regs) && regs.length > 0) {
+          setLatestRegistration(regs[0]);
+        }
+      })
+      .catch(() => {});
+  }, [isAuthenticated]);
 
   const operativeName = user ? user.name : "Aromal S S";
-  const passId = user
+  const passId = latestRegistration?.ticket_code || (user?.vyuham_id || user?.vyuhamId) || (user
     ? user.id.includes("USR")
       ? user.id.replace("USR", "QR")
-      : `VYU26-QR-${user.id.toUpperCase()}`
-    : "VYU26-QR-904812";
+      : `VYU26-QR-${user.id.slice(0, 8).toUpperCase()}`
+    : "VYU26-QR-904812");
   const venueOrCollege = user?.college ? `${user.college.toUpperCase()} / TECHNOCITY` : "DUK CAMPUS / TECHNOCITY";
-  const accessLevel = user?.role === "admin" ? "COMMAND / ALL-ACCESS" : user?.role === "volunteer" ? "STAFF / FIELD-ACCESS" : "ALL-ACCESS";
+  const accessLevel = user?.role === "admin" ? "COMMAND / ALL-ACCESS" : user?.role === "volunteer" ? "STAFF / FIELD-ACCESS" : user?.role === "event_head" ? "HEAD / STAGE-ACCESS" : "ALL-ACCESS";
 
   const handleDownload = () => {
     setDownloaded(true);

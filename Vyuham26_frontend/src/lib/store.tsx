@@ -75,7 +75,7 @@ interface Ctx {
   checkins: CheckInRecord[];
   addCheckin: (record: CheckInRecord) => void;
   clearCheckins: () => void;
-  updateUserRole: (id: string, role: "user" | "admin" | "volunteer", station?: string) => void;
+  updateUserRole: (id: string, role: "user" | "admin" | "volunteer" | "event_head", station?: string) => void;
   addVolunteer: (v: {
     name: string;
     email: string;
@@ -286,15 +286,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
     login: (email, password) => {
       const cleanEmail = email.trim().toLowerCase();
-      auth.login(cleanEmail, password).catch(() => {});
 
       const found = users.find(
         (u) => u.email.toLowerCase() === cleanEmail && u.password === password,
       );
       if (!found) {
-        if (cleanEmail === "admin@vyuham26.in" || cleanEmail === "volunteer@vyuham26.in") {
-          return { ok: true, message: "Welcome back, Operative." };
-        }
+        // Delegate entirely to AuthContext (Supabase + backend)
+        auth.login(cleanEmail, password).catch(() => {});
         return { ok: true, message: "Authentication initiated." };
       }
       setUserId(found.id);

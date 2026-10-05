@@ -1,11 +1,11 @@
-"use client";
-
 import { useState, useEffect, useRef, useCallback } from "react";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import AnimatedSection from "@/components/motion/AnimatedSection";
 import { Kicker } from "@/components/ui/Elements";
 import { useApp } from "@/lib/store";
+import { useAuth } from "@/context/AuthContext";
+import { checkinApi, type CheckInHistoryItem } from "@/lib/api";
 import { toast } from "@/components/ui/Toaster";
 import { cyberAudio } from "@/lib/cyberAudio";
 import type { CheckInRecord } from "@/data/types";
@@ -75,6 +75,7 @@ function playScanSound(type: "approved" | "duplicate" | "invalid") {
 
 export default function VolunteerScannerPage() {
   const { user, users, checkins, addCheckin, clearCheckins, registrations, content, login } = useApp();
+  const auth = useAuth();
 
   // Authentication & Session
   const [station, setStation] = useState<string>(() => user?.station || STATIONS[0]);
@@ -106,7 +107,24 @@ export default function VolunteerScannerPage() {
   const [filterQuery, setFilterQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState<"all" | "approved" | "duplicate" | "invalid">("all");
 
-  const isVolunteerOrAdmin = user && (user.role === "volunteer" || user.role === "admin");
+  const effectiveRole = auth.user?.role || user?.role;
+  const isVolunteerOrAdmin =
+    effectiveRole === "volunteer" ||
+    effectiveRole === "event_head" ||
+    effectiveRole === "admin";
+
+  const [liveHistory, setLiveHistory] = useState<CheckInHistoryItem[]>([]);
+
+  const loadHistory = useCallback(async () => {
+    try {
+      const hist = await checkinApi.getHistory(station);
+      if (Array.isArray(hist)) setLiveHistory(hist);
+    } catch {}
+  }, [station]);
+
+  useEffect(() => {
+    loadHistory();
+  }, [loadHistory]);
 
   /* ------------------------------------------------------------------ */
   /*  CAMERA CONTROLS                                                   */
@@ -127,11 +145,10 @@ export default function VolunteerScannerPage() {
   }, []);
 
   const processScannedValue = useCallback(
-    (rawPayload: string) => {
+    async (rawPayload: string) => {
       const clean = rawPayload.trim();
       if (!clean) return;
 
-      // Format time
       const timeStr = new Date().toLocaleTimeString("en-IN", {
         hour: "2-digit",
         minute: "2-digit",
@@ -139,118 +156,59 @@ export default function VolunteerScannerPage() {
         hour12: true,
       });
 
-      // Check for duplicate in existing checkins
-      const existing = checkins.find(
-        (c) => c.ticketCode.toLowerCase() === clean.toLowerCase() && c.status === "approved"
-      );
-
-      if (existing) {
-        playScanSound("duplicate");
-        setActiveResult({
-          status: "duplicate",
-          ticketCode: clean,
-          attendeeName: existing.attendeeName,
-          college: existing.college,
-          eventName: existing.eventName,
-          scannedAt: timeStr,
-          originalCheckin: existing,
-        });
-
-        // Record duplicate attempt
-        addCheckin({
-          id: `chk-${Date.now()}`,
-          ticketCode: clean,
-          attendeeName: existing.attendeeName,
-          college: existing.college,
-          eventName: existing.eventName,
+      try {
+        const res = await checkinApi.scanPass({
+          ticket_code: clean,
           station,
-          scannedBy: user?.name || "VOLUNTEER",
-          scannedAt: timeStr,
-          status: "duplicate",
-          notes: `Duplicate attempt at ${station}`,
+          volunteer_name: auth.user?.name || user?.name || "DIVYA MENON",
         });
-        toast("⚠️ [DUPLICATE PASS] Attendee already checked in.", "warn");
-        return;
-      }
 
-      // Check if code matches a known registration or attendee
-      // Supported formats: VYU26-TKT-*, VYU26-REG-*, user emails, or registration IDs
-      const reg = registrations.find(
-        (r) =>
-          r.id.toLowerCase() === clean.toLowerCase() ||
-          r.userId.toLowerCase() === clean.toLowerCase() ||
-          clean.toLowerCase().includes(r.id.toLowerCase())
-      );
+        playScanSound(res.status);
 
-      const matchedUser = users.find(
-        (u) =>
-          u.email.toLowerCase() === clean.toLowerCase() ||
-          u.id.toLowerCase() === clean.toLowerCase() ||
-          (reg && u.id === reg.userId)
-      );
-
-      if (reg || matchedUser || clean.startsWith("VYU26-TKT-") || clean.startsWith("VYU26-QR-")) {
-        const attendeeName = reg?.userName || matchedUser?.name || "AUTHENTICATED OPERATIVE";
-        const college = matchedUser?.college || "Registered Participant";
-        const eventName = reg?.eventName || "VYUHAM'26 ALL-ACCESS PASS";
-
-        playScanSound("approved");
         const newRecord: CheckInRecord = {
           id: `chk-${Date.now()}`,
-          ticketCode: clean,
-          attendeeName,
-          college,
-          eventName,
+          ticketCode: res.ticket_code,
+          attendeeName: res.attendee_name || "UNKNOWN OPERATIVE",
+          college: res.college || "Digital University Kerala",
+          eventName: res.event_name || "VYUHAM'26 PASS",
           station,
-          scannedBy: user?.name || "VOLUNTEER",
+          scannedBy: auth.user?.name || user?.name || "VOLUNTEER",
           scannedAt: timeStr,
-          status: "approved",
+          status: res.status,
+          notes: res.notes,
         };
-
         addCheckin(newRecord);
+
         setActiveResult({
-          status: "approved",
-          ticketCode: clean,
-          attendeeName,
-          college,
-          eventName,
+          status: res.status,
+          ticketCode: res.ticket_code,
+          attendeeName: res.attendee_name || "UNKNOWN OPERATIVE",
+          college: res.college || "Digital University Kerala",
+          eventName: res.event_name || "VYUHAM'26 PASS",
           scannedAt: timeStr,
         });
 
-        toast(`✓ [APPROVED] ${attendeeName} admitted at ${station}`, "info");
+        if (res.status === "approved") {
+          toast(`✓ [APPROVED] ${res.attendee_name} admitted at ${station}`, "info");
+        } else if (res.status === "duplicate") {
+          toast(`⚠️ [DUPLICATE PASS] Attendee already checked in at ${station}.`, "warn");
+        } else {
+          toast("⛔ [INVALID CODE] Pass not recognized in registry.", "warn");
+        }
+
+        loadHistory();
 
         if (rapidMode) {
           setTimeout(() => {
             setActiveResult((prev) => (prev?.ticketCode === clean ? null : prev));
           }, 2400);
         }
-      } else {
-        // Unrecognized / Invalid
+      } catch (err: any) {
         playScanSound("invalid");
-        const newRecord: CheckInRecord = {
-          id: `chk-${Date.now()}`,
-          ticketCode: clean,
-          attendeeName: "UNKNOWN / UNREGISTERED",
-          college: "N/A",
-          eventName: "INVALID CREDENTIALS",
-          station,
-          scannedBy: user?.name || "VOLUNTEER",
-          scannedAt: timeStr,
-          status: "invalid",
-        };
-        addCheckin(newRecord);
-        setActiveResult({
-          status: "invalid",
-          ticketCode: clean,
-          attendeeName: "UNKNOWN ATTENDEE",
-          college: "UNVERIFIED ENTITY",
-          eventName: "NO REGISTRATION RECORD FOUND",
-          scannedAt: timeStr,
-        });
-        toast("⛔ [INVALID CODE] Pass not recognized in registry.", "warn");
+        toast(`Scanner error: ${err?.message || "Network error"}`, "error");
       }
     },
-    [checkins, registrations, users, station, user, addCheckin, rapidMode]
+    [station, user, auth.user, addCheckin, loadHistory, rapidMode]
   );
 
   const startCamera = useCallback(async () => {

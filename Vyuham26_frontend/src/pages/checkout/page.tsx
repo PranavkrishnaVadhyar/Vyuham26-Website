@@ -1,21 +1,51 @@
-"use client";
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import AnimatedSection from "@/components/motion/AnimatedSection";
 import { Kicker, Button } from "@/components/ui/Elements";
+import { useAuth } from "@/context/AuthContext";
+import { paymentsApi, registrationsApi, eventsApi, type EventRecord } from "@/lib/api";
+import { toast } from "@/components/ui/Toaster";
 
 export default function CheckoutPage() {
+  const router = useRouter();
+  const { user, isAuthenticated } = useAuth();
   const reduceMotion = usePrefersReducedMotion();
+
   const [items, setItems] = useState([
     { id: "1", title: "National Hackathon", fee: 500, stream: "TECH", squad: "CyberVipers" },
     { id: "2", title: "CTF Warzone", fee: 300, stream: "TECH", squad: "CyberVipers" },
     { id: "3", title: "Battle of the Bands", fee: 400, stream: "CULTURE", squad: "Solo" },
   ]);
+  const [isCreatingOrder, setIsCreatingOrder] = useState(false);
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    Promise.all([
+      registrationsApi.listMine().catch(() => []),
+      eventsApi.list().catch(() => []),
+    ]).then(([regs, eventsList]) => {
+      if (Array.isArray(regs) && regs.length > 0 && Array.isArray(eventsList)) {
+        const mapped = regs.map((r, idx) => {
+          const ev = eventsList.find((e) => e.id === r.event_id);
+          const feeStr = ev?.fee ? String(ev.fee).replace(/[^0-9]/g, "") : "400";
+          const feeVal = parseInt(feeStr, 10) || 400;
+          return {
+            id: r.id || String(idx + 1),
+            title: ev?.name || `Operation ${r.event_id.slice(0, 8)}`,
+            fee: feeVal,
+            stream: (ev?.stream || "TECH").toUpperCase(),
+            squad: r.team_id ? "Squad Linked" : "Solo",
+          };
+        });
+        setItems(mapped);
+      }
+    });
+  }, [isAuthenticated]);
 
   const removeItem = (id: string) => {
     setItems(items.filter((item) => item.id !== id));
@@ -24,6 +54,25 @@ export default function CheckoutPage() {
   const subtotal = items.reduce((acc, item) => acc + item.fee, 0);
   const platformFee = items.length > 0 ? 30 : 0;
   const grandTotal = subtotal + platformFee;
+
+  const handleProceedToPayment = async () => {
+    if (items.length === 0) return;
+    setIsCreatingOrder(true);
+    try {
+      const order = await paymentsApi.createOrder({
+        registration_ids: items.map((i) => i.id),
+        payment_method: "upi",
+        subtotal,
+        platform_fee: platformFee,
+      });
+      sessionStorage.setItem("vyuham_active_payment", JSON.stringify(order));
+      router.push(`/payment?order_id=${order.payment_id}&ref=${order.transaction_ref}`);
+    } catch (err: any) {
+      toast(`Checkout Error: ${err?.message || "Failed to initialize order"}`, "error");
+    } finally {
+      setIsCreatingOrder(false);
+    }
+  };
 
   return (
     <>
@@ -131,14 +180,14 @@ export default function CheckoutPage() {
                   </div>
 
                   <div className="mt-8">
-                    <Button
-                      href="/payment"
-                      variant="primary"
-                      className="w-full justify-center"
-                      disabled={items.length === 0}
+                    <button
+                      type="button"
+                      onClick={handleProceedToPayment}
+                      disabled={items.length === 0 || isCreatingOrder}
+                      className="w-full rounded border border-green/50 bg-green/20 py-3.5 px-4 font-mono text-xs font-bold uppercase tracking-widest text-green transition-all hover:bg-green hover:text-black disabled:opacity-50 cursor-pointer"
                     >
-                      Proceed to Verification Chamber →
-                    </Button>
+                      {isCreatingOrder ? "INITIALIZING SECURE GATEWAY..." : "Proceed to Verification Chamber →"}
+                    </button>
                   </div>
                 </div>
               </AnimatedSection>
