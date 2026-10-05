@@ -1,6 +1,7 @@
 /* ─── Event data model ─── */
 
 export interface Event {
+  id?: string;
   slug: string;
   title: string;
   stream: "tech" | "culture" | "gaming" | "management" | "technology" | "impact";
@@ -15,6 +16,7 @@ export interface Event {
   teamSize: string;
   status: "upcoming" | "live" | "completed";
 }
+
 
 export const events: Event[] = [
   {

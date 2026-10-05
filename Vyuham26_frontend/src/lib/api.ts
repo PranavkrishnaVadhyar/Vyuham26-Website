@@ -118,8 +118,9 @@ export interface EventRecord {
   registration_type: "solo" | "team";
   team_size_min?: number | null;
   team_size_max?: number | null;
-  prize_amount?: number | null;
+  prize_amount?: number | string | null;
   venue?: string | null;
+
   fee?: string | null;
   day?: number | null;
   time?: string | null;

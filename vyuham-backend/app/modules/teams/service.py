@@ -90,16 +90,17 @@ async def get_team_with_members(db: AsyncSession, team_id: UUID) -> dict:
     if team is None:
         raise ResourceNotFoundError("Team")
     result = await db.execute(
-        select(TeamMember.user_id, Profile.email, TeamMember.joined_at)
+        select(TeamMember.user_id, Profile.email, Profile.name, TeamMember.joined_at)
         .join(Profile, Profile.id == TeamMember.user_id)
         .where(TeamMember.team_id == team_id)
         .order_by(TeamMember.joined_at)
     )
     members = [
-        {"user_id": row.user_id, "email": row.email, "joined_at": row.joined_at}
+        {"user_id": row.user_id, "email": row.email, "name": row.name, "joined_at": row.joined_at}
         for row in result.all()
     ]
     return {**_team_data(team, len(members)), "members": members}
+
 
 
 async def is_team_member(db: AsyncSession, team_id: UUID, user_id: UUID) -> bool:

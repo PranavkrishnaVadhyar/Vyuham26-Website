@@ -102,15 +102,13 @@ export default function EventDetailClient({ event }: EventDetailClientProps) {
         registerForEvent(event.slug);
         toast("You are already registered for this protocol.", "warn");
       } else {
-        // Fallback for offline/demo environment: update client state
-        registerForEvent(event.slug);
-        setShowSuccessModal(true);
-        toast(`Registered locally for ${event.title}`, "info");
+        toast(errorMsg, "warn");
       }
     } finally {
       setIsRegistering(false);
     }
   };
+
 
   const dayLabel =
     event.day === 1

@@ -11,6 +11,7 @@ import React, {
 import { supabase } from "@/lib/supabase";
 import { authApi, registrationsApi } from "@/lib/api";
 import { SITE_CONFIG } from "@/config/site";
+import { events as localEvents } from "@/data/events";
 
 export interface AuthUser {
   id: string;
@@ -94,11 +95,23 @@ async function fetchBackendProfile(): Promise<Partial<AuthUser> | null> {
     try {
       const myRegs = await registrationsApi.listMine();
       if (Array.isArray(myRegs)) {
-        registeredSlugs = myRegs.map((r: any) => r.event_slug || r.event_id);
+        registeredSlugs = myRegs.flatMap((r: any) => {
+          const items: string[] = [];
+          if (r.event_slug) items.push(r.event_slug);
+          if (r.event_id) {
+            items.push(r.event_id);
+            const matched = localEvents.find((e) => e.id === r.event_id || e.slug === r.event_slug);
+            if (matched && !items.includes(matched.slug)) {
+              items.push(matched.slug);
+            }
+          }
+          return items;
+        });
       }
     } catch {
       // ignore – registrations endpoint may not exist yet
     }
+
 
     return {
       id: profile.id,
@@ -471,7 +484,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const registerForEvent = useCallback(
-    (eventSlug: string) => {
+    (eventSlugOrId: string) => {
       if (!SITE_CONFIG.REG_OPEN) {
         return { success: false, alreadyRegistered: false };
       }
@@ -479,14 +492,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return { success: false, alreadyRegistered: false };
       }
 
-      if (user.registeredEvents.includes(eventSlug)) {
+      const cleanTarget = eventSlugOrId.trim().toLowerCase();
+      const matchedEvent = localEvents.find(
+        (e) => e.slug.toLowerCase() === cleanTarget || e.id.toLowerCase() === cleanTarget
+      );
+
+      const toAdd = [cleanTarget];
+      if (matchedEvent) {
+        toAdd.push(matchedEvent.slug.toLowerCase());
+        toAdd.push(matchedEvent.id.toLowerCase());
+      }
+
+      if (user.registeredEvents.some((e) => toAdd.includes(e.toLowerCase()))) {
         return { success: true, alreadyRegistered: true };
       }
 
-      const updatedEvents = [...user.registeredEvents, eventSlug];
+      const updatedEvents = [...user.registeredEvents, ...toAdd];
       const updatedUser: AuthUser = {
         ...user,
-        registeredEvents: updatedEvents,
+        registeredEvents: Array.from(new Set(updatedEvents)),
       };
 
       setUser(updatedUser);
@@ -498,9 +522,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 
   const unregisterEvent = useCallback(
-    (eventSlug: string) => {
+    (eventSlugOrId: string) => {
       if (!user) return;
-      const updatedEvents = user.registeredEvents.filter((s) => s !== eventSlug);
+      const cleanTarget = eventSlugOrId.trim().toLowerCase();
+      const matchedEvent = localEvents.find(
+        (e) => e.slug.toLowerCase() === cleanTarget || e.id.toLowerCase() === cleanTarget
+      );
+      const toRemove = [cleanTarget];
+      if (matchedEvent) {
+        toRemove.push(matchedEvent.slug.toLowerCase());
+        toRemove.push(matchedEvent.id.toLowerCase());
+      }
+
+      const updatedEvents = user.registeredEvents.filter(
+        (s) => !toRemove.includes(s.toLowerCase())
+      );
       const updatedUser: AuthUser = {
         ...user,
         registeredEvents: updatedEvents,
@@ -512,12 +548,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 
   const isEventRegistered = useCallback(
-    (eventSlug: string) => {
+    (eventSlugOrId: string) => {
       if (!user) return false;
-      return user.registeredEvents.includes(eventSlug);
+      const cleanTarget = eventSlugOrId.trim().toLowerCase();
+      if (user.registeredEvents.some((e) => e.toLowerCase() === cleanTarget)) {
+        return true;
+      }
+      const matchedEvent = localEvents.find(
+        (e) => e.slug.toLowerCase() === cleanTarget || e.id.toLowerCase() === cleanTarget
+      );
+      if (matchedEvent) {
+        return user.registeredEvents.some(
+          (e) =>
+            e.toLowerCase() === matchedEvent.slug.toLowerCase() ||
+            e.toLowerCase() === matchedEvent.id.toLowerCase()
+        );
+      }
+      return false;
     },
     [user]
   );
+
 
   return (
     <AuthContext.Provider

@@ -17,10 +17,12 @@ class RegistrationOut(BaseModel):
 
     id: UUID
     event_id: UUID
+    event_slug: Optional[str] = None
     user_id: UUID | None
     team_id: UUID | None
     status: RegistrationStatus
     created_at: datetime
+
 
 
 class RegistrationStatusUpdate(BaseModel):

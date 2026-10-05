@@ -87,6 +87,7 @@ async def register_for_event(
         await db.rollback()
         raise ValueError("This user or team is already registered for this event") from None
     await db.refresh(registration)
+    registration.event_slug = event.slug
     return registration
 
 
@@ -120,6 +121,9 @@ async def get_registration(db: AsyncSession, registration_id: UUID) -> Registrat
     registration = await db.get(Registration, registration_id)
     if registration is None:
         raise ResourceNotFoundError("Registration")
+    event = await db.get(Event, registration.event_id)
+    if event:
+        registration.event_slug = event.slug
     return registration
 
 
@@ -131,7 +135,15 @@ async def list_user_registrations(db: AsyncSession, user_id: UUID) -> list[Regis
         .distinct()
         .order_by(Registration.created_at.desc())
     )
-    return list(result)
+    regs = list(result)
+    event_ids = [r.event_id for r in regs]
+    if event_ids:
+        events_list = (await db.scalars(select(Event).where(Event.id.in_(event_ids)))).all()
+        events_map = {e.id: e.slug for e in events_list}
+        for r in regs:
+            r.event_slug = events_map.get(r.event_id)
+    return regs
+
 
 
 async def can_view_registration(db: AsyncSession, registration: Registration, user_id: UUID) -> bool:

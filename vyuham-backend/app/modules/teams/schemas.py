@@ -1,5 +1,7 @@
 from datetime import datetime
+from typing import Optional
 from uuid import UUID
+
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -26,7 +28,9 @@ class TeamOut(BaseModel):
 class TeamMemberOut(BaseModel):
     user_id: UUID
     email: str
+    name: Optional[str] = None
     joined_at: datetime
+
 
 
 class TeamDetailOut(TeamOut):
