@@ -41,6 +41,7 @@ htmlcov/
 
 # SQLite / Local DBs
 *.sqlite3
+*.sqlite
 *.db
 
 # Logs
@@ -52,6 +53,8 @@ logs/
 .idea/
 .DS_Store
 Thumbs.db
+ehthumbs.db
+desktop.ini
 *.swp
 *.swo
 

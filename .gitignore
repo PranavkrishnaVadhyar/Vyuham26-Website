@@ -7,7 +7,7 @@ node_modules/
 .pnp
 .pnp.js
 
-# Build Outputs
+# Build Outputs & Bundles
 dist/
 dist-ssr/
 out/
@@ -15,6 +15,7 @@ build/
 .next/
 .turbo/
 .vercel/
+stats.html
 
 # Environment Variables & Secrets
 .env
@@ -63,6 +64,18 @@ htmlcov/
 .mypy_cache/
 .ruff_cache/
 
+# Frontend Testing & Playwright
+test-results/
+playwright-report/
+blob-report/
+coverage/
+.nyc_output/
+
+# SQLite & Local DBs
+*.sqlite
+*.sqlite3
+*.db
+
 # Editor & IDE directories
 .vscode/
 !.vscode/extensions.json
@@ -75,7 +88,7 @@ htmlcov/
 *.swo
 *.swp
 
-# AI Assistant configs
+# AI Assistant configs & Local Artifacts
 .gemini/
 .agents/
 .claude/

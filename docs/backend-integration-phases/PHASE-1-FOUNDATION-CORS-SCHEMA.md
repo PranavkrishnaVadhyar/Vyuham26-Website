@@ -94,9 +94,9 @@
 
 ## ✅ Phase 1 Checklist & Verification
 
-- [ ] 1. Update `app/core/config.py` with port 5173 origins.
-- [ ] 2. Add `degree` and `year` to `Profile` model & schemas.
-- [ ] 3. Add `slug`, `fee`, `day`, `time`, `rules`, and updated streams to `Event` model & schemas.
-- [ ] 4. Run `python -m scripts.create_tables` to generate/update PostgreSQL tables.
-- [ ] 5. Run `python -m scripts.seed_events` to populate the official events.
-- [ ] 6. Start server with `uvicorn app.main:app --reload` and verify at `http://localhost:8000/docs`.
+- [x] 1. Update `app/core/config.py` with port 5173 origins.
+- [x] 2. Add `degree` and `year` to `Profile` model & schemas.
+- [x] 3. Add `slug`, `fee`, `day`, `time`, `rules`, and updated streams to `Event` model & schemas.
+- [x] 4. Run `python -m scripts.create_tables` to generate/update PostgreSQL tables.
+- [x] 5. Run `python -m scripts.seed_events` to populate the official events.
+- [x] 6. Start server with `uvicorn app.main:app --reload` and verify at `http://localhost:8000/docs`.

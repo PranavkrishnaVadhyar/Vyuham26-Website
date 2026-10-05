@@ -49,7 +49,12 @@ async def get_current_user(
 
 
 def require_role(*allowed_roles: UserRole | str) -> Callable:
-    allowed = {str(role.value if isinstance(role, UserRole) else role) for role in allowed_roles}
+    allowed = set()
+    for role in allowed_roles:
+        val = role.value if isinstance(role, UserRole) else str(role)
+        if val == "user":
+            val = "participant"
+        allowed.add(val)
 
     async def role_dependency(
         current_user: Annotated[Profile, Depends(get_current_user)],

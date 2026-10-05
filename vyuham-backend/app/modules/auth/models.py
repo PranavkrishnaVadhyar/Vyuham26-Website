@@ -24,6 +24,8 @@ class Profile(Base):
     name: Mapped[str | None] = mapped_column(String(120), nullable=True)
     phone: Mapped[str | None] = mapped_column(String(40), nullable=True)
     college: Mapped[str | None] = mapped_column(String(200), nullable=True)
+    degree: Mapped[str | None] = mapped_column(String(120), nullable=True)
+    year: Mapped[str | None] = mapped_column(String(50), nullable=True)
     role: Mapped[UserRole] = mapped_column(
         Enum(UserRole, name="user_role"), nullable=False, default=UserRole.participant,
         server_default=UserRole.participant.value,
