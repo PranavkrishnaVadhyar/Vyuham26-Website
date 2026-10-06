@@ -1,5 +1,64 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 
+/* ------------------------------------------------------------------ */
+/*  Navigation Guard — prevents direct URL access to sub-pages        */
+/* ------------------------------------------------------------------ */
+const NAV_FLAG_KEY = "vyuham26:nav";
+
+/** Mark the current session as having performed internal navigation. */
+function markInternalNav(): void {
+  try {
+    sessionStorage.setItem(NAV_FLAG_KEY, Date.now().toString());
+  } catch { /* private mode */ }
+}
+
+/** Check whether the current session has a valid internal navigation flag. */
+export function isInternalNavigation(): boolean {
+  try {
+    return !!sessionStorage.getItem(NAV_FLAG_KEY);
+  } catch {
+    return false;
+  }
+}
+
+/** Clear the navigation flag (used on full page reload detection). */
+export function clearNavFlag(): void {
+  try {
+    sessionStorage.removeItem(NAV_FLAG_KEY);
+  } catch { /* private mode */ }
+}
+
+/**
+ * Determines if a path is a "home" route that should always be allowed.
+ * Home routes: "/", "", "/about", "/gallery", "/streams"
+ */
+export function isHomeRoute(path: string): boolean {
+  const normalized = normalizePath(path);
+  return (
+    normalized === "/" ||
+    normalized === "" ||
+    normalized === "/about" ||
+    normalized === "/gallery" ||
+    normalized === "/streams"
+  );
+}
+
+/**
+ * Guard that redirects to home if the route was reached by direct URL
+ * access (typing in address bar / pasting) rather than internal navigation.
+ * Returns true if the route is allowed, false if redirected.
+ */
+export function guardRoute(currentPath: string): boolean {
+  if (typeof window === "undefined") return true;
+  if (isHomeRoute(currentPath)) return true;
+  if (isInternalNavigation()) return true;
+
+  // Not an internal navigation — redirect to home
+  window.location.hash = "";
+  window.location.replace(window.location.pathname);
+  return false;
+}
+
 /**
  * Normalizes a raw pathname or hash to a standard application route path.
  * e.g. "#/events?filter=all" -> "/events"
@@ -100,6 +159,9 @@ export function navigate(to: string, options: NavigateOptions = {}): void {
     const clean = target.startsWith("/") ? target : `/${target}`;
     targetHash = `#${clean}`;
   }
+
+  // Mark this as a legitimate internal navigation
+  markInternalNav();
 
   if (options.replace) {
     window.location.replace(targetHash);

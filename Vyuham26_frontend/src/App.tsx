@@ -4,7 +4,7 @@ import { AuthProvider } from "@/context/AuthContext";
 import { useReducedMotion } from "@/lib/hooks";
 import { lockScroll, scrollToId } from "@/lib/scroll";
 import { ScrollTrigger } from "@/lib/anim";
-import { usePlatformRoute } from "@/lib/router";
+import { usePlatformRoute, guardRoute, clearNavFlag } from "@/lib/router";
 import { RouteRenderer } from "@/routes";
 
 import Atmosphere from "@/components/cinematic/Atmosphere";
@@ -168,9 +168,20 @@ function Site() {
 function Router() {
   const route = usePlatformRoute();
   const { ui } = useApp();
+  const [guarded, setGuarded] = useState(false);
 
+  // On fresh page load, clear the nav flag so direct URL access is blocked
   useEffect(() => {
-    lockScroll(false);
+    clearNavFlag();
+  }, []);
+
+  // On every route change, check if the navigation is allowed
+  useEffect(() => {
+    const allowed = guardRoute(route);
+    setGuarded(!allowed);
+    if (allowed) {
+      lockScroll(false);
+    }
   }, [route]);
 
   const isHomepage =
@@ -196,6 +207,9 @@ function Router() {
       window.removeEventListener("offline", handleOffline);
     };
   }, []);
+
+  // If navigation was blocked, render nothing (redirect is in progress)
+  if (guarded) return null;
 
   return (
     <>
