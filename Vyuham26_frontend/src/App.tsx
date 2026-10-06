@@ -82,8 +82,12 @@ function Site() {
     lockScroll(introActive);
     if (!introActive) {
       ui.setIntroDone(true);
-      const t = window.setTimeout(() => ScrollTrigger.refresh(), 320);
-      return () => window.clearTimeout(t);
+      const t1 = window.setTimeout(() => ScrollTrigger.refresh(), 320);
+      const t2 = window.setTimeout(() => ScrollTrigger.refresh(), 700);
+      return () => {
+        window.clearTimeout(t1);
+        window.clearTimeout(t2);
+      };
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [introActive]);

@@ -3,7 +3,7 @@ import { cn } from "@/utils/cn";
 import { gsap } from "@/lib/anim";
 import { useApp } from "@/lib/store";
 import { zones } from "@/data/content";
-import { useIsMobile, useReducedMotion } from "@/lib/hooks";
+import { useReducedMotion } from "@/lib/hooks";
 import { FocusIn, MaskReveal } from "@/components/cinematic/Reveal";
 import type { GalleryItem } from "@/data/types";
 
@@ -19,11 +19,10 @@ export default function Experience() {
   const [active, setActive] = useState<GalleryItem | null>(null);
   const grid = useRef<HTMLDivElement | null>(null);
   const reduced = useReducedMotion();
-  const mobile = useIsMobile();
 
   useEffect(() => {
     const el = grid.current;
-    if (!el || reduced || mobile) return;
+    if (!el || reduced) return;
     const ctx = gsap.context(() => {
       gsap.utils.toArray<HTMLElement>(".tile").forEach((t, i) => {
         gsap.fromTo(
@@ -39,7 +38,7 @@ export default function Experience() {
       });
     }, el);
     return () => ctx.revert();
-  }, [reduced, mobile, items]);
+  }, [reduced, items]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && setActive(null);

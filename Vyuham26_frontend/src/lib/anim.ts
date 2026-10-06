@@ -3,6 +3,8 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
 
+ScrollTrigger.config({ ignoreMobileResize: true });
+
 gsap.defaults({ ease: "power3.out" });
 
 export { gsap, ScrollTrigger };

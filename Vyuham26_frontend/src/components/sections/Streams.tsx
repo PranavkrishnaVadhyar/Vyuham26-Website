@@ -18,7 +18,7 @@ export default function Streams() {
 
   useEffect(() => {
     const el = wrap.current;
-    if (!el || reduced || mobile) return;
+    if (!el || reduced) return;
     const ctx = gsap.context(() => {
       /* GSAP owns the centering transform so scale tweens can't clobber it */
       gsap.set(".node, .core, .field-glow", { xPercent: -50, yPercent: -50 });
@@ -97,10 +97,10 @@ export default function Streams() {
       tl.to(".field-glow", { opacity: 0.9, scale: 1.25, ease: "none", duration: 0.2 }, conv);
     }, el);
     return () => ctx.revert();
-  }, [reduced, mobile, streams]);
+  }, [reduced, streams]);
 
   /* ---------------- mobile composition ---------------- */
-  if (mobile || reduced) {
+  if (reduced) {
     return (
       <section id="streams" className="relative w-full px-5 py-24">
         <p className="eyebrow">02 — THE FOUR STREAMS</p>
@@ -165,8 +165,12 @@ export default function Streams() {
             </linearGradient>
           </defs>
           {streams.map((s, i) => {
-            const x = s.node.x * 100;
-            const y = s.node.y * 100;
+            const x = mobile
+              ? (i === 0 ? 22 : i === 1 ? 78 : i === 2 ? 22 : 78)
+              : s.node.x * 100;
+            const y = mobile
+              ? (i === 0 ? 18 : i === 1 ? 18 : i === 2 ? 38 : 38)
+              : s.node.y * 100;
             const cx = (x + 50) / 2 + (i % 2 === 0 ? -9 : 9);
             const cy = (y + 50) / 2 + (i < 2 ? 10 : -10);
             return (
@@ -188,44 +192,52 @@ export default function Streams() {
         </svg>
 
         {/* nodes */}
-        {streams.map((s, i) => (
-          <div
-            key={s.id}
-            className={`node node-${i} absolute opacity-0 will-change-transform`}
-            style={{ left: `${s.node.x * 100}%`, top: `${s.node.y * 100}%` }}
-          >
-            <div className="relative">
-              <div
-                className="relative h-[15vw] max-h-[190px] w-[15vw] max-w-[190px] overflow-hidden rounded-full"
-                style={{ boxShadow: `0 0 70px -10px ${s.glow}, inset 0 0 40px rgba(2,6,4,0.8)` }}
-              >
-                <img
-                  src={s.image}
-                  alt={s.name}
-                  loading="lazy"
-                  className="h-full w-full object-cover"
-                  style={{ filter: "saturate(0.35) contrast(1.28) brightness(0.48)" }}
+        {streams.map((s, i) => {
+          const posX = mobile
+            ? (i === 0 ? 22 : i === 1 ? 78 : i === 2 ? 22 : 78)
+            : s.node.x * 100;
+          const posY = mobile
+            ? (i === 0 ? 18 : i === 1 ? 18 : i === 2 ? 38 : 38)
+            : s.node.y * 100;
+          return (
+            <div
+              key={s.id}
+              className={`node node-${i} absolute opacity-0 will-change-transform`}
+              style={{ left: `${posX}%`, top: `${posY}%` }}
+            >
+              <div className="relative">
+                <div
+                  className="relative h-[18vw] max-h-[190px] min-h-[72px] w-[18vw] max-w-[190px] min-w-[72px] sm:h-[15vw] sm:w-[15vw] overflow-hidden rounded-full"
+                  style={{ boxShadow: `0 0 70px -10px ${s.glow}, inset 0 0 40px rgba(2,6,4,0.8)` }}
+                >
+                  <img
+                    src={s.image}
+                    alt={s.name}
+                    loading="lazy"
+                    className="h-full w-full object-cover"
+                    style={{ filter: "saturate(0.35) contrast(1.28) brightness(0.48)" }}
+                  />
+                  <div className="absolute inset-0 rounded-full border" style={{ borderColor: `${s.accent}55` }} />
+                  <div className="absolute inset-0 rounded-full bg-[radial-gradient(circle,transparent_40%,rgba(2,6,4,0.85))]" />
+                </div>
+                <div
+                  className="absolute inset-0 rounded-full border"
+                  style={{ borderColor: `${s.accent}30`, animation: "pulseRing 3.4s ease-out infinite" }}
                 />
-                <div className="absolute inset-0 rounded-full border" style={{ borderColor: `${s.accent}55` }} />
-                <div className="absolute inset-0 rounded-full bg-[radial-gradient(circle,transparent_40%,rgba(2,6,4,0.85))]" />
+                <p
+                  className="mt-2 sm:mt-3 text-center font-mono text-[8px] sm:text-[9px] tracking-[0.25em] sm:tracking-[0.3em]"
+                  style={{ color: s.accent }}
+                >
+                  {s.index} · {s.name}
+                </p>
               </div>
-              <div
-                className="absolute inset-0 rounded-full border"
-                style={{ borderColor: `${s.accent}30`, animation: "pulseRing 3.4s ease-out infinite" }}
-              />
-              <p
-                className="mt-3 text-center font-mono text-[9px] tracking-[0.3em]"
-                style={{ color: s.accent }}
-              >
-                {s.index} · {s.name}
-              </p>
             </div>
-          </div>
-        ))}
+          );
+        })}
 
         {/* core */}
         <div className="core absolute left-1/2 top-1/2 opacity-0">
-          <div className="relative h-[16vw] max-h-[210px] w-[16vw] max-w-[210px]">
+          <div className="relative h-[22vw] max-h-[210px] min-h-[85px] w-[22vw] max-w-[210px] min-w-[85px] sm:h-[16vw] sm:w-[16vw]">
             <div
               className="absolute inset-0 rounded-full"
               style={{ background: "radial-gradient(circle, rgba(126,255,200,0.55), rgba(10,60,40,0) 68%)", filter: "blur(6px)" }}
@@ -253,8 +265,8 @@ export default function Streams() {
         {/* centre readout */}
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center px-6">
           <div className="str-intro text-center">
-            <p className="eyebrow mb-5">02 — THE FOUR STREAMS</p>
-            <h2 className="t-cond text-[7vw] leading-[0.86] text-[#f0f9f5]">
+            <p className="eyebrow mb-4 sm:mb-5">02 — THE FOUR STREAMS</p>
+            <h2 className="t-cond text-[11vw] sm:text-[8.5vw] md:text-[7vw] leading-[0.86] text-[#f0f9f5]">
               ONE ENVIRONMENT.
               <br />
               <span className="text-[#18c47c]">FOUR CURRENTS.</span>
@@ -262,22 +274,22 @@ export default function Streams() {
           </div>
         </div>
 
-        <div className="pointer-events-none absolute inset-x-0 bottom-[12%] flex justify-center px-6">
+        <div className="pointer-events-none absolute inset-x-0 bottom-[6%] sm:bottom-[10%] md:bottom-[12%] flex justify-center px-6">
           <div className="relative h-[220px] w-full max-w-[620px]">
             {streams.map((s, i) => (
               <div key={s.id} className={`read-${i} absolute inset-x-0 text-center opacity-0`}>
-                <p className="font-mono text-[10px] tracking-[0.34em]" style={{ color: s.accent }}>
+                <p className="font-mono text-[9px] sm:text-[10px] tracking-[0.34em]" style={{ color: s.accent }}>
                   STREAM {s.index}
                 </p>
-                <h3 className="t-cond mt-2 text-[5.6vw] leading-none text-[#f2fbf6]">{s.name}</h3>
-                <p className="t-cond-l mt-3 text-[1.5vw] text-[#bcdcce]">{s.line}</p>
-                <p className="mx-auto mt-4 max-w-[46ch] text-[13px] leading-relaxed text-[#7d9a8d]">
+                <h3 className="t-cond mt-1.5 sm:mt-2 text-[8.5vw] sm:text-[6.5vw] md:text-[5.6vw] leading-none text-[#f2fbf6]">{s.name}</h3>
+                <p className="t-cond-l mt-2 sm:mt-3 text-[4.2vw] sm:text-[2.6vw] md:text-[1.5vw] text-[#bcdcce]">{s.line}</p>
+                <p className="mx-auto mt-2.5 sm:mt-4 max-w-[46ch] text-[12px] sm:text-[13px] leading-relaxed text-[#7d9a8d]">
                   {s.description}
                 </p>
-                <div className="mt-5 flex justify-center gap-10">
+                <div className="mt-3.5 sm:mt-5 flex justify-center gap-6 sm:gap-10">
                   {s.stats.map((st) => (
                     <div key={st.label}>
-                      <div className="t-mid text-[20px] text-[#dff3e8]">{st.value}</div>
+                      <div className="t-mid text-[18px] sm:text-[20px] text-[#dff3e8]">{st.value}</div>
                       <div className="font-mono text-[8px] tracking-[0.3em] text-[#557767]">{st.label}</div>
                     </div>
                   ))}
@@ -285,14 +297,14 @@ export default function Streams() {
               </div>
             ))}
 
-            <div className="str-final absolute inset-x-0 top-[-34vh] text-center opacity-0">
-              <h3 className="t-cond text-[6.5vw] leading-[0.86] text-[#f4fcf8]">
+            <div className="str-final absolute inset-x-0 top-[-25vh] sm:top-[-30vh] md:top-[-34vh] text-center opacity-0">
+              <h3 className="t-cond text-[10vw] sm:text-[8vw] md:text-[6.5vw] leading-[0.86] text-[#f4fcf8]">
                 FOUR STREAMS.
                 <br />
                 <span className="text-[#18c47c]">ONE SIGNAL.</span>
               </h3>
               <MaskReveal delay={0.05}>
-                <p className="mx-auto mt-5 max-w-[52ch] text-[13px] leading-relaxed text-[#7d9a8d]">
+                <p className="mx-auto mt-3 sm:mt-5 max-w-[52ch] text-[12px] sm:text-[13px] leading-relaxed text-[#7d9a8d]">
                   Everything built, performed, played and proven across three days collapses into a single
                   current — and that current has a date.
                 </p>

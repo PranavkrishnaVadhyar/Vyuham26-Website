@@ -15,8 +15,9 @@ export function initSmoothScroll() {
     easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
     smoothWheel: true,
     wheelMultiplier: 0.95,
-    touchMultiplier: 1.6,
-    syncTouch: false,
+    touchMultiplier: 1.8,
+    syncTouch: true,
+    syncTouchLerp: 0.068,
   });
 
   lenis.on("scroll", ScrollTrigger.update);
