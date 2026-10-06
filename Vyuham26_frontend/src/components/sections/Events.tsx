@@ -1,18 +1,19 @@
 import { useMemo, useState } from "react";
+import Link from "next/link";
 import { cn } from "@/utils/cn";
 import { useApp } from "@/lib/store";
 import { FocusIn, MaskReveal } from "@/components/cinematic/Reveal";
 import { DepthImage, MagneticButton } from "@/components/cinematic/Interactive";
 import { toast } from "@/components/ui/Toaster";
 import type { FestEvent, StreamId } from "@/data/types";
-import { SITE_CONFIG } from "@/config/site";
+import { SITE_CONFIG, useRegistrationOpen } from "@/config/site";
 
 const FILTERS: { id: StreamId | "all"; label: string }[] = [
   { id: "all", label: "ALL" },
-  { id: "technology", label: "TECHNOLOGY" },
-  { id: "culture", label: "CULTURE" },
-  { id: "gaming", label: "GAMING" },
+  { id: "tech", label: "TECH" },
   { id: "management", label: "MANAGEMENT" },
+  { id: "cultural", label: "CULTURAL" },
+  { id: "esports", label: "ESPORTS" },
 ];
 
 
@@ -24,6 +25,7 @@ function statusStyle(s: FestEvent["status"]) {
 
 export default function Events() {
   const { content, register, isRegistered, toggleSave, saved, user, ui } = useApp();
+  const regOpen = useRegistrationOpen();
   const [filter, setFilter] = useState<StreamId | "all">("all");
   const [query, setQuery] = useState("");
   const [openId, setOpenId] = useState<string | null>(null);
@@ -48,7 +50,7 @@ export default function Events() {
   const rows = useMemo(() => list.filter((e) => e.id !== featured?.id), [list, featured]);
 
   const onRegister = (e: FestEvent) => {
-    if (!SITE_CONFIG.REG_OPEN) {
+    if (!regOpen) {
       toast("Event registration is coming soon!", "info");
       return;
     }
@@ -71,7 +73,7 @@ export default function Events() {
             <MaskReveal>THE PROGRAMME</MaskReveal>
           </h2>
           <p className="mt-5 max-w-[46ch] text-[13px] leading-relaxed text-[#7d9a8d] md:text-[15px]">
-            Forty-eight events across four streams. Filter the signal, search the noise, lock your slot.
+            30+ events across four streams. Filter the signal, search the noise, lock your slot.
           </p>
         </div>
 
@@ -159,12 +161,18 @@ export default function Events() {
               </dl>
               <div className="mt-8 flex flex-wrap items-center gap-3">
                 <MagneticButton variant="solid" onClick={() => onRegister(featured)}>
-                  {!SITE_CONFIG.REG_OPEN
+                  {!regOpen
                     ? "COMING SOON"
                     : isRegistered(featured.id)
                     ? "REGISTERED ✓"
                     : "REGISTER"}
                 </MagneticButton>
+                <Link
+                  href={`/events/${featured.id.replace(/^ev-/, "")}`}
+                  className="font-mono text-[10px] tracking-[0.2em] text-[#7dffc4] transition hover:underline"
+                >
+                  VIEW DOSSIER & RULEBOOK →
+                </Link>
                 <button
                   onClick={() => toggleSave(featured.id)}
                   className="font-mono text-[10px] tracking-[0.26em] text-[#7d9a8d] transition-colors duration-500 hover:text-[#9fe9c6]"
@@ -282,7 +290,7 @@ export default function Events() {
                             variant={isRegistered(e.id) ? "ghost" : "solid"}
                             onClick={() => onRegister(e)}
                           >
-                            {!SITE_CONFIG.REG_OPEN
+                            {!regOpen
                               ? "COMING SOON"
                               : isRegistered(e.id)
                               ? "REGISTERED ✓"
@@ -294,27 +302,12 @@ export default function Events() {
                           >
                             {saved.includes(e.id) ? "SAVED ★" : "SAVE ☆"}
                           </button>
-                          <a
-                            href={`/events/${
-                              {
-                                "ev-hack": "hackathon",
-                                "ev-robowars": "robowars",
-                                "ev-circuit": "silent-circuit",
-                                "ev-mainstage": "mainstage-night-one",
-                                "ev-nritya": "nritya",
-                                "ev-battle": "street-battle",
-                                "ev-valorant": "valorant",
-                                "ev-bgmi": "bgmi",
-                                "ev-retro": "retro-arcade",
-                                "ev-summit": "impact-summit",
-                                "ev-climate": "climate-build-sprint",
-                                "ev-outreach": "outreach-1000-hands",
-                              }[e.id] || e.id
-                            }`}
-                            className="font-mono text-[10px] tracking-[0.2em] text-[#7dffc4] hover:underline"
+                          <Link
+                            href={`/events/${e.id.replace(/^ev-/, "")}`}
+                            className="font-mono text-[10px] tracking-[0.2em] text-[#7dffc4] transition hover:underline"
                           >
                             RULEBOOK & DETAILS →
-                          </a>
+                          </Link>
                           {e.prize && (
                             <span className="font-mono text-[10px] tracking-[0.2em] text-[#f2c98a]">
                               PRIZE {e.prize}
@@ -340,32 +333,32 @@ export default function Events() {
         <div className="mt-14 flex flex-col gap-6 rounded-xl border border-[rgba(24,196,124,0.18)] bg-[rgba(5,15,10,0.6)] p-6 backdrop-blur-md sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="font-mono text-[10px] tracking-[0.28em] text-[#18c47c]">
-              ARCHIVE // 48 OPERATIONS
+              ARCHIVE // 30+ OPERATIONS
             </p>
             <p className="mt-1 font-sans text-sm text-[#cfe8dc]">
-              Browse the complete event rulebooks, team loadouts, or view the 72-hour timeline.
+              Browse the complete event rulebooks, team loadouts, or view the 3-day timeline.
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-3">
-            <a
+            <Link
               href="/schedule"
               className="inline-flex items-center justify-center border border-[rgba(120,160,145,0.25)] px-4 py-2.5 font-mono text-[9px] uppercase tracking-[0.22em] text-[#cfe8dc] transition-all hover:border-[#18c47c] hover:text-[#18c47c]"
             >
               Full Schedule →
-            </a>
-            <a
+            </Link>
+            <Link
               href="/events"
               className="inline-flex items-center justify-center border border-[rgba(24,196,124,0.4)] bg-[rgba(24,196,124,0.1)] px-4 py-2.5 font-mono text-[9px] uppercase tracking-[0.22em] text-[#18c47c] transition-all hover:bg-[#18c47c] hover:text-[#030504]"
             >
               All Events Directory →
-            </a>
-            {SITE_CONFIG.REG_OPEN ? (
-              <a
+            </Link>
+            {regOpen ? (
+              <Link
                 href="/register"
                 className="inline-flex items-center justify-center bg-[#18c47c] px-5 py-2.5 font-mono text-[9px] font-bold uppercase tracking-[0.22em] text-[#030504] shadow-[0_0_20px_rgba(24,196,124,0.35)] transition-all hover:bg-[#2ee59d]"
               >
                 Registration Hub →
-              </a>
+              </Link>
             ) : (
               <span className="inline-flex items-center justify-center border border-amber-500/40 bg-amber-500/10 px-4 py-2.5 font-mono text-[9px] font-bold uppercase tracking-[0.22em] text-amber-300 shadow-[0_0_12px_rgba(245,158,11,0.15)]">
                 <span className="h-1.5 w-1.5 rounded-full bg-amber-400 animate-pulse mr-2" />

@@ -11,77 +11,67 @@ import Campus3DOverview from "@/components/venue/Campus3DOverview";
 
 const venues = [
   {
-    name: "Main Stage",
+    name: "Open Air Stage",
     description:
-      "Grand performances, opening and closing ceremonies",
-    events: "Battle of Bands, Dance Battle, Ceremonies",
-    code: "MS-01",
+      "Grand performances, opening ceremony, fashion runway and closing concert",
+    events: "Inauguration Ceremony, Cultural Night, DJ Night, Fashion Show, Concert Night",
+    code: "OAS-01",
     type: "CULTURE",
   },
   {
-    name: "Innovation Lab",
+    name: "Main Hall",
     description:
-      "Hackathons and AI/ML challenges",
-    events: "Hackathon 36, AI Arena",
-    code: "IL-02",
+      "24HR Hackathon arena, midnight mentoring, and award ceremonies",
+    events: "Hackathon — 24HR, Overnight Mentoring, Hackathon Demos, Prize Distribution",
+    code: "MH-02",
     type: "TECH",
   },
   {
-    name: "Cyber Arena",
+    name: "Computer Lab",
     description:
-      "Cybersecurity and CTF competitions",
-    events: "Capture The Flag",
-    code: "CA-03",
-    type: "CYBER",
+      "Cybersecurity warfare, prompt battles, and hands-on LLM labs",
+    events: "Capture the Flag, Prompt War, Prompt Engineering & LLM Workshop",
+    code: "CL-03",
+    type: "TECH",
   },
   {
     name: "Esports Arena",
     description:
-      "Competitive gaming tournaments",
-    events:
-      "Valorant Championship, BGMI Showdown",
+      "Competitive esports tournaments and championship finals",
+    events: "Valorant Tournament, BGMI Tournament, E-Football Tournament",
     code: "EA-04",
     type: "GAMING",
   },
   {
-    name: "Lab Complex",
+    name: "Gallery Hall",
     description:
-      "Coding competitions and technical events",
-    events: "Code Relay, Technical workshops",
-    code: "LC-05",
-    type: "TECH",
-  },
-  {
-    name: "Conference Hall",
-    description:
-      "Presentations and pitching events",
-    events: "Pitch Perfect, Panel discussions",
-    code: "CH-06",
+      "Management strategy rounds, quizzes, and applied AI keynotes",
+    events: "Best Management Team, Business Quiz, Startup Showcase, Tech Quiz, Agentic AI Talk, Movie Quiz",
+    code: "GH-05",
     type: "FORUM",
   },
   {
-    name: "Amphitheatre",
+    name: "Seminar Hall",
     description:
-      "Open-air cultural performances",
-    events: "Poetry Slam, Open mic sessions",
-    code: "AM-07",
-    type: "CULTURE",
+      "AI panels, debate rounds, and quantum computing sessions",
+    events: "Responsible AI Panel, Quantum Computing Meets AI Talk, Open Floor Debate",
+    code: "SH-06",
+    type: "FORUM",
   },
   {
-    name: "Green Lab",
+    name: "Management Wing",
     description:
-      "Sustainability and management events",
-    events: "Sustainability Hack",
-    code: "GL-08",
+      "Aptitude, crisis simulation, and executive interviews",
+    events: "Best Manager, Marketing Game, Finance Game, HR Game",
+    code: "MW-07",
     type: "MANAGEMENT",
   },
   {
     name: "Campus Grounds",
     description:
-      "Outdoor art and food courts",
-    events:
-      "Street Art, Food Court, Exhibitions",
-    code: "CG-09",
+      "Food court, markets, stalls, and campus-wide contests",
+    events: "Play Fest, Fitness Competition, Photography Contest, Food Court & Stalls",
+    code: "CG-08",
     type: "OPEN",
   },
 ];
@@ -93,17 +83,17 @@ const hub = {
 
 const zonePoints = [
   {
-    name: "Main Stage",
+    name: "Open Air Stage",
     x: 150,
     y: 80,
   },
   {
-    name: "Innovation Lab",
+    name: "Main Hall",
     x: 450,
     y: 80,
   },
   {
-    name: "Cyber Arena",
+    name: "Computer Lab",
     x: 750,
     y: 80,
   },
@@ -113,22 +103,17 @@ const zonePoints = [
     y: 240,
   },
   {
-    name: "Lab Complex",
-    x: 450,
-    y: 240,
-  },
-  {
-    name: "Conference Hall",
+    name: "Gallery Hall",
     x: 750,
     y: 240,
   },
   {
-    name: "Amphitheatre",
+    name: "Seminar Hall",
     x: 150,
     y: 400,
   },
   {
-    name: "Green Lab",
+    name: "Management Wing",
     x: 450,
     y: 400,
   },

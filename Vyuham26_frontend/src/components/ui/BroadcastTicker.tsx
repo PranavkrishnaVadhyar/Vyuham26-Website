@@ -59,15 +59,15 @@ export default function BroadcastTicker({ visible = true }: { visible?: boolean 
     {
       id: "b2",
       category: "REGISTRATIONS",
-      title: "NATIONAL 24H HACKATHON AT 85% CAPACITY — REGISTER SQUADS BEFORE LOCKOUT",
-      time: "TECH STREAM // PRIZE POOL ₹1,50,000",
+      title: "HACKATHON — 24HR AT 85% CAPACITY — REGISTER SQUADS BEFORE LOCKOUT",
+      time: "TECH STREAM // PRIZE POOL ₹30,000",
       urgent: true,
     },
     {
       id: "b3",
       category: "CYBER WARFARE",
-      title: "FLAG HUNT CTF WARZONE QUALIFIERS OPEN FOR ALL REGISTERED OPERATIVES",
-      time: "MAIN CYBER ARENA",
+      title: "CAPTURE THE FLAG REGISTRATIONS OPEN IN COMPUTER LAB",
+      time: "COMPUTER LAB // PRIZE POOL ₹15,000",
       urgent: false,
     },
     {

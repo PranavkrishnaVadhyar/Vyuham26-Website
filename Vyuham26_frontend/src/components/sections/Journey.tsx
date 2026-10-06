@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import Link from "next/link";
 import { gsap } from "@/lib/anim";
 import { useApp } from "@/lib/store";
 import { useReducedMotion } from "@/lib/hooks";
@@ -78,6 +79,15 @@ function Panel({ d, i, total }: { d: ScheduleDay; i: number; total: number }) {
               </li>
             ))}
           </ul>
+
+          <div className="mt-6 sm:mt-8">
+            <Link
+              href="/schedule"
+              className="inline-flex items-center gap-2 border border-[#18c47c]/30 bg-[#18c47c]/10 px-4 py-2 font-mono text-[9px] uppercase tracking-[0.22em] text-[#7dffc4] transition hover:bg-[#18c47c] hover:text-[#030504]"
+            >
+              EXPLORE {d.day} SCHEDULE & EVENTS →
+            </Link>
+          </div>
         </div>
       </div>
 
@@ -157,17 +167,27 @@ export default function Journey() {
 
   return (
     <section id="schedule" className="relative w-full">
-      <div className="relative z-10 px-6 pt-24 md:px-[10vw]">
-        <p className="eyebrow">03 — THE JOURNEY</p>
-        <FocusIn delay={0.05}>
-          <h2 className="t-cond mt-4 text-[12vw] leading-[0.84] text-[#f0f9f5] md:text-[6vw]">
-            IGNITION <span className="text-[#2c4a3e]">→</span> CONVERGENCE{" "}
-            <span className="text-[#2c4a3e]">→</span> <span className="text-[#18c47c]">AFTERSHOCK</span>
-          </h2>
-        </FocusIn>
-        <p className="mt-5 max-w-[56ch] text-[13px] leading-relaxed text-[#7d9a8d] md:text-[15px]">
-          Three days engineered as one continuous escalation. Each stage burns hotter than the last.
-        </p>
+      <div className="relative z-10 flex flex-col justify-between gap-6 px-6 pt-24 md:flex-row md:items-end md:px-[10vw]">
+        <div>
+          <p className="eyebrow">03 — THE JOURNEY</p>
+          <FocusIn delay={0.05}>
+            <h2 className="t-cond mt-4 text-[12vw] leading-[0.84] text-[#f0f9f5] md:text-[6vw]">
+              IGNITION <span className="text-[#2c4a3e]">→</span> CONVERGENCE{" "}
+              <span className="text-[#2c4a3e]">→</span> <span className="text-[#18c47c]">AFTERSHOCK</span>
+            </h2>
+          </FocusIn>
+          <p className="mt-5 max-w-[56ch] text-[13px] leading-relaxed text-[#7d9a8d] md:text-[15px]">
+            Three days engineered as one continuous escalation. Each stage burns hotter than the last.
+          </p>
+        </div>
+        <div className="shrink-0">
+          <Link
+            href="/schedule"
+            className="inline-flex items-center justify-center border border-[#18c47c]/40 bg-[#18c47c]/10 px-5 py-2.5 font-mono text-[10px] uppercase tracking-[0.24em] text-[#18c47c] transition-all hover:bg-[#18c47c] hover:text-[#030504]"
+          >
+            Full Timeline / Schedule →
+          </Link>
+        </div>
       </div>
 
       {reduced ? (

@@ -25,11 +25,48 @@ import About from "@/components/sections/About";
 import Countdown from "@/components/sections/Countdown";
 import FinalReveal from "@/components/sections/FinalReveal";
 import { AuthModal, ProfilePanel } from "@/components/auth/Auth";
-import Toaster from "@/components/ui/Toaster";
+import Toaster, { toast } from "@/components/ui/Toaster";
 import CyberTerminal from "@/components/ui/CyberTerminal";
 import Logo from "@/components/ui/Logo";
 import AdminSecretListener from "@/components/admin/AdminSecretListener";
 import ErrorBoundary from "@/components/ui/ErrorBoundary";
+import { cyberAudio } from "@/lib/cyberAudio";
+
+function GlobalKeyboardShortcuts() {
+  const { ui } = useApp();
+
+  useEffect(() => {
+    const handleGlobalKeys = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement | null;
+      const isInput =
+        target &&
+        (target.tagName === "INPUT" ||
+          target.tagName === "TEXTAREA" ||
+          target.tagName === "SELECT" ||
+          target.isContentEditable);
+
+      if (isInput) return;
+
+      // Key M = Audio Mute toggle
+      if ((e.key === "m" || e.key === "M") && !e.ctrlKey && !e.altKey && !e.metaKey) {
+        const muted = cyberAudio.toggleMute();
+        ui.setSound(!muted);
+        toast(muted ? "🔇 [AUDIO MUTED]" : "🔊 [AUDIO ENABLED]", "info");
+      }
+
+      // Key ? = Help / Terminal
+      if (e.key === "?" && !e.ctrlKey && !e.altKey && !e.metaKey) {
+        e.preventDefault();
+        window.dispatchEvent(new CustomEvent("open-cyber-terminal"));
+      }
+    };
+
+    window.addEventListener("keydown", handleGlobalKeys);
+    return () => window.removeEventListener("keydown", handleGlobalKeys);
+  }, [ui]);
+
+  return null;
+}
 
 /* ------------------------------------------------------------------ */
 /*  Scroll progress rail                                               */
@@ -172,9 +209,9 @@ function Site() {
 function Router() {
   const route = usePlatformRoute();
   const { ui } = useApp();
-  const [guarded, setGuarded] = useState(false);
+  const [guarded, setGuarded] = useState(() => !guardRoute(route));
 
-  // On fresh page load, clear the nav flag so direct URL access is blocked
+  // On fresh page load, clear navigation flag
   useEffect(() => {
     clearNavFlag();
   }, []);
@@ -242,6 +279,7 @@ function Router() {
             <RouteRenderer
               routePath={route}
               adminUnlocked={!!ui.adminUnlocked}
+              onAdminUnlock={() => ui.setAdminUnlocked(true)}
               siteComponent={Site}
             />
           ) : (
@@ -251,6 +289,7 @@ function Router() {
                 <RouteRenderer
                   routePath={route}
                   adminUnlocked={!!ui.adminUnlocked}
+                  onAdminUnlock={() => ui.setAdminUnlocked(true)}
                   siteComponent={Site}
                 />
               </CinematicTransition>
@@ -270,6 +309,7 @@ export default function App() {
     <AuthProvider>
       <AppProvider>
         <AdminSecretListener />
+        <GlobalKeyboardShortcuts />
         <CinematicCursor />
         <Router />
         <CyberTerminal />

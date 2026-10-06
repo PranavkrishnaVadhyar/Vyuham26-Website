@@ -1,4 +1,14 @@
-export type StreamId = "technology" | "culture" | "gaming" | "management" | "impact";
+export type StreamId =
+  | "tech"
+  | "management"
+  | "cultural"
+  | "esports"
+  | "general"
+  | "session"
+  | "technology"
+  | "culture"
+  | "gaming"
+  | "impact";
 
 
 export interface Stream {
@@ -25,6 +35,7 @@ export interface FestEvent {
   venue: string;
   blurb: string;
   prize?: string;
+  fee?: string;
   seats: number;
   registered: number;
   image: string;

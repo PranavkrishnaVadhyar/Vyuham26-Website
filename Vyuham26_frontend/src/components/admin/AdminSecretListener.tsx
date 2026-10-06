@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import { useApp } from "@/lib/store";
 import { toast } from "@/components/ui/Toaster";
 import { cyberAudio } from "@/lib/cyberAudio";
+import { navigate, markInternalNav, getAppPath } from "@/lib/router";
 
 /**
  * Play a high-tech synthesized cyber audio chirp on root unlock/lock
@@ -49,42 +50,50 @@ export default function AdminSecretListener() {
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // 1. HARD SECRET CHORD 1: Ctrl + Alt + Shift + A (Cmd + Option + Shift + A on macOS)
-      const isQuadChord =
-        (e.ctrlKey || e.metaKey) &&
-        e.altKey &&
-        e.shiftKey &&
-        (e.code === "KeyA" || e.key.toLowerCase() === "a");
+      // 1. HARD SECRET CHORD:
+      // Accepts Ctrl+Shift+A, Ctrl+Alt+A, Alt+Shift+A, Ctrl+Alt+Shift+A, or Ctrl+Shift+F12 / Ctrl+F12
+      const isAKey = e.code === "KeyA" || e.key.toLowerCase() === "a";
+      const hasCtrl = e.ctrlKey || e.metaKey;
+      const hasAlt = e.altKey;
+      const hasShift = e.shiftKey;
 
-      // 2. HARD SECRET CHORD 2: Ctrl + Shift + F12
-      const isF12Chord =
-        (e.ctrlKey || e.metaKey) &&
-        e.shiftKey &&
-        (e.key === "F12" || e.code === "F12");
+      const isChord =
+        (isAKey &&
+          ((hasCtrl && hasShift) ||
+            (hasCtrl && hasAlt) ||
+            (hasAlt && hasShift) ||
+            (hasCtrl && hasAlt && hasShift))) ||
+        ((e.key === "F12" || e.code === "F12") && hasCtrl);
 
-      if (isQuadChord || isF12Chord) {
+      if (isChord) {
         e.preventDefault();
         e.stopPropagation();
 
-        const willUnlock = !ui.adminUnlocked;
+        const currentPath = getAppPath();
+        const isOnAdmin = currentPath === "/admin" || currentPath.startsWith("/admin/");
+        const willUnlock = !isOnAdmin;
+
         ui.setAdminUnlocked(willUnlock);
         playRootChime(willUnlock);
+        markInternalNav();
 
         if (willUnlock) {
+          navigate("/admin");
           toast(
-            "⚡ [ROOT OVERRIDE GRANTED] Admin Core protocol activated. Link revealed in footer.",
-            "info"
+            "⚡ [ROOT OVERRIDE GRANTED] Entering Admin Operations Center...",
+            "ok"
           );
         } else {
+          navigate("/");
           toast(
-            "🔒 [SECURITY PROTOCOL] Admin Core protocol locked and concealed.",
+            "🔒 [SECURITY PROTOCOL] Admin Core locked. Returned to festival arena.",
             "warn"
           );
         }
         return;
       }
 
-      // 3. STEALTH PASSPHRASE BUFFER (e.g. typing "root26" or "vyuhamadmin" anywhere outside inputs)
+      // 2. STEALTH PASSPHRASE BUFFER (e.g. typing "root26", "admin", "admin26", "root" outside inputs)
       const target = e.target as HTMLElement | null;
       const isInput =
         target &&
@@ -103,22 +112,34 @@ export default function AdminSecretListener() {
           bufferRef.current = "";
         }, 2500);
 
+        const buf = bufferRef.current;
         if (
-          bufferRef.current.endsWith("root26") ||
-          bufferRef.current.endsWith("vyuhamadmin") ||
-          bufferRef.current.endsWith("admin26")
+          buf.endsWith("root26") ||
+          buf.endsWith("admin26") ||
+          buf.endsWith("vyuhamadmin") ||
+          buf.endsWith("vyuham26") ||
+          buf.endsWith("admin") ||
+          buf.endsWith("root") ||
+          buf.endsWith("secret") ||
+          buf.endsWith("vyuham")
         ) {
           bufferRef.current = "";
-          const willUnlock = !ui.adminUnlocked;
+          const currentPath = getAppPath();
+          const isOnAdmin = currentPath === "/admin" || currentPath.startsWith("/admin/");
+          const willUnlock = !isOnAdmin;
+
           ui.setAdminUnlocked(willUnlock);
           playRootChime(willUnlock);
+          markInternalNav();
 
           if (willUnlock) {
+            navigate("/admin");
             toast(
-              "⚡ [STEALTH OVERRIDE VERIFIED] Admin Core unlocked.",
-              "info"
+              "⚡ [STEALTH OVERRIDE VERIFIED] Access Granted — Welcome Admin.",
+              "ok"
             );
           } else {
+            navigate("/");
             toast("🔒 [SECURITY LOCK] Admin Core concealed.", "warn");
           }
         }

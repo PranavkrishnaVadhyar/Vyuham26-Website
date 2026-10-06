@@ -756,7 +756,7 @@ export default function TeamsPage() {
                         </span>
 
                         <h4 className="mt-2 font-display font-medium text-paper">
-                          National Hackathon
+                          Hackathon — 24HR
                         </h4>
 
                         <div className="mt-3 flex items-center gap-2">
@@ -773,14 +773,14 @@ export default function TeamsPage() {
                         whileHover={reduceMotion ? undefined : { y: -2 }}
                         className="group relative overflow-hidden border border-line bg-[#080c0a] p-4"
                       >
-                        <div className="absolute inset-y-0 left-0 w-0.5 bg-purple-400" />
+                        <div className="absolute inset-y-0 left-0 w-0.5 bg-green" />
 
-                        <span className="font-mono text-[8px] uppercase tracking-wider text-purple-400">
-                          GAMING STREAM
+                        <span className="font-mono text-[8px] uppercase tracking-wider text-green">
+                          TECH STREAM
                         </span>
 
                         <h4 className="mt-2 font-display font-medium text-paper">
-                          CTF Warzone
+                          Capture the Flag
                         </h4>
 
                         <div className="mt-3 flex items-center gap-2">

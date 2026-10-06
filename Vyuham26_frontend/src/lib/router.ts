@@ -4,9 +4,11 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 /*  Navigation Guard — prevents direct URL access to sub-pages        */
 /* ------------------------------------------------------------------ */
 const NAV_FLAG_KEY = "vyuham26:nav";
+let _lastInternalNavTime = 0;
 
 /** Mark the current session as having performed internal navigation. */
-function markInternalNav(): void {
+export function markInternalNav(): void {
+  _lastInternalNavTime = Date.now();
   try {
     sessionStorage.setItem(NAV_FLAG_KEY, Date.now().toString());
   } catch { /* private mode */ }
@@ -14,6 +16,9 @@ function markInternalNav(): void {
 
 /** Check whether the current session has a valid internal navigation flag. */
 export function isInternalNavigation(): boolean {
+  if (_lastInternalNavTime && (Date.now() - _lastInternalNavTime < 30000)) {
+    return true;
+  }
   try {
     return !!sessionStorage.getItem(NAV_FLAG_KEY);
   } catch {
@@ -23,6 +28,7 @@ export function isInternalNavigation(): boolean {
 
 /** Clear the navigation flag (used on full page reload detection). */
 export function clearNavFlag(): void {
+  _lastInternalNavTime = 0;
   try {
     sessionStorage.removeItem(NAV_FLAG_KEY);
   } catch { /* private mode */ }
@@ -52,6 +58,12 @@ export function guardRoute(currentPath: string): boolean {
   if (typeof window === "undefined") return true;
   if (isHomeRoute(currentPath)) return true;
   if (isInternalNavigation()) return true;
+
+  // Admin routes have their own security gate and should never be blocked by nav guard
+  const normalized = normalizePath(currentPath);
+  if (normalized === "/admin" || normalized.startsWith("/admin/")) {
+    return true;
+  }
 
   // Not an internal navigation — redirect to home
   window.location.hash = "";

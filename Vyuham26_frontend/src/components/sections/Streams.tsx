@@ -21,7 +21,7 @@ export default function Streams() {
     if (!el || reduced) return;
     const ctx = gsap.context(() => {
       /* GSAP owns the centering transform so scale tweens can't clobber it */
-      gsap.set(".node, .core, .field-glow", { xPercent: -50, yPercent: -50 });
+      gsap.set(".node, .field-glow", { xPercent: -50, yPercent: -50 });
 
       const tl = gsap.timeline({
         scrollTrigger: { trigger: el, start: "top top", end: "bottom bottom", scrub: 0.9 },
@@ -65,36 +65,45 @@ export default function Streams() {
           {
             left: "50%",
             top: "50%",
-            scale: 0.16,
-            autoAlpha: 0.15,
+            scale: 0.12,
+            autoAlpha: 0,
             filter: "blur(6px)",
             ease: "power2.inOut",
             duration: 0.18,
           },
           conv,
         );
-        tl.to(`.path-${i}`, { opacity: 0.85, strokeWidth: 2.2, ease: "none", duration: 0.18 }, conv);
+        tl.to(`.path-${i}`, { opacity: 0.5, strokeWidth: 1.8, ease: "none", duration: 0.08 }, conv);
         void s;
       });
+
+      // Reduce opacity of the 4 rails / lines so they are not showing when text appears
+      tl.to(
+        ".energy-paths, .path-0, .path-1, .path-2, .path-3",
+        { autoAlpha: 0, opacity: 0, duration: 0.12, ease: "power2.out" },
+        conv + 0.08,
+      );
+
+      // Final reveal: Title, Official VYUHAM'26 Logo, and Description in unified centered layout
+      tl.fromTo(
+        ".str-final",
+        { autoAlpha: 0, yPercent: 20, filter: "blur(12px)" },
+        { autoAlpha: 1, yPercent: 0, filter: "blur(0px)", ease: "expo.out", duration: 0.14 },
+        conv + 0.1,
+      );
       tl.fromTo(
         ".core",
-        { autoAlpha: 0, scale: 0.3 },
-        { autoAlpha: 1, scale: 1, ease: "expo.out", duration: 0.14 },
-        conv + 0.06,
+        { autoAlpha: 0, scale: 0.35 },
+        { autoAlpha: 1, scale: 1, ease: "back.out(1.4)", duration: 0.16 },
+        conv + 0.1,
       );
       tl.fromTo(
         ".core-ring",
-        { scale: 0.35, opacity: 0.6 },
-        { scale: 1.8, opacity: 0, ease: "power2.out", duration: 0.2 },
-        conv + 0.08,
+        { scale: 0.35, opacity: 0.75 },
+        { scale: 1.85, opacity: 0, ease: "power2.out", duration: 0.22 },
+        conv + 0.11,
       );
-      tl.fromTo(
-        ".str-final",
-        { autoAlpha: 0, yPercent: 40, filter: "blur(16px)" },
-        { autoAlpha: 1, yPercent: 0, filter: "blur(0px)", ease: "expo.out", duration: 0.12 },
-        conv + 0.14,
-      );
-      tl.to(".field-glow", { opacity: 0.9, scale: 1.25, ease: "none", duration: 0.2 }, conv);
+      tl.to(".field-glow", { opacity: 0.85, scale: 1.25, ease: "none", duration: 0.2 }, conv);
     }, el);
     return () => ctx.revert();
   }, [reduced, streams]);
@@ -152,7 +161,7 @@ export default function Streams() {
 
         {/* energy paths */}
         <svg
-          className="pointer-events-none absolute inset-0 h-full w-full"
+          className="energy-paths pointer-events-none absolute inset-0 h-full w-full"
           viewBox="0 0 100 100"
           preserveAspectRatio="none"
           aria-hidden
@@ -188,7 +197,6 @@ export default function Streams() {
               />
             );
           })}
-          <circle cx="50" cy="50" r="0.35" fill="rgba(160,255,214,0.8)" vectorEffect="non-scaling-stroke" />
         </svg>
 
         {/* nodes */}
@@ -235,33 +243,6 @@ export default function Streams() {
           );
         })}
 
-        {/* core */}
-        <div className="core absolute left-1/2 top-1/2 opacity-0">
-          <div className="relative h-[22vw] max-h-[210px] min-h-[85px] w-[22vw] max-w-[210px] min-w-[85px] sm:h-[16vw] sm:w-[16vw]">
-            <div
-              className="absolute inset-0 rounded-full"
-              style={{ background: "radial-gradient(circle, rgba(126,255,200,0.55), rgba(10,60,40,0) 68%)", filter: "blur(6px)" }}
-            />
-            <svg viewBox="0 0 100 100" className="absolute inset-0 h-full w-full">
-              <polygon
-                points="50,6 88,28 88,72 50,94 12,72 12,28"
-                fill="none"
-                stroke="rgba(160,255,214,0.65)"
-                strokeWidth="0.7"
-              />
-              <polygon
-                points="50,20 76,35 76,65 50,80 24,65 24,35"
-                fill="none"
-                stroke="rgba(24,196,124,0.5)"
-                strokeWidth="0.5"
-                style={{ transformOrigin: "50% 50%", animation: "spin 24s linear infinite" }}
-              />
-              <circle cx="50" cy="50" r="6" fill="rgba(200,255,232,0.9)" />
-            </svg>
-            <div className="core-ring absolute inset-0 rounded-full border border-[rgba(126,255,200,0.4)]" />
-          </div>
-        </div>
-
         {/* centre readout */}
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center px-6">
           <div className="str-intro text-center">
@@ -274,6 +255,7 @@ export default function Streams() {
           </div>
         </div>
 
+        {/* stream readouts */}
         <div className="pointer-events-none absolute inset-x-0 bottom-[6%] sm:bottom-[10%] md:bottom-[12%] flex justify-center px-6">
           <div className="relative h-[220px] w-full max-w-[620px]">
             {streams.map((s, i) => (
@@ -296,26 +278,52 @@ export default function Streams() {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
 
-            <div className="str-final absolute inset-x-0 top-[-25vh] sm:top-[-30vh] md:top-[-34vh] text-center opacity-0">
-              <h3 className="t-cond text-[10vw] sm:text-[8vw] md:text-[6.5vw] leading-[0.86] text-[#f4fcf8]">
-                FOUR STREAMS.
-                <br />
-                <span className="text-[#18c47c]">ONE SIGNAL.</span>
-              </h3>
-              <MaskReveal delay={0.05}>
-                <p className="mx-auto mt-3 sm:mt-5 max-w-[52ch] text-[12px] sm:text-[13px] leading-relaxed text-[#7d9a8d]">
-                  Everything built, performed, played and proven across three days collapses into a single
-                  current — and that current has a date.
-                </p>
-              </MaskReveal>
+        {/* Final convergence reveal: Title, VYUHAM'26 Official Logo, and Subtitle cleanly aligned */}
+        <div className="str-final pointer-events-none absolute inset-0 flex flex-col items-center justify-center px-6 text-center opacity-0 z-20">
+          <h3 className="t-cond text-[9.5vw] sm:text-[7.5vw] md:text-[6vw] leading-[0.88] text-[#f4fcf8]">
+            FOUR STREAMS.
+            <br />
+            <span className="text-[#18c47c]">ONE SIGNAL.</span>
+          </h3>
+
+          {/* Official VYUHAM'26 Logo replacing the centre hexagon */}
+          <div className="core relative my-4 sm:my-6 md:my-7 flex items-center justify-center">
+            <div className="relative flex items-center justify-center h-[20vw] max-h-[140px] min-h-[85px] w-[20vw] max-w-[140px] min-w-[85px] sm:h-[13vw] sm:w-[13vw]">
+              {/* Radial glow aura */}
+              <div
+                className="absolute inset-[-24%] rounded-full"
+                style={{
+                  background: "radial-gradient(circle, rgba(24,196,124,0.45), rgba(16,140,92,0.12) 55%, transparent 70%)",
+                  filter: "blur(14px)",
+                }}
+              />
+              {/* Logo Brandmark */}
+              <img
+                src="/vyuham_logo_md.png"
+                alt="VYUHAM'26 Official Logo"
+                className="relative z-[2] h-full w-full object-contain drop-shadow-[0_0_24px_rgba(24,196,124,0.7)]"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = "/vyuham_logo.png";
+                }}
+              />
+              {/* Expanding pulse shockwave */}
+              <div className="core-ring absolute inset-[-15%] rounded-full border border-[rgba(126,255,200,0.45)] shadow-[0_0_20px_rgba(24,196,124,0.4)]" />
             </div>
           </div>
+
+          <MaskReveal delay={0.05}>
+            <p className="mx-auto max-w-[52ch] text-[12px] sm:text-[14px] md:text-[15px] leading-relaxed text-[#8caea0]">
+              Everything built, performed, played and proven across three days collapses into a single
+              current — and that current has a date.
+            </p>
+          </MaskReveal>
         </div>
 
         <div className="pointer-events-none absolute inset-0 vignette" />
       </div>
-      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );
 }

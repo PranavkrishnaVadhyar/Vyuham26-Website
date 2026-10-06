@@ -12,8 +12,8 @@ const streams = [
   {
     number: "01",
     glyph: "⌁",
-    title: "Technology",
-    description: "Hackathons, coding, CTF and innovation.",
+    title: "Tech",
+    description: "Hackathons, CTF, prompt battles and innovation.",
     slug: "tech",
     code: "TECH PROTOCOL",
     signal: "96%",
@@ -22,36 +22,36 @@ const streams = [
   },
   {
     number: "02",
-    glyph: "◈",
-    title: "Culture",
-    description: "Stage, visual arts, words and rhythm.",
-    slug: "culture",
-    code: "CULTURE PROTOCOL",
+    glyph: "⊹",
+    title: "Management",
+    description: "Best manager, finance, HR, marketing and business quiz.",
+    slug: "management",
+    code: "MANAGEMENT PROTOCOL",
     signal: "91%",
+    status: "ONLINE",
+    color: "lime",
+  },
+  {
+    number: "03",
+    glyph: "◈",
+    title: "Cultural",
+    description: "Fashion runway, cultural night, DJ and live concert.",
+    slug: "cultural",
+    code: "CULTURAL PROTOCOL",
+    signal: "95%",
     status: "ONLINE",
     color: "cyan",
   },
   {
-    number: "03",
+    number: "04",
     glyph: "✦",
-    title: "Gaming",
-    description: "Esports, strategy and zero-sum glory.",
-    slug: "gaming",
-    code: "GAMING PROTOCOL",
+    title: "Esports",
+    description: "Valorant, BGMI and E-Football championship brackets.",
+    slug: "esports",
+    code: "ESPORTS PROTOCOL",
     signal: "98%",
     status: "ONLINE",
     color: "violet",
-  },
-  {
-    number: "04",
-    glyph: "⊹",
-    title: "Management",
-    description: "Ideas designed to move the world forward.",
-    slug: "management",
-    code: "MANAGEMENT PROTOCOL",
-    signal: "88%",
-    status: "ONLINE",
-    color: "lime",
   },
 ] as const;
 
@@ -503,7 +503,10 @@ export default function StreamsSection() {
       if (
         target?.tagName === "INPUT" ||
         target?.tagName === "TEXTAREA" ||
-        target?.isContentEditable
+        target?.isContentEditable ||
+        event.ctrlKey ||
+        event.altKey ||
+        event.metaKey
       ) {
         return;
       }

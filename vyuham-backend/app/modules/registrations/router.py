@@ -4,7 +4,9 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.config import is_registration_open
+from pydantic import BaseModel
+
+from app.core.config import is_registration_open, set_runtime_registration_open
 from app.core.db import get_db
 from app.core.deps import get_current_user, require_role
 from app.modules.auth.models import Profile
@@ -19,6 +21,24 @@ from app.modules.registrations.service import (
 )
 
 router = APIRouter(prefix="/registrations", tags=["registrations"])
+
+
+class RegistrationGatewayStatus(BaseModel):
+    reg_open: bool
+
+
+@router.get("/config/status", response_model=RegistrationGatewayStatus)
+async def get_registration_gateway_status() -> dict[str, bool]:
+    return {"reg_open": is_registration_open()}
+
+
+@router.patch("/config/status", response_model=RegistrationGatewayStatus)
+async def set_registration_gateway_status(
+    data: RegistrationGatewayStatus,
+    _: Annotated[Profile, Depends(require_role("admin"))],
+) -> dict[str, bool]:
+    set_runtime_registration_open(data.reg_open)
+    return {"reg_open": is_registration_open()}
 
 
 @router.post("", response_model=RegistrationOut, status_code=status.HTTP_201_CREATED)

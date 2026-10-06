@@ -1,4 +1,5 @@
 import { MEDIA } from "./media";
+import { events as rawEvents } from "./events";
 import type {
   Announcement,
   FestEvent,
@@ -9,51 +10,52 @@ import type {
   TeamMember,
   UserAccount,
   Registration,
+  StreamId,
 } from "./types";
 
 /* ------------------------------------------------------------------ */
-/*  HOMEPAGE / GLOBAL COPY                                             */
+/*  HOMEPAGE / GLOBAL COPY (Source: VYUHAM26_v8.pdf)                   */
 /* ------------------------------------------------------------------ */
 
 export const homepage = {
   brand: "VYUHAM",
   year: "'26",
-  edition: "EDITION VII",
+  edition: "3RD EDITION",
   institution: "DIGITAL UNIVERSITY KERALA",
-  kicker: "TECHNOLOGY • CULTURE • GAMING • MANAGEMENT",
-  tagline: "THE FUTURE AWAITS.",
-  openingLine: "THE WORLD IS CHANGING.",
-  dates: "30 OCT — 01 NOV 2026",
-  location: "TECHNOCITY · THIRUVANANTHAPURAM",
+  kicker: "TECH • MANAGEMENT • CULTURAL • ESPORTS",
+  tagline: "WHERE TECHNOLOGY, MANAGEMENT & CULTURE CONVERGE",
+  openingLine: "NATIONAL-LEVEL TECHNO-CULTURAL FEST",
+  dates: "OCTOBER 30 – NOVEMBER 1, 2026",
+  location: "TECHNOCITY CAMPUS · THIRUVANANTHAPURAM, KERALA",
   countdownTarget: "2026-10-30T09:00:00+05:30",
   primaryCta: "ENTER VYUHAM",
   secondaryCta: "EXPLORE EVENTS",
-  finalCta: "ENTER THE FUTURE",
+  finalCta: "JOIN VYUHAM '26",
   about:
-    "A convergence of technology, culture, gaming and management at Digital University Kerala — bringing together ideas, creativity, competition and people shaping what comes next.",
+    "Vyuham is Digital University Kerala's flagship national-level management–techno–cultural fest — three days of competitions, workshops, talks and cultural showcases that bring students from across India together to build, debate, perform and celebrate.",
 
   aboutSupport:
-    "Three days. Four streams. One signal. VYUHAM'26 is built by students for the generation that refuses to wait for permission to build the future.",
-  awakeningTitle: "THE FUTURE IS ALREADY HERE.",
+    "More than a celebration of technology — Vyuham is where builders, managers and performers meet to push the boundaries of what's possible.",
+  awakeningTitle: "WHERE TECHNOLOGY, MANAGEMENT & CULTURE CONVERGE.",
   awakeningLines: [
-    "It is being written in labs at 3AM.",
-    "In rehearsal rooms that never close.",
-    "In the silence before the first move.",
-    "In the people who decide to begin.",
+    "Three days of non-stop action at Technocity.",
+    "24-hour hackathons, leadership crisis arenas, and esports brackets.",
+    "Panels with industry leaders and hands-on LLM workshops.",
+    "Fashion showcases, live cultural nights, and a massive closing concert.",
   ],
   stats: [
-    { value: "72", label: "HOURS" },
-    { value: "48", label: "EVENTS" },
-    { value: "120+", label: "COLLEGES" },
-    { value: "₹12L", label: "PRIZE POOL" },
+    { value: "3", label: "DAYS" },
+    { value: "30+", label: "EVENTS" },
+    { value: "₹2.21L", label: "PRIZE POOL" },
+    { value: "100+", label: "COLLEGES" },
   ],
   contact: {
-    email: "vyuham@duk.ac.in",
+    email: "techfest@duk.ac.in",
     phone: "+91 471 278 8000",
-    address: "Digital University Kerala, Technocity Campus, Thiruvananthapuram, Kerala 695317",
+    address: "Technocity Campus, Mangalapuram, Thiruvananthapuram – 695317",
     socials: [
-      { label: "INSTAGRAM", href: "https://instagram.com" },
-      { label: "YOUTUBE", href: "https://youtube.com" },
+      { label: "INSTAGRAM", href: "https://instagram.com/vyuham.duk" },
+      { label: "YOUTUBE", href: "https://youtube.com/@VYUHAMDUK" },
       { label: "LINKEDIN", href: "https://linkedin.com" },
       { label: "X", href: "https://x.com" },
     ],
@@ -74,350 +76,195 @@ export const navLinks = [
 
 /** Chapter cards used by the opening cinematic sequence. */
 export const introChapters = [
-  { key: "campus", word: "CAMPUS", sub: "WHERE IT BEGINS", image: MEDIA.campusNight, hold: 1250 },
-  { key: "people", word: "PEOPLE", sub: "WHO REFUSE TO WAIT", image: MEDIA.lecture, hold: 1100 },
-  { key: "tech", word: "TECHNOLOGY", sub: "BUILT AFTER MIDNIGHT", image: MEDIA.electronics, hold: 950 },
-  { key: "culture", word: "CULTURE", sub: "LOUD AND UNAPOLOGETIC", image: MEDIA.dancers, hold: 820 },
-  { key: "gaming", word: "GAMING", sub: "NO SECOND CHANCES", image: MEDIA.esports, hold: 700 },
-  { key: "management", word: "MANAGEMENT", sub: "STRATEGY & EXECUTION", image: MEDIA.impactField, hold: 620 },
+  { key: "campus", word: "CAMPUS", sub: "TECHNOCITY, TVM", image: MEDIA.campusNight, hold: 1250 },
+  { key: "tech", word: "TECH", sub: "INNOVATE & BUILD", image: MEDIA.electronics, hold: 1100 },
+  { key: "management", word: "MANAGEMENT", sub: "STRATEGY & CRISIS", image: MEDIA.impactTeam, hold: 950 },
+  { key: "cultural", word: "CULTURAL", sub: "PERFORM & CELEBRATE", image: MEDIA.dancers, hold: 820 },
+  { key: "esports", word: "ESPORTS", sub: "COMPETE & CONQUER", image: MEDIA.esports, hold: 700 },
 ];
 
 /* ------------------------------------------------------------------ */
-/*  STREAMS                                                            */
+/*  STREAMS (Source: VYUHAM26_v8.pdf)                                  */
 /* ------------------------------------------------------------------ */
 
 export const streams: Stream[] = [
   {
-    id: "technology",
+    id: "tech",
     index: "01",
-    name: "TECHNOLOGY",
-    line: "Build what comes next.",
+    name: "TECH",
+    line: "Innovate, build, conquer.",
     description:
-      "Hardware that shouldn't work but does. Models trained on stolen sleep. 36 hours, one problem, no excuses.",
+      "24HR Hackathon, Capture the Flag, Startup Showcase, Prompt War, Tech Quiz, and deep tech sessions.",
     accent: "#18c47c",
     glow: "rgba(24,196,124,0.55)",
-    image: MEDIA.oscilloscope,
+    image: MEDIA.lab,
     stats: [
-      { label: "EVENTS", value: "14" },
-      { label: "PRIZE", value: "₹5L" },
+      { label: "PRIZE POOL", value: "₹1,00,000" },
+      { label: "FLAGSHIP", value: "24HR HACKATHON" },
     ],
     node: { x: 0.18, y: 0.24 },
   },
   {
-    id: "culture",
-    index: "02",
-    name: "CULTURE",
-    line: "Express what defines us.",
-    description:
-      "Twelve languages on one stage. Rhythm inherited, rebuilt, and handed forward louder than it arrived.",
-    accent: "#f2c98a",
-    glow: "rgba(242,201,138,0.45)",
-    image: MEDIA.dancerSilhouette,
-    stats: [
-      { label: "EVENTS", value: "16" },
-      { label: "STAGES", value: "04" },
-    ],
-    node: { x: 0.82, y: 0.2 },
-  },
-  {
-    id: "gaming",
-    index: "03",
-    name: "GAMING",
-    line: "Challenge the limits.",
-    description:
-      "Reaction time measured in milliseconds. LAN arenas, open brackets, and a crowd that hears every keystroke.",
-    accent: "#5ff3d2",
-    glow: "rgba(95,243,210,0.45)",
-    image: MEDIA.esportsArena,
-    stats: [
-      { label: "TITLES", value: "09" },
-      { label: "SLOTS", value: "512" },
-    ],
-    node: { x: 0.2, y: 0.78 },
-  },
-  {
     id: "management",
-    index: "04",
+    index: "02",
     name: "MANAGEMENT",
-    line: "Lead, strategize, build empires.",
+    line: "Lead, strategize, execute.",
     description:
-      "Venture pitch battles, boardroom crisis simulations, corporate strategizing and operational leadership challenges.",
+      "Best Manager & Team, Finance & HR crisis simulations, Marketing strategy games, and Business Quiz.",
     accent: "#6ff2b8",
     glow: "rgba(111,242,184,0.45)",
     image: MEDIA.impactTeam,
     stats: [
-      { label: "TRACKS", value: "09" },
-      { label: "PARTNERS", value: "22" },
+      { label: "PRIZE POOL", value: "₹90,000" },
+      { label: "FLAGSHIP", value: "BEST MANAGER" },
+    ],
+    node: { x: 0.82, y: 0.2 },
+  },
+  {
+    id: "cultural",
+    index: "03",
+    name: "CULTURAL",
+    line: "Celebrate, express, ignite.",
+    description:
+      "Runway fashion show, DUK cultural performances, live DJ night, and the headlining closing concert.",
+    accent: "#f2c98a",
+    glow: "rgba(242,201,138,0.45)",
+    image: MEDIA.dancers,
+    stats: [
+      { label: "MAINSTAGE", value: "OPEN AIR STAGE" },
+      { label: "FLAGSHIP", value: "CONCERT NIGHT" },
+    ],
+    node: { x: 0.2, y: 0.78 },
+  },
+  {
+    id: "esports",
+    index: "04",
+    name: "ESPORTS",
+    line: "Reflexes, tactics, victory.",
+    description:
+      "Valorant Tournament championship decider, high-intensity BGMI scrims, and E-Football showdowns.",
+    accent: "#5ff3d2",
+    glow: "rgba(95,243,210,0.45)",
+    image: MEDIA.esportsArena,
+    stats: [
+      { label: "PRIZE POOL", value: "₹21,000" },
+      { label: "FLAGSHIP", value: "VALORANT" },
     ],
     node: { x: 0.8, y: 0.8 },
   },
 ];
 
-
 /* ------------------------------------------------------------------ */
-/*  SCHEDULE / JOURNEY                                                 */
+/*  SCHEDULE / JOURNEY (Source: VYUHAM26_v8.pdf)                       */
 /* ------------------------------------------------------------------ */
 
 export const schedule: ScheduleDay[] = [
   {
     id: "day-1",
     day: "DAY 01",
-    title: "IGNITION",
+    title: "DAY ONE",
     date: "30 OCT 2026",
     intensity: 0.34,
-    statement: "The first spark is always quiet.",
+    statement: "HACKATHON BEGINS · MANAGEMENT GAMES · INAUGURATION",
     description:
-      "Gates open at dawn. Keynote, hackathon flag-off and the first qualifiers. The campus stops being a campus.",
+      "24HR Hackathon begins with overnight mentoring, full lineup of 6 management games, tech & AI sessions, and the official VYUHAM '26 Inauguration on the Open Air Stage.",
     image: MEDIA.campusFigure,
     beats: [
-      { time: "07:30", label: "GATES / REGISTRATION DESK" },
-      { time: "09:00", label: "OPENING CEREMONY — CENTRAL AMPHITHEATRE" },
-      { time: "11:00", label: "HACK VYUHAM 36H — FLAG OFF" },
-      { time: "15:00", label: "STREAM QUALIFIERS BEGIN" },
-      { time: "20:30", label: "NIGHT SET — LIGHT & SOUND" },
+      { time: "09:00 AM", label: "HACKATHON — 24HR BEGINS (MAIN HALL + LAB)" },
+      { time: "10:00 AM", label: "MANAGEMENT GAMES (BEST MANAGER, TEAM, HR, FINANCE, MKTG, QUIZ)" },
+      { time: "10:00 AM", label: "PANEL: RESPONSIBLE AI — A HUMANITIES LENS" },
+      { time: "12:00 PM", label: "TALK: QUANTUM COMPUTING MEETS AI: REAL VS. HYPE" },
+      { time: "02:00 PM", label: "WORKSHOP: PROMPT ENGINEERING & BUILDING WITH LLMS" },
+      { time: "05:00 PM", label: "INAUGURATION CEREMONY (OPEN AIR STAGE)" },
+      { time: "OVERNIGHT", label: "HACKATHON CONTINUES — MIDNIGHT MENTORING ROUND & SNACKS" },
     ],
   },
   {
     id: "day-2",
     day: "DAY 02",
-    title: "CONVERGENCE",
+    title: "DAY TWO",
     date: "31 OCT 2026",
     intensity: 0.68,
-    statement: "Four streams. One current.",
+    statement: "HACKATHON JUDGING · CTF · MAIN STAGE NIGHT",
     description:
-      "Every arena runs at once. Robotics finals overlap with the cultural mainstage while the LAN floor never sleeps.",
+      "Hackathon demos and evaluation, Capture the Flag, Startup Showcase, Prompt War, Tech Quiz, expert AI talk sessions, and an electric Cultural & DJ Night.",
     image: MEDIA.crowd,
     beats: [
-      { time: "08:00", label: "ROBOWARS — ARENA 02" },
-      { time: "10:30", label: "IMPACT SUMMIT — FOUNDERS PANEL" },
-      { time: "13:00", label: "LAN FINALS — STAGE GRID" },
-      { time: "17:00", label: "CULTURAL MAINSTAGE OPENS" },
-      { time: "21:00", label: "HEADLINE PERFORMANCE" },
+      { time: "09:00 AM", label: "HACKATHON DEMOS & JUDGING (MAIN HALL)" },
+      { time: "10:00 AM", label: "CAPTURE THE FLAG & PROMPT WAR (COMPUTER LAB)" },
+      { time: "10:00 AM", label: "STARTUP SHOWCASE & TECH QUIZ (GALLERY HALL)" },
+      { time: "02:00 PM", label: "TALK: STATE OF AGENTIC AI & CAREERS IN APPLIED AI" },
+      { time: "04:00 PM", label: "PANEL: CYBERSECURITY CAREERS — LIVE CTF DEBRIEF" },
+      { time: "04:00 PM", label: "CULTURAL NIGHT BY DUK STUDENTS (OPEN AIR STAGE)" },
+      { time: "08:00 PM", label: "DJ NIGHT (OPEN AIR STAGE)" },
     ],
   },
   {
     id: "day-3",
     day: "DAY 03",
-    title: "AFTERSHOCK",
+    title: "DAY THREE",
     date: "01 NOV 2026",
     intensity: 1,
-    statement: "What remains when the lights cut.",
+    statement: "CLOSING CEREMONY · CONCERT NIGHT",
     description:
-      "Grand finales, results, and the closing sequence. Everything built over 72 hours collides in one night.",
+      "AI Short Film screenings, Ethical Hacking workshop, Valorant Tournament decider, Hackathon prize distribution, Movie Quiz, Fashion Show, and the Grand Closing Concert.",
     image: MEDIA.laser,
     beats: [
-      { time: "09:00", label: "HACK VYUHAM — FINAL PITCHES" },
-      { time: "12:00", label: "GRAND FINALS — ALL STREAMS" },
-      { time: "16:00", label: "SHOWCASE WALK — INNOVATION MILE" },
-      { time: "19:00", label: "AWARDS & CLOSING" },
-      { time: "21:30", label: "AFTERSHOCK — CLOSING SET" },
+      { time: "09:00 AM", label: "AI SHORT FILM SCREENINGS & KSUM TALK SESSION" },
+      { time: "10:00 AM", label: "WORKSHOP: ETHICAL HACKING & OSINT RECONNAISSANCE" },
+      { time: "10:00 AM", label: "VALORANT TOURNAMENT CHAMPIONSHIP DECIDER" },
+      { time: "01:00 PM", label: "HACKATHON WINNERS & PRIZE DISTRIBUTION" },
+      { time: "01:00 PM", label: "MOVIE QUIZ (GALLERY HALL)" },
+      { time: "06:00 PM", label: "FASHION SHOW (OPEN AIR STAGE)" },
+      { time: "07:00 PM", label: "CLOSING CEREMONY & CONCERT NIGHT (OPEN AIR STAGE)" },
     ],
   },
 ];
 
 /* ------------------------------------------------------------------ */
-/*  EVENTS                                                             */
+/*  EVENTS (Unified directly from rawEvents — Source: VYUHAM26_v8.pdf) */
 /* ------------------------------------------------------------------ */
 
-export const events: FestEvent[] = [
-  {
-    id: "ev-hack",
-    name: "HACK VYUHAM 36",
-    stream: "technology",
-    day: 1,
-    date: "30 OCT 2026",
-    time: "11:00 — 23:00",
-    venue: "INNOVATION BLOCK · L4",
-    blurb:
-      "Thirty-six uninterrupted hours. One brief revealed at flag-off. Build, break, ship before the sun comes back twice.",
-    prize: "₹2,50,000",
-    seats: 400,
-    registered: 331,
-    image: MEDIA.lab,
-    featured: true,
-    status: "closing",
-  },
-  {
-    id: "ev-robowars",
-    name: "ROBOWARS: STEEL RITE",
-    stream: "technology",
-    day: 2,
-    date: "31 OCT 2026",
-    time: "08:00 — 18:00",
-    venue: "ARENA 02 · EAST YARD",
-    blurb:
-      "15kg combat class. Reinforced arena, open weapon rules, and a floor that has never survived a full weekend.",
-    prize: "₹1,20,000",
-    seats: 64,
-    registered: 64,
-    image: MEDIA.roboticsWide,
-    status: "full",
-  },
-  {
-    id: "ev-circuit",
-    name: "SILENT CIRCUIT",
-    stream: "technology",
-    day: 2,
-    date: "31 OCT 2026",
-    time: "14:00 — 17:00",
-    venue: "ELECTRONICS LAB · B WING",
-    blurb:
-      "Reverse-engineer a sealed board with no documentation. Oscilloscopes provided. Assumptions are not.",
-    seats: 120,
-    registered: 87,
-    image: MEDIA.oscilloscope,
-    status: "open",
-  },
-  {
-    id: "ev-mainstage",
-    name: "MAINSTAGE: NIGHT ONE",
-    stream: "culture",
-    day: 2,
-    date: "31 OCT 2026",
-    time: "21:00 — 00:30",
-    venue: "CENTRAL AMPHITHEATRE",
-    blurb:
-      "The headline set. Forty thousand watts, a crowd that arrived six hours early, and a skyline that answers back.",
-    seats: 6000,
-    registered: 4820,
-    image: MEDIA.crowdBlue,
-    featured: true,
-    status: "open",
-  },
-  {
-    id: "ev-nritya",
-    name: "NRITYA — CLASSICAL FRAME",
-    stream: "culture",
-    day: 1,
-    date: "30 OCT 2026",
-    time: "17:00 — 20:00",
-    venue: "HERITAGE HALL",
-    blurb:
-      "Bharatanatyam, Kuchipudi and Kathak in a single lighting grid designed for shadow, not spectacle.",
-    prize: "₹60,000",
-    seats: 300,
-    registered: 244,
-    image: MEDIA.kathakali,
-    status: "open",
-  },
-  {
-    id: "ev-battle",
-    name: "STREET BATTLE 2V2",
-    stream: "culture",
-    day: 3,
-    date: "01 NOV 2026",
-    time: "15:00 — 19:00",
-    venue: "OPEN PLAZA",
-    blurb: "Open cypher, elimination format, live DJ. No choreography allowed — only what you can answer with.",
-    prize: "₹80,000",
-    seats: 128,
-    registered: 96,
-    image: MEDIA.dancers,
-    status: "open",
-  },
-  {
-    id: "ev-valorant",
-    name: "VALORANT OPEN BRACKET",
-    stream: "gaming",
-    day: 2,
-    date: "31 OCT 2026",
-    time: "10:00 — 22:00",
-    venue: "LAN FLOOR · ARENA 01",
-    blurb:
-      "128 teams. Double elimination. Broadcast desk, shoutcast, and a viewing wall that makes every clutch public.",
-    prize: "₹1,50,000",
-    seats: 640,
-    registered: 588,
-    image: MEDIA.esports,
-    featured: true,
-    status: "closing",
-  },
-  {
-    id: "ev-bgmi",
-    name: "BGMI SCRIM SERIES",
-    stream: "gaming",
-    day: 1,
-    date: "30 OCT 2026",
-    time: "13:00 — 20:00",
-    venue: "MOBILE ARENA · DOME",
-    blurb: "Six matches, rolling points, zero reruns. Bring your own device, we bring the pressure.",
-    prize: "₹70,000",
-    seats: 400,
-    registered: 312,
-    image: MEDIA.arcade,
-    status: "open",
-  },
-  {
-    id: "ev-retro",
-    name: "RETRO CABINET RUN",
-    stream: "gaming",
-    day: 3,
-    date: "01 NOV 2026",
-    time: "11:00 — 16:00",
-    venue: "ARCADE ZONE",
-    blurb: "Twenty restored cabinets. Highest aggregate score across five titles. One credit each.",
-    seats: 200,
-    registered: 121,
-    image: MEDIA.gamingRoom,
-    status: "open",
-  },
-  {
-    id: "ev-summit",
-    name: "IMPACT SUMMIT",
-    stream: "impact",
-    day: 2,
-    date: "31 OCT 2026",
-    time: "10:30 — 13:00",
-    venue: "CONVENTION HALL",
-    blurb:
-      "Founders, policy researchers and climate engineers in conversation about what actually scales beyond a pitch deck.",
-    seats: 800,
-    registered: 512,
-    image: MEDIA.filmCrew,
-    status: "open",
-  },
-  {
-    id: "ev-climate",
-    name: "CLIMATE BUILD SPRINT",
-    stream: "impact",
-    day: 3,
-    date: "01 NOV 2026",
-    time: "09:00 — 17:00",
-    venue: "GREEN LAB",
-    blurb:
-      "Eight hours to prototype one intervention for a real municipal dataset. Judged on deployability, not slides.",
-    prize: "₹1,00,000",
-    seats: 150,
-    registered: 108,
-    image: MEDIA.impactField,
-    status: "open",
-  },
-  {
-    id: "ev-outreach",
-    name: "OUTREACH: 1000 HANDS",
-    stream: "impact",
-    day: 1,
-    date: "30 OCT 2026",
-    time: "06:30 — 10:00",
-    venue: "CITY SECTOR 4",
-    blurb:
-      "A pre-dawn city intervention run with partner NGOs. Registration closes when the vans are full.",
-    seats: 1000,
-    registered: 742,
-    image: MEDIA.impactTeam,
-    status: "open",
-  },
-];
+export const events: FestEvent[] = rawEvents.map((e) => {
+  const imageByStream: Record<string, string> = {
+    tech: MEDIA.lab,
+    management: MEDIA.impactTeam,
+    cultural: MEDIA.dancers,
+    esports: MEDIA.esportsArena,
+    general: MEDIA.crowdBlue,
+    session: MEDIA.lecture,
+  };
+
+  const isClosing = e.featured || e.slug === "hackathon" || e.slug === "valorant";
+
+  return {
+    id: `ev-${e.slug}`,
+    name: e.title,
+    stream: e.stream as StreamId,
+    day: e.day,
+    date: e.day === 1 ? "30 OCT 2026" : e.day === 2 ? "31 OCT 2026" : "01 NOV 2026",
+    time: e.time,
+    venue: e.venue,
+    blurb: e.description,
+    prize: e.prizes !== "N/A" && e.prizes !== "Campus Life" ? e.prizes : undefined,
+    fee: e.fee !== "FREE ENTRY" && e.fee !== "Open Access" ? e.fee : undefined,
+    seats: e.slug.includes("hackathon") ? 400 : 200,
+    registered: e.slug.includes("hackathon") ? 312 : 85,
+    image: imageByStream[e.stream] || MEDIA.lab,
+    featured: e.featured,
+    status: isClosing ? "closing" : "open",
+  };
+});
 
 /* ------------------------------------------------------------------ */
 /*  GALLERY / EXPERIENCE                                               */
 /* ------------------------------------------------------------------ */
 
 export const gallery: GalleryItem[] = [
-  { id: "g1", type: "image", src: MEDIA.crowd, caption: "MAINSTAGE — NIGHT TWO", tag: "CULTURE", span: "wide" },
+  { id: "g1", type: "image", src: MEDIA.crowd, caption: "MAINSTAGE — NIGHT TWO", tag: "CULTURAL", span: "wide" },
   { id: "g2", type: "image", src: MEDIA.tunnel, caption: "THE APPROACH", tag: "CAMPUS", span: "tall" },
-  { id: "g3", type: "image", src: MEDIA.esportsArena, caption: "LAN FLOOR — ARENA 01", tag: "GAMING", span: "std" },
-  { id: "g4", type: "image", src: MEDIA.electronics, caption: "BUILD BAY 07", tag: "TECHNOLOGY", span: "std" },
+  { id: "g3", type: "image", src: MEDIA.esportsArena, caption: "LAN FLOOR — ESPORTS ARENA", tag: "ESPORTS", span: "std" },
+  { id: "g4", type: "image", src: MEDIA.electronics, caption: "BUILD BAY — COMPUTER LAB", tag: "TECH", span: "std" },
   {
     id: "g5",
     type: "video",
@@ -427,19 +274,19 @@ export const gallery: GalleryItem[] = [
     tag: "FILM",
     span: "wide",
   },
-  { id: "g6", type: "image", src: MEDIA.dancerSilhouette, caption: "HERITAGE HALL", tag: "CULTURE", span: "tall" },
-  { id: "g7", type: "image", src: MEDIA.laser, caption: "AFTERSHOCK CLOSING SET", tag: "CULTURE", span: "std" },
-  { id: "g8", type: "image", src: MEDIA.victory, caption: "GRAND FINAL — MATCH POINT", tag: "GAMING", span: "std" },
-  { id: "g9", type: "image", src: MEDIA.campusNight, caption: "SOUTH CAMPUS 02:40", tag: "CAMPUS", span: "wide" },
+  { id: "g6", type: "image", src: MEDIA.dancerSilhouette, caption: "OPEN AIR STAGE", tag: "CULTURAL", span: "tall" },
+  { id: "g7", type: "image", src: MEDIA.laser, caption: "AFTERSHOCK CLOSING CONCERT", tag: "CULTURAL", span: "std" },
+  { id: "g8", type: "image", src: MEDIA.victory, caption: "GRAND FINAL — MATCH POINT", tag: "ESPORTS", span: "std" },
+  { id: "g9", type: "image", src: MEDIA.campusNight, caption: "TECHNOCITY CAMPUS 02:40", tag: "CAMPUS", span: "wide" },
 ];
 
 export const zones = [
-  { id: "z1", code: "Z-01", name: "CENTRAL AMPHITHEATRE", note: "6,000 CAP · MAINSTAGE" },
-  { id: "z2", code: "Z-02", name: "INNOVATION BLOCK", note: "HACK FLOOR · 36H ACCESS" },
-  { id: "z3", code: "Z-03", name: "ARENA GRID", note: "LAN + ROBOTICS COMBAT" },
-  { id: "z4", code: "Z-04", name: "HERITAGE HALL", note: "CLASSICAL & THEATRE" },
-  { id: "z5", code: "Z-05", name: "INNOVATION MILE", note: "EXHIBITS · STARTUP WALK" },
-  { id: "z6", code: "Z-06", name: "NIGHT MARKET", note: "FOOD · MERCH · 24H" },
+  { id: "z1", code: "Z-01", name: "OPEN AIR STAGE", note: "INAUGURATION · CULTURAL · CONCERT" },
+  { id: "z2", code: "Z-02", name: "MAIN HALL", note: "24HR HACKATHON · CEREMONIES" },
+  { id: "z3", code: "Z-03", name: "COMPUTER LAB", note: "CTF · PROMPT WAR · LLM WORKSHOPS" },
+  { id: "z4", code: "Z-04", name: "GALLERY HALL", note: "MANAGEMENT GAMES · QUIZZES · TALKS" },
+  { id: "z5", code: "Z-05", name: "SEMINAR HALL", note: "AI PANELS · QUANTUM COMPUTING TALKS" },
+  { id: "z6", code: "Z-06", name: "CAMPUS GROUNDS", note: "FOOD COURT · MARKETS & STALLS · CONTESTS" },
 ];
 
 /* ------------------------------------------------------------------ */
@@ -459,10 +306,10 @@ export const sponsors: Sponsor[] = [
 
 export const team: TeamMember[] = [
   { id: "t1", name: "ANANYA RAO", role: "FESTIVAL DIRECTOR", dept: "CORE" },
-  { id: "t2", name: "KABIR MENON", role: "TECHNOLOGY LEAD", dept: "STREAMS" },
-  { id: "t3", name: "ISHA VERMA", role: "CULTURE LEAD", dept: "STREAMS" },
-  { id: "t4", name: "ROHAN D'SOUZA", role: "GAMING LEAD", dept: "STREAMS" },
-  { id: "t5", name: "MEERA NAIR", role: "IMPACT LEAD", dept: "STREAMS" },
+  { id: "t2", name: "KABIR MENON", role: "TECH LEAD", dept: "STREAMS" },
+  { id: "t3", name: "ISHA VERMA", role: "MANAGEMENT LEAD", dept: "STREAMS" },
+  { id: "t4", name: "ROHAN D'SOUZA", role: "CULTURAL LEAD", dept: "STREAMS" },
+  { id: "t5", name: "MEERA NAIR", role: "ESPORTS LEAD", dept: "STREAMS" },
   { id: "t6", name: "ADITYA SHARMA", role: "CREATIVE DIRECTOR", dept: "DESIGN" },
 ];
 
@@ -470,21 +317,21 @@ export const announcements: Announcement[] = [
   {
     id: "a1",
     date: "12 SEP 2026",
-    title: "HACK VYUHAM 36 — SECOND WAVE OPEN",
-    body: "An additional 120 seats released after infrastructure expansion in the Innovation Block.",
+    title: "24HR HACKATHON — PROBLEM STATEMENT TRACKS ANNOUNCED",
+    body: "Theme: Agentic AI / Autonomous Systems. Mentors from top AI labs confirmed for midnight rounds.",
     pinned: true,
   },
   {
     id: "a2",
     date: "04 SEP 2026",
-    title: "MAINSTAGE HEADLINER REVEAL — 25 SEP",
-    body: "The Night Two headline act will be announced in the reveal film dropping at 20:00 IST.",
+    title: "CONCERT NIGHT HEADLINER REVEAL — COMING SOON",
+    body: "The Day 3 Closing Concert headliner on the Open Air Stage will be revealed shortly.",
   },
   {
     id: "a3",
     date: "28 AUG 2026",
-    title: "TRAVEL & ACCOMMODATION DESK LIVE",
-    body: "Outstation participants can now request subsidised campus housing during registration.",
+    title: "PRE-FEST ONLINE QUALIFIERS LIVE",
+    body: "BGMI and E-Football online qualifiers begin 5 days prior to the festival kickoff.",
   },
 ];
 
@@ -529,8 +376,8 @@ export const seedRegistrations: Registration[] = [
     id: "r-1",
     userId: "u-demo",
     userName: "ARJUN IYER",
-    eventId: "ev-hack",
-    eventName: "HACK VYUHAM 36",
+    eventId: "ev-hackathon",
+    eventName: "Hackathon — 24HR",
     createdAt: "2026-08-20",
     status: "confirmed",
   },

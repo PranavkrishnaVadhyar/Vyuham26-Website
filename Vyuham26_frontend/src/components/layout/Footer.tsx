@@ -2,15 +2,85 @@ import { useApp } from "@/lib/store";
 import { navLinks } from "@/data/content";
 import { scrollToId, scrollToTop } from "@/lib/scroll";
 import { FocusIn } from "@/components/cinematic/Reveal";
-import { toast } from "@/components/ui/Toaster";
 import Logo from "@/components/ui/Logo";
+import { navigate, markInternalNav } from "@/lib/router";
+
+function SocialIcon({ name, className = "h-3.5 w-3.5" }: { name: string; className?: string }) {
+  const norm = name.toUpperCase();
+  if (norm === "INSTAGRAM") {
+    return (
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className={className}
+      >
+        <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
+        <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+        <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
+      </svg>
+    );
+  }
+  if (norm === "YOUTUBE") {
+    return (
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className={className}
+      >
+        <path d="M2.5 17a24.12 24.12 0 0 1 0-10 2 2 0 0 1 1.4-1.4 49.56 49.56 0 0 1 16.2 0A2 2 0 0 1 21.5 7a24.12 24.12 0 0 1 0 10 2 2 0 0 1-1.4 1.4 49.55 49.55 0 0 1-16.2 0A2 2 0 0 1 2.5 17" />
+        <polygon points="10 15 15 12 10 9 10 15" fill="currentColor" stroke="none" />
+      </svg>
+    );
+  }
+  if (norm === "LINKEDIN") {
+    return (
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className={className}
+      >
+        <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
+        <rect width="4" height="12" x="2" y="9" />
+        <circle cx="4" cy="4" r="2" />
+      </svg>
+    );
+  }
+  // X (Twitter)
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+    >
+      <path d="M4 4l11.733 16h4.267l-11.733 -16z" />
+      <path d="M4 20l6.768 -6.768m2.46 -2.46l6.772 -6.772" />
+    </svg>
+  );
+}
 
 export default function Footer() {
-  const { content, ui } = useApp();
+  const { content } = useApp();
   const hp = content.homepage;
 
   const navigateTo = (path: string) => {
-    window.location.hash = path;
+    markInternalNav();
+    navigate(path);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -65,6 +135,23 @@ export default function Footer() {
             <span>{hp.institution}</span>
           </div>
           <p className="mt-2 font-mono text-[9px] tracking-[0.28em] text-[#4f6f61]">{hp.dates} · {hp.location}</p>
+
+          {/* Quick social icon buttons under brand column */}
+          <div className="mt-5 flex items-center gap-2">
+            {hp.contact.socials.map((s) => (
+              <a
+                key={s.label}
+                href={s.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                title={s.label}
+                aria-label={s.label}
+                className="flex h-8 w-8 items-center justify-center rounded-lg border border-[rgba(120,160,145,0.2)] bg-[rgba(6,15,11,0.6)] text-[#84a094] transition-all duration-300 hover:border-emerald-500/50 hover:bg-emerald-950/50 hover:text-emerald-300 hover:shadow-[0_0_12px_rgba(24,196,124,0.25)]"
+              >
+                <SocialIcon name={s.label} />
+              </a>
+            ))}
+          </div>
         </div>
 
         {/* Public platform links */}
@@ -155,7 +242,7 @@ export default function Footer() {
           </button>
         </div>
 
-        {/* Support, Admin & Contact */}
+        {/* Support, Social & Contact */}
         <div className="flex flex-col gap-2.5">
           <p className="eyebrow mb-1">CONNECT & SUPPORT</p>
           <button
@@ -183,21 +270,37 @@ export default function Footer() {
             {hp.contact.email}
           </a>
           <p className="font-mono text-[10px] tracking-[0.18em] text-[#84a094]">{hp.contact.phone}</p>
-          <div className="mt-3 flex flex-wrap gap-2">
-            {ui.adminUnlocked && (
-              <button
-                onClick={() => navigateTo("/admin")}
-                className="border border-emerald-500/60 bg-emerald-950/60 px-2.5 py-1 font-mono text-[9px] tracking-[0.2em] text-emerald-300 hover:border-emerald-200 shadow-[0_0_14px_rgba(24,196,124,0.4)] animate-pulse transition-all duration-300"
-                title="Root Core Active (Ctrl+Alt+Shift+A to conceal)"
-              >
-                ADMIN CORE ↗
-              </button>
-            )}
+
+          {/* Social Channels List */}
+          <div className="mt-3 pt-3 border-t border-[rgba(120,160,145,0.14)]">
+            <p className="font-mono text-[8px] tracking-[0.26em] text-[#527768] uppercase mb-2">
+              SOCIAL CHANNELS
+            </p>
+            <div className="flex flex-col gap-1.5">
+              {hp.contact.socials.map((s) => (
+                <a
+                  key={s.label}
+                  href={s.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group flex items-center justify-between rounded border border-[rgba(120,160,145,0.16)] bg-[rgba(6,15,11,0.5)] px-2.5 py-1.5 font-mono text-[9px] tracking-[0.18em] text-[#84a094] transition-all duration-300 hover:border-emerald-500/40 hover:bg-emerald-950/30 hover:text-emerald-300"
+                >
+                  <div className="flex items-center gap-2">
+                    <SocialIcon name={s.label} className="h-3 w-3 text-emerald-400/80 group-hover:text-emerald-300 transition-colors" />
+                    <span>{s.label}</span>
+                  </div>
+                  <span className="text-[8px] text-[#4f6f61] group-hover:text-emerald-400 group-hover:translate-x-0.5 transition-all">↗</span>
+                </a>
+              ))}
+            </div>
+          </div>
+
+          <div className="mt-2">
             <button
               onClick={() => window.dispatchEvent(new CustomEvent("open-cyber-terminal"))}
-              className="border border-[rgba(120,160,145,0.3)] px-2.5 py-1 font-mono text-[9px] tracking-[0.2em] text-[#84a094] hover:text-white"
+              className="w-full flex items-center justify-center gap-1.5 border border-[rgba(120,160,145,0.22)] bg-[rgba(6,15,11,0.4)] px-2.5 py-1.5 font-mono text-[9px] tracking-[0.2em] text-[#709786] hover:border-emerald-500/40 hover:text-emerald-300 transition-colors"
             >
-              CONSOLE (⌘K)
+              <span>CONSOLE (⌘K)</span>
             </button>
           </div>
         </div>

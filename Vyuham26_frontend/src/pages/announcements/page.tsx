@@ -14,12 +14,12 @@ export default function AnnouncementsFeedPage() {
     {
       id: "01",
       priority: "HIGH PRIORITY",
-      title: "CTF WARZONE // ROUND 02",
+      title: "CAPTURE THE FLAG // ROUND 02",
       subtitle: "OPENING SHIFT DETECTED",
       time: "10 MIN AGO",
       stream: "TECH",
       content:
-        "All registered CTF teams are requested to report to the Cyber Range by 11:15 AM for network credential allocation.",
+        "All registered CTF teams are requested to report to the Computer Lab by 11:15 AM for network credential allocation.",
       accent: "green",
     },
     {
@@ -36,12 +36,12 @@ export default function AnnouncementsFeedPage() {
     {
       id: "03",
       priority: "LIVE SIGNAL",
-      title: "BATTLE OF THE BANDS",
-      subtitle: "SOUND CHECK WINDOW OPEN",
+      title: "FASHION SHOW // RUNWAY CALL",
+      subtitle: "DESIGNER LINEUP OPEN",
       time: "02 HRS AGO",
-      stream: "CULTURE",
+      stream: "CULTURAL",
       content:
-        "Stage A sound checks begin at 03:00 PM. Team leads are requested to bring their stage technical riders.",
+        "Open call runway briefing starts at the Open Air Stage. Student designers and models report for rehearsal.",
       accent: "purple",
     },
   ];

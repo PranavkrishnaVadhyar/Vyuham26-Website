@@ -7,12 +7,27 @@ import AnimatedSection from "@/components/motion/AnimatedSection";
 import { Kicker, Button } from "@/components/ui/Elements";
 import { useAuth } from "@/context/AuthContext";
 import { adminApi, type AdminStatsResponse } from "@/lib/api";
+import { useRegistrationOpen, setRegistrationOpen } from "@/config/site";
+import { toast } from "@/components/ui/Toaster";
+import { cyberAudio } from "@/lib/cyberAudio";
 
 export default function AdminDashboardPage() {
   const { user } = useAuth();
+  const regOpen = useRegistrationOpen();
   const reduceMotion = usePrefersReducedMotion();
-  const [filter, setFilter] = useState<"all" | "tech" | "culture" | "gaming">("all");
+  const [filter, setFilter] = useState<"all" | "tech" | "management" | "cultural" | "esports">("all");
   const [stats, setStats] = useState<AdminStatsResponse | null>(null);
+
+  const handleToggleRegistration = () => {
+    cyberAudio.playTelemetry();
+    const next = !regOpen;
+    setRegistrationOpen(next);
+    if (next) {
+      toast("🟢 [GATEWAY ACTIVATED] Registration is now OPEN live across all public portals.", "ok");
+    } else {
+      toast("🟠 [GATEWAY LOCKED] Registration is CLOSED. Public sees COMING SOON.", "warn");
+    }
+  };
 
   useEffect(() => {
     adminApi.getStats().then((data) => setStats(data)).catch(() => {});
@@ -52,19 +67,78 @@ export default function AdminDashboardPage() {
 
                 {/* Filter Controls */}
                 <div className="flex flex-wrap gap-2 font-mono text-xs">
-                  {(["all", "tech", "culture", "gaming"] as const).map((cat) => (
+                  {(["all", "tech", "management", "cultural", "esports"] as const).map((cat) => (
                     <button
                       key={cat}
                       onClick={() => setFilter(cat)}
                       className={`rounded px-3 py-1.5 uppercase font-medium transition-all ${
                         filter === cat
-                          ? "border border-green bg-green/10 text-green"
+                           ? "border border-green bg-green/10 text-green"
                           : "border border-line bg-ink-mid/40 text-muted hover:text-paper"
                       }`}
                     >
                       {cat}
                     </button>
                   ))}
+                </div>
+              </div>
+            </AnimatedSection>
+
+            {/* Festival Registration Gateway Operational Status Banner */}
+            <AnimatedSection delay={0.05}>
+              <div
+                className={`mt-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4 p-5 rounded-lg border backdrop-blur-xl transition-all duration-300 ${
+                  regOpen
+                    ? "border-emerald-500/40 bg-emerald-950/20 shadow-[0_0_25px_rgba(24,196,124,0.1)]"
+                    : "border-amber-500/40 bg-amber-950/20 shadow-[0_0_25px_rgba(245,158,11,0.1)]"
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="relative flex h-3.5 w-3.5 items-center justify-center">
+                    <span
+                      className={`absolute inline-flex h-full w-full rounded-full opacity-75 animate-ping ${
+                        regOpen ? "bg-emerald-400" : "bg-amber-400"
+                      }`}
+                    />
+                    <span
+                      className={`relative inline-flex h-2.5 w-2.5 rounded-full ${
+                        regOpen ? "bg-emerald-400" : "bg-amber-400"
+                      }`}
+                    />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="font-mono text-xs font-bold uppercase tracking-[0.2em] text-paper">
+                        Registration Gateway:
+                      </span>
+                      <span
+                        className={`font-mono text-xs font-extrabold uppercase tracking-[0.22em] ${
+                          regOpen ? "text-emerald-400" : "text-amber-400"
+                        }`}
+                      >
+                        {regOpen ? "OPEN & LIVE" : "CLOSED (COMING SOON)"}
+                      </span>
+                    </div>
+                    <p className="mt-0.5 font-mono text-[10px] text-muted">
+                      {regOpen
+                        ? "Public portals are actively accepting event registrations, teams, and pass checkouts."
+                        : "Registration forms and checkout are locked. Public sees 'COMING SOON' on Nav and event pages."}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3 shrink-0">
+                  <button
+                    type="button"
+                    onClick={handleToggleRegistration}
+                    className={`font-mono text-xs font-bold px-4 py-2 uppercase tracking-[0.18em] transition-all duration-300 rounded border ${
+                      regOpen
+                        ? "border-red-500/60 bg-red-950/40 text-red-300 hover:bg-red-900/60 hover:text-white hover:shadow-[0_0_15px_rgba(239,68,68,0.3)]"
+                        : "border-emerald-500/60 bg-emerald-950/50 text-emerald-300 hover:bg-emerald-900/70 hover:text-white hover:shadow-[0_0_20px_rgba(24,196,124,0.4)]"
+                    }`}
+                  >
+                    {regOpen ? "Turn OFF Registration" : "Turn ON Registration"}
+                  </button>
                 </div>
               </div>
             </AnimatedSection>

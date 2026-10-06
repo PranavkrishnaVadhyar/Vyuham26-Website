@@ -38,7 +38,7 @@ export default function LeaderboardPage() {
                     LIVE <em>LEADERBOARD</em>
                   </h1>
                   <p className="mt-2 text-sm text-muted">
-                    Real-time ranking for National Hackathon & CTF Warzone.
+                    Real-time ranking for Hackathon — 24HR & Capture the Flag.
                   </p>
                 </div>
                 <div className="font-mono text-xs text-green">

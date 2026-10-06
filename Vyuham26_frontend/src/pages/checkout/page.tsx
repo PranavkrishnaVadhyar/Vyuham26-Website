@@ -17,9 +17,9 @@ export default function CheckoutPage() {
   const reduceMotion = usePrefersReducedMotion();
 
   const [items, setItems] = useState([
-    { id: "1", title: "National Hackathon", fee: 500, stream: "TECH", squad: "CyberVipers" },
-    { id: "2", title: "CTF Warzone", fee: 300, stream: "TECH", squad: "CyberVipers" },
-    { id: "3", title: "Battle of the Bands", fee: 400, stream: "CULTURE", squad: "Solo" },
+    { id: "1", title: "Hackathon — 24HR", fee: 1000, stream: "TECH", squad: "CyberVipers" },
+    { id: "2", title: "Capture the Flag", fee: 400, stream: "TECH", squad: "CyberVipers" },
+    { id: "3", title: "Best Management Team", fee: 400, stream: "MANAGEMENT", squad: "Apex Strikers" },
   ]);
   const [isCreatingOrder, setIsCreatingOrder] = useState(false);
 

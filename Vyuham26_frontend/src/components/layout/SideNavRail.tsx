@@ -201,6 +201,12 @@ export default function SideNavRail() {
         return;
       }
 
+      // Ignore when modifiers like Ctrl, Alt, Meta are held down
+      // so we do not hijack browser shortcuts (Ctrl+1..9) or terminal shortcuts (Ctrl+K)
+      if (e.ctrlKey || e.altKey || e.metaKey) {
+        return;
+      }
+
       // Keys 0 to 9 (1-9 for nodes 01-09, 0 for node 10)
       const keyNum = parseInt(e.key, 10);
       if (!isNaN(keyNum) && keyNum >= 0 && keyNum <= 9) {

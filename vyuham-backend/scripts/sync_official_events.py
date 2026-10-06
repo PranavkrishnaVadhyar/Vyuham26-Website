@@ -1,8 +1,9 @@
 import asyncio
 from decimal import Decimal
-from sqlalchemy import select, delete, or_
+from sqlalchemy import select, text
 from app.core.db import SessionFactory, engine
 from app.modules.events.models import Event, EventStream, RegistrationType
+from app.modules.announcements.models import Announcement
 
 OFFICIAL_EVENTS = [
     # ── DAY 1: OCTOBER 30, 2026 ──
@@ -693,44 +694,82 @@ OFFICIAL_EVENTS = [
     },
 ]
 
+OFFICIAL_ANNOUNCEMENTS = [
+    {
+        "title": "DUK Technocity Gates Open for Fest Check-in",
+        "content": "All registered operatives proceed to Gate 1 and Gate 2 for QR pass verification and welcome kit collection.",
+        "category": "LOGISTICS",
+        "urgent": True,
+        "stream": "ALL",
+        "pinned": True,
+    },
+    {
+        "title": "Hackathon — 24HR Problem Statement Released",
+        "content": "The official Agentic AI / Autonomous Systems hackathon challenge is now accessible in the build zone.",
+        "category": "TECH",
+        "urgent": False,
+        "stream": "TECH",
+        "pinned": False,
+    },
+    {
+        "title": "Capture the Flag Briefing in Computer Lab",
+        "content": "Registered CTF teams report to Computer Lab for network credential allocation and environment setup.",
+        "category": "CYBER",
+        "urgent": False,
+        "stream": "TECH",
+        "pinned": False,
+    },
+]
 
-async def main() -> None:
-    async with SessionFactory() as session:
-        # Delete obsolete events
+async def sync():
+    async with SessionFactory() as db:
+        print("Cleaning obsolete events...")
+        # Remove old template events
         obsolete_slugs = [
             "robowars", "silent-circuit", "nritya", "street-battle", "street-art",
             "retro-arcade", "code-relay", "ai-arena", "pitch-perfect", "sustainability-hack",
             "battle-of-bands", "outreach-1000-hands", "climate-build", "impact-summit", "poetry-slam",
             "valorant", "hackathon-36", "ai-short-film-showcase", "campus-photography"
         ]
-        await session.execute(delete(Event).where(Event.slug.in_(obsolete_slugs)))
-        await session.execute(delete(Event).where(or_(
+        from sqlalchemy import delete, or_
+        await db.execute(delete(Event).where(Event.slug.in_(obsolete_slugs)))
+        await db.execute(delete(Event).where(or_(
             Event.name.ilike('Robowars%'),
             Event.name.ilike('Silent Circuit%'),
             Event.name.ilike('Nritya%'),
             Event.name.ilike('Street Battle%'),
             Event.name.ilike('Retro Cabinet%')
         )))
-        await session.commit()
+        await db.commit()
 
-        # Check existing events by slug
-        result = await session.scalars(select(Event))
-        existing_map = {e.slug: e for e in result if e.slug}
+        # Update or Insert official events
+        print("Syncing official events from VYUHAM26_v8.pdf...")
+        existing_result = await db.scalars(select(Event))
+        existing_map = {e.slug: e for e in existing_result if e.slug}
 
-        for item in OFFICIAL_EVENTS:
-            slug = item["slug"]
-            existing = existing_map.get(slug)
-
-            if existing:
-                for k, v in item.items():
-                    setattr(existing, k, v)
+        for ev_data in OFFICIAL_EVENTS:
+            slug = ev_data["slug"]
+            if slug in existing_map:
+                ev = existing_map[slug]
+                for k, v in ev_data.items():
+                    setattr(ev, k, v)
             else:
-                session.add(Event(**item))
+                db.add(Event(**ev_data))
 
-        await session.commit()
-        print(f"Successfully seeded {len(OFFICIAL_EVENTS)} official Vyuham '26 events from VYUHAM26_v8.pdf.")
+        # Sync announcements
+        print("Syncing announcements...")
+        await db.execute(delete(Announcement).where(Announcement.title.ilike('%National Hackathon%')))
+        ann_result = await db.scalars(select(Announcement))
+        existing_anns = {a.title: a for a in ann_result}
+
+        for ann_data in OFFICIAL_ANNOUNCEMENTS:
+            if ann_data["title"] not in existing_anns:
+                db.add(Announcement(**ann_data))
+
+        await db.commit()
+        print("Database synchronized successfully with official schedule!")
+
     await engine.dispose()
 
-
 if __name__ == "__main__":
-    asyncio.run(main())
+    asyncio.run(sync())

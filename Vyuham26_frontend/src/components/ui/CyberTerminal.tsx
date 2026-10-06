@@ -9,7 +9,11 @@ import {
 import Link from "@/shims/next-link";
 import { lockScroll } from "@/lib/scroll";
 import { useApp } from "@/lib/store";
-import { SITE_CONFIG } from "@/config/site";
+import { SITE_CONFIG, setRegistrationOpen, isRegistrationOpen } from "@/config/site";
+import { useConsoleConfig, type ConsoleConfig } from "@/config/consoleConfig";
+import { cyberAudio } from "@/lib/cyberAudio";
+import { navigate, markInternalNav } from "@/lib/router";
+import { toast } from "@/components/ui/Toaster";
 
 interface HistoryItem {
   type: "input" | "output" | "system" | "error" | "ascii";
@@ -39,26 +43,31 @@ const INITIAL_WELCOME: HistoryItem[] = [
   },
 ];
 
-const HELP_TEXT = `VYUHAM’26 TERMINAL
+export function getDynamicHelpText(config: ConsoleConfig, isAdmin: boolean): string {
+  const sections: string[] = [];
 
-EXPLORE
+  sections.push("VYUHAM’26 TERMINAL");
+
+  sections.push(`EXPLORE
   events        - Explore festival events
   schedule      - Festival journey
   streams       - Technology / Culture / Gaming / Management
   about         - Discover VYUHAM’26
-
   venue         - Explore the festival venue
-  gallery       - Open the cinematic gallery
+  gallery       - Open the cinematic gallery`);
 
-ACCOUNT
+  if (config.showAccount) {
+    sections.push(`ACCOUNT
   register      - Event registration
   login         - Login portal
   signup        - Create an account
   dashboard     - Participant dashboard
   profile       - Participant profile
-  ticket        - Digital festival pass
+  ticket        - Digital festival pass`);
+  }
 
-FESTIVAL
+  if (config.showFestival) {
+    sections.push(`FESTIVAL
   certificates  - Certificates
   leaderboard   - Live standings
   results       - Competition results
@@ -72,17 +81,28 @@ FESTIVAL
   contact       - Contact VYUHAM
   support       - Support center
   feedback      - Festival feedback
-  photography   - Photography experience
+  photography   - Photography experience`);
+  }
 
-IDENTITY
+  sections.push(`IDENTITY
   logo          - Display VYUHAM identity
   status        - Festival system status
-  whoami        - Current terminal session
+  whoami        - Current terminal session`);
 
-TERMINAL
+  if (config.showRootGateway || isAdmin) {
+    sections.push(`ROOT GATEWAY (ADMIN)
+  reg:open      - Turn ON festival registrations
+  reg:close     - Turn OFF festival registrations
+  reg:status    - Check live gateway status`);
+  }
+
+  sections.push(`TERMINAL
   help          - Show available commands
   clear / cls   - Clear terminal
-  exit / quit   - Close terminal`;
+  exit / quit   - Close terminal`);
+
+  return sections.join("\n\n");
+}
 
 export default function CyberTerminal() {
   const [isOpen, setIsOpen] = useState(false);
@@ -91,6 +111,7 @@ export default function CyberTerminal() {
   const [cmdHistory, setCmdHistory] = useState<string[]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
 
+  const [consoleConfig] = useConsoleConfig();
   const { ui } = useApp();
   const inputRef = useRef<HTMLInputElement>(null);
   const terminalEndRef = useRef<HTMLDivElement>(null);
@@ -141,15 +162,33 @@ export default function CyberTerminal() {
   useEffect(() => {
     const handleKeyDown = (event: globalThis.KeyboardEvent) => {
       const activeTag = document.activeElement?.tagName;
-      const typing = activeTag === "INPUT" || activeTag === "TEXTAREA";
+      const isInput =
+        activeTag === "INPUT" ||
+        activeTag === "TEXTAREA" ||
+        activeTag === "SELECT" ||
+        (document.activeElement as HTMLElement)?.isContentEditable;
+      const isTerminalInput = document.activeElement === inputRef.current;
 
-      if (
-        !typing &&
-        (event.key === "`" ||
-          event.key === "~" ||
-          ((event.ctrlKey || event.metaKey) &&
-            event.key.toLowerCase() === "k"))
-      ) {
+      const isBackquote =
+        event.key === "`" ||
+        event.key === "~" ||
+        event.code === "Backquote";
+
+      // Toggle shortcuts:
+      // - Backtick / Tilde (when not in a regular page input)
+      // - Ctrl+` or Cmd+` (works anywhere!)
+      // - Ctrl+K or Cmd+K (works anywhere!)
+      // - Ctrl+/ or Cmd+/ (works anywhere!)
+      const isTerminalShortcut =
+        ((event.ctrlKey || event.metaKey) &&
+          (event.key.toLowerCase() === "k" ||
+            isBackquote ||
+            event.key === "/" ||
+            event.code === "Slash")) ||
+        (!isInput && isBackquote) ||
+        (isTerminalInput && isBackquote && inputVal === "");
+
+      if (isTerminalShortcut) {
         event.preventDefault();
         setIsOpen((previous) => !previous);
         return;
@@ -231,7 +270,12 @@ export default function CyberTerminal() {
 
       switch (command) {
         case "help":
-          addOutput(HELP_TEXT, undefined, undefined, "system");
+          addOutput(
+            getDynamicHelpText(consoleConfig, ui.adminUnlocked),
+            undefined,
+            undefined,
+            "system"
+          );
           break;
 
         case "events":
@@ -336,6 +380,18 @@ competitions, performances and experiences.`,
           break;
 
         case "register":
+          if (!consoleConfig.showAccount) {
+            addOutput(
+              `[MODULE RESTRICTED // ACCOUNT GATEWAY]
+
+Participant registration commands are currently locked by administration.
+Public pre-launch mode active. Check official festival schedule & announcements for enrollment opening.`,
+              "/events",
+              "Explore public events directory →",
+              "system"
+            );
+            break;
+          }
           if (!SITE_CONFIG.REG_OPEN) {
             addOutput(
               `[REGISTRATION]
@@ -356,6 +412,18 @@ Choose an event and become part of the VYUHAM’26 journey.`,
           break;
 
         case "login":
+          if (!consoleConfig.showAccount) {
+            addOutput(
+              `[MODULE RESTRICTED // ACCOUNT GATEWAY]
+
+Participant authentication is currently locked by administration.
+Public pre-launch mode active.`,
+              "/schedule",
+              "View festival schedule →",
+              "system"
+            );
+            break;
+          }
           if (!SITE_CONFIG.REG_OPEN) {
             addOutput(
               `[LOGIN]
@@ -376,7 +444,19 @@ Access your VYUHAM’26 participant account.`,
           break;
 
         case "signup":
-          if (!SITE_CONFIG.REG_OPEN) {
+          if (!consoleConfig.showAccount) {
+            addOutput(
+              `[MODULE RESTRICTED // ACCOUNT GATEWAY]
+
+Participant account creation is currently locked by administration.
+Public pre-launch mode active.`,
+              "/events",
+              "Browse events →",
+              "system"
+            );
+            break;
+          }
+          if (!isRegistrationOpen()) {
             addOutput(
               `[CREATE ACCOUNT]
 
@@ -396,7 +476,18 @@ Create your VYUHAM’26 participant profile.`,
           break;
 
         case "dashboard":
-          if (!SITE_CONFIG.REG_OPEN) {
+          if (!consoleConfig.showAccount) {
+            addOutput(
+              `[MODULE RESTRICTED // ACCOUNT GATEWAY]
+
+Participant dashboard access is currently locked by administration.`,
+              "/schedule",
+              "View schedule →",
+              "system"
+            );
+            break;
+          }
+          if (!isRegistrationOpen()) {
             addOutput(
               `[PARTICIPANT DASHBOARD]
 
@@ -416,7 +507,18 @@ View registrations, tickets, certificates and festival activity.`,
           break;
 
         case "profile":
-          if (!SITE_CONFIG.REG_OPEN) {
+          if (!consoleConfig.showAccount) {
+            addOutput(
+              `[MODULE RESTRICTED // ACCOUNT GATEWAY]
+
+Participant profile management is currently locked by administration.`,
+              "/about",
+              "Learn about Vyuham →",
+              "system"
+            );
+            break;
+          }
+          if (!isRegistrationOpen()) {
             addOutput(
               `[PROFILE]
 
@@ -436,27 +538,79 @@ Manage your participant information and VYUHAM activity.`,
           break;
 
         case "admin":
-          if (ui.adminUnlocked) {
-            addOutput(
-              `[ADMINISTRATION]
+        case "root":
+        case "sudo":
+        case "root26":
+        case "admin26":
+        case "vyuhamadmin": {
+          const pass = (args[0] || "").toLowerCase();
+          const validPassphrases = [
+            "root26",
+            "admin26",
+            "vyuhamadmin",
+            "vyuham26",
+            "admin",
+            "root",
+          ];
+          const isSecret =
+            validPassphrases.includes(pass) ||
+            command === "root26" ||
+            command === "admin26" ||
+            command === "vyuhamadmin" ||
+            (args.length === 0 && (command === "admin" || command === "root"));
 
-Restricted administration interface for managing the VYUHAM ecosystem.`,
+          if (isSecret || ui.adminUnlocked) {
+            ui.setAdminUnlocked(true);
+            markInternalNav();
+            cyberAudio.playTelemetry();
+            addOutput(
+              `[AUTHENTICATION GRANTED]
+Welcome, Administrator. Level-0 Root clearance verified.
+Redirecting to Operations Console...`,
               "/admin",
-              "Open admin →"
+              "Enter Admin Operations Console →",
+              "system"
             );
+            toast("⚡ [ADMIN ACCESS GRANTED] Operations Console Unlocked", "ok");
+            setTimeout(() => {
+              navigate("/admin");
+              setIsOpen(false);
+            }, 600);
+          } else if (args.length > 0) {
+            addOutput(
+              `[ACCESS DENIED] Invalid authorization signature for '${pass}'.
+Type 'admin root26' or visit the Cyber Gate.`,
+              "/admin",
+              "Open Cyber Gate →",
+              "error"
+            );
+            toast("⛔ [ACCESS DENIED] Invalid authorization signature", "warn");
           } else {
             addOutput(
-              `Command not recognized: '${trimmed}'.
-
-Type 'help' to see the available VYUHAM’26 commands.`,
-              undefined,
-              undefined,
-              "error"
+              `[RESTRICTED PROTOCOL // ADMIN GATEWAY]
+Direct administrative console requires authentication.
+Use: 'admin <passphrase>' (e.g. 'admin root26') or press Ctrl+Shift+A.`,
+              "/admin",
+              "Open Admin Gateway (Cyber Gate) →",
+              "system"
             );
           }
           break;
+        }
 
         case "ticket":
+          if (!consoleConfig.showAccount) {
+            addOutput(
+              `[MODULE RESTRICTED // TICKETING]
+
+Digital pass retrieval is currently locked by administration.
+Public pre-launch mode active.`,
+              "/schedule",
+              "View festival schedule →",
+              "system"
+            );
+            break;
+          }
           addOutput(
             `[DIGITAL PASS]
 
@@ -467,6 +621,18 @@ View your VYUHAM’26 festival access pass.`,
           break;
 
         case "certificates":
+          if (!consoleConfig.showFestival) {
+            addOutput(
+              `[MODULE RESTRICTED // FESTIVAL OPERATIONS]
+
+Festival live operations and certificates are scheduled for festival kickoff (30 OCT — 01 NOV 2026).
+Module is currently locked by administration.`,
+              "/schedule",
+              "View festival schedule →",
+              "system"
+            );
+            break;
+          }
           addOutput(
             `[CERTIFICATES]
 
@@ -477,6 +643,18 @@ Access official participation and achievement certificates.`,
           break;
 
         case "leaderboard":
+          if (!consoleConfig.showFestival) {
+            addOutput(
+              `[MODULE RESTRICTED // FESTIVAL OPERATIONS]
+
+Live standings and competition leaderboards will activate on event days.
+Module is currently locked by administration.`,
+              "/schedule",
+              "View festival schedule →",
+              "system"
+            );
+            break;
+          }
           addOutput(
             `[LEADERBOARD]
 
@@ -487,6 +665,18 @@ Follow team standings and competition progress.`,
           break;
 
         case "results":
+          if (!consoleConfig.showFestival) {
+            addOutput(
+              `[MODULE RESTRICTED // FESTIVAL OPERATIONS]
+
+Competition results and finalist announcements will be published during festival days.
+Module is currently locked by administration.`,
+              "/schedule",
+              "View festival schedule →",
+              "system"
+            );
+            break;
+          }
           addOutput(
             `[RESULTS]
 
@@ -497,6 +687,18 @@ View official competition results and finalist information.`,
           break;
 
         case "qualifiers":
+          if (!consoleConfig.showFestival) {
+            addOutput(
+              `[MODULE RESTRICTED // FESTIVAL OPERATIONS]
+
+Qualifier schedules and matchup brackets will activate on event days.
+Module is currently locked by administration.`,
+              "/schedule",
+              "View festival schedule →",
+              "system"
+            );
+            break;
+          }
           addOutput(
             `[QUALIFIERS]
 
@@ -507,6 +709,18 @@ Explore qualifier schedules, matchups and advancement information.`,
           break;
 
         case "food":
+          if (!consoleConfig.showFestival) {
+            addOutput(
+              `[MODULE RESTRICTED // FESTIVAL OPERATIONS]
+
+Campus food services, stall menus, and food wallet activate during festival kickoff.
+Module is currently locked by administration.`,
+              "/venue",
+              "Explore venue information →",
+              "system"
+            );
+            break;
+          }
           addOutput(
             `[CAMPUS EXPERIENCE]
 
@@ -517,6 +731,18 @@ Food, wallet and festival vendor services.`,
           break;
 
         case "checkin":
+          if (!consoleConfig.showFestival) {
+            addOutput(
+              `[MODULE RESTRICTED // FESTIVAL OPERATIONS]
+
+Festival on-ground check-in opens on event day at campus gates.
+Module is currently locked by administration.`,
+              "/venue",
+              "Explore venue information →",
+              "system"
+            );
+            break;
+          }
           addOutput(
             `[CHECK-IN]
 
@@ -527,6 +753,18 @@ Access the festival check-in experience.`,
           break;
 
         case "teams":
+          if (!consoleConfig.showFestival) {
+            addOutput(
+              `[MODULE RESTRICTED // FESTIVAL OPERATIONS]
+
+Registered team rosters and verification activate closer to festival start.
+Module is currently locked by administration.`,
+              "/schedule",
+              "View festival schedule →",
+              "system"
+            );
+            break;
+          }
           addOutput(
             `[TEAMS]
 
@@ -646,6 +884,85 @@ STATUS        : NOMINAL`
           setIsOpen(false);
           return;
 
+        case "reg:open":
+        case "registration:open":
+        case "reg-open":
+          if (!consoleConfig.showRootGateway && !ui.adminUnlocked) {
+            addOutput(
+              `[RESTRICTED PROTOCOL // ROOT PRIVILEGE REQUIRED]
+
+Administrative root clearance required to execute registration gateway overrides.
+Clearance signature not verified. Type 'admin <passphrase>' or unlock via Cyber Gate.`,
+              "/admin",
+              "Open Admin Gateway (Cyber Gate) →",
+              "error"
+            );
+            break;
+          }
+          setRegistrationOpen(true);
+          cyberAudio.playTelemetry();
+          addOutput(
+            `[ROOT OVERRIDE GRANTED]
+
+FESTIVAL REGISTRATION GATEWAY: OPEN & LIVE
+- Public registration routes unlocked (/register, /checkout)
+- Event registration buttons activated
+- Attendee enrollment protocol: NOMINAL`,
+            "/register",
+            "Open registration portal →"
+          );
+          break;
+
+        case "reg:close":
+        case "registration:close":
+        case "reg-close":
+          if (!consoleConfig.showRootGateway && !ui.adminUnlocked) {
+            addOutput(
+              `[RESTRICTED PROTOCOL // ROOT PRIVILEGE REQUIRED]
+
+Administrative root clearance required to execute registration gateway overrides.
+Clearance signature not verified. Type 'admin <passphrase>' or unlock via Cyber Gate.`,
+              "/admin",
+              "Open Admin Gateway (Cyber Gate) →",
+              "error"
+            );
+            break;
+          }
+          setRegistrationOpen(false);
+          cyberAudio.playTelemetry();
+          addOutput(
+            `[ROOT OVERRIDE GRANTED]
+
+FESTIVAL REGISTRATION GATEWAY: CLOSED
+- Public portals set to COMING SOON
+- Registration forms locked
+- Security gate active: SAFEGUARDED`
+          );
+          break;
+
+        case "reg:status":
+        case "registration:status":
+          if (!consoleConfig.showRootGateway && !ui.adminUnlocked) {
+            addOutput(
+              `[RESTRICTED PROTOCOL // ROOT PRIVILEGE REQUIRED]
+
+Administrative root clearance required to inspect gateway telemetry.
+Clearance signature not verified. Type 'admin <passphrase>' or unlock via Cyber Gate.`,
+              "/admin",
+              "Open Admin Gateway (Cyber Gate) →",
+              "error"
+            );
+            break;
+          }
+          addOutput(
+            `FESTIVAL REGISTRATION GATEWAY STATUS:
+
+GATE STATUS : ${isRegistrationOpen() ? "OPEN (LIVE)" : "CLOSED (COMING SOON)"}
+AUDIT       : LOCAL_STORAGE_PERSISTED
+ACCESS      : ADMIN ROOT TOGGLEABLE`
+          );
+          break;
+
         default:
           addOutput(
             `Command not recognized: '${trimmed}'.
@@ -663,7 +980,7 @@ Type 'help' to see the available VYUHAM’26 commands.`,
         );
       }
     },
-    [addOutput, ui.adminUnlocked]
+    [addOutput, ui.adminUnlocked, consoleConfig]
   );
 
   const handleSubmit = (event: FormEvent) => {
@@ -674,6 +991,23 @@ Type 'help' to see the available VYUHAM’26 commands.`,
   const handleInputKeyDown = (
     event: KeyboardEvent<HTMLInputElement>
   ) => {
+    if (event.key === "Escape") {
+      event.preventDefault();
+      setIsOpen(false);
+      return;
+    }
+
+    if (
+      (event.ctrlKey || event.metaKey) &&
+      (event.key.toLowerCase() === "k" ||
+        event.key === "`" ||
+        event.code === "Backquote")
+    ) {
+      event.preventDefault();
+      setIsOpen(false);
+      return;
+    }
+
     if (event.key === "ArrowUp") {
       event.preventDefault();
 

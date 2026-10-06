@@ -16,12 +16,12 @@ export default function QualifiersPage() {
             <AnimatedSection>
               <div className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
                 <div>
-                  <Kicker>Pre-Launch Briefing</Kicker>
+                  <Kicker>PRE FEST · 5 DAYS BEFORE</Kicker>
                   <h1 className="mt-2 font-display text-[36px] font-semibold md:text-[52px]">
-                    PRE-FEST <em>QUALIFIERS</em>
+                    ONLINE <em>QUALIFIERS</em>
                   </h1>
                   <p className="mt-2 max-w-xl text-sm text-muted">
-                    Online qualification brackets for flagship events. Secure your spot in the finals before on-ground fest dates.
+                    Official online tournament qualifiers beginning 5 days prior to VYUHAM &apos;26 fest kickoff.
                   </p>
                 </div>
                 {SITE_CONFIG.REG_OPEN ? (
@@ -39,76 +39,116 @@ export default function QualifiersPage() {
 
             {/* Qualifier Brackets List */}
             <div className="mt-12 space-y-6">
+              {/* E-Football Tournament */}
               <AnimatedSection delay={0.1}>
                 <div className="glass-card p-6 md:p-8">
                   <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center border-b border-line pb-4">
                     <div>
-                      <StreamBadge stream="tech" />
+                      <StreamBadge stream="esports" />
                       <h2 className="mt-2 font-display text-2xl font-bold text-paper">
-                        National Hackathon — Phase 1 Screening
+                        E-Football Tournament
                       </h2>
                       <p className="font-mono text-xs text-muted">
-                        Online PPT & Abstract Submission | Deadline: 20 OCT 2026
+                        Online Qualifiers · 5 Days Before Fest | Prize: ₹5,000 | Reg: ₹50/head
                       </p>
                     </div>
                     <span className="rounded border border-green/30 bg-green/10 px-3 py-1 font-mono text-xs font-semibold text-green">
-                      STATUS: SUBMISSIONS OPEN
+                      FORMAT: ONLINE QUALIFIERS
                     </span>
                   </div>
 
                   {/* Bracket Timeline */}
                   <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-3">
                     <div className="rounded border border-line bg-ink-mid/40 p-4">
-                      <span className="font-mono text-[10px] text-muted">ROUND 01</span>
-                      <h4 className="font-display font-semibold text-paper">Abstract Screening</h4>
-                      <p className="font-mono text-xs text-muted mt-1">20 OCT 2026</p>
+                      <span className="font-mono text-[10px] text-muted">TIMING</span>
+                      <h4 className="font-display font-semibold text-paper">5 Days Before Fest</h4>
+                      <p className="font-mono text-xs text-muted mt-1">25 OCT 2026</p>
                     </div>
                     <div className="rounded border border-line bg-ink-mid/40 p-4">
-                      <span className="font-mono text-[10px] text-muted">ROUND 02</span>
-                      <h4 className="font-display font-semibold text-paper">Prototype Demo</h4>
-                      <p className="font-mono text-xs text-muted mt-1">25 OCT 2026</p>
+                      <span className="font-mono text-[10px] text-muted">ENTRY & PRIZE</span>
+                      <h4 className="font-display font-semibold text-paper">₹50 / Head</h4>
+                      <p className="font-mono text-xs text-green mt-1">Prize Pool: ₹5,000</p>
                     </div>
                     <div className="rounded border border-green/30 bg-green/10 p-4">
                       <span className="font-mono text-[10px] text-green">FINALS</span>
-                      <h4 className="font-display font-semibold text-paper">24-Hour On-Ground Hack</h4>
-                      <p className="font-mono text-xs text-green mt-1">30 OCT 2026 (Fest Day 1)</p>
+                      <h4 className="font-display font-semibold text-paper">Championship Decider</h4>
+                      <p className="font-mono text-xs text-green mt-1">Online / Broadcast</p>
                     </div>
                   </div>
                 </div>
               </AnimatedSection>
 
+              {/* BGMI Tournament */}
               <AnimatedSection delay={0.2}>
                 <div className="glass-card p-6 md:p-8">
                   <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center border-b border-line pb-4">
                     <div>
-                      <StreamBadge stream="gaming" />
+                      <StreamBadge stream="esports" />
                       <h2 className="mt-2 font-display text-2xl font-bold text-paper">
-                        VALORANT Arena — Online Knockouts
+                        BGMI Tournament
                       </h2>
                       <p className="font-mono text-xs text-muted">
-                        5v5 Single Elimination Bracket | Qualifier Dates: 22 - 24 OCT 2026
+                        Online Qualifiers · 5 Days Before Fest | Prize: ₹6,000 | Reg: ₹50/head
                       </p>
                     </div>
-                    <span className="rounded border border-amber-500/30 bg-amber-500/10 px-3 py-1 font-mono text-xs font-semibold text-amber-400">
-                      STATUS: BRACKET SEEDED
+                    <span className="rounded border border-cyan-500/30 bg-cyan-500/10 px-3 py-1 font-mono text-xs font-semibold text-cyan-400">
+                      FORMAT: ONLINE BATTLE ROYALE
                     </span>
                   </div>
 
                   <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-3">
                     <div className="rounded border border-line bg-ink-mid/40 p-4">
-                      <span className="font-mono text-[10px] text-muted">ROUND OF 64</span>
-                      <h4 className="font-display font-semibold text-paper">Online Round 1</h4>
-                      <p className="font-mono text-xs text-muted mt-1">22 OCT 2026</p>
+                      <span className="font-mono text-[10px] text-muted">TIMING</span>
+                      <h4 className="font-display font-semibold text-paper">5 Days Before Fest</h4>
+                      <p className="font-mono text-xs text-muted mt-1">25 OCT 2026</p>
                     </div>
                     <div className="rounded border border-line bg-ink-mid/40 p-4">
-                      <span className="font-mono text-[10px] text-muted">QUARTERFINALS</span>
-                      <h4 className="font-display font-semibold text-paper">Online Semis</h4>
-                      <p className="font-mono text-xs text-muted mt-1">24 OCT 2026</p>
+                      <span className="font-mono text-[10px] text-muted">ENTRY & PRIZE</span>
+                      <h4 className="font-display font-semibold text-paper">₹50 / Head</h4>
+                      <p className="font-mono text-xs text-green mt-1">Prize Pool: ₹6,000</p>
+                    </div>
+                    <div className="rounded border border-cyan-500/30 bg-cyan-500/10 p-4">
+                      <span className="font-mono text-[10px] text-cyan-400">FINALS</span>
+                      <h4 className="font-display font-semibold text-paper">Lobby Finals</h4>
+                      <p className="font-mono text-xs text-cyan-400 mt-1">Online Broadcast Stream</p>
+                    </div>
+                  </div>
+                </div>
+              </AnimatedSection>
+
+              {/* Valorant Tournament */}
+              <AnimatedSection delay={0.3}>
+                <div className="glass-card p-6 md:p-8">
+                  <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center border-b border-line pb-4">
+                    <div>
+                      <StreamBadge stream="esports" />
+                      <h2 className="mt-2 font-display text-2xl font-bold text-paper">
+                        Valorant Tournament
+                      </h2>
+                      <p className="font-mono text-xs text-muted">
+                        Championship Decider · Live / Online | Prize: ₹10,000 | Reg: ₹500
+                      </p>
+                    </div>
+                    <span className="rounded border border-amber-500/30 bg-amber-500/10 px-3 py-1 font-mono text-xs font-semibold text-amber-400">
+                      STATUS: CHAMPIONSHIP DECIDER
+                    </span>
+                  </div>
+
+                  <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-3">
+                    <div className="rounded border border-line bg-ink-mid/40 p-4">
+                      <span className="font-mono text-[10px] text-muted">FORMAT</span>
+                      <h4 className="font-display font-semibold text-paper">Live / Online</h4>
+                      <p className="font-mono text-xs text-muted mt-1">Pre-fest &amp; Main Fest</p>
+                    </div>
+                    <div className="rounded border border-line bg-ink-mid/40 p-4">
+                      <span className="font-mono text-[10px] text-muted">ENTRY & PRIZE</span>
+                      <h4 className="font-display font-semibold text-paper">₹500 / Team</h4>
+                      <p className="font-mono text-xs text-green mt-1">Prize Pool: ₹10,000</p>
                     </div>
                     <div className="rounded border border-amber-500/30 bg-amber-500/10 p-4">
-                      <span className="font-mono text-[10px] text-amber-400">LAN FINALS</span>
-                      <h4 className="font-display font-semibold text-paper">Stage LAN Finals</h4>
-                      <p className="font-mono text-xs text-amber-400 mt-1">31 OCT 2026 (Fest Day 2)</p>
+                      <span className="font-mono text-[10px] text-amber-400">DECIDER MATCH</span>
+                      <h4 className="font-display font-semibold text-paper">Championship Decider</h4>
+                      <p className="font-mono text-xs text-amber-400 mt-1">10:00 AM – 1:00 PM (DAY 3)</p>
                     </div>
                   </div>
                 </div>

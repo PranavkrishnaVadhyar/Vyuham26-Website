@@ -2,13 +2,17 @@ import { useMemo, useState, type ReactNode } from "react";
 import { cn } from "@/utils/cn";
 import { useApp } from "@/lib/store";
 import { toast } from "@/components/ui/Toaster";
+import { cyberAudio } from "@/lib/cyberAudio";
 import type { Announcement, FestEvent, Sponsor, StreamId } from "@/data/types";
+import ConsoleManager from "./ConsoleManager";
+import { useConsoleConfig } from "@/config/consoleConfig";
 
 /* ------------------------------------------------------------------ */
 /*  primitives                                                         */
 /* ------------------------------------------------------------------ */
 const SECTIONS = [
   "Overview",
+  "Console",
   "Events",
   "Registrations",
   "Users",
@@ -102,6 +106,93 @@ const blankEvent = (): FestEvent => ({
   status: "open",
 });
 
+function RegistrationGatePanel() {
+  const { regOpen, setRegOpen } = useApp();
+  const [loading, setLoading] = useState(false);
+
+  const handleToggle = () => {
+    setLoading(true);
+    cyberAudio.playTelemetry();
+    const nextState = !regOpen;
+    setRegOpen(nextState);
+    setTimeout(() => {
+      setLoading(false);
+      if (nextState) {
+        toast("🟢 [GATEWAY ACTIVATED] Festival registration is now OPEN live across all public portals.", "ok");
+      } else {
+        toast("🟠 [GATEWAY LOCKED] Festival registration is CLOSED. Public sees COMING SOON.", "warn");
+      }
+    }, 200);
+  };
+
+  return (
+    <div
+      className={`relative overflow-hidden border p-5 transition-all duration-300 ${
+        regOpen
+          ? "border-emerald-500/40 bg-gradient-to-r from-[rgba(6,25,18,0.92)] to-[rgba(4,18,13,0.75)] shadow-[0_0_25px_rgba(24,196,124,0.12)]"
+          : "border-amber-500/40 bg-gradient-to-r from-[rgba(25,18,6,0.92)] to-[rgba(18,12,4,0.75)] shadow-[0_0_25px_rgba(245,158,11,0.12)]"
+      }`}
+    >
+      <div
+        className="pointer-events-none absolute -right-12 -top-12 h-36 w-36 rounded-full blur-xl"
+        style={{
+          background: regOpen
+            ? "radial-gradient(circle, rgba(24,196,124,0.22), transparent 70%)"
+            : "radial-gradient(circle, rgba(245,158,11,0.22), transparent 70%)",
+        }}
+      />
+
+      <div className="relative z-10 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div className="space-y-1.5">
+          <div className="flex flex-wrap items-center gap-2">
+            <span
+              className={`h-2.5 w-2.5 rounded-full animate-pulse ${
+                regOpen ? "bg-emerald-400 shadow-[0_0_8px_#34d399]" : "bg-amber-400 shadow-[0_0_8px_#fbbf24]"
+              }`}
+            />
+            <span
+              className={`font-mono text-[10px] font-bold tracking-[0.26em] uppercase ${
+                regOpen ? "text-emerald-400" : "text-amber-400"
+              }`}
+            >
+              REGISTRATION GATEWAY: {regOpen ? "OPEN & LIVE" : "CLOSED (COMING SOON)"}
+            </span>
+            <span className="font-mono text-[8px] tracking-[0.16em] text-[#6f8b80] border border-[rgba(120,160,145,0.2)] px-1.5 py-0.5 rounded">
+              ROOT OVERRIDE
+            </span>
+          </div>
+
+          <p className="font-mono text-[11px] text-[#c6ded3] max-w-[700px] leading-relaxed">
+            {regOpen
+              ? "All event registration forms, tickets, teams, cart checkout, and attendee dashboard pipelines are actively accepting user entries across the festival site."
+              : "All registration forms and submissions are blocked. Navbar and event dossiers display 'COMING SOON'. Direct registration endpoints are guarded."}
+          </p>
+        </div>
+
+        <div className="flex items-center gap-3 shrink-0">
+          <button
+            type="button"
+            onClick={handleToggle}
+            disabled={loading}
+            className={`group relative flex items-center gap-2.5 px-5 py-2.5 font-mono text-[11px] font-bold tracking-[0.2em] uppercase transition-all duration-300 ${
+              regOpen
+                ? "border border-red-500/60 bg-red-950/40 text-red-300 hover:bg-red-900/60 hover:border-red-400 hover:text-white hover:shadow-[0_0_20px_rgba(239,68,68,0.3)]"
+                : "border border-emerald-500/60 bg-emerald-950/50 text-emerald-300 hover:bg-emerald-900/70 hover:border-emerald-300 hover:text-white hover:shadow-[0_0_25px_rgba(24,196,124,0.4)]"
+            }`}
+          >
+            <span
+              className={`h-2 w-2 rounded-full ${
+                regOpen ? "bg-red-400" : "bg-emerald-400"
+              }`}
+            />
+            <span>{regOpen ? "CLOSE REGISTRATION GATE" : "ACTIVATE REGISTRATION GATE"}</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ------------------------------------------------------------------ */
 /*  admin app                                                          */
 /* ------------------------------------------------------------------ */
@@ -109,6 +200,7 @@ export default function AdminApp() {
   const app = useApp();
   const { content, users, registrations, user } = app;
   const [section, setSection] = useState<Section>("Overview");
+  const [consoleConfig] = useConsoleConfig();
   const [editing, setEditing] = useState<FestEvent | null>(null);
   const [navOpen, setNavOpen] = useState(false);
   const [email, setEmail] = useState("admin@vyuham26.in");
@@ -254,9 +346,6 @@ export default function AdminApp() {
               AUTHENTICATE
             </button>
           </form>
-          <p className="mt-5 font-mono text-[9px] tracking-[0.18em] text-[#3f6152]">
-            DEMO · admin@vyuham26.in / vyuham26
-          </p>
           <a href="#/" className="link-trail mt-6 inline-block font-mono text-[9px] tracking-[0.26em] text-[#6f8b80]">
             ← BACK TO SITE
           </a>
@@ -338,6 +427,54 @@ export default function AdminApp() {
             {/* ---------------- OVERVIEW ---------------- */}
             {section === "Overview" && (
               <>
+                <RegistrationGatePanel />
+
+                {/* Cyber Terminal Console Policy Quick Status */}
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border border-[rgba(120,160,145,0.16)] bg-[#060a09] p-4">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span
+                        className={`h-2 w-2 rounded-full ${
+                          !consoleConfig.showAccount &&
+                          !consoleConfig.showFestival &&
+                          !consoleConfig.showRootGateway
+                            ? "bg-emerald-400 shadow-[0_0_8px_#34d399]"
+                            : "bg-amber-400 shadow-[0_0_8px_#fbbf24]"
+                        } animate-pulse`}
+                      />
+                      <span className="font-mono text-[10px] font-bold tracking-[0.22em] text-[#9fc4b4] uppercase">
+                        CYBER TERMINAL CONSOLE POLICY:{" "}
+                        {!consoleConfig.showAccount &&
+                        !consoleConfig.showFestival &&
+                        !consoleConfig.showRootGateway
+                          ? "PRE-LAUNCH SAFE (PUBLIC READY)"
+                          : "CUSTOM PROTOCOL ACTIVE"}
+                      </span>
+                    </div>
+                    <p className="font-mono text-[10px] text-[#78a091]">
+                      Account Module:{" "}
+                      <strong className={consoleConfig.showAccount ? "text-emerald-400" : "text-[#9fc4b4]"}>
+                        {consoleConfig.showAccount ? "ON (VISIBLE)" : "OFF (HIDDEN)"}
+                      </strong>{" "}
+                      • Festival Ops:{" "}
+                      <strong className={consoleConfig.showFestival ? "text-emerald-400" : "text-[#9fc4b4]"}>
+                        {consoleConfig.showFestival ? "ON (VISIBLE)" : "OFF (HIDDEN)"}
+                      </strong>{" "}
+                      • Root Gateway:{" "}
+                      <strong className={consoleConfig.showRootGateway ? "text-amber-400" : "text-emerald-400"}>
+                        {consoleConfig.showRootGateway ? "ON (DEBUG VISIBLE)" : "OFF (SECURED)"}
+                      </strong>
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setSection("Console")}
+                    className="btn-cine font-mono text-[9px] tracking-[0.2em] uppercase shrink-0"
+                  >
+                    MANAGE CONSOLE MODULES →
+                  </button>
+                </div>
+
                 <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
                   <Stat label="TOTAL EVENTS" value={stats.events} hint="ACROSS 4 STREAMS" />
                   <Stat label="TOTAL USERS" value={stats.users} hint="REGISTERED ACCOUNTS" />
@@ -425,6 +562,9 @@ export default function AdminApp() {
                 </Panel>
               </>
             )}
+
+            {/* ---------------- CONSOLE ---------------- */}
+            {section === "Console" && <ConsoleManager />}
 
             {/* ---------------- EVENTS ---------------- */}
             {section === "Events" && (
@@ -937,7 +1077,10 @@ export default function AdminApp() {
 
             {/* ---------------- SETTINGS ---------------- */}
             {section === "Settings" && (
-              <Panel title="Settings">
+              <div className="space-y-5">
+                <RegistrationGatePanel />
+                <ConsoleManager />
+                <Panel title="Settings">
                 <p className="max-w-[60ch] text-[12px] leading-relaxed text-[#7d9a8d]">
                   All content is persisted locally in this browser. In production this store maps 1:1 to a CMS or
                   REST/GraphQL layer — the presentational components never change.
@@ -957,7 +1100,8 @@ export default function AdminApp() {
                   </a>
                 </div>
               </Panel>
-            )}
+            </div>
+          )}
           </div>
         </main>
       </div>

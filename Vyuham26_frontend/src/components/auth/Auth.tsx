@@ -3,7 +3,7 @@ import { cn } from "@/utils/cn";
 import { useApp } from "@/lib/store";
 import { toast } from "@/components/ui/Toaster";
 import { MEDIA } from "@/data/media";
-import { SITE_CONFIG } from "@/config/site";
+import { SITE_CONFIG, isRegistrationOpen } from "@/config/site";
 
 /* ================================================================== */
 /*  AUTH MODAL                                                         */
@@ -29,7 +29,7 @@ export function AuthModal() {
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!SITE_CONFIG.REG_OPEN) {
+    if (!isRegistrationOpen()) {
       setErr("Registration & login are currently closed. Coming soon!");
       return;
     }
@@ -160,16 +160,6 @@ export function AuthModal() {
               {mode === "login" ? "ENTER" : "CREATE ACCESS"}
             </button>
           </form>
-
-          <div className="mt-6 border-t border-[rgba(120,160,145,0.14)] pt-4">
-            <p className="font-mono text-[9px] leading-relaxed tracking-[0.18em] text-[#4f6f61]">
-              DEMO · admin@vyuham26.in / vyuham26 (admin)
-              <br />
-              DEMO · volunteer@vyuham26.in / volunteer26 (gate volunteer)
-              <br />
-              DEMO · arjun@student.in / vyuham26 (participant)
-            </p>
-          </div>
         </div>
       </div>
     </div>
