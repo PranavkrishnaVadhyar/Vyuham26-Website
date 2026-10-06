@@ -153,10 +153,15 @@ export interface EventRecord {
 export interface RegistrationRecord {
   id: string;
   event_id: string;
+  event_slug?: string;
   user_id?: string | null;
   team_id?: string | null;
   status: "pending" | "confirmed" | "cancelled";
   ticket_code?: string;
+  checked_in?: boolean;
+  checked_in_at?: string | null;
+  amount_paid?: number;
+  payment_reference?: string | null;
   created_at: string;
 }
 
@@ -626,6 +631,25 @@ export const announcementsApi = {
     apiFetch<AnnouncementRecord>("/announcements", {
       method: "POST",
       body: JSON.stringify(payload),
+    }),
+  update: (
+    announcementId: string,
+    payload: {
+      title?: string;
+      content?: string;
+      category?: string;
+      urgent?: boolean;
+      stream?: string;
+      pinned?: boolean;
+    }
+  ) =>
+    apiFetch<AnnouncementRecord>(`/announcements/${announcementId}`, {
+      method: "PATCH",
+      body: JSON.stringify(payload),
+    }),
+  delete: (announcementId: string) =>
+    apiFetch<void>(`/announcements/${announcementId}`, {
+      method: "DELETE",
     }),
 };
 

@@ -10,6 +10,7 @@ import { adminApi, type AdminStatsResponse } from "@/lib/api";
 import { useRegistrationOpen, setRegistrationOpen } from "@/config/site";
 import { toast } from "@/components/ui/Toaster";
 import { cyberAudio } from "@/lib/cyberAudio";
+import AnnouncementManager from "@/components/admin/AnnouncementManager";
 
 export default function AdminDashboardPage() {
   const { user } = useAuth();
@@ -252,6 +253,13 @@ export default function AdminDashboardPage() {
                     </Button>
                   </div>
                 </div>
+              </AnimatedSection>
+            </div>
+
+            {/* Live Announcements Management */}
+            <div className="mt-12">
+              <AnimatedSection delay={0.3}>
+                <AnnouncementManager />
               </AnimatedSection>
             </div>
           </div>

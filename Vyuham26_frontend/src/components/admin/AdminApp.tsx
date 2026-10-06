@@ -5,6 +5,7 @@ import { toast } from "@/components/ui/Toaster";
 import { cyberAudio } from "@/lib/cyberAudio";
 import type { Announcement, FestEvent, Sponsor, StreamId } from "@/data/types";
 import ConsoleManager from "./ConsoleManager";
+import AnnouncementManager from "./AnnouncementManager";
 import { useConsoleConfig } from "@/config/consoleConfig";
 
 /* ------------------------------------------------------------------ */
@@ -930,56 +931,7 @@ export default function AdminApp() {
             )}
 
             {/* ---------------- ANNOUNCEMENTS ---------------- */}
-            {section === "Announcements" && (
-              <Panel
-                title={`Announcements (${content.announcements.length})`}
-                action={
-                  <button
-                    onClick={() =>
-                      app.upsertAnnouncement({
-                        id: `a-${Math.random().toString(36).slice(2, 7)}`,
-                        date: new Date().toDateString().slice(4, 15).toUpperCase(),
-                        title: "NEW TRANSMISSION",
-                        body: "Write the announcement body here.",
-                      } as Announcement)
-                    }
-                    className="font-mono text-[9px] tracking-[0.24em] text-[#18c47c] hover:text-[#7dffc4]"
-                  >
-                    + NEW
-                  </button>
-                }
-              >
-                <div className="space-y-4">
-                  {content.announcements.map((a) => (
-                    <div key={a.id} className="border border-[rgba(120,160,145,0.14)] p-4">
-                      <div className="grid gap-3 md:grid-cols-[160px_1fr]">
-                        <Input label="Date" value={a.date} onChange={(v) => app.upsertAnnouncement({ ...a, date: v })} />
-                        <Input label="Title" value={a.title} onChange={(v) => app.upsertAnnouncement({ ...a, title: v })} />
-                      </div>
-                      <div className="mt-3">
-                        <Input label="Body" area value={a.body} onChange={(v) => app.upsertAnnouncement({ ...a, body: v })} />
-                      </div>
-                      <div className="mt-3 flex items-center gap-4">
-                        <label className="flex items-center gap-2 font-mono text-[9px] tracking-[0.22em] text-[#6f8b80]">
-                          <input
-                            type="checkbox"
-                            checked={!!a.pinned}
-                            onChange={(e) => app.upsertAnnouncement({ ...a, pinned: e.target.checked })}
-                          />
-                          PINNED
-                        </label>
-                        <button
-                          onClick={() => app.removeAnnouncement(a.id)}
-                          className="font-mono text-[9px] tracking-[0.22em] text-[#6f8b80] hover:text-[#f2a98a]"
-                        >
-                          DELETE
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </Panel>
-            )}
+            {section === "Announcements" && <AnnouncementManager />}
 
             {/* ---------------- SPONSORS ---------------- */}
             {section === "Sponsors" && (
