@@ -26,6 +26,7 @@ class EventFields(BaseModel):
     image: str | None = Field(default=None, max_length=500)
     featured: bool = False
     status: str = Field(default="upcoming", max_length=50)
+    blurb: str | None = Field(default=None, max_length=500)
     start_time: datetime | None = None
     end_time: datetime | None = None
     description: str | None = None
@@ -73,6 +74,7 @@ class EventUpdate(BaseModel):
     image: str | None = Field(default=None, max_length=500)
     featured: bool | None = None
     status: str | None = Field(default=None, max_length=50)
+    blurb: str | None = Field(default=None, max_length=500)
     start_time: datetime | None = None
     end_time: datetime | None = None
     description: str | None = None
@@ -126,6 +128,7 @@ class EventOut(BaseModel):
     image: str | None
     featured: bool
     status: str
+    blurb: str | None = None
     start_time: datetime | None
     end_time: datetime | None
     description: str | None

@@ -16,6 +16,8 @@ class ProfileOut(BaseModel):
     college: str | None
     degree: str | None = None
     year: str | None = None
+    station: str | None = None
+    avatar_url: str | None = None
     role: UserRole
 
     @field_serializer("role")
@@ -43,6 +45,8 @@ class ProfileUpdate(BaseModel):
     college: str | None = Field(default=None, max_length=200)
     degree: str | None = Field(default=None, max_length=120)
     year: str | None = Field(default=None, max_length=50)
+    station: str | None = Field(default=None, max_length=120)
+    avatar_url: str | None = Field(default=None, max_length=500)
 
 
 class RoleAssignRequest(BaseModel):

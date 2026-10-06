@@ -20,6 +20,11 @@ class RegistrationOut(BaseModel):
     event_slug: Optional[str] = None
     user_id: UUID | None
     team_id: UUID | None
+    ticket_code: Optional[str] = None
+    checked_in: bool = False
+    checked_in_at: Optional[datetime] = None
+    amount_paid: Optional[float] = 0.0
+    payment_reference: Optional[str] = None
     status: RegistrationStatus
     created_at: datetime
 
