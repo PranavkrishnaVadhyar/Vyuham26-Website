@@ -11,7 +11,6 @@ import { lockScroll } from "@/lib/scroll";
 import { useApp } from "@/lib/store";
 import {
   SITE_CONFIG,
-  setRegistrationOpen,
   isRegistrationOpen,
   setCoreTeamVisible,
   isCoreTeamVisible,
@@ -97,12 +96,7 @@ export function getDynamicHelpText(config: ConsoleConfig, isAdmin: boolean): str
   status        - Festival system status
   whoami        - Current terminal session`);
 
-  if (config.showRootGateway || isAdmin) {
-    sections.push(`ROOT GATEWAY (ADMIN)
-  reg:open      - Turn ON festival registrations
-  reg:close     - Turn OFF festival registrations
-  reg:status    - Check live gateway status`);
-  }
+  // Root gateway overrides removed from console per security requirements
 
   sections.push(`TERMINAL
   help          - Show available commands
@@ -550,61 +544,17 @@ Manage your participant information and VYUHAM activity.`,
         case "sudo":
         case "root26":
         case "admin26":
-        case "vyuhamadmin": {
-          const pass = (args[0] || "").toLowerCase();
-          const validPassphrases = [
-            "root26",
-            "admin26",
-            "vyuhamadmin",
-            "vyuham26",
-            "admin",
-            "root",
-          ];
-          const isSecret =
-            validPassphrases.includes(pass) ||
-            command === "root26" ||
-            command === "admin26" ||
-            command === "vyuhamadmin" ||
-            (args.length === 0 && (command === "admin" || command === "root"));
+        case "vyuhamadmin":
+          addOutput(
+            `[ACCESS RESTRICTED // AUTHENTICATION REQUIRED]
 
-          if (isSecret || ui.adminUnlocked) {
-            ui.setAdminUnlocked(true);
-            markInternalNav();
-            cyberAudio.playTelemetry();
-            addOutput(
-              `[AUTHENTICATION GRANTED]
-Welcome, Administrator. Level-0 Root clearance verified.
-Redirecting to Operations Console...`,
-              "/admin",
-              "Enter Admin Operations Console →",
-              "system"
-            );
-            toast("⚡ [ADMIN ACCESS GRANTED] Operations Console Unlocked", "ok");
-            setTimeout(() => {
-              navigate("/admin");
-              setIsOpen(false);
-            }, 600);
-          } else if (args.length > 0) {
-            addOutput(
-              `[ACCESS DENIED] Invalid authorization signature for '${pass}'.
-Type 'admin root26' or visit the Cyber Gate.`,
-              "/admin",
-              "Open Cyber Gate →",
-              "error"
-            );
-            toast("⛔ [ACCESS DENIED] Invalid authorization signature", "warn");
-          } else {
-            addOutput(
-              `[RESTRICTED PROTOCOL // ADMIN GATEWAY]
-Direct administrative console requires authentication.
-Use: 'admin <passphrase>' (e.g. 'admin root26') or press Ctrl+Shift+A.`,
-              "/admin",
-              "Open Admin Gateway (Cyber Gate) →",
-              "system"
-            );
-          }
+The Admin Operations Console cannot be unlocked via terminal commands.
+Administrators must authenticate directly at the secure Admin Portal (/admin).`,
+            "/admin",
+            "Go to Admin Login Portal →",
+            "system"
+          );
           break;
-        }
 
         case "ticket":
           if (!consoleConfig.showAccount) {
@@ -895,79 +845,29 @@ STATUS        : NOMINAL`
         case "reg:open":
         case "registration:open":
         case "reg-open":
-          if (!consoleConfig.showRootGateway && !ui.adminUnlocked) {
-            addOutput(
-              `[RESTRICTED PROTOCOL // ROOT PRIVILEGE REQUIRED]
-
-Administrative root clearance required to execute registration gateway overrides.
-Clearance signature not verified. Type 'admin <passphrase>' or unlock via Cyber Gate.`,
-              "/admin",
-              "Open Admin Gateway (Cyber Gate) →",
-              "error"
-            );
-            break;
-          }
-          setRegistrationOpen(true);
-          cyberAudio.playTelemetry();
-          addOutput(
-            `[ROOT OVERRIDE GRANTED]
-
-FESTIVAL REGISTRATION GATEWAY: OPEN & LIVE
-- Public registration routes unlocked (/register, /checkout)
-- Event registration buttons activated
-- Attendee enrollment protocol: NOMINAL`,
-            "/register",
-            "Open registration portal →"
-          );
-          break;
-
         case "reg:close":
         case "registration:close":
         case "reg-close":
-          if (!consoleConfig.showRootGateway && !ui.adminUnlocked) {
-            addOutput(
-              `[RESTRICTED PROTOCOL // ROOT PRIVILEGE REQUIRED]
-
-Administrative root clearance required to execute registration gateway overrides.
-Clearance signature not verified. Type 'admin <passphrase>' or unlock via Cyber Gate.`,
-              "/admin",
-              "Open Admin Gateway (Cyber Gate) →",
-              "error"
-            );
-            break;
-          }
-          setRegistrationOpen(false);
-          cyberAudio.playTelemetry();
           addOutput(
-            `[ROOT OVERRIDE GRANTED]
+            `[ACCESS RESTRICTED // ADMIN PAGE ONLY]
 
-FESTIVAL REGISTRATION GATEWAY: CLOSED
-- Public portals set to COMING SOON
-- Registration forms locked
-- Security gate active: SAFEGUARDED`
+Registration open/close controls are disabled in the console.
+Festival registration can only be opened or closed by authorized administrators directly inside the Admin Dashboard (/admin).`,
+            "/admin",
+            "Go to Admin Dashboard →",
+            "system"
           );
           break;
 
         case "reg:status":
         case "registration:status":
-          if (!consoleConfig.showRootGateway && !ui.adminUnlocked) {
-            addOutput(
-              `[RESTRICTED PROTOCOL // ROOT PRIVILEGE REQUIRED]
-
-Administrative root clearance required to inspect gateway telemetry.
-Clearance signature not verified. Type 'admin <passphrase>' or unlock via Cyber Gate.`,
-              "/admin",
-              "Open Admin Gateway (Cyber Gate) →",
-              "error"
-            );
-            break;
-          }
           addOutput(
-            `FESTIVAL REGISTRATION GATEWAY STATUS:
+            `FESTIVAL REGISTRATION STATUS:
 
 GATE STATUS : ${isRegistrationOpen() ? "OPEN (LIVE)" : "CLOSED (COMING SOON)"}
-AUDIT       : LOCAL_STORAGE_PERSISTED
-ACCESS      : ADMIN ROOT TOGGLEABLE`
+MANAGEMENT  : ADMIN DASHBOARD EXCLUSIVE (/admin)
+
+Registration open/close is controlled exclusively by administrators from the Admin Dashboard.`
           );
           break;
 

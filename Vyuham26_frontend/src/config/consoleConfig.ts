@@ -143,9 +143,9 @@ export const CONSOLE_PRESETS = {
   },
   ADMIN_FULL: {
     id: "ADMIN_FULL",
-    name: "Full Root Manual",
-    badge: "DEBUG ONLY",
-    desc: "Exposes all modules including Root Gateway overrides in terminal help.",
-    config: { showAccount: true, showFestival: true, showRootGateway: true },
+    name: "Full Manual",
+    badge: "ALL MODULES",
+    desc: "Exposes all attendee and festival exploration modules in terminal help.",
+    config: { showAccount: true, showFestival: true, showRootGateway: false },
   },
 } as const;

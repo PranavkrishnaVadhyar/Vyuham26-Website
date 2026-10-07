@@ -60,11 +60,11 @@ const MODULES: ModuleMeta[] = [
     key: "showRootGateway",
     title: "Root Gateway (Admin Overrides)",
     badgeCode: "ROOT // SEC-00",
-    commands: ["reg:open", "reg:close", "reg:status"],
+    commands: ["reg:status"],
     description:
-      "Controls whether administrative root gateway controls (reg:open, reg:close, reg:status) are revealed in the public help manual.",
+      "Controls whether administrative telemetry is displayed. Note: Registration open and close can strictly only be modified by administrators directly inside the Admin Dashboard.",
     warning:
-      "CRITICAL: Keep OFF for public publication to safeguard administrative capabilities from attendees.",
+      "Keep OFF for public publication to keep administrative diagnostics hidden from attendees.",
     recommendedPublishState: false,
   },
 ];
@@ -115,12 +115,7 @@ export function getDynamicHelpPreview(config: ConsoleConfig): string {
   status        - Festival system status
   whoami        - Current terminal session`);
 
-  if (config.showRootGateway) {
-    sections.push(`ROOT GATEWAY (ADMIN)
-  reg:open      - Turn ON festival registrations
-  reg:close     - Turn OFF festival registrations
-  reg:status    - Check live gateway status`);
-  }
+  // Root gateway overrides removed from console per security requirements
 
   sections.push(`TERMINAL
   help          - Show available commands

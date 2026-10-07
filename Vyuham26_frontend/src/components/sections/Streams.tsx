@@ -6,18 +6,30 @@ import { FocusIn, MaskReveal } from "@/components/cinematic/Reveal";
 
 /**
  * Rail start points for the 4 streams.
+ * Desktop: Balanced wide-canvas constellation across the 4 quadrants (18/82% X, 22/78% Y).
+ * Mobile: Corner anchors with spacious vertical clearance for center readout.
  */
 function getRailStart(i: number, isMobile: boolean) {
   if (isMobile) {
     return {
-      x: i % 2 === 0 ? 18 : 82,
+      x: i % 2 === 0 ? 20 : 80,
       y: i < 2 ? 16 : 84,
     };
   }
   return {
-    x: i % 2 === 0 ? 16 : 84,
-    y: i < 2 ? 18 : 82,
+    x: i % 2 === 0 ? 18 : 82,
+    y: i < 2 ? 22 : 78,
   };
+}
+
+/**
+ * Control point for the smooth quadratic bezier energy rail:
+ * Curves inward gracefully toward the centre (50, 50).
+ */
+function getRailControl(x0: number, y0: number, i: number) {
+  const cx = (x0 + 50) / 2 + (i % 2 === 0 ? -7 : 7);
+  const cy = (y0 + 50) / 2 + (i < 2 ? 7 : -7);
+  return { cx, cy };
 }
 
 /**
@@ -27,8 +39,7 @@ function getRailStart(i: number, isMobile: boolean) {
  */
 function getRailPoint(i: number, p: number, isMobile: boolean) {
   const { x: x0, y: y0 } = getRailStart(i, isMobile);
-  const cx = (x0 + 50) / 2 + (i % 2 === 0 ? -6 : 6);
-  const cy = (y0 + 50) / 2 + (i < 2 ? 6 : -6);
+  const { cx, cy } = getRailControl(x0, y0, i);
   const inv = 1 - p;
   const x = inv * inv * x0 + 2 * inv * p * cx + p * p * 50;
   const y = inv * inv * y0 + 2 * inv * p * cy + p * p * 50;
@@ -51,18 +62,18 @@ export default function Streams() {
     const el = wrap.current;
     if (!el || reduced) return;
     const ctx = gsap.context(() => {
-      /* GSAP owns the centering transform so scale tweens can't clobber it */
-      gsap.set(".node, .field-glow", { xPercent: -50, yPercent: -50 });
+      /* Centering transform for field glow */
+      gsap.set(".field-glow", { xPercent: -50, yPercent: -50 });
 
       // Track progress along rail for each node [0, 1]
       const railProgress: Record<string, number> = { p0: 0, p1: 0, p2: 0, p3: 0 };
 
       const updateNodePos = (i: number, p: number) => {
-        const nodeEl = el.querySelector<HTMLElement>(`.node-${i}`);
-        if (!nodeEl) return;
+        const slotEl = el.querySelector<HTMLElement>(`.node-slot-${i}`);
+        if (!slotEl) return;
         const { x, y } = getRailPoint(i, p, window.innerWidth < 768);
-        nodeEl.style.left = `${x}%`;
-        nodeEl.style.top = `${y}%`;
+        slotEl.style.left = `${x}%`;
+        slotEl.style.top = `${y}%`;
       };
 
       // Initialize all nodes to the start of their rails
@@ -83,7 +94,7 @@ export default function Streams() {
       streams.forEach((_, i) => {
         const at = 0.1 + i * 0.15;
 
-        // Node reveals at the outer rail
+        // Node reveals at the outer rail station
         tl.fromTo(
           `.node-${i}`,
           { autoAlpha: 0, scale: 0.35, filter: "blur(14px)" },
@@ -91,23 +102,11 @@ export default function Streams() {
           at,
         );
 
-        // Path draws along the rail
+        // Path draws along the rail into centre
         tl.fromTo(
           `.path-${i}`,
           { strokeDashoffset: 1000, opacity: 0 },
           { strokeDashoffset: 0, opacity: 1, ease: "power2.inOut", duration: 0.13 },
-          at + 0.02,
-        );
-
-        // The stream node MOVES ON THE RAIL toward the centre (from p = 0 to p = 0.40)
-        tl.to(
-          railProgress,
-          {
-            [`p${i}`]: 0.4,
-            ease: "power2.out",
-            duration: 0.12,
-            onUpdate: () => updateNodePos(i, railProgress[`p${i}`]),
-          },
           at + 0.02,
         );
 
@@ -126,10 +125,10 @@ export default function Streams() {
           at + 0.115,
         );
 
-        tl.to(`.node-${i}`, { scale: 0.88, ease: "none", duration: 0.1 }, at + 0.1);
+        tl.to(`.node-${i}`, { scale: 0.9, ease: "none", duration: 0.1 }, at + 0.1);
       });
 
-      /* convergence: all 4 streams move ON THE RAIL to the exact centre (p = 1.0 -> 50% 50%) */
+      /* convergence: all 4 streams move ON THE RAIL to the exact centre (p: 0 -> 1.0 -> 50% 50%) */
       const conv = 0.72;
       streams.forEach((_, i) => {
         tl.to(
@@ -185,7 +184,7 @@ export default function Streams() {
       tl.to(".field-glow", { opacity: 0.85, scale: 1.25, ease: "none", duration: 0.2 }, conv);
     }, el);
     return () => ctx.revert();
-  }, [reduced, streams]);
+  }, [reduced, streams, mobile]);
 
   /* ---------------- reduced motion accessible composition ---------------- */
   if (reduced) {
@@ -257,8 +256,7 @@ export default function Streams() {
           </defs>
           {streams.map((s, i) => {
             const { x: x0, y: y0 } = getRailStart(i, mobile);
-            const cx = (x0 + 50) / 2 + (i % 2 === 0 ? -6 : 6);
-            const cy = (y0 + 50) / 2 + (i < 2 ? 6 : -6);
+            const { cx, cy } = getRailControl(x0, y0, i);
             return (
               <path
                 key={s.id}
@@ -282,10 +280,14 @@ export default function Streams() {
           return (
             <div
               key={s.id}
-              className={`node node-${i} absolute opacity-0 will-change-transform z-10`}
-              style={{ left: `${posX}%`, top: `${posY}%` }}
+              className={`node-slot node-slot-${i} absolute z-10 pointer-events-none`}
+              style={{
+                left: `${posX}%`,
+                top: `${posY}%`,
+                transform: "translate(-50%, -50%)",
+              }}
             >
-              <div className="relative">
+              <div className={`node node-${i} relative opacity-0 will-change-transform pointer-events-auto`}>
                 <div
                   className="relative h-[19vw] max-h-[175px] min-h-[68px] w-[19vw] max-w-[175px] min-w-[68px] sm:h-[15vw] sm:w-[15vw] overflow-hidden rounded-full"
                   style={{ boxShadow: `0 0 50px -10px ${s.glow}, inset 0 0 35px rgba(2,6,4,0.85)` }}
@@ -305,7 +307,7 @@ export default function Streams() {
                   style={{ borderColor: `${s.accent}30`, animation: "pulseRing 3.4s ease-out infinite" }}
                 />
                 <p
-                  className="mt-1.5 sm:mt-2 text-center font-mono text-[8px] sm:text-[9px] tracking-[0.22em] sm:tracking-[0.3em] drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)]"
+                  className="absolute top-[calc(100%+6px)] sm:top-[calc(100%+8px)] left-1/2 -translate-x-1/2 whitespace-nowrap text-center font-mono text-[8px] sm:text-[9px] tracking-[0.22em] sm:tracking-[0.3em] drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)]"
                   style={{ color: s.accent }}
                 >
                   {s.index} · {s.name}
