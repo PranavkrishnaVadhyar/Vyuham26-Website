@@ -40,6 +40,7 @@ export interface FestEvent {
   registered: number;
   image: string;
   featured?: boolean;
+  starred?: boolean;
   status: "open" | "closing" | "full";
 }
 

@@ -14,10 +14,12 @@ import {
   setCoreTeamVisible,
   useSponsorsVisible,
   setSponsorsVisible,
+  useStarredEvents,
 } from "@/config/site";
 import { toast } from "@/components/ui/Toaster";
 import { cyberAudio } from "@/lib/cyberAudio";
 import AnnouncementManager from "@/components/admin/AnnouncementManager";
+import { events } from "@/data/events";
 
 export default function AdminDashboardPage() {
   const { user } = useAuth();
@@ -364,10 +366,126 @@ export default function AdminDashboardPage() {
                 <AnnouncementManager />
               </AnimatedSection>
             </div>
+
+            {/* Main Stage / Homepage Event Starring Curation Console */}
+            <div className="mt-12">
+              <AnimatedSection delay={0.32}>
+                <MainPageStarredManager />
+              </AnimatedSection>
+            </div>
           </div>
         </section>
       </main>
       <Footer />
     </>
+  );
+}
+
+function MainPageStarredManager() {
+  const { isStarred, toggleStar } = useStarredEvents();
+  const [filterStream, setFilterStream] = useState<string>("all");
+  const [search, setSearch] = useState("");
+
+  const handleToggle = (slug: string, title: string) => {
+    cyberAudio.playTelemetry();
+    const next = toggleStar(slug);
+    if (next) {
+      toast(`★ '${title}' is now STARRED for Main Page!`, "ok");
+    } else {
+      toast(`☆ '${title}' unstarred. Removed from Main Page (remains in /events directory).`, "info");
+    }
+  };
+
+  const filtered = events.filter((e) => {
+    const streamMatch = filterStream === "all" || e.stream === filterStream;
+    const query = search.trim().toLowerCase();
+    const searchMatch = !query || e.title.toLowerCase().includes(query) || e.stream.toLowerCase().includes(query);
+    return streamMatch && searchMatch;
+  });
+
+  const starredCount = events.filter((e) => isStarred(e.slug)).length;
+
+  return (
+    <div className="glass-card p-6 border border-line">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-line pb-4">
+        <div>
+          <div className="flex items-center gap-2">
+            <span className="font-mono text-xs font-bold uppercase tracking-[0.2em] text-amber-300">
+              ★ HOMEPAGE EVENT CURATION (SECTION 04)
+            </span>
+            <span className="rounded bg-amber-400/20 px-2 py-0.5 font-mono text-[9px] font-bold text-amber-300">
+              {starredCount} STARRED
+            </span>
+          </div>
+          <p className="mt-1 font-mono text-xs text-muted">
+            Starred events are exclusively listed on the Main Page. All {events.length} events remain active and accessible on the full Events directory.
+          </p>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2">
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="FILTER EVENTS..."
+            className="rounded border border-line bg-black/40 px-3 py-1.5 font-mono text-xs uppercase text-paper outline-none focus:border-amber-400/50"
+          />
+          <div className="flex items-center gap-1">
+            {["all", "tech", "management", "cultural", "esports"].map((s) => (
+              <button
+                key={s}
+                onClick={() => setFilterStream(s)}
+                className={`rounded px-2.5 py-1 font-mono text-[9px] uppercase tracking-[0.14em] transition border ${
+                  filterStream === s
+                    ? "border-amber-400/60 bg-amber-400/20 text-amber-300 font-bold"
+                    : "border-line text-muted hover:text-paper"
+                }`}
+              >
+                {s}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 max-h-[460px] overflow-y-auto pr-1">
+        {filtered.map((e) => {
+          const starred = isStarred(e.slug);
+          return (
+            <div
+              key={e.slug}
+              className={`flex items-center justify-between gap-3 p-3 rounded border transition-all ${
+                starred
+                  ? "border-amber-400/50 bg-amber-400/10 shadow-[0_0_12px_rgba(251,191,36,0.1)]"
+                  : "border-line/60 bg-black/20 hover:border-line"
+              }`}
+            >
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-1.5 font-mono text-[9px] text-muted">
+                  <span className="uppercase text-green">{e.stream}</span>
+                  <span>·</span>
+                  <span>DAY {e.day}</span>
+                </div>
+                <h4 className="truncate font-display text-sm font-semibold text-paper mt-0.5">
+                  {e.title}
+                </h4>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => handleToggle(e.slug, e.title)}
+                className={`shrink-0 rounded px-3 py-1 font-mono text-[9px] font-bold uppercase tracking-[0.16em] transition border ${
+                  starred
+                    ? "border-amber-400/60 bg-amber-400/25 text-amber-300 shadow-[0_0_8px_rgba(251,191,36,0.3)] hover:bg-amber-400/40"
+                    : "border-line text-muted hover:border-amber-400/40 hover:text-amber-300 hover:bg-amber-400/10"
+                }`}
+              >
+                {starred ? "★ STARRED" : "☆ STAR"}
+              </button>
+            </div>
+          );
+        })}
+      </div>
+    </div>
   );
 }

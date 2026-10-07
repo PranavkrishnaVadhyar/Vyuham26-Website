@@ -95,6 +95,12 @@ export const SITE_CONFIG = {
   set SHOW_SPONSORS(val: boolean) {
     setSponsorsVisible(val);
   },
+  get STARRED_EVENTS(): string[] {
+    return getStarredEvents();
+  },
+  set STARRED_EVENTS(val: string[]) {
+    setStarredEvents(val);
+  },
 };
 
 const CORE_STORAGE_KEY = "vyuham26:core_team_visible";
@@ -231,5 +237,146 @@ export function useSponsorsVisible(): boolean {
   }, []);
 
   return visible;
+}
+
+/* -------------------------------------------------------------------------- */
+/*  STARRED / MAIN PAGE EVENTS CONFIGURATION                                  */
+/* -------------------------------------------------------------------------- */
+
+const STARRED_STORAGE_KEY = "vyuham26:starred_events";
+
+/**
+ * Default flagship events highlighted on the main stage before admin overrides.
+ */
+export const DEFAULT_STARRED_EVENTS: string[] = [
+  "hackathon",
+  "best-manager",
+  "valorant",
+  "concert",
+];
+
+export function normalizeEventSlug(idOrSlug: string): string {
+  if (!idOrSlug) return "";
+  return idOrSlug.replace(/^ev-/, "").trim().toLowerCase();
+}
+
+/**
+ * Returns the list of event slugs currently starred for Main Page showcase.
+ */
+export function getStarredEvents(): string[] {
+  if (typeof window === "undefined") {
+    return DEFAULT_STARRED_EVENTS;
+  }
+  try {
+    const val = localStorage.getItem(STARRED_STORAGE_KEY);
+    if (val !== null) {
+      const parsed = JSON.parse(val);
+      if (Array.isArray(parsed)) {
+        return parsed.map(normalizeEventSlug).filter(Boolean);
+      }
+    }
+  } catch {
+    // fallback
+  }
+  return DEFAULT_STARRED_EVENTS;
+}
+
+/**
+ * Checks whether an event (by slug or id) is starred for Main Page showcase.
+ */
+export function isEventStarred(idOrSlug: string): boolean {
+  const norm = normalizeEventSlug(idOrSlug);
+  return getStarredEvents().includes(norm);
+}
+
+/**
+ * Persists the entire list of starred event slugs and broadcasts change.
+ */
+export function setStarredEvents(slugs: string[]): void {
+  try {
+    if (typeof window !== "undefined") {
+      const unique = Array.from(new Set(slugs.map(normalizeEventSlug).filter(Boolean)));
+      localStorage.setItem(STARRED_STORAGE_KEY, JSON.stringify(unique));
+      window.dispatchEvent(
+        new CustomEvent("vyuham:starred_events_toggle", {
+          detail: { slugs: unique },
+        })
+      );
+      window.dispatchEvent(new Event("storage"));
+    }
+  } catch {}
+}
+
+/**
+ * Stars or unstars a single event by id/slug.
+ */
+export function setEventStarred(idOrSlug: string, starred: boolean): void {
+  const norm = normalizeEventSlug(idOrSlug);
+  if (!norm) return;
+  const current = getStarredEvents();
+  const next = starred
+    ? Array.from(new Set([...current, norm]))
+    : current.filter((s) => s !== norm);
+  setStarredEvents(next);
+}
+
+/**
+ * Toggles starred status for an event. Returns true if newly starred, false if unstarred.
+ */
+export function toggleEventStarred(idOrSlug: string): boolean {
+  const norm = normalizeEventSlug(idOrSlug);
+  if (!norm) return false;
+  const current = getStarredEvents();
+  const isCurrently = current.includes(norm);
+  const nextStarred = !isCurrently;
+  setEventStarred(norm, nextStarred);
+  return nextStarred;
+}
+
+/**
+ * React hook that returns live starred event slugs and mutation utilities.
+ * Synchronizes instantly across admin and public pages without page reloads.
+ */
+export function useStarredEvents() {
+  const [starredSlugs, setStarredSlugs] = useState<string[]>(getStarredEvents);
+
+  useEffect(() => {
+    const handleToggle = (e: Event) => {
+      const customEvent = e as CustomEvent<{ slugs?: string[] }>;
+      if (customEvent.detail && Array.isArray(customEvent.detail.slugs)) {
+        setStarredSlugs(customEvent.detail.slugs);
+      } else {
+        setStarredSlugs(getStarredEvents());
+      }
+    };
+
+    window.addEventListener("vyuham:starred_events_toggle", handleToggle);
+    window.addEventListener("storage", handleToggle);
+
+    return () => {
+      window.removeEventListener("vyuham:starred_events_toggle", handleToggle);
+      window.removeEventListener("storage", handleToggle);
+    };
+  }, []);
+
+  const isStarred = (idOrSlug: string) => {
+    const norm = normalizeEventSlug(idOrSlug);
+    return starredSlugs.includes(norm);
+  };
+
+  const toggleStar = (idOrSlug: string) => {
+    return toggleEventStarred(idOrSlug);
+  };
+
+  const setStar = (idOrSlug: string, starred: boolean) => {
+    setEventStarred(idOrSlug, starred);
+  };
+
+  return {
+    starredSlugs,
+    isStarred,
+    toggleStar,
+    setStar,
+  };
 }
 

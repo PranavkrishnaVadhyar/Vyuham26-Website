@@ -6,7 +6,7 @@ import { FocusIn, MaskReveal } from "@/components/cinematic/Reveal";
 import { DepthImage, MagneticButton } from "@/components/cinematic/Interactive";
 import { toast } from "@/components/ui/Toaster";
 import type { FestEvent, StreamId } from "@/data/types";
-import { SITE_CONFIG, useRegistrationOpen } from "@/config/site";
+import { SITE_CONFIG, useRegistrationOpen, useStarredEvents } from "@/config/site";
 
 const FILTERS: { id: StreamId | "all"; label: string }[] = [
   { id: "all", label: "ALL" },
@@ -15,7 +15,6 @@ const FILTERS: { id: StreamId | "all"; label: string }[] = [
   { id: "cultural", label: "CULTURAL" },
   { id: "esports", label: "ESPORTS" },
 ];
-
 
 function statusStyle(s: FestEvent["status"]) {
   if (s === "full") return { color: "#f2c98a", label: "WAITLIST" };
@@ -26,15 +25,25 @@ function statusStyle(s: FestEvent["status"]) {
 export default function Events() {
   const { content, register, isRegistered, toggleSave, saved, user, ui } = useApp();
   const regOpen = useRegistrationOpen();
+  const { starredSlugs, isStarred } = useStarredEvents();
   const [filter, setFilter] = useState<StreamId | "all">("all");
   const [query, setQuery] = useState("");
   const [openId, setOpenId] = useState<string | null>(null);
 
   const accentOf = (id: StreamId) => content.streams.find((s) => s.id === id)?.accent ?? "#18c47c";
 
+  // Main page ONLY lists starred / important events selected by admin
+  const starredBaseList = useMemo(() => {
+    const starred = content.events.filter((e) => isStarred(e.id) || !!e.starred);
+    if (starred.length > 0) return starred;
+    // Graceful fallback if no events have been starred yet so section is never blank
+    const fallback = content.events.filter((e) => e.featured);
+    return fallback.length > 0 ? fallback : content.events.slice(0, 4);
+  }, [content.events, starredSlugs, isStarred]);
+
   const list = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return content.events.filter((e) => {
+    return starredBaseList.filter((e) => {
       const matchStream = filter === "all" || e.stream === filter;
       const matchQuery =
         !q ||
@@ -44,7 +53,7 @@ export default function Events() {
         e.stream.includes(q);
       return matchStream && matchQuery;
     });
-  }, [content.events, filter, query]);
+  }, [starredBaseList, filter, query]);
 
   const featured = useMemo(() => list.find((e) => e.featured) ?? list[0], [list]);
   const rows = useMemo(() => list.filter((e) => e.id !== featured?.id), [list, featured]);
@@ -68,12 +77,20 @@ export default function Events() {
       {/* header */}
       <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <p className="eyebrow">04 — EVENTS</p>
+          <div className="flex flex-wrap items-center gap-2.5">
+            <p className="eyebrow">04 — EVENTS</p>
+            <span className="inline-flex items-center gap-1 rounded border border-amber-400/40 bg-amber-400/10 px-2.5 py-0.5 font-mono text-[8px] font-bold tracking-[0.2em] uppercase text-amber-300 shadow-[0_0_12px_rgba(251,191,36,0.18)]">
+              ★ MAIN STAGE HIGHLIGHTS ({starredBaseList.length})
+            </span>
+          </div>
           <h2 className="t-cond mt-4 text-[13vw] leading-[0.82] text-[#f0f9f5] md:text-[6.4vw]">
             <MaskReveal>THE PROGRAMME</MaskReveal>
           </h2>
-          <p className="mt-5 max-w-[46ch] text-[13px] leading-relaxed text-[#7d9a8d] md:text-[15px]">
-            30+ events across four streams. Filter the signal, search the noise, lock your slot.
+          <p className="mt-5 max-w-[50ch] text-[13px] leading-relaxed text-[#7d9a8d] md:text-[15px]">
+            Marquee attractions & flagship tournaments hand-picked for the main stage. Looking for the complete 30+ event roster?{" "}
+            <Link href="/events" className="text-[#18c47c] underline underline-offset-4 hover:text-[#7dffc4] transition-colors">
+              View All 30+ Events in Full Directory →
+            </Link>
           </p>
         </div>
 
@@ -137,6 +154,9 @@ export default function Events() {
                 />
                 <span className="font-mono text-[9px] tracking-[0.3em] text-[#c6e5d8]">
                   FEATURED · {featured.stream.toUpperCase()}
+                </span>
+                <span className="inline-flex items-center gap-1 rounded border border-amber-400/50 bg-amber-400/15 px-2 py-0.5 font-mono text-[8px] font-bold tracking-[0.16em] uppercase text-amber-300 shadow-[0_0_10px_rgba(251,191,36,0.25)]">
+                  ★ STARRED
                 </span>
               </div>
             </div>
@@ -230,10 +250,15 @@ export default function Events() {
                     </span>
                   </span>
 
-                  <span className="hidden shrink-0 items-center gap-2 lg:flex">
-                    <span className="h-[5px] w-[5px] rounded-full" style={{ background: st.color }} />
-                    <span className="font-mono text-[9px] tracking-[0.24em]" style={{ color: st.color }}>
-                      {st.label}
+                  <span className="hidden shrink-0 items-center gap-3 sm:flex">
+                    <span className="inline-flex items-center gap-1 rounded border border-amber-400/40 bg-amber-400/10 px-2 py-0.5 font-mono text-[8px] font-bold tracking-[0.16em] uppercase text-amber-300">
+                      ★ STARRED
+                    </span>
+                    <span className="hidden items-center gap-2 lg:flex">
+                      <span className="h-[5px] w-[5px] rounded-full" style={{ background: st.color }} />
+                      <span className="font-mono text-[9px] tracking-[0.24em]" style={{ color: st.color }}>
+                        {st.label}
+                      </span>
                     </span>
                   </span>
 

@@ -7,6 +7,7 @@ import type { Announcement, FestEvent, Sponsor, StreamId, TeamMember } from "@/d
 import ConsoleManager from "./ConsoleManager";
 import AnnouncementManager from "./AnnouncementManager";
 import { useConsoleConfig } from "@/config/consoleConfig";
+import { useStarredEvents } from "@/config/site";
 
 /* ------------------------------------------------------------------ */
 /*  primitives                                                         */
@@ -62,8 +63,8 @@ const Th = ({ children }: { children: ReactNode }) => (
     {children}
   </th>
 );
-const Td = ({ children, className }: { children: ReactNode; className?: string }) => (
-  <td className={cn("px-3 py-3 font-mono text-[10px] tracking-[0.1em] text-[#b9d3c7]", className)}>{children}</td>
+const Td = ({ children, className, colSpan }: { children: ReactNode; className?: string; colSpan?: number }) => (
+  <td colSpan={colSpan} className={cn("px-3 py-3 font-mono text-[10px] tracking-[0.1em] text-[#b9d3c7]", className)}>{children}</td>
 );
 
 function Input({
@@ -105,6 +106,7 @@ const blankEvent = (): FestEvent => ({
   seats: 100,
   registered: 0,
   image: "https://images.pexels.com/photos/3861960/pexels-photo-3861960.jpeg?auto=compress&cs=tinysrgb&w=1200",
+  starred: false,
   status: "open",
 });
 
@@ -337,6 +339,34 @@ export default function AdminApp() {
   const [mediaSpan, setMediaSpan] = useState<"auto" | "wide" | "tall" | "std">("auto");
   const [detectedSpan, setDetectedSpan] = useState<"wide" | "tall" | "std">("std");
   const [detectedInfo, setDetectedInfo] = useState<string>("");
+
+  const { starredSlugs, isStarred } = useStarredEvents();
+  const [eventStarFilter, setEventStarFilter] = useState<"all" | "starred" | "unstarred">("all");
+
+  const starredEventCount = useMemo(() => {
+    return content.events.filter((e) => isStarred(e.id) || !!e.starred).length;
+  }, [content.events, starredSlugs, isStarred]);
+
+  const displayEvents = useMemo(() => {
+    return content.events.filter((e) => {
+      const starred = isStarred(e.id) || !!e.starred;
+      if (eventStarFilter === "starred") return starred;
+      if (eventStarFilter === "unstarred") return !starred;
+      return true;
+    });
+  }, [content.events, eventStarFilter, isStarred, starredSlugs]);
+
+  const handleToggleStar = (e: FestEvent) => {
+    cyberAudio.playTelemetry();
+    app.toggleStarEvent(e.id);
+    const currentlyStarred = isStarred(e.id) || !!e.starred;
+    const nextStarred = !currentlyStarred;
+    if (nextStarred) {
+      toast(`★ '${e.name}' is now STARRED and listed on the Main Page!`, "ok");
+    } else {
+      toast(`☆ '${e.name}' unstarred. Removed from Main Page (remains listed on Events directory).`, "info");
+    }
+  };
 
   const handleMediaUrlChange = (url: string) => {
     setMediaUrl(url);
@@ -591,8 +621,31 @@ export default function AdminApp() {
                   </button>
                 </div>
 
-                <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                {/* Main Page Starred Highlights Quick Summary Banner */}
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border border-amber-400/30 bg-gradient-to-r from-[rgba(28,22,6,0.92)] to-[rgba(15,12,3,0.8)] p-4 shadow-[0_0_20px_rgba(251,191,36,0.08)]">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="h-2 w-2 rounded-full bg-amber-400 shadow-[0_0_8px_#fbbf24] animate-pulse" />
+                      <span className="font-mono text-[10px] font-bold tracking-[0.22em] text-amber-300 uppercase">
+                        MAIN PAGE EVENT CURATION: {starredEventCount} EVENTS STARRED
+                      </span>
+                    </div>
+                    <p className="font-mono text-[10px] text-[#b8d4c7]">
+                      Only starred events are featured on the homepage (Section 04). All {content.events.length} events remain listed on the public Events catalog.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setSection("Events")}
+                    className="btn-cine font-mono text-[9px] tracking-[0.2em] uppercase shrink-0 border-amber-400/40 text-amber-300 hover:bg-amber-400/20"
+                  >
+                    CURATE STARRED EVENTS →
+                  </button>
+                </div>
+
+                <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
                   <Stat label="TOTAL EVENTS" value={stats.events} hint="ACROSS 4 STREAMS" />
+                  <Stat label="MAIN PAGE STARRED" value={starredEventCount} hint="DISPLAYED IN SEC 04" />
                   <Stat label="TOTAL USERS" value={stats.users} hint="REGISTERED ACCOUNTS" />
                   <Stat label="TOTAL REGISTRATIONS" value={stats.regs} hint="SLOTS HELD" />
                   <Stat label="ACTIVE EVENTS" value={stats.active} hint="ACCEPTING ENTRIES" />
@@ -687,56 +740,146 @@ export default function AdminApp() {
               <Panel
                 title={`Events (${content.events.length})`}
                 action={
-                  <button
-                    onClick={() => setEditing(blankEvent())}
-                    className="font-mono text-[9px] tracking-[0.24em] text-[#18c47c] hover:text-[#7dffc4]"
-                  >
-                    + NEW EVENT
-                  </button>
+                  <div className="flex items-center gap-3">
+                    <span className="hidden sm:inline-flex items-center gap-1.5 font-mono text-[9px] text-amber-300 bg-amber-400/10 border border-amber-400/30 px-2 py-0.5 rounded">
+                      ★ {starredEventCount} on Main Page
+                    </span>
+                    <button
+                      onClick={() => setEditing(blankEvent())}
+                      className="font-mono text-[9px] tracking-[0.24em] text-[#18c47c] hover:text-[#7dffc4]"
+                    >
+                      + NEW EVENT
+                    </button>
+                  </div>
                 }
               >
+                {/* Main Page Curation Guidance & Filter Bar */}
+                <div className="mb-5 flex flex-col gap-4 rounded border border-amber-400/25 bg-[rgba(25,20,5,0.7)] p-4 sm:flex-row sm:items-center sm:justify-between shadow-[0_0_15px_rgba(251,191,36,0.06)]">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-amber-400 text-sm">★</span>
+                      <span className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-amber-300">
+                        HOMEPAGE EVENT CURATION
+                      </span>
+                      <span className="rounded bg-amber-400/20 px-1.5 py-0.5 font-mono text-[8px] text-amber-300">
+                        SECTION 04
+                      </span>
+                    </div>
+                    <p className="mt-1 text-xs text-[#9fc4b4] leading-relaxed">
+                      Only events marked with <strong className="text-amber-300 font-semibold">★ STARRED</strong> appear on the public Homepage. All {content.events.length} events remain listed on the full <a href="/events" target="_blank" rel="noopener noreferrer" className="text-emerald-400 underline underline-offset-2 hover:text-emerald-300">Events Directory</a>.
+                    </p>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-2 shrink-0">
+                    <button
+                      onClick={() => setEventStarFilter("all")}
+                      className={`px-3 py-1 font-mono text-[9px] uppercase tracking-[0.16em] rounded border transition ${
+                        eventStarFilter === "all"
+                          ? "border-emerald-500/50 bg-emerald-500/15 text-emerald-300 font-bold"
+                          : "border-white/10 text-white/40 hover:text-white"
+                      }`}
+                    >
+                      ALL ({content.events.length})
+                    </button>
+                    <button
+                      onClick={() => setEventStarFilter("starred")}
+                      className={`px-3 py-1 font-mono text-[9px] uppercase tracking-[0.16em] rounded border transition ${
+                        eventStarFilter === "starred"
+                          ? "border-amber-400/60 bg-amber-400/20 text-amber-300 shadow-[0_0_10px_rgba(251,191,36,0.25)] font-bold"
+                          : "border-white/10 text-white/40 hover:text-amber-300"
+                      }`}
+                    >
+                      ★ STARRED ({starredEventCount})
+                    </button>
+                    <button
+                      onClick={() => setEventStarFilter("unstarred")}
+                      className={`px-3 py-1 font-mono text-[9px] uppercase tracking-[0.16em] rounded border transition ${
+                        eventStarFilter === "unstarred"
+                          ? "border-emerald-500/50 bg-emerald-500/15 text-emerald-300 font-bold"
+                          : "border-white/10 text-white/40 hover:text-white"
+                      }`}
+                    >
+                      UNSTARRED ({content.events.length - starredEventCount})
+                    </button>
+                  </div>
+                </div>
+
                 <div className="overflow-x-auto">
-                  <table className="w-full min-w-[720px]">
+                  <table className="w-full min-w-[780px]">
                     <thead>
                       <tr>
+                        <Th>MAIN PAGE ★</Th>
                         <Th>NAME</Th>
                         <Th>STREAM</Th>
                         <Th>DATE</Th>
                         <Th>VENUE</Th>
                         <Th>SEATS</Th>
                         <Th>STATUS</Th>
-                        <Th> </Th>
+                        <Th>ACTIONS</Th>
                       </tr>
                     </thead>
                     <tbody>
-                      {content.events.map((e) => (
-                        <Row key={e.id}>
-                          <Td className="text-[#e7f5ee]">{e.name}</Td>
-                          <Td>{e.stream.toUpperCase()}</Td>
-                          <Td>{e.date}</Td>
-                          <Td>{e.venue}</Td>
-                          <Td>
-                            {e.registered}/{e.seats}
-                          </Td>
-                          <Td>{e.status.toUpperCase()}</Td>
-                          <Td>
-                            <div className="flex gap-3">
-                              <button onClick={() => setEditing(e)} className="text-[#18c47c] hover:text-[#7dffc4]">
-                                EDIT
-                              </button>
+                      {displayEvents.map((e) => {
+                        const starred = isStarred(e.id) || !!e.starred;
+                        return (
+                          <Row key={e.id}>
+                            <Td>
                               <button
-                                onClick={() => {
-                                  app.removeEvent(e.id);
-                                  toast("Event removed.", "warn");
-                                }}
-                                className="text-[#6f8b80] hover:text-[#f2a98a]"
+                                onClick={() => handleToggleStar(e)}
+                                className={`inline-flex items-center gap-1.5 rounded px-2.5 py-1 font-mono text-[9px] tracking-[0.16em] uppercase transition-all ${
+                                  starred
+                                    ? "border border-amber-400/60 bg-amber-400/20 text-amber-300 shadow-[0_0_12px_rgba(251,191,36,0.3)] font-bold hover:bg-amber-400/30"
+                                    : "border border-white/10 bg-white/[0.03] text-white/40 hover:border-amber-400/40 hover:text-amber-300 hover:bg-amber-400/10"
+                                }`}
+                                title={starred ? "Starred for Main Page. Click to unstar." : "Click to star and display on Main Page."}
                               >
-                                DELETE
+                                <span className={starred ? "text-amber-300 text-xs" : "text-white/30 text-xs"}>
+                                  {starred ? "★" : "☆"}
+                                </span>
+                                <span>{starred ? "STARRED" : "UNSTARRED"}</span>
                               </button>
-                            </div>
+                            </Td>
+                            <Td className="text-[#e7f5ee]">
+                              <span className="font-semibold">{e.name}</span>
+                              {e.featured && (
+                                <span className="ml-2 font-mono text-[8px] text-emerald-400">
+                                  [FLAGSHIP]
+                                </span>
+                              )}
+                            </Td>
+                            <Td>{e.stream.toUpperCase()}</Td>
+                            <Td>{e.date}</Td>
+                            <Td>{e.venue}</Td>
+                            <Td>
+                              {e.registered}/{e.seats}
+                            </Td>
+                            <Td>{e.status.toUpperCase()}</Td>
+                            <Td>
+                              <div className="flex gap-3">
+                                <button onClick={() => setEditing(e)} className="text-[#18c47c] hover:text-[#7dffc4]">
+                                  EDIT
+                                </button>
+                                <button
+                                  onClick={() => {
+                                    app.removeEvent(e.id);
+                                    toast("Event removed.", "warn");
+                                  }}
+                                  className="text-[#6f8b80] hover:text-[#f2a98a]"
+                                >
+                                  DELETE
+                                </button>
+                              </div>
+                            </Td>
+                          </Row>
+                        );
+                      })}
+                      {displayEvents.length === 0 && (
+                        <Row>
+                          <Td colSpan={8} className="text-center py-8 text-white/40 font-mono text-xs">
+                            NO EVENTS MATCH FILTER.
                           </Td>
                         </Row>
-                      ))}
+                      )}
                     </tbody>
                   </table>
                 </div>
@@ -1310,14 +1453,25 @@ export default function AdminApp() {
               <div className="md:col-span-2">
                 <Input label="Blurb" area value={editing.blurb} onChange={(v) => setEditing({ ...editing, blurb: v })} />
               </div>
-              <label className="flex items-center gap-2 font-mono text-[9px] tracking-[0.22em] text-[#6f8b80]">
-                <input
-                  type="checkbox"
-                  checked={!!editing.featured}
-                  onChange={(e) => setEditing({ ...editing, featured: e.target.checked })}
-                />
-                FEATURED
-              </label>
+              <div className="flex flex-wrap items-center gap-4 md:col-span-2">
+                <label className="flex items-center gap-2 font-mono text-[9px] tracking-[0.22em] text-[#6f8b80]">
+                  <input
+                    type="checkbox"
+                    checked={!!editing.featured}
+                    onChange={(e) => setEditing({ ...editing, featured: e.target.checked })}
+                  />
+                  FLAGSHIP FEATURED
+                </label>
+
+                <label className="flex items-center gap-2 rounded border border-amber-400/40 bg-amber-400/10 px-3 py-1.5 font-mono text-[9px] font-bold tracking-[0.2em] text-amber-300">
+                  <input
+                    type="checkbox"
+                    checked={!!editing.starred}
+                    onChange={(e) => setEditing({ ...editing, starred: e.target.checked })}
+                  />
+                  ★ STARRED (LIST ON MAIN PAGE)
+                </label>
+              </div>
             </div>
             <div className="mt-7 flex gap-3">
               <button

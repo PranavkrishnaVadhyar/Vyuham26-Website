@@ -6,6 +6,7 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { useApp } from "@/lib/store";
 import { events } from "@/data/events";
+import { useStarredEvents } from "@/config/site";
 
 /* ==========================================================================
    VYUHAM'26 — CINEMATIC 3D EVENT REGISTRY
@@ -122,11 +123,13 @@ function EventCard({
   index,
   total,
   registerCard,
+  isStarred = false,
 }: {
   event: (typeof events)[number];
   index: number;
   total: number;
   registerCard: (index: number, element: HTMLDivElement | null) => void;
+  isStarred?: boolean;
 }) {
   const stream = getStream(event);
   const theme = streamTheme[stream] ?? streamTheme.tech;
@@ -220,11 +223,18 @@ function EventCard({
           <div className="relative z-10 flex h-full flex-col justify-between p-4 sm:p-6">
             <div className="flex items-start justify-between">
               <div>
-                <div
-                  className="font-mono text-[9px] uppercase tracking-[0.24em] font-semibold"
-                  style={{ color: theme.accent }}
-                >
-                  {stream}
+                <div className="flex items-center gap-1.5">
+                  <span
+                    className="font-mono text-[9px] uppercase tracking-[0.24em] font-semibold"
+                    style={{ color: theme.accent }}
+                  >
+                    {stream}
+                  </span>
+                  {isStarred && (
+                    <span className="inline-flex items-center gap-0.5 rounded border border-amber-400/50 bg-amber-400/20 px-1.5 py-0.5 font-mono text-[7px] font-bold tracking-[0.16em] uppercase text-amber-300 shadow-[0_0_8px_rgba(251,191,36,0.3)]">
+                      ★ STARRED
+                    </span>
+                  )}
                 </div>
                 <div className="mt-0.5 sm:mt-1 font-mono text-[7px] tracking-[0.16em] text-white/35">
                   PROTOCOL {String(index + 1).padStart(2, "0")} /{" "}
@@ -338,11 +348,13 @@ function EventCard({
 
 export default function EventsPage() {
   const { saved, toggleSave } = useApp();
+  const { starredSlugs, isStarred } = useStarredEvents();
 
   const [activeStream, setActiveStream] = useState<string>("all");
   const [activeDay, setActiveDay] = useState<string>("all");
   const [search, setSearch] = useState("");
   const [savedOnly, setSavedOnly] = useState(false);
+  const [starredOnly, setStarredOnly] = useState(false);
   const [paused, setPaused] = useState(false);
 
   const [metrics, setMetrics] = useState({ cardW: 340, cardH: 215 });
@@ -398,7 +410,11 @@ export default function EventsPage() {
     return () => window.removeEventListener("keydown", handleKey);
   }, []);
 
-  /* Filter events */
+  const starredCount = useMemo(() => {
+    return events.filter((e) => isStarred(e.slug)).length;
+  }, [isStarred, starredSlugs]);
+
+  /* Filter events - displays all events by default, with optional filters */
   const filtered = useMemo(() => {
     const query = search.trim().toLowerCase();
 
@@ -414,10 +430,11 @@ export default function EventsPage() {
         event.venue.toLowerCase().includes(query);
 
       const savedMatch = !savedOnly || saved.includes(event.slug);
+      const starredMatch = !starredOnly || isStarred(event.slug);
 
-      return streamMatch && dayMatch && searchMatch && savedMatch;
+      return streamMatch && dayMatch && searchMatch && savedMatch && starredMatch;
     });
-  }, [activeStream, activeDay, search, savedOnly, saved]);
+  }, [activeStream, activeDay, search, savedOnly, saved, starredOnly, isStarred]);
 
   /* Carousel shows up to 12 featured events */
   const carouselEvents = useMemo(() => {
@@ -841,6 +858,7 @@ export default function EventsPage() {
                   index={index}
                   total={carouselEvents.length}
                   registerCard={registerCard}
+                  isStarred={isStarred(event.slug)}
                 />
               ))}
             </div>
@@ -925,6 +943,18 @@ export default function EventsPage() {
                     </button>
                   );
                 })}
+
+                <button
+                  type="button"
+                  onClick={() => setStarredOnly((v) => !v)}
+                  className={`shrink-0 rounded-lg border px-3 py-1.5 font-mono text-[9px] uppercase tracking-[0.16em] transition-all ${
+                    starredOnly
+                      ? "border-amber-400/60 bg-amber-400/20 text-amber-300 shadow-[0_0_12px_rgba(251,191,36,0.3)] font-bold"
+                      : "border-white/[0.08] bg-white/[0.02] text-white/40 hover:text-white/70"
+                  }`}
+                >
+                  ★ STARRED ({starredCount})
+                </button>
 
                 <button
                   type="button"
@@ -1021,7 +1051,8 @@ export default function EventsPage() {
               {(activeStream !== "all" ||
                 activeDay !== "all" ||
                 search !== "" ||
-                savedOnly) && (
+                savedOnly ||
+                starredOnly) && (
                 <button
                   type="button"
                   onClick={() => {
@@ -1029,6 +1060,7 @@ export default function EventsPage() {
                     setActiveDay("all");
                     setSearch("");
                     setSavedOnly(false);
+                    setStarredOnly(false);
                   }}
                   className="rounded-lg border border-emerald-500/30 bg-emerald-950/30 px-3.5 py-1.5 font-mono text-[9px] uppercase tracking-[0.16em] text-emerald-400 hover:bg-emerald-900/40 transition"
                 >
@@ -1044,25 +1076,28 @@ export default function EventsPage() {
                   const stream = getStream(event);
                   const theme = streamTheme[stream] ?? streamTheme.tech;
                   const isSaved = saved.includes(event.slug);
+                  const starred = isStarred(event.slug);
 
                   return (
                     <div
                       key={event.slug}
-                      className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border bg-[#050c08]/80 p-6 backdrop-blur-sm transition-all duration-300 hover:border-emerald-500/40 hover:bg-[#07130d]"
-                      style={{ borderColor: "rgba(120,160,145,0.16)" }}
+                      className={`group relative flex flex-col justify-between overflow-hidden rounded-2xl border bg-[#050c08]/80 p-6 backdrop-blur-sm transition-all duration-300 hover:border-emerald-500/40 hover:bg-[#07130d] ${
+                        starred ? "border-amber-400/40 shadow-[0_0_24px_rgba(251,191,36,0.08)]" : ""
+                      }`}
+                      style={{ borderColor: starred ? "rgba(251,191,36,0.38)" : "rgba(120,160,145,0.16)" }}
                     >
                       {/* Top accent line on hover */}
                       <div
                         className="absolute left-0 right-0 top-0 h-[2px] opacity-0 transition-opacity duration-300 group-hover:opacity-100"
                         style={{
-                          background: `linear-gradient(90deg, transparent, ${theme.accent}, transparent)`,
+                          background: `linear-gradient(90deg, transparent, ${starred ? "#fbbf24" : theme.accent}, transparent)`,
                         }}
                       />
 
                       {/* Header info */}
                       <div>
                         <div className="flex items-start justify-between">
-                          <div className="flex items-center gap-2">
+                          <div className="flex flex-wrap items-center gap-2">
                             <span
                               className="flex h-6 w-6 items-center justify-center rounded-md border text-[10px]"
                               style={{
@@ -1079,6 +1114,11 @@ export default function EventsPage() {
                             >
                               {stream}
                             </span>
+                            {starred && (
+                              <span className="inline-flex items-center gap-1 rounded border border-amber-400/50 bg-amber-400/15 px-2 py-0.5 font-mono text-[8px] font-bold tracking-[0.16em] uppercase text-amber-300 shadow-[0_0_10px_rgba(251,191,36,0.25)]">
+                                ★ STARRED
+                              </span>
+                            )}
                           </div>
 
                           <div className="flex items-center gap-2">

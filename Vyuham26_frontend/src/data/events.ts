@@ -16,6 +16,7 @@ export interface Event {
   teamSize: string;
   status: "upcoming" | "live" | "completed";
   featured?: boolean;
+  starred?: boolean;
 }
 
 export const events: Event[] = [

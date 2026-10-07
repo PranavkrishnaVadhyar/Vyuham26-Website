@@ -35,6 +35,10 @@ import {
   isSponsorsVisible,
   setSponsorsVisible,
   useSponsorsVisible,
+  isEventStarred,
+  setEventStarred,
+  toggleEventStarred,
+  normalizeEventSlug,
 } from "@/config/site";
 
 /**
@@ -60,6 +64,8 @@ interface Ctx {
   setHomepage: (patch: Partial<typeof seedHomepage>) => void;
   upsertEvent: (e: FestEvent) => void;
   removeEvent: (id: string) => void;
+  toggleStarEvent: (idOrSlug: string) => void;
+  isEventStarred: (idOrSlug: string) => boolean;
   upsertAnnouncement: (a: Announcement) => void;
   removeAnnouncement: (id: string) => void;
   upsertSponsor: (s: Sponsor) => void;
@@ -173,7 +179,11 @@ function getInitialContent(): Content {
       localStorage.removeItem(CONTENT_STORAGE_KEY);
       return seedContent;
     }
-    return parsed;
+    const syncedEvents = (parsed.events || seedContent.events).map((e) => ({
+      ...e,
+      starred: typeof e.starred === "boolean" ? e.starred : isEventStarred(e.id),
+    }));
+    return { ...parsed, events: syncedEvents };
   } catch {
     return seedContent;
   }
@@ -203,6 +213,21 @@ export function AppProvider({ children }: { children: ReactNode }) {
       localStorage.setItem(CONTENT_STORAGE_KEY, JSON.stringify(content));
     } catch {}
   }, [content]);
+
+  // Synchronize starred status in content when toggled from admin or config
+  useEffect(() => {
+    const handleStarredSync = () => {
+      setContent((c) => ({
+        ...c,
+        events: c.events.map((e) => ({
+          ...e,
+          starred: isEventStarred(e.id),
+        })),
+      }));
+    };
+    window.addEventListener("vyuham:starred_events_toggle", handleStarredSync);
+    return () => window.removeEventListener("vyuham:starred_events_toggle", handleStarredSync);
+  }, []);
   const [users, setUsers] = useLocalState<UserAccount[]>("vyuham26:users:v1", seedUsers);
   const [registrations, setRegistrations] = useLocalState<Registration[]>(
     "vyuham26:regs:v1",
@@ -342,15 +367,34 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const value: Ctx = {
     content,
     setHomepage: (patch) => patchContent((c) => ({ ...c, homepage: { ...c.homepage, ...patch } })),
-    upsertEvent: (e) =>
+    upsertEvent: (e) => {
+      if (typeof e.starred === "boolean") {
+        setEventStarred(e.id, e.starred);
+      }
       patchContent((c) => {
         const exists = c.events.some((x) => x.id === e.id);
         return {
           ...c,
           events: exists ? c.events.map((x) => (x.id === e.id ? e : x)) : [...c.events, e],
         };
-      }),
+      });
+    },
     removeEvent: (id) => patchContent((c) => ({ ...c, events: c.events.filter((e) => e.id !== id) })),
+    toggleStarEvent: (idOrSlug) => {
+      const next = toggleEventStarred(idOrSlug);
+      const norm = normalizeEventSlug(idOrSlug);
+      patchContent((c) => ({
+        ...c,
+        events: c.events.map((x) => {
+          const xNorm = normalizeEventSlug(x.id);
+          if (x.id === idOrSlug || xNorm === norm) {
+            return { ...x, starred: next };
+          }
+          return x;
+        }),
+      }));
+    },
+    isEventStarred: (idOrSlug) => isEventStarred(idOrSlug),
     upsertAnnouncement: (a) =>
       patchContent((c) => ({
         ...c,
