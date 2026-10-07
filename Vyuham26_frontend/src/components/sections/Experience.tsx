@@ -47,7 +47,7 @@ export default function Experience() {
   }, []);
 
   return (
-    <section id="gallery" data-section="experience" className="relative w-full px-5 py-24 md:px-[6vw] md:py-36">
+    <section id="gallery" data-section="experience" className="relative w-full px-5 py-10 sm:py-14 md:py-20 md:px-[6vw]">
       <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <p className="eyebrow">05 — THE EXPERIENCE</p>
@@ -62,7 +62,7 @@ export default function Experience() {
       </div>
 
       {/* zone rail */}
-      <div className="no-scrollbar mt-10 flex gap-3 overflow-x-auto border-y border-[rgba(120,160,145,0.12)] py-4">
+      <div className="no-scrollbar mt-6 sm:mt-8 flex gap-3 overflow-x-auto border-y border-[rgba(120,160,145,0.12)] py-3 sm:py-4">
         {zones.map((z) => (
           <div
             key={z.id}
@@ -76,7 +76,7 @@ export default function Experience() {
       </div>
 
       {/* gallery */}
-      <div ref={grid} className="mt-12 grid grid-cols-1 gap-3 md:grid-cols-3 md:gap-4">
+      <div ref={grid} className="mt-8 sm:mt-10 grid grid-cols-1 gap-3 md:grid-cols-3 md:gap-4">
         {items.map((g, i) => {
           const mediaUrl = g.type === "video" ? g.poster ?? g.src : g.src;
           return (

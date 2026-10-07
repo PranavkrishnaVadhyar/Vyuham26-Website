@@ -81,12 +81,18 @@ export default function Awakening() {
         );
       });
 
-      // 3. Outro: stats and support copy fade in cleanly after all statements finish
+      // 3. Outro: stats and support copy fade in cleanly in center after statements finish
       tl.fromTo(
         ".awk-out",
-        { autoAlpha: 0, yPercent: 20, filter: "blur(8px)" },
-        { autoAlpha: 1, yPercent: 0, filter: "blur(0px)", ease: "power2.out", duration: 0.14 },
-        0.83,
+        { autoAlpha: 0, yPercent: 16, filter: "blur(6px)" },
+        { autoAlpha: 1, yPercent: 0, filter: "blur(0px)", ease: "power2.out", duration: 0.13 },
+        0.78,
+      );
+      // Dissolve cleanly at the end to hand over seamlessly to Streams
+      tl.to(
+        ".awk-out",
+        { autoAlpha: 0, yPercent: -14, filter: "blur(6px)", ease: "power2.in", duration: 0.06 },
+        0.94,
       );
       tl.fromTo(".awk-glow", { opacity: 0.1 }, { opacity: 0.5, ease: "none", duration: 1 }, 0);
     }, el);
@@ -96,7 +102,7 @@ export default function Awakening() {
   /* ---------- reduced motion: a static, fully readable scene ---------- */
   if (reduced) {
     return (
-      <section id="awakening" className="relative w-full px-5 py-24 md:px-[10vw]">
+      <section id="awakening" className="relative w-full px-5 py-12 sm:py-16 md:py-20 md:px-[10vw]">
         <p className="eyebrow">01 — THE AWAKENING</p>
         <h2 className="t-cond mt-5 max-w-[18ch] text-[12vw] leading-[0.86] text-[#f0f9f5] md:text-[6vw]">
           {hp.awakeningTitle}
@@ -135,7 +141,7 @@ export default function Awakening() {
   }
 
   return (
-    <div id="awakening" ref={wrap} className="relative h-[320vh] w-full">
+    <div id="awakening" ref={wrap} className="relative h-[200vh] sm:h-[220vh] md:h-[250vh] w-full">
       <div className="sticky top-0 h-[100svh] w-full overflow-hidden">
         {/* depth plates */}
         {PLATES.map((p, i) => (
@@ -185,13 +191,13 @@ export default function Awakening() {
             ))}
           </div>
 
-          <div className="awk-out absolute inset-x-0 bottom-[10%] px-5 opacity-0">
+          <div className="awk-out pointer-events-none absolute inset-0 flex flex-col items-center justify-center px-5 opacity-0">
             <FocusIn>
               <p className="mx-auto max-w-[46ch] text-[13px] leading-relaxed text-[#8faea1] md:text-[15px]">
                 {hp.aboutSupport}
               </p>
             </FocusIn>
-            <div className="mt-8 flex flex-wrap items-center justify-center gap-x-10 gap-y-4">
+            <div className="mt-6 sm:mt-8 flex flex-wrap items-center justify-center gap-x-8 sm:gap-x-10 gap-y-3 sm:gap-y-4">
               {hp.stats.map((s) => (
                 <div key={s.label} className="text-center">
                   <div className="t-cond text-[7vw] leading-none text-[#e8f7f0] md:text-[2.6vw]">{s.value}</div>

@@ -11,7 +11,7 @@ export default function Interstitial({
   line,
   caption,
   align = "center",
-  height = "h-[78vh]",
+  height = "h-[38vh] sm:h-[44vh] md:h-[50vh]",
 }: {
   image: string;
   line: string;
@@ -83,12 +83,12 @@ export default function Interstitial({
           align === "center" ? "items-center text-center" : "items-start text-left"
         }`}
       >
-        <div className="itl-rule mb-7 h-px w-[min(340px,50vw)] origin-left bg-gradient-to-r from-[rgba(24,196,124,0.8)] to-transparent" />
+        <div className="itl-rule mb-4 sm:mb-5 h-px w-[min(340px,50vw)] origin-left bg-gradient-to-r from-[rgba(24,196,124,0.8)] to-transparent" />
         <h3 className="itl-line t-cond-l max-w-[18ch] text-[8.4vw] leading-[1.05] text-[#e2f3ea] md:text-[3.4vw]">
           {line}
         </h3>
         {caption && (
-          <p className="mt-6 font-mono text-[9px] tracking-[0.34em] text-[#5f8474] md:text-[10px]">{caption}</p>
+          <p className="mt-3 sm:mt-4 font-mono text-[9px] tracking-[0.34em] text-[#5f8474] md:text-[10px]">{caption}</p>
         )}
       </div>
     </div>

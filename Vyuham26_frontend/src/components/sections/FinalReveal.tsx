@@ -225,7 +225,7 @@ export default function FinalReveal() {
   const getProgress = useRef(() => progress.current).current;
 
   return (
-    <div ref={wrap} className="relative h-[300vh] w-full">
+    <div ref={wrap} className="relative h-[200vh] sm:h-[220vh] md:h-[250vh] w-full">
       <div className="sticky top-0 h-[100svh] w-full overflow-hidden bg-[#020403]">
         <div className="fin-dark absolute inset-0 bg-[#010302] opacity-0" />
         <ConvergenceCanvas getProgress={getProgress} />

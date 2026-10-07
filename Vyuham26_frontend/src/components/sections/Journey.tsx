@@ -167,7 +167,7 @@ export default function Journey() {
 
   return (
     <section id="schedule" className="relative w-full">
-      <div className="relative z-10 flex flex-col justify-between gap-6 px-6 pt-24 md:flex-row md:items-end md:px-[10vw]">
+      <div className="relative z-10 flex flex-col justify-between gap-6 px-6 pt-10 sm:pt-14 md:pt-18 md:flex-row md:items-end md:px-[10vw]">
         <div>
           <p className="eyebrow">03 — THE JOURNEY</p>
           <FocusIn delay={0.05}>
@@ -191,13 +191,13 @@ export default function Journey() {
       </div>
 
       {reduced ? (
-        <div className="mt-16">
+        <div className="mt-8 sm:mt-10 md:mt-12">
           {days.map((d, i) => (
             <Panel key={d.id} d={d} i={i} total={days.length} />
           ))}
         </div>
       ) : (
-        <div ref={wrap} className="relative mt-16 overflow-hidden">
+        <div ref={wrap} className="relative mt-8 sm:mt-10 md:mt-12 overflow-hidden">
           <div className="track flex w-max will-change-transform">
             {days.map((d, i) => (
               <Panel key={d.id} d={d} i={i} total={days.length} />

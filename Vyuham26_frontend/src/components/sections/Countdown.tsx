@@ -56,7 +56,7 @@ export default function Countdown() {
   }, [left.total]);
 
   return (
-    <section id="countdown" className="relative w-full overflow-hidden px-4 sm:px-5 py-24 sm:py-28 md:py-44">
+    <section id="countdown" className="relative w-full overflow-hidden px-4 sm:px-5 py-10 sm:py-14 md:py-20">
       {/* energy field */}
       <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
         <div
@@ -85,13 +85,13 @@ export default function Countdown() {
         <p className="eyebrow text-center">07 — COUNTDOWN</p>
 
         <FocusIn delay={0.05}>
-          <h2 className="t-cond-l mt-6 text-center text-[6.4vw] tracking-[0.16em] text-[#c6e5d8] md:text-[2.2vw]">
+          <h2 className="t-cond-l mt-3 sm:mt-5 text-center text-[6.4vw] tracking-[0.16em] text-[#c6e5d8] md:text-[2.2vw]">
             THE SIGNAL OPENS
           </h2>
         </FocusIn>
 
         {/* 4-digit countdown counter — strictly non-wrapping on all mobile screens */}
-        <div className="mt-10 sm:mt-14 flex flex-nowrap items-start justify-center gap-2 sm:gap-4 md:gap-7 lg:gap-9">
+        <div className="mt-6 sm:mt-9 flex flex-nowrap items-start justify-center gap-2 sm:gap-4 md:gap-7 lg:gap-9">
           <Unit value={left.days} label="DAYS" pad={left.days >= 100 ? 3 : 2} />
           <span className="t-cond flex text-[6.5vw] sm:text-[8vw] md:text-[5.5vw] lg:text-[6.5vw] leading-[0.82] text-[#1e4638] select-none pt-1 sm:pt-1.5 md:pt-2" aria-hidden="true">:</span>
           <Unit value={left.hours} label="HOURS" />
@@ -102,7 +102,7 @@ export default function Countdown() {
         </div>
 
         {/* signal strength */}
-        <div className="mx-auto mt-16 max-w-[720px]">
+        <div className="mx-auto mt-8 sm:mt-11 max-w-[720px]">
           <div className="flex items-center justify-between font-mono text-[8px] tracking-[0.3em] text-[#4f6f61] md:text-[9px]">
             <span>SIGNAL ACQUISITION</span>
             <span>{(progress * 100).toFixed(2)}%</span>

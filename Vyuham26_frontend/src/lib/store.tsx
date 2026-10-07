@@ -25,7 +25,17 @@ import type {
 } from "@/data/types";
 import { useLocalState } from "./hooks";
 import { useAuth } from "@/context/AuthContext";
-import { isRegistrationOpen, setRegistrationOpen, useRegistrationOpen } from "@/config/site";
+import {
+  isRegistrationOpen,
+  setRegistrationOpen,
+  useRegistrationOpen,
+  isCoreTeamVisible,
+  setCoreTeamVisible,
+  useCoreTeamVisible,
+  isSponsorsVisible,
+  setSponsorsVisible,
+  useSponsorsVisible,
+} from "@/config/site";
 
 /**
  * Single source of truth for every editable piece of content.
@@ -54,6 +64,8 @@ interface Ctx {
   removeAnnouncement: (id: string) => void;
   upsertSponsor: (s: Sponsor) => void;
   removeSponsor: (id: string) => void;
+  upsertTeamMember: (m: TeamMember) => void;
+  removeTeamMember: (id: string) => void;
   removeGalleryItem: (id: string) => void;
   addGalleryItem: (g: GalleryItem) => void;
   updateStream: (s: Stream) => void;
@@ -87,6 +99,10 @@ interface Ctx {
 
   regOpen: boolean;
   setRegOpen: (open: boolean) => void;
+  showCoreTeam: boolean;
+  setShowCoreTeam: (visible: boolean) => void;
+  showSponsors: boolean;
+  setShowSponsors: (visible: boolean) => void;
 
   ui: {
     authOpen: false | "login" | "signup";
@@ -101,6 +117,10 @@ interface Ctx {
     setAdminUnlocked: (v: boolean) => void;
     regOpen: boolean;
     setRegOpen: (v: boolean) => void;
+    showCoreTeam: boolean;
+    setShowCoreTeam: (v: boolean) => void;
+    showSponsors: boolean;
+    setShowSponsors: (v: boolean) => void;
   };
 }
 
@@ -162,10 +182,20 @@ function getInitialContent(): Content {
 export function AppProvider({ children }: { children: ReactNode }) {
   const auth = useAuth();
   const regOpen = useRegistrationOpen();
+  const showCoreTeam = useCoreTeamVisible();
+  const showSponsors = useSponsorsVisible();
   const [content, setContent] = useState<Content>(getInitialContent);
 
   const setRegOpen = useCallback((val: boolean) => {
     setRegistrationOpen(val);
+  }, []);
+
+  const setShowCoreTeam = useCallback((val: boolean) => {
+    setCoreTeamVisible(val);
+  }, []);
+
+  const setShowSponsors = useCallback((val: boolean) => {
+    setSponsorsVisible(val);
   }, []);
 
   useEffect(() => {
@@ -338,6 +368,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
           : [...c.sponsors, s],
       })),
     removeSponsor: (id) => patchContent((c) => ({ ...c, sponsors: c.sponsors.filter((s) => s.id !== id) })),
+    upsertTeamMember: (m) =>
+      patchContent((c) => ({
+        ...c,
+        team: (c.team || seedTeam).some((x) => x.id === m.id)
+          ? (c.team || seedTeam).map((x) => (x.id === m.id ? m : x))
+          : [...(c.team || seedTeam), m],
+      })),
+    removeTeamMember: (id) =>
+      patchContent((c) => ({
+        ...c,
+        team: (c.team || seedTeam).filter((m) => m.id !== id),
+      })),
     removeGalleryItem: (id) => patchContent((c) => ({ ...c, gallery: c.gallery.filter((g) => g.id !== id) })),
     addGalleryItem: (g) => patchContent((c) => ({ ...c, gallery: [...c.gallery, g] })),
     updateStream: (s) =>
@@ -480,6 +522,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
     regOpen,
     setRegOpen,
+    showCoreTeam,
+    setShowCoreTeam,
+    showSponsors,
+    setShowSponsors,
 
     ui: {
       authOpen,
@@ -494,6 +540,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setAdminUnlocked,
       regOpen,
       setRegOpen,
+      showCoreTeam,
+      setShowCoreTeam,
+      showSponsors,
+      setShowSponsors,
     },
   };
 

@@ -64,7 +64,7 @@ export default function Events() {
   };
 
   return (
-    <section id="events" className="relative w-full px-5 py-24 md:px-[6vw] md:py-36">
+    <section id="events" className="relative w-full px-5 py-10 sm:py-14 md:py-20 md:px-[6vw]">
       {/* header */}
       <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
         <div>
@@ -94,7 +94,7 @@ export default function Events() {
       </div>
 
       {/* filter rail */}
-      <div className="no-scrollbar mt-9 flex gap-2 overflow-x-auto border-y border-[rgba(120,160,145,0.12)] py-3">
+      <div className="no-scrollbar mt-6 sm:mt-7 flex gap-2 overflow-x-auto border-y border-[rgba(120,160,145,0.12)] py-3">
         {FILTERS.map((f) => {
           const on = filter === f.id;
           const accent = f.id === "all" ? "#18c47c" : accentOf(f.id as StreamId);
@@ -120,7 +120,7 @@ export default function Events() {
 
       {/* featured editorial block */}
       {featured && (
-        <FocusIn className="mt-14">
+        <FocusIn className="mt-8 sm:mt-10">
           <div className="grid gap-8 lg:grid-cols-[1.25fr_1fr] lg:items-end">
             <div className="relative">
               <DepthImage
@@ -186,7 +186,7 @@ export default function Events() {
       )}
 
       {/* editorial rows */}
-      <div className="mt-20 border-t border-[rgba(120,160,145,0.14)]">
+      <div className="mt-10 sm:mt-12 border-t border-[rgba(120,160,145,0.14)]">
         {rows.map((e, i) => {
           const accent = accentOf(e.stream);
           const st = statusStyle(e.status);
@@ -330,7 +330,7 @@ export default function Events() {
         )}
 
         {/* Global Archive & Subpage Links */}
-        <div className="mt-14 flex flex-col gap-6 rounded-xl border border-[rgba(24,196,124,0.18)] bg-[rgba(5,15,10,0.6)] p-6 backdrop-blur-md sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-8 sm:mt-10 flex flex-col gap-6 rounded-xl border border-[rgba(24,196,124,0.18)] bg-[rgba(5,15,10,0.6)] p-6 backdrop-blur-md sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="font-mono text-[10px] tracking-[0.28em] text-[#18c47c]">
               ARCHIVE // 30+ OPERATIONS

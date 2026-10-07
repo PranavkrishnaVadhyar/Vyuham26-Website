@@ -111,7 +111,7 @@ export default function Streams() {
   /* ---------------- mobile composition ---------------- */
   if (reduced) {
     return (
-      <section id="streams" className="relative w-full px-5 py-24">
+      <section id="streams" className="relative w-full px-5 py-12 sm:py-16 md:py-20">
         <p className="eyebrow">02 — THE FOUR STREAMS</p>
         <h2 className="t-cond mt-4 text-[13vw] leading-[0.86] text-[#f0f9f5]">
           FOUR STREAMS.
@@ -151,7 +151,7 @@ export default function Streams() {
 
   /* ---------------- cinematic desktop field ---------------- */
   return (
-    <div id="streams" ref={wrap} className="relative h-[440vh] w-full">
+    <div id="streams" ref={wrap} className="relative h-[250vh] sm:h-[280vh] md:h-[320vh] w-full">
       <div className="sticky top-0 h-[100svh] w-full overflow-hidden">
         {/* field glow */}
         <div

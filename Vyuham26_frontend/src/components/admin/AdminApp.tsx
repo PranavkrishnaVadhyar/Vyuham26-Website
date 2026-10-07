@@ -3,7 +3,7 @@ import { cn } from "@/utils/cn";
 import { useApp } from "@/lib/store";
 import { toast } from "@/components/ui/Toaster";
 import { cyberAudio } from "@/lib/cyberAudio";
-import type { Announcement, FestEvent, Sponsor, StreamId } from "@/data/types";
+import type { Announcement, FestEvent, Sponsor, StreamId, TeamMember } from "@/data/types";
 import ConsoleManager from "./ConsoleManager";
 import AnnouncementManager from "./AnnouncementManager";
 import { useConsoleConfig } from "@/config/consoleConfig";
@@ -22,6 +22,7 @@ const SECTIONS = [
   "Gallery",
   "Announcements",
   "Sponsors",
+  "Team",
   "Homepage",
   "Settings",
 ] as const;
@@ -193,6 +194,119 @@ function RegistrationGatePanel() {
     </div>
   );
 }
+
+function CoreTeamGatePanel() {
+  const { showCoreTeam, setShowCoreTeam, showSponsors, setShowSponsors } = useApp();
+  const [loading, setLoading] = useState(false);
+
+  const handleToggleCore = () => {
+    setLoading(true);
+    cyberAudio.playTelemetry();
+    const nextState = !showCoreTeam;
+    setShowCoreTeam(nextState);
+    setTimeout(() => {
+      setLoading(false);
+      if (nextState) {
+        toast("🟢 [THE CORE ACTIVATED] 'THE CORE' team showcase is now visible across the public site.", "ok");
+      } else {
+        toast("🟠 [THE CORE HIDDEN] 'THE CORE' team showcase is turned OFF and hidden from the public.", "warn");
+      }
+    }, 150);
+  };
+
+  const handleToggleSponsors = () => {
+    cyberAudio.playTelemetry();
+    const nextState = !showSponsors;
+    setShowSponsors(nextState);
+    if (nextState) {
+      toast("🟢 [SPONSORS ACTIVATED] 'BACKED BY' showcase is visible across the public site.", "ok");
+    } else {
+      toast("🟠 [SPONSORS HIDDEN] 'BACKED BY' showcase is turned OFF and hidden.", "warn");
+    }
+  };
+
+  return (
+    <div
+      className={`relative overflow-hidden border p-5 transition-all duration-300 ${
+        showCoreTeam
+          ? "border-emerald-500/40 bg-gradient-to-r from-[rgba(6,25,18,0.92)] to-[rgba(4,18,13,0.75)] shadow-[0_0_25px_rgba(24,196,124,0.12)]"
+          : "border-amber-500/40 bg-gradient-to-r from-[rgba(25,18,6,0.92)] to-[rgba(18,12,4,0.75)] shadow-[0_0_25px_rgba(245,158,11,0.12)]"
+      }`}
+    >
+      <div
+        className="pointer-events-none absolute -right-12 -top-12 h-36 w-36 rounded-full blur-xl"
+        style={{
+          background: showCoreTeam
+            ? "radial-gradient(circle, rgba(24,196,124,0.22), transparent 70%)"
+            : "radial-gradient(circle, rgba(245,158,11,0.22), transparent 70%)",
+        }}
+      />
+
+      <div className="relative z-10 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div className="space-y-1.5">
+          <div className="flex flex-wrap items-center gap-2">
+            <span
+              className={`h-2.5 w-2.5 rounded-full animate-pulse ${
+                showCoreTeam ? "bg-emerald-400 shadow-[0_0_8px_#34d399]" : "bg-amber-400 shadow-[0_0_8px_#fbbf24]"
+              }`}
+            />
+            <span
+              className={`font-mono text-[10px] font-bold tracking-[0.26em] uppercase ${
+                showCoreTeam ? "text-emerald-400" : "text-amber-400"
+              }`}
+            >
+              CORE TEAM SHOWCASE ("THE CORE"): {showCoreTeam ? "ON (VISIBLE & LIVE)" : "OFF (HIDDEN FROM PUBLIC)"}
+            </span>
+            <span className="font-mono text-[8px] tracking-[0.16em] text-[#6f8b80] border border-[rgba(120,160,145,0.2)] px-1.5 py-0.5 rounded">
+              ABOUT SECTION
+            </span>
+          </div>
+
+          <p className="font-mono text-[11px] text-[#c6ded3] max-w-[700px] leading-relaxed">
+            {showCoreTeam
+              ? "The 6-member leadership roster ('THE CORE' — Festival Director, Leads & Creative Director) is currently active and rendered on the About page."
+              : "The leadership roster ('THE CORE') is completely hidden from the public About page. Only stats and fest details will be displayed."}
+          </p>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2 shrink-0">
+          <button
+            type="button"
+            onClick={handleToggleCore}
+            disabled={loading}
+            className={`group relative flex items-center gap-2.5 px-5 py-2.5 font-mono text-[11px] font-bold tracking-[0.2em] uppercase transition-all duration-300 ${
+              showCoreTeam
+                ? "border border-red-500/60 bg-red-950/40 text-red-300 hover:bg-red-900/60 hover:border-red-400 hover:text-white hover:shadow-[0_0_20px_rgba(239,68,68,0.3)]"
+                : "border border-emerald-500/60 bg-emerald-950/50 text-emerald-300 hover:bg-emerald-900/70 hover:border-emerald-300 hover:text-white hover:shadow-[0_0_25px_rgba(24,196,124,0.4)]"
+            }`}
+          >
+            <span
+              className={`h-2 w-2 rounded-full ${
+                showCoreTeam ? "bg-red-400" : "bg-emerald-400"
+              }`}
+            />
+            <span>{showCoreTeam ? "TURN OFF \"THE CORE\"" : "TURN ON \"THE CORE\""}</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={handleToggleSponsors}
+            className={`flex items-center gap-2 px-3 py-2.5 font-mono text-[10px] tracking-[0.16em] uppercase border transition-all duration-300 ${
+              showSponsors
+                ? "border-[rgba(120,160,145,0.3)] bg-[rgba(6,25,18,0.5)] text-[#9fc4b4] hover:border-amber-500/50 hover:text-amber-300"
+                : "border-amber-500/40 bg-amber-950/30 text-amber-300 hover:border-emerald-500/50 hover:text-emerald-300"
+            }`}
+            title="Toggle 'BACKED BY' sponsors visibility on About page"
+          >
+            <span className={`h-1.5 w-1.5 rounded-full ${showSponsors ? "bg-emerald-400" : "bg-amber-400"}`} />
+            <span>BACKED BY: {showSponsors ? "ON" : "OFF"}</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 
 /* ------------------------------------------------------------------ */
 /*  admin app                                                          */
@@ -429,6 +543,7 @@ export default function AdminApp() {
             {section === "Overview" && (
               <>
                 <RegistrationGatePanel />
+                <CoreTeamGatePanel />
 
                 {/* Cyber Terminal Console Policy Quick Status */}
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border border-[rgba(120,160,145,0.16)] bg-[#060a09] p-4">
@@ -971,9 +1086,68 @@ export default function AdminApp() {
               </Panel>
             )}
 
+            {/* ---------------- TEAM / THE CORE ---------------- */}
+            {section === "Team" && (
+              <div className="space-y-5">
+                <CoreTeamGatePanel />
+
+                <Panel
+                  title={`Core Team Roster (${(content.team || []).length} Members)`}
+                  action={
+                    <button
+                      onClick={() =>
+                        app.upsertTeamMember({
+                          id: `t-${Math.random().toString(36).slice(2, 7)}`,
+                          name: "NEW MEMBER",
+                          role: "CORE COORDINATOR",
+                          dept: "CORE",
+                        })
+                      }
+                      className="font-mono text-[9px] tracking-[0.24em] text-[#18c47c] hover:text-[#7dffc4]"
+                    >
+                      + NEW MEMBER
+                    </button>
+                  }
+                >
+                  <p className="mb-4 font-mono text-[10px] text-[#7d9a8d]">
+                    These leadership profiles are featured under "THE CORE" on the public About page. Use the switch above to toggle the whole section ON or OFF.
+                  </p>
+                  <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                    {(content.team || []).map((m) => (
+                      <div key={m.id} className="space-y-3 border border-[rgba(120,160,145,0.14)] p-4 bg-[#050807]">
+                        <Input
+                          label="Full Name"
+                          value={m.name}
+                          onChange={(v) => app.upsertTeamMember({ ...m, name: v })}
+                        />
+                        <Input
+                          label="Role / Title"
+                          value={m.role}
+                          onChange={(v) => app.upsertTeamMember({ ...m, role: v })}
+                        />
+                        <Input
+                          label="Department"
+                          value={m.dept}
+                          onChange={(v) => app.upsertTeamMember({ ...m, dept: v })}
+                        />
+                        <button
+                          onClick={() => app.removeTeamMember(m.id)}
+                          className="font-mono text-[9px] tracking-[0.22em] text-[#6f8b80] hover:text-[#f2a98a]"
+                        >
+                          REMOVE MEMBER
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </Panel>
+              </div>
+            )}
+
             {/* ---------------- HOMEPAGE ---------------- */}
             {section === "Homepage" && (
-              <div className="grid gap-5 xl:grid-cols-2">
+              <div className="space-y-5">
+                <CoreTeamGatePanel />
+                <div className="grid gap-5 xl:grid-cols-2">
                 <Panel title="Hero & identity">
                   <div className="space-y-3">
                     <Input label="Brand" value={content.homepage.brand} onChange={(v) => app.setHomepage({ brand: v })} />
@@ -1025,12 +1199,14 @@ export default function AdminApp() {
                   </div>
                 </Panel>
               </div>
+            </div>
             )}
 
             {/* ---------------- SETTINGS ---------------- */}
             {section === "Settings" && (
               <div className="space-y-5">
                 <RegistrationGatePanel />
+                <CoreTeamGatePanel />
                 <ConsoleManager />
                 <Panel title="Settings">
                 <p className="max-w-[60ch] text-[12px] leading-relaxed text-[#7d9a8d]">

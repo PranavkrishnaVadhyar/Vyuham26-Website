@@ -9,7 +9,15 @@ import {
 import Link from "@/shims/next-link";
 import { lockScroll } from "@/lib/scroll";
 import { useApp } from "@/lib/store";
-import { SITE_CONFIG, setRegistrationOpen, isRegistrationOpen } from "@/config/site";
+import {
+  SITE_CONFIG,
+  setRegistrationOpen,
+  isRegistrationOpen,
+  setCoreTeamVisible,
+  isCoreTeamVisible,
+  setSponsorsVisible,
+  isSponsorsVisible,
+} from "@/config/site";
 import { useConsoleConfig, type ConsoleConfig } from "@/config/consoleConfig";
 import { cyberAudio } from "@/lib/cyberAudio";
 import { navigate, markInternalNav } from "@/lib/router";
@@ -959,6 +967,110 @@ Clearance signature not verified. Type 'admin <passphrase>' or unlock via Cyber 
 
 GATE STATUS : ${isRegistrationOpen() ? "OPEN (LIVE)" : "CLOSED (COMING SOON)"}
 AUDIT       : LOCAL_STORAGE_PERSISTED
+ACCESS      : ADMIN ROOT TOGGLEABLE`
+          );
+          break;
+
+        case "core:show":
+        case "core:on":
+        case "team:show":
+        case "team:on":
+          if (!consoleConfig.showRootGateway && !ui.adminUnlocked) {
+            addOutput(
+              `[RESTRICTED PROTOCOL // ROOT PRIVILEGE REQUIRED]
+
+Administrative root clearance required to execute core showcase overrides.`,
+              "/admin",
+              "Open Admin Gateway (Cyber Gate) →",
+              "error"
+            );
+            break;
+          }
+          setCoreTeamVisible(true);
+          cyberAudio.playTelemetry();
+          addOutput(
+            `[ROOT OVERRIDE GRANTED]
+
+THE CORE SHOWCASE: ACTIVATED & VISIBLE
+- Leadership roster is now visible on public About section.
+- Section: '06 — ABOUT -> THE CORE'`
+          );
+          break;
+
+        case "core:hide":
+        case "core:off":
+        case "team:hide":
+        case "team:off":
+          if (!consoleConfig.showRootGateway && !ui.adminUnlocked) {
+            addOutput(
+              `[RESTRICTED PROTOCOL // ROOT PRIVILEGE REQUIRED]
+
+Administrative root clearance required to execute core showcase overrides.`,
+              "/admin",
+              "Open Admin Gateway (Cyber Gate) →",
+              "error"
+            );
+            break;
+          }
+          setCoreTeamVisible(false);
+          cyberAudio.playTelemetry();
+          addOutput(
+            `[ROOT OVERRIDE GRANTED]
+
+THE CORE SHOWCASE: DEACTIVATED & HIDDEN
+- Leadership roster is suppressed from public About section.`
+          );
+          break;
+
+        case "core:status":
+        case "team:status":
+          addOutput(
+            `THE CORE (LEADERSHIP ROSTER) STATUS:
+
+VISIBILITY  : ${isCoreTeamVisible() ? "ON (VISIBLE & LIVE)" : "OFF (HIDDEN FROM PUBLIC)"}
+SECTION     : 06 — ABOUT -> THE CORE
+ACCESS      : ADMIN ROOT TOGGLEABLE`
+          );
+          break;
+
+        case "sponsors:show":
+        case "sponsors:on":
+          if (!consoleConfig.showRootGateway && !ui.adminUnlocked) {
+            addOutput(
+              `[RESTRICTED PROTOCOL // ROOT PRIVILEGE REQUIRED]`,
+              "/admin",
+              "Open Admin Gateway (Cyber Gate) →",
+              "error"
+            );
+            break;
+          }
+          setSponsorsVisible(true);
+          cyberAudio.playTelemetry();
+          addOutput(`[ROOT OVERRIDE GRANTED] BACKED BY SHOWCASE: ON (VISIBLE)`);
+          break;
+
+        case "sponsors:hide":
+        case "sponsors:off":
+          if (!consoleConfig.showRootGateway && !ui.adminUnlocked) {
+            addOutput(
+              `[RESTRICTED PROTOCOL // ROOT PRIVILEGE REQUIRED]`,
+              "/admin",
+              "Open Admin Gateway (Cyber Gate) →",
+              "error"
+            );
+            break;
+          }
+          setSponsorsVisible(false);
+          cyberAudio.playTelemetry();
+          addOutput(`[ROOT OVERRIDE GRANTED] BACKED BY SHOWCASE: OFF (HIDDEN)`);
+          break;
+
+        case "sponsors:status":
+          addOutput(
+            `BACKED BY (SPONSORS SHOWCASE) STATUS:
+
+VISIBILITY  : ${isSponsorsVisible() ? "ON (VISIBLE & LIVE)" : "OFF (HIDDEN)"}
+SECTION     : 06 — ABOUT -> BACKED BY
 ACCESS      : ADMIN ROOT TOGGLEABLE`
           );
           break;
