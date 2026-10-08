@@ -14,7 +14,7 @@ import { type Event } from "@/data/events";
 import { useAuth } from "@/context/AuthContext";
 import { registrationsApi, eventsApi, teamsApi, type TeamRecord } from "@/lib/api";
 import { toast } from "@/components/ui/Toaster";
-import { SITE_CONFIG } from "@/config/site";
+import { SITE_CONFIG, useRegistrationOpen } from "@/config/site";
 
 interface EventDetailClientProps {
   event: Event;
@@ -23,6 +23,7 @@ interface EventDetailClientProps {
 export default function EventDetailClient({ event }: EventDetailClientProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const regOpen = useRegistrationOpen();
   const { user, isAuthenticated, isEventRegistered, registerForEvent } = useAuth();
 
   const [showSuccessModal, setShowSuccessModal] = useState(false);
@@ -51,15 +52,15 @@ export default function EventDetailClient({ event }: EventDetailClientProps) {
 
   // Check if redirected back after authenticating with intent to register
   useEffect(() => {
-    if (!SITE_CONFIG.REG_OPEN) return;
+    if (!regOpen) return;
     if (searchParams.get("registered") === "true" && isAuthenticated) {
       registerForEvent(event.slug);
       setShowSuccessModal(true);
     }
-  }, [searchParams, isAuthenticated, event.slug, registerForEvent]);
+  }, [searchParams, isAuthenticated, event.slug, registerForEvent, regOpen]);
 
   const handleRegisterClick = async () => {
-    if (!SITE_CONFIG.REG_OPEN) {
+    if (!regOpen) {
       toast("Event registration is coming soon!", "info");
       return;
     }
@@ -447,6 +448,17 @@ export default function EventDetailClient({ event }: EventDetailClientProps) {
                       <p className="mt-2 font-display text-2xl font-semibold text-[#2ee59d] [text-shadow:0_0_20px_rgba(46,229,157,.2)]">
                         {event.prizes}
                       </p>
+
+                      {event.fee && (
+                        <div className="mt-4 border-t border-white/[0.08] pt-3">
+                          <span className="block font-mono text-[8px] uppercase tracking-[0.2em] text-white/20">
+                            Registration Fee
+                          </span>
+                          <p className="mt-1 font-mono text-sm font-semibold text-paper">
+                            {event.fee}
+                          </p>
+                        </div>
+                      )}
                     </div>
                   </div>
 
@@ -516,9 +528,9 @@ export default function EventDetailClient({ event }: EventDetailClientProps) {
                       <button
                         type="button"
                         onClick={handleRegisterClick}
-                        disabled={isRegistering || !SITE_CONFIG.REG_OPEN}
+                        disabled={isRegistering || !regOpen}
                         className={`group relative flex w-full cursor-pointer items-center justify-center overflow-hidden border px-6 py-4 font-mono text-xs font-extrabold uppercase tracking-[0.18em] transition-all duration-300 ${
-                          !SITE_CONFIG.REG_OPEN
+                          !regOpen
                             ? "border-amber-500/40 bg-amber-500/10 text-amber-300 hover:border-amber-400 hover:bg-amber-500/20 shadow-[0_0_20px_rgba(245,158,11,0.15)]"
                             : "border-[#2ee59d]/50 bg-[#2ee59d]/10 text-[#2ee59d] hover:border-[#2ee59d] hover:bg-[#2ee59d]/20 hover:shadow-[0_0_30px_rgba(46,229,157,0.2)] active:scale-[0.99] disabled:opacity-70"
                         }`}
@@ -527,7 +539,7 @@ export default function EventDetailClient({ event }: EventDetailClientProps) {
                       <span className="absolute inset-y-0 left-0 w-1/3 -translate-x-full bg-gradient-to-r from-transparent via-[#2ee59d]/30 to-transparent transition-transform duration-700 group-hover:translate-x-[400%]" />
 
                       <span className="relative z-10 flex items-center gap-2">
-                        {!SITE_CONFIG.REG_OPEN ? (
+                        {!regOpen ? (
                           <>
                             <span className="h-2 w-2 rounded-full bg-amber-400 animate-pulse" />
                             COMING SOON

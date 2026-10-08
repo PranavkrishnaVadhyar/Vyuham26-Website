@@ -2,13 +2,19 @@ import { useMemo, useState, type ReactNode } from "react";
 import { cn } from "@/utils/cn";
 import { useApp } from "@/lib/store";
 import { toast } from "@/components/ui/Toaster";
-import type { Announcement, FestEvent, Sponsor, StreamId } from "@/data/types";
+import { cyberAudio } from "@/lib/cyberAudio";
+import type { Announcement, FestEvent, Sponsor, StreamId, TeamMember } from "@/data/types";
+import ConsoleManager from "./ConsoleManager";
+import AnnouncementManager from "./AnnouncementManager";
+import { useConsoleConfig } from "@/config/consoleConfig";
+import { useStarredEvents } from "@/config/site";
 
 /* ------------------------------------------------------------------ */
 /*  primitives                                                         */
 /* ------------------------------------------------------------------ */
 const SECTIONS = [
   "Overview",
+  "Console",
   "Events",
   "Registrations",
   "Users",
@@ -17,6 +23,7 @@ const SECTIONS = [
   "Gallery",
   "Announcements",
   "Sponsors",
+  "Team",
   "Homepage",
   "Settings",
 ] as const;
@@ -56,8 +63,8 @@ const Th = ({ children }: { children: ReactNode }) => (
     {children}
   </th>
 );
-const Td = ({ children, className }: { children: ReactNode; className?: string }) => (
-  <td className={cn("px-3 py-3 font-mono text-[10px] tracking-[0.1em] text-[#b9d3c7]", className)}>{children}</td>
+const Td = ({ children, className, colSpan }: { children: ReactNode; className?: string; colSpan?: number }) => (
+  <td colSpan={colSpan} className={cn("px-3 py-3 font-mono text-[10px] tracking-[0.1em] text-[#b9d3c7]", className)}>{children}</td>
 );
 
 function Input({
@@ -99,8 +106,209 @@ const blankEvent = (): FestEvent => ({
   seats: 100,
   registered: 0,
   image: "https://images.pexels.com/photos/3861960/pexels-photo-3861960.jpeg?auto=compress&cs=tinysrgb&w=1200",
+  starred: false,
   status: "open",
 });
+
+function RegistrationGatePanel() {
+  const { regOpen, setRegOpen } = useApp();
+  const [loading, setLoading] = useState(false);
+
+  const handleToggle = () => {
+    setLoading(true);
+    cyberAudio.playTelemetry();
+    const nextState = !regOpen;
+    setRegOpen(nextState);
+    setTimeout(() => {
+      setLoading(false);
+      if (nextState) {
+        toast("🟢 [GATEWAY ACTIVATED] Festival registration is now OPEN live across all public portals.", "ok");
+      } else {
+        toast("🟠 [GATEWAY LOCKED] Festival registration is CLOSED. Public sees COMING SOON.", "warn");
+      }
+    }, 200);
+  };
+
+  return (
+    <div
+      className={`relative overflow-hidden border p-5 transition-all duration-300 ${
+        regOpen
+          ? "border-emerald-500/40 bg-gradient-to-r from-[rgba(6,25,18,0.92)] to-[rgba(4,18,13,0.75)] shadow-[0_0_25px_rgba(24,196,124,0.12)]"
+          : "border-amber-500/40 bg-gradient-to-r from-[rgba(25,18,6,0.92)] to-[rgba(18,12,4,0.75)] shadow-[0_0_25px_rgba(245,158,11,0.12)]"
+      }`}
+    >
+      <div
+        className="pointer-events-none absolute -right-12 -top-12 h-36 w-36 rounded-full blur-xl"
+        style={{
+          background: regOpen
+            ? "radial-gradient(circle, rgba(24,196,124,0.22), transparent 70%)"
+            : "radial-gradient(circle, rgba(245,158,11,0.22), transparent 70%)",
+        }}
+      />
+
+      <div className="relative z-10 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div className="space-y-1.5">
+          <div className="flex flex-wrap items-center gap-2">
+            <span
+              className={`h-2.5 w-2.5 rounded-full animate-pulse ${
+                regOpen ? "bg-emerald-400 shadow-[0_0_8px_#34d399]" : "bg-amber-400 shadow-[0_0_8px_#fbbf24]"
+              }`}
+            />
+            <span
+              className={`font-mono text-[10px] font-bold tracking-[0.26em] uppercase ${
+                regOpen ? "text-emerald-400" : "text-amber-400"
+              }`}
+            >
+              REGISTRATION GATEWAY: {regOpen ? "OPEN & LIVE" : "CLOSED (COMING SOON)"}
+            </span>
+            <span className="font-mono text-[8px] tracking-[0.16em] text-[#6f8b80] border border-[rgba(120,160,145,0.2)] px-1.5 py-0.5 rounded">
+              ROOT OVERRIDE
+            </span>
+          </div>
+
+          <p className="font-mono text-[11px] text-[#c6ded3] max-w-[700px] leading-relaxed">
+            {regOpen
+              ? "All event registration forms, tickets, teams, cart checkout, and attendee dashboard pipelines are actively accepting user entries across the festival site."
+              : "All registration forms and submissions are blocked. Navbar and event dossiers display 'COMING SOON'. Direct registration endpoints are guarded."}
+          </p>
+        </div>
+
+        <div className="flex items-center gap-3 shrink-0">
+          <button
+            type="button"
+            onClick={handleToggle}
+            disabled={loading}
+            className={`group relative flex items-center gap-2.5 px-5 py-2.5 font-mono text-[11px] font-bold tracking-[0.2em] uppercase transition-all duration-300 ${
+              regOpen
+                ? "border border-red-500/60 bg-red-950/40 text-red-300 hover:bg-red-900/60 hover:border-red-400 hover:text-white hover:shadow-[0_0_20px_rgba(239,68,68,0.3)]"
+                : "border border-emerald-500/60 bg-emerald-950/50 text-emerald-300 hover:bg-emerald-900/70 hover:border-emerald-300 hover:text-white hover:shadow-[0_0_25px_rgba(24,196,124,0.4)]"
+            }`}
+          >
+            <span
+              className={`h-2 w-2 rounded-full ${
+                regOpen ? "bg-red-400" : "bg-emerald-400"
+              }`}
+            />
+            <span>{regOpen ? "CLOSE REGISTRATION GATE" : "ACTIVATE REGISTRATION GATE"}</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function CoreTeamGatePanel() {
+  const { showCoreTeam, setShowCoreTeam, showSponsors, setShowSponsors } = useApp();
+  const [loading, setLoading] = useState(false);
+
+  const handleToggleCore = () => {
+    setLoading(true);
+    cyberAudio.playTelemetry();
+    const nextState = !showCoreTeam;
+    setShowCoreTeam(nextState);
+    setTimeout(() => {
+      setLoading(false);
+      if (nextState) {
+        toast("🟢 [THE CORE ACTIVATED] 'THE CORE' team showcase is now visible across the public site.", "ok");
+      } else {
+        toast("🟠 [THE CORE HIDDEN] 'THE CORE' team showcase is turned OFF and hidden from the public.", "warn");
+      }
+    }, 150);
+  };
+
+  const handleToggleSponsors = () => {
+    cyberAudio.playTelemetry();
+    const nextState = !showSponsors;
+    setShowSponsors(nextState);
+    if (nextState) {
+      toast("🟢 [SPONSORS ACTIVATED] 'BACKED BY' showcase is visible across the public site.", "ok");
+    } else {
+      toast("🟠 [SPONSORS HIDDEN] 'BACKED BY' showcase is turned OFF and hidden.", "warn");
+    }
+  };
+
+  return (
+    <div
+      className={`relative overflow-hidden border p-5 transition-all duration-300 ${
+        showCoreTeam
+          ? "border-emerald-500/40 bg-gradient-to-r from-[rgba(6,25,18,0.92)] to-[rgba(4,18,13,0.75)] shadow-[0_0_25px_rgba(24,196,124,0.12)]"
+          : "border-amber-500/40 bg-gradient-to-r from-[rgba(25,18,6,0.92)] to-[rgba(18,12,4,0.75)] shadow-[0_0_25px_rgba(245,158,11,0.12)]"
+      }`}
+    >
+      <div
+        className="pointer-events-none absolute -right-12 -top-12 h-36 w-36 rounded-full blur-xl"
+        style={{
+          background: showCoreTeam
+            ? "radial-gradient(circle, rgba(24,196,124,0.22), transparent 70%)"
+            : "radial-gradient(circle, rgba(245,158,11,0.22), transparent 70%)",
+        }}
+      />
+
+      <div className="relative z-10 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div className="space-y-1.5">
+          <div className="flex flex-wrap items-center gap-2">
+            <span
+              className={`h-2.5 w-2.5 rounded-full animate-pulse ${
+                showCoreTeam ? "bg-emerald-400 shadow-[0_0_8px_#34d399]" : "bg-amber-400 shadow-[0_0_8px_#fbbf24]"
+              }`}
+            />
+            <span
+              className={`font-mono text-[10px] font-bold tracking-[0.26em] uppercase ${
+                showCoreTeam ? "text-emerald-400" : "text-amber-400"
+              }`}
+            >
+              CORE TEAM SHOWCASE ("THE CORE"): {showCoreTeam ? "ON (VISIBLE & LIVE)" : "OFF (HIDDEN FROM PUBLIC)"}
+            </span>
+            <span className="font-mono text-[8px] tracking-[0.16em] text-[#6f8b80] border border-[rgba(120,160,145,0.2)] px-1.5 py-0.5 rounded">
+              ABOUT SECTION
+            </span>
+          </div>
+
+          <p className="font-mono text-[11px] text-[#c6ded3] max-w-[700px] leading-relaxed">
+            {showCoreTeam
+              ? "The 6-member leadership roster ('THE CORE' — Festival Director, Leads & Creative Director) is currently active and rendered on the About page."
+              : "The leadership roster ('THE CORE') is completely hidden from the public About page. Only stats and fest details will be displayed."}
+          </p>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2 shrink-0">
+          <button
+            type="button"
+            onClick={handleToggleCore}
+            disabled={loading}
+            className={`group relative flex items-center gap-2.5 px-5 py-2.5 font-mono text-[11px] font-bold tracking-[0.2em] uppercase transition-all duration-300 ${
+              showCoreTeam
+                ? "border border-red-500/60 bg-red-950/40 text-red-300 hover:bg-red-900/60 hover:border-red-400 hover:text-white hover:shadow-[0_0_20px_rgba(239,68,68,0.3)]"
+                : "border border-emerald-500/60 bg-emerald-950/50 text-emerald-300 hover:bg-emerald-900/70 hover:border-emerald-300 hover:text-white hover:shadow-[0_0_25px_rgba(24,196,124,0.4)]"
+            }`}
+          >
+            <span
+              className={`h-2 w-2 rounded-full ${
+                showCoreTeam ? "bg-red-400" : "bg-emerald-400"
+              }`}
+            />
+            <span>{showCoreTeam ? "TURN OFF \"THE CORE\"" : "TURN ON \"THE CORE\""}</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={handleToggleSponsors}
+            className={`flex items-center gap-2 px-3 py-2.5 font-mono text-[10px] tracking-[0.16em] uppercase border transition-all duration-300 ${
+              showSponsors
+                ? "border-[rgba(120,160,145,0.3)] bg-[rgba(6,25,18,0.5)] text-[#9fc4b4] hover:border-amber-500/50 hover:text-amber-300"
+                : "border-amber-500/40 bg-amber-950/30 text-amber-300 hover:border-emerald-500/50 hover:text-emerald-300"
+            }`}
+            title="Toggle 'BACKED BY' sponsors visibility on About page"
+          >
+            <span className={`h-1.5 w-1.5 rounded-full ${showSponsors ? "bg-emerald-400" : "bg-amber-400"}`} />
+            <span>BACKED BY: {showSponsors ? "ON" : "OFF"}</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 
 /* ------------------------------------------------------------------ */
 /*  admin app                                                          */
@@ -109,6 +317,7 @@ export default function AdminApp() {
   const app = useApp();
   const { content, users, registrations, user } = app;
   const [section, setSection] = useState<Section>("Overview");
+  const [consoleConfig] = useConsoleConfig();
   const [editing, setEditing] = useState<FestEvent | null>(null);
   const [navOpen, setNavOpen] = useState(false);
   const [email, setEmail] = useState("admin@vyuham26.in");
@@ -130,6 +339,34 @@ export default function AdminApp() {
   const [mediaSpan, setMediaSpan] = useState<"auto" | "wide" | "tall" | "std">("auto");
   const [detectedSpan, setDetectedSpan] = useState<"wide" | "tall" | "std">("std");
   const [detectedInfo, setDetectedInfo] = useState<string>("");
+
+  const { starredSlugs, isStarred } = useStarredEvents();
+  const [eventStarFilter, setEventStarFilter] = useState<"all" | "starred" | "unstarred">("all");
+
+  const starredEventCount = useMemo(() => {
+    return content.events.filter((e) => isStarred(e.id) || !!e.starred).length;
+  }, [content.events, starredSlugs, isStarred]);
+
+  const displayEvents = useMemo(() => {
+    return content.events.filter((e) => {
+      const starred = isStarred(e.id) || !!e.starred;
+      if (eventStarFilter === "starred") return starred;
+      if (eventStarFilter === "unstarred") return !starred;
+      return true;
+    });
+  }, [content.events, eventStarFilter, isStarred, starredSlugs]);
+
+  const handleToggleStar = (e: FestEvent) => {
+    cyberAudio.playTelemetry();
+    app.toggleStarEvent(e.id);
+    const currentlyStarred = isStarred(e.id) || !!e.starred;
+    const nextStarred = !currentlyStarred;
+    if (nextStarred) {
+      toast(`★ '${e.name}' is now STARRED and listed on the Main Page!`, "ok");
+    } else {
+      toast(`☆ '${e.name}' unstarred. Removed from Main Page (remains listed on Events directory).`, "info");
+    }
+  };
 
   const handleMediaUrlChange = (url: string) => {
     setMediaUrl(url);
@@ -254,9 +491,6 @@ export default function AdminApp() {
               AUTHENTICATE
             </button>
           </form>
-          <p className="mt-5 font-mono text-[9px] tracking-[0.18em] text-[#3f6152]">
-            DEMO · admin@vyuham26.in / vyuham26
-          </p>
           <a href="#/" className="link-trail mt-6 inline-block font-mono text-[9px] tracking-[0.26em] text-[#6f8b80]">
             ← BACK TO SITE
           </a>
@@ -338,8 +572,80 @@ export default function AdminApp() {
             {/* ---------------- OVERVIEW ---------------- */}
             {section === "Overview" && (
               <>
-                <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                <RegistrationGatePanel />
+                <CoreTeamGatePanel />
+
+                {/* Cyber Terminal Console Policy Quick Status */}
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border border-[rgba(120,160,145,0.16)] bg-[#060a09] p-4">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span
+                        className={`h-2 w-2 rounded-full ${
+                          !consoleConfig.showAccount &&
+                          !consoleConfig.showFestival &&
+                          !consoleConfig.showRootGateway
+                            ? "bg-emerald-400 shadow-[0_0_8px_#34d399]"
+                            : "bg-amber-400 shadow-[0_0_8px_#fbbf24]"
+                        } animate-pulse`}
+                      />
+                      <span className="font-mono text-[10px] font-bold tracking-[0.22em] text-[#9fc4b4] uppercase">
+                        CYBER TERMINAL CONSOLE POLICY:{" "}
+                        {!consoleConfig.showAccount &&
+                        !consoleConfig.showFestival &&
+                        !consoleConfig.showRootGateway
+                          ? "PRE-LAUNCH SAFE (PUBLIC READY)"
+                          : "CUSTOM PROTOCOL ACTIVE"}
+                      </span>
+                    </div>
+                    <p className="font-mono text-[10px] text-[#78a091]">
+                      Account Module:{" "}
+                      <strong className={consoleConfig.showAccount ? "text-emerald-400" : "text-[#9fc4b4]"}>
+                        {consoleConfig.showAccount ? "ON (VISIBLE)" : "OFF (HIDDEN)"}
+                      </strong>{" "}
+                      • Festival Ops:{" "}
+                      <strong className={consoleConfig.showFestival ? "text-emerald-400" : "text-[#9fc4b4]"}>
+                        {consoleConfig.showFestival ? "ON (VISIBLE)" : "OFF (HIDDEN)"}
+                      </strong>{" "}
+                      • Root Gateway:{" "}
+                      <strong className={consoleConfig.showRootGateway ? "text-amber-400" : "text-emerald-400"}>
+                        {consoleConfig.showRootGateway ? "ON (DEBUG VISIBLE)" : "OFF (SECURED)"}
+                      </strong>
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setSection("Console")}
+                    className="btn-cine font-mono text-[9px] tracking-[0.2em] uppercase shrink-0"
+                  >
+                    MANAGE CONSOLE MODULES →
+                  </button>
+                </div>
+
+                {/* Main Page Starred Highlights Quick Summary Banner */}
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border border-amber-400/30 bg-gradient-to-r from-[rgba(28,22,6,0.92)] to-[rgba(15,12,3,0.8)] p-4 shadow-[0_0_20px_rgba(251,191,36,0.08)]">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="h-2 w-2 rounded-full bg-amber-400 shadow-[0_0_8px_#fbbf24] animate-pulse" />
+                      <span className="font-mono text-[10px] font-bold tracking-[0.22em] text-amber-300 uppercase">
+                        MAIN PAGE EVENT CURATION: {starredEventCount} EVENTS STARRED
+                      </span>
+                    </div>
+                    <p className="font-mono text-[10px] text-[#b8d4c7]">
+                      Only starred events are featured on the homepage (Section 04). All {content.events.length} events remain listed on the public Events catalog.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setSection("Events")}
+                    className="btn-cine font-mono text-[9px] tracking-[0.2em] uppercase shrink-0 border-amber-400/40 text-amber-300 hover:bg-amber-400/20"
+                  >
+                    CURATE STARRED EVENTS →
+                  </button>
+                </div>
+
+                <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
                   <Stat label="TOTAL EVENTS" value={stats.events} hint="ACROSS 4 STREAMS" />
+                  <Stat label="MAIN PAGE STARRED" value={starredEventCount} hint="DISPLAYED IN SEC 04" />
                   <Stat label="TOTAL USERS" value={stats.users} hint="REGISTERED ACCOUNTS" />
                   <Stat label="TOTAL REGISTRATIONS" value={stats.regs} hint="SLOTS HELD" />
                   <Stat label="ACTIVE EVENTS" value={stats.active} hint="ACCEPTING ENTRIES" />
@@ -426,61 +732,154 @@ export default function AdminApp() {
               </>
             )}
 
+            {/* ---------------- CONSOLE ---------------- */}
+            {section === "Console" && <ConsoleManager />}
+
             {/* ---------------- EVENTS ---------------- */}
             {section === "Events" && (
               <Panel
                 title={`Events (${content.events.length})`}
                 action={
-                  <button
-                    onClick={() => setEditing(blankEvent())}
-                    className="font-mono text-[9px] tracking-[0.24em] text-[#18c47c] hover:text-[#7dffc4]"
-                  >
-                    + NEW EVENT
-                  </button>
+                  <div className="flex items-center gap-3">
+                    <span className="hidden sm:inline-flex items-center gap-1.5 font-mono text-[9px] text-amber-300 bg-amber-400/10 border border-amber-400/30 px-2 py-0.5 rounded">
+                      ★ {starredEventCount} on Main Page
+                    </span>
+                    <button
+                      onClick={() => setEditing(blankEvent())}
+                      className="font-mono text-[9px] tracking-[0.24em] text-[#18c47c] hover:text-[#7dffc4]"
+                    >
+                      + NEW EVENT
+                    </button>
+                  </div>
                 }
               >
+                {/* Main Page Curation Guidance & Filter Bar */}
+                <div className="mb-5 flex flex-col gap-4 rounded border border-amber-400/25 bg-[rgba(25,20,5,0.7)] p-4 sm:flex-row sm:items-center sm:justify-between shadow-[0_0_15px_rgba(251,191,36,0.06)]">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-amber-400 text-sm">★</span>
+                      <span className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-amber-300">
+                        HOMEPAGE EVENT CURATION
+                      </span>
+                      <span className="rounded bg-amber-400/20 px-1.5 py-0.5 font-mono text-[8px] text-amber-300">
+                        SECTION 04
+                      </span>
+                    </div>
+                    <p className="mt-1 text-xs text-[#9fc4b4] leading-relaxed">
+                      Only events marked with <strong className="text-amber-300 font-semibold">★ STARRED</strong> appear on the public Homepage. All {content.events.length} events remain listed on the full <a href="/events" target="_blank" rel="noopener noreferrer" className="text-emerald-400 underline underline-offset-2 hover:text-emerald-300">Events Directory</a>.
+                    </p>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-2 shrink-0">
+                    <button
+                      onClick={() => setEventStarFilter("all")}
+                      className={`px-3 py-1 font-mono text-[9px] uppercase tracking-[0.16em] rounded border transition ${
+                        eventStarFilter === "all"
+                          ? "border-emerald-500/50 bg-emerald-500/15 text-emerald-300 font-bold"
+                          : "border-white/10 text-white/40 hover:text-white"
+                      }`}
+                    >
+                      ALL ({content.events.length})
+                    </button>
+                    <button
+                      onClick={() => setEventStarFilter("starred")}
+                      className={`px-3 py-1 font-mono text-[9px] uppercase tracking-[0.16em] rounded border transition ${
+                        eventStarFilter === "starred"
+                          ? "border-amber-400/60 bg-amber-400/20 text-amber-300 shadow-[0_0_10px_rgba(251,191,36,0.25)] font-bold"
+                          : "border-white/10 text-white/40 hover:text-amber-300"
+                      }`}
+                    >
+                      ★ STARRED ({starredEventCount})
+                    </button>
+                    <button
+                      onClick={() => setEventStarFilter("unstarred")}
+                      className={`px-3 py-1 font-mono text-[9px] uppercase tracking-[0.16em] rounded border transition ${
+                        eventStarFilter === "unstarred"
+                          ? "border-emerald-500/50 bg-emerald-500/15 text-emerald-300 font-bold"
+                          : "border-white/10 text-white/40 hover:text-white"
+                      }`}
+                    >
+                      UNSTARRED ({content.events.length - starredEventCount})
+                    </button>
+                  </div>
+                </div>
+
                 <div className="overflow-x-auto">
-                  <table className="w-full min-w-[720px]">
+                  <table className="w-full min-w-[780px]">
                     <thead>
                       <tr>
+                        <Th>MAIN PAGE ★</Th>
                         <Th>NAME</Th>
                         <Th>STREAM</Th>
                         <Th>DATE</Th>
                         <Th>VENUE</Th>
                         <Th>SEATS</Th>
                         <Th>STATUS</Th>
-                        <Th> </Th>
+                        <Th>ACTIONS</Th>
                       </tr>
                     </thead>
                     <tbody>
-                      {content.events.map((e) => (
-                        <Row key={e.id}>
-                          <Td className="text-[#e7f5ee]">{e.name}</Td>
-                          <Td>{e.stream.toUpperCase()}</Td>
-                          <Td>{e.date}</Td>
-                          <Td>{e.venue}</Td>
-                          <Td>
-                            {e.registered}/{e.seats}
-                          </Td>
-                          <Td>{e.status.toUpperCase()}</Td>
-                          <Td>
-                            <div className="flex gap-3">
-                              <button onClick={() => setEditing(e)} className="text-[#18c47c] hover:text-[#7dffc4]">
-                                EDIT
-                              </button>
+                      {displayEvents.map((e) => {
+                        const starred = isStarred(e.id) || !!e.starred;
+                        return (
+                          <Row key={e.id}>
+                            <Td>
                               <button
-                                onClick={() => {
-                                  app.removeEvent(e.id);
-                                  toast("Event removed.", "warn");
-                                }}
-                                className="text-[#6f8b80] hover:text-[#f2a98a]"
+                                onClick={() => handleToggleStar(e)}
+                                className={`inline-flex items-center gap-1.5 rounded px-2.5 py-1 font-mono text-[9px] tracking-[0.16em] uppercase transition-all ${
+                                  starred
+                                    ? "border border-amber-400/60 bg-amber-400/20 text-amber-300 shadow-[0_0_12px_rgba(251,191,36,0.3)] font-bold hover:bg-amber-400/30"
+                                    : "border border-white/10 bg-white/[0.03] text-white/40 hover:border-amber-400/40 hover:text-amber-300 hover:bg-amber-400/10"
+                                }`}
+                                title={starred ? "Starred for Main Page. Click to unstar." : "Click to star and display on Main Page."}
                               >
-                                DELETE
+                                <span className={starred ? "text-amber-300 text-xs" : "text-white/30 text-xs"}>
+                                  {starred ? "★" : "☆"}
+                                </span>
+                                <span>{starred ? "STARRED" : "UNSTARRED"}</span>
                               </button>
-                            </div>
+                            </Td>
+                            <Td className="text-[#e7f5ee]">
+                              <span className="font-semibold">{e.name}</span>
+                              {e.featured && (
+                                <span className="ml-2 font-mono text-[8px] text-emerald-400">
+                                  [FLAGSHIP]
+                                </span>
+                              )}
+                            </Td>
+                            <Td>{e.stream.toUpperCase()}</Td>
+                            <Td>{e.date}</Td>
+                            <Td>{e.venue}</Td>
+                            <Td>
+                              {e.registered}/{e.seats}
+                            </Td>
+                            <Td>{e.status.toUpperCase()}</Td>
+                            <Td>
+                              <div className="flex gap-3">
+                                <button onClick={() => setEditing(e)} className="text-[#18c47c] hover:text-[#7dffc4]">
+                                  EDIT
+                                </button>
+                                <button
+                                  onClick={() => {
+                                    app.removeEvent(e.id);
+                                    toast("Event removed.", "warn");
+                                  }}
+                                  className="text-[#6f8b80] hover:text-[#f2a98a]"
+                                >
+                                  DELETE
+                                </button>
+                              </div>
+                            </Td>
+                          </Row>
+                        );
+                      })}
+                      {displayEvents.length === 0 && (
+                        <Row>
+                          <Td colSpan={8} className="text-center py-8 text-white/40 font-mono text-xs">
+                            NO EVENTS MATCH FILTER.
                           </Td>
                         </Row>
-                      ))}
+                      )}
                     </tbody>
                   </table>
                 </div>
@@ -790,56 +1189,7 @@ export default function AdminApp() {
             )}
 
             {/* ---------------- ANNOUNCEMENTS ---------------- */}
-            {section === "Announcements" && (
-              <Panel
-                title={`Announcements (${content.announcements.length})`}
-                action={
-                  <button
-                    onClick={() =>
-                      app.upsertAnnouncement({
-                        id: `a-${Math.random().toString(36).slice(2, 7)}`,
-                        date: new Date().toDateString().slice(4, 15).toUpperCase(),
-                        title: "NEW TRANSMISSION",
-                        body: "Write the announcement body here.",
-                      } as Announcement)
-                    }
-                    className="font-mono text-[9px] tracking-[0.24em] text-[#18c47c] hover:text-[#7dffc4]"
-                  >
-                    + NEW
-                  </button>
-                }
-              >
-                <div className="space-y-4">
-                  {content.announcements.map((a) => (
-                    <div key={a.id} className="border border-[rgba(120,160,145,0.14)] p-4">
-                      <div className="grid gap-3 md:grid-cols-[160px_1fr]">
-                        <Input label="Date" value={a.date} onChange={(v) => app.upsertAnnouncement({ ...a, date: v })} />
-                        <Input label="Title" value={a.title} onChange={(v) => app.upsertAnnouncement({ ...a, title: v })} />
-                      </div>
-                      <div className="mt-3">
-                        <Input label="Body" area value={a.body} onChange={(v) => app.upsertAnnouncement({ ...a, body: v })} />
-                      </div>
-                      <div className="mt-3 flex items-center gap-4">
-                        <label className="flex items-center gap-2 font-mono text-[9px] tracking-[0.22em] text-[#6f8b80]">
-                          <input
-                            type="checkbox"
-                            checked={!!a.pinned}
-                            onChange={(e) => app.upsertAnnouncement({ ...a, pinned: e.target.checked })}
-                          />
-                          PINNED
-                        </label>
-                        <button
-                          onClick={() => app.removeAnnouncement(a.id)}
-                          className="font-mono text-[9px] tracking-[0.22em] text-[#6f8b80] hover:text-[#f2a98a]"
-                        >
-                          DELETE
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </Panel>
-            )}
+            {section === "Announcements" && <AnnouncementManager />}
 
             {/* ---------------- SPONSORS ---------------- */}
             {section === "Sponsors" && (
@@ -879,9 +1229,68 @@ export default function AdminApp() {
               </Panel>
             )}
 
+            {/* ---------------- TEAM / THE CORE ---------------- */}
+            {section === "Team" && (
+              <div className="space-y-5">
+                <CoreTeamGatePanel />
+
+                <Panel
+                  title={`Core Team Roster (${(content.team || []).length} Members)`}
+                  action={
+                    <button
+                      onClick={() =>
+                        app.upsertTeamMember({
+                          id: `t-${Math.random().toString(36).slice(2, 7)}`,
+                          name: "NEW MEMBER",
+                          role: "CORE COORDINATOR",
+                          dept: "CORE",
+                        })
+                      }
+                      className="font-mono text-[9px] tracking-[0.24em] text-[#18c47c] hover:text-[#7dffc4]"
+                    >
+                      + NEW MEMBER
+                    </button>
+                  }
+                >
+                  <p className="mb-4 font-mono text-[10px] text-[#7d9a8d]">
+                    These leadership profiles are featured under "THE CORE" on the public About page. Use the switch above to toggle the whole section ON or OFF.
+                  </p>
+                  <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                    {(content.team || []).map((m) => (
+                      <div key={m.id} className="space-y-3 border border-[rgba(120,160,145,0.14)] p-4 bg-[#050807]">
+                        <Input
+                          label="Full Name"
+                          value={m.name}
+                          onChange={(v) => app.upsertTeamMember({ ...m, name: v })}
+                        />
+                        <Input
+                          label="Role / Title"
+                          value={m.role}
+                          onChange={(v) => app.upsertTeamMember({ ...m, role: v })}
+                        />
+                        <Input
+                          label="Department"
+                          value={m.dept}
+                          onChange={(v) => app.upsertTeamMember({ ...m, dept: v })}
+                        />
+                        <button
+                          onClick={() => app.removeTeamMember(m.id)}
+                          className="font-mono text-[9px] tracking-[0.22em] text-[#6f8b80] hover:text-[#f2a98a]"
+                        >
+                          REMOVE MEMBER
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </Panel>
+              </div>
+            )}
+
             {/* ---------------- HOMEPAGE ---------------- */}
             {section === "Homepage" && (
-              <div className="grid gap-5 xl:grid-cols-2">
+              <div className="space-y-5">
+                <CoreTeamGatePanel />
+                <div className="grid gap-5 xl:grid-cols-2">
                 <Panel title="Hero & identity">
                   <div className="space-y-3">
                     <Input label="Brand" value={content.homepage.brand} onChange={(v) => app.setHomepage({ brand: v })} />
@@ -933,11 +1342,16 @@ export default function AdminApp() {
                   </div>
                 </Panel>
               </div>
+            </div>
             )}
 
             {/* ---------------- SETTINGS ---------------- */}
             {section === "Settings" && (
-              <Panel title="Settings">
+              <div className="space-y-5">
+                <RegistrationGatePanel />
+                <CoreTeamGatePanel />
+                <ConsoleManager />
+                <Panel title="Settings">
                 <p className="max-w-[60ch] text-[12px] leading-relaxed text-[#7d9a8d]">
                   All content is persisted locally in this browser. In production this store maps 1:1 to a CMS or
                   REST/GraphQL layer — the presentational components never change.
@@ -957,7 +1371,8 @@ export default function AdminApp() {
                   </a>
                 </div>
               </Panel>
-            )}
+            </div>
+          )}
           </div>
         </main>
       </div>
@@ -1038,14 +1453,25 @@ export default function AdminApp() {
               <div className="md:col-span-2">
                 <Input label="Blurb" area value={editing.blurb} onChange={(v) => setEditing({ ...editing, blurb: v })} />
               </div>
-              <label className="flex items-center gap-2 font-mono text-[9px] tracking-[0.22em] text-[#6f8b80]">
-                <input
-                  type="checkbox"
-                  checked={!!editing.featured}
-                  onChange={(e) => setEditing({ ...editing, featured: e.target.checked })}
-                />
-                FEATURED
-              </label>
+              <div className="flex flex-wrap items-center gap-4 md:col-span-2">
+                <label className="flex items-center gap-2 font-mono text-[9px] tracking-[0.22em] text-[#6f8b80]">
+                  <input
+                    type="checkbox"
+                    checked={!!editing.featured}
+                    onChange={(e) => setEditing({ ...editing, featured: e.target.checked })}
+                  />
+                  FLAGSHIP FEATURED
+                </label>
+
+                <label className="flex items-center gap-2 rounded border border-amber-400/40 bg-amber-400/10 px-3 py-1.5 font-mono text-[9px] font-bold tracking-[0.2em] text-amber-300">
+                  <input
+                    type="checkbox"
+                    checked={!!editing.starred}
+                    onChange={(e) => setEditing({ ...editing, starred: e.target.checked })}
+                  />
+                  ★ STARRED (LIST ON MAIN PAGE)
+                </label>
+              </div>
             </div>
             <div className="mt-7 flex gap-3">
               <button

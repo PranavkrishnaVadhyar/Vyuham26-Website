@@ -25,6 +25,21 @@ import type {
 } from "@/data/types";
 import { useLocalState } from "./hooks";
 import { useAuth } from "@/context/AuthContext";
+import {
+  isRegistrationOpen,
+  setRegistrationOpen,
+  useRegistrationOpen,
+  isCoreTeamVisible,
+  setCoreTeamVisible,
+  useCoreTeamVisible,
+  isSponsorsVisible,
+  setSponsorsVisible,
+  useSponsorsVisible,
+  isEventStarred,
+  setEventStarred,
+  toggleEventStarred,
+  normalizeEventSlug,
+} from "@/config/site";
 
 /**
  * Single source of truth for every editable piece of content.
@@ -49,10 +64,14 @@ interface Ctx {
   setHomepage: (patch: Partial<typeof seedHomepage>) => void;
   upsertEvent: (e: FestEvent) => void;
   removeEvent: (id: string) => void;
+  toggleStarEvent: (idOrSlug: string) => void;
+  isEventStarred: (idOrSlug: string) => boolean;
   upsertAnnouncement: (a: Announcement) => void;
   removeAnnouncement: (id: string) => void;
   upsertSponsor: (s: Sponsor) => void;
   removeSponsor: (id: string) => void;
+  upsertTeamMember: (m: TeamMember) => void;
+  removeTeamMember: (id: string) => void;
   removeGalleryItem: (id: string) => void;
   addGalleryItem: (g: GalleryItem) => void;
   updateStream: (s: Stream) => void;
@@ -84,6 +103,13 @@ interface Ctx {
     station?: string;
   }) => { ok: boolean; message: string };
 
+  regOpen: boolean;
+  setRegOpen: (open: boolean) => void;
+  showCoreTeam: boolean;
+  setShowCoreTeam: (visible: boolean) => void;
+  showSponsors: boolean;
+  setShowSponsors: (visible: boolean) => void;
+
   ui: {
     authOpen: false | "login" | "signup";
     setAuthOpen: (v: false | "login" | "signup") => void;
@@ -95,6 +121,12 @@ interface Ctx {
     setIntroDone: (v: boolean) => void;
     adminUnlocked: boolean;
     setAdminUnlocked: (v: boolean) => void;
+    regOpen: boolean;
+    setRegOpen: (v: boolean) => void;
+    showCoreTeam: boolean;
+    setShowCoreTeam: (v: boolean) => void;
+    showSponsors: boolean;
+    setShowSponsors: (v: boolean) => void;
   };
 }
 
@@ -113,9 +145,89 @@ const seedContent: Content = {
 
 const uid = (p: string) => `${p}-${Math.random().toString(36).slice(2, 8)}`;
 
+const CONTENT_STORAGE_KEY = "vyuham26:content:v10_v8pdf_official";
+
+function getInitialContent(): Content {
+  if (typeof window === "undefined") return seedContent;
+  try {
+    // Purge all legacy stored content keys immediately
+    ["v1", "v2", "v3", "v4", "v5", "v6", "v7", "v8", "v9"].forEach((v) => {
+      localStorage.removeItem(`vyuham26:content:${v}`);
+    });
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (k && k.startsWith("vyuham26:content:") && k !== CONTENT_STORAGE_KEY) {
+        localStorage.removeItem(k);
+      }
+    }
+    const raw = localStorage.getItem(CONTENT_STORAGE_KEY);
+    if (!raw) return seedContent;
+    const parsed = JSON.parse(raw) as Content;
+    const isObsolete =
+      !parsed.events ||
+      parsed.events.length !== seedContent.events.length ||
+      parsed.events.some((e) =>
+        ["robowars", "silent circuit", "nritya", "street battle", "impact summit"].some((bad) =>
+          e.name.toLowerCase().includes(bad)
+        )
+      ) ||
+      parsed.homepage?.stats?.some(
+        (s) => s.value === "48" || s.value === "72" || s.value.includes("12L") || s.label === "HOURS"
+      ) ||
+      parsed.homepage?.aboutSupport?.includes("refuses to wait for permission");
+    if (isObsolete) {
+      localStorage.removeItem(CONTENT_STORAGE_KEY);
+      return seedContent;
+    }
+    const syncedEvents = (parsed.events || seedContent.events).map((e) => ({
+      ...e,
+      starred: typeof e.starred === "boolean" ? e.starred : isEventStarred(e.id),
+    }));
+    return { ...parsed, events: syncedEvents };
+  } catch {
+    return seedContent;
+  }
+}
+
 export function AppProvider({ children }: { children: ReactNode }) {
   const auth = useAuth();
-  const [content, setContent] = useLocalState<Content>("vyuham26:content:v5", seedContent);
+  const regOpen = useRegistrationOpen();
+  const showCoreTeam = useCoreTeamVisible();
+  const showSponsors = useSponsorsVisible();
+  const [content, setContent] = useState<Content>(getInitialContent);
+
+  const setRegOpen = useCallback((val: boolean) => {
+    setRegistrationOpen(val);
+  }, []);
+
+  const setShowCoreTeam = useCallback((val: boolean) => {
+    setCoreTeamVisible(val);
+  }, []);
+
+  const setShowSponsors = useCallback((val: boolean) => {
+    setSponsorsVisible(val);
+  }, []);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(CONTENT_STORAGE_KEY, JSON.stringify(content));
+    } catch {}
+  }, [content]);
+
+  // Synchronize starred status in content when toggled from admin or config
+  useEffect(() => {
+    const handleStarredSync = () => {
+      setContent((c) => ({
+        ...c,
+        events: c.events.map((e) => ({
+          ...e,
+          starred: isEventStarred(e.id),
+        })),
+      }));
+    };
+    window.addEventListener("vyuham:starred_events_toggle", handleStarredSync);
+    return () => window.removeEventListener("vyuham:starred_events_toggle", handleStarredSync);
+  }, []);
   const [users, setUsers] = useLocalState<UserAccount[]>("vyuham26:users:v1", seedUsers);
   const [registrations, setRegistrations] = useLocalState<Registration[]>(
     "vyuham26:regs:v1",
@@ -127,7 +239,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       ticketCode: "VYU26-TKT-1082",
       attendeeName: "ARJUN IYER",
       college: "National Institute of Engineering",
-      eventName: "HACK VYUHAM 36",
+      eventName: "Hackathon — 24HR",
       station: "Gate 1 - Main Entrance",
       scannedBy: "DIVYA MENON",
       scannedAt: "10:14 AM IST",
@@ -187,34 +299,38 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   }, [auth.user, auth.isReady]);
 
-  // Invalidate any legacy cached content (e.g. from v1..v4 containing old streams or locations)
+  // Invalidate any legacy cached content (e.g. from v1..v8 containing old streams or events)
   useEffect(() => {
     try {
-      localStorage.removeItem("vyuham26:content:v1");
-      localStorage.removeItem("vyuham26:content:v2");
-      localStorage.removeItem("vyuham26:content:v3");
-      localStorage.removeItem("vyuham26:content:v4");
+      ["v1", "v2", "v3", "v4", "v5", "v6", "v7", "v8", "v9"].forEach((v) => {
+        localStorage.removeItem(`vyuham26:content:${v}`);
+      });
     } catch {}
-    const hasOldImpactStream = content.streams.some(
-      (s) => s.id === "impact" || s.name.toUpperCase() === "IMPACT"
-    );
-    if (
-      hasOldImpactStream ||
-      content.homepage.location !== seedHomepage.location ||
-      content.homepage.dates !== seedHomepage.dates
-    ) {
-      setContent((c) => ({
-        ...c,
-        streams: seedStreams,
-        homepage: {
-          ...c.homepage,
-          dates: seedHomepage.dates,
-          location: seedHomepage.location,
-          institution: seedHomepage.institution,
-        },
-      }));
+
+    const isStale =
+      !content ||
+      !content.events ||
+      content.events.length !== seedContent.events.length ||
+      content.events.some((e) =>
+        ["robowars", "silent circuit", "nritya", "street battle", "impact summit"].some((bad) =>
+          e.name.toLowerCase().includes(bad)
+        )
+      ) ||
+      content.homepage?.stats?.some(
+        (s) => s.value === "48" || s.value === "72" || s.value.includes("12L") || s.label === "HOURS"
+      ) ||
+      content.homepage?.aboutSupport?.includes("refuses to wait for permission") ||
+      content.streams?.some(
+        (s) => s.id === "impact" || s.id === "technology" || s.id === "culture" || s.id === "gaming"
+      ) ||
+      content.homepage?.location !== seedHomepage.location ||
+      content.homepage?.dates !== seedHomepage.dates;
+
+    if (isStale) {
+      localStorage.removeItem(CONTENT_STORAGE_KEY);
+      setContent(seedContent);
     }
-  }, [content.streams, content.homepage.location, content.homepage.dates, setContent]);
+  }, [content]);
 
   const [authOpen, setAuthOpen] = useState<false | "login" | "signup">(false);
   const [profileOpen, setProfileOpen] = useState(false);
@@ -251,15 +367,34 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const value: Ctx = {
     content,
     setHomepage: (patch) => patchContent((c) => ({ ...c, homepage: { ...c.homepage, ...patch } })),
-    upsertEvent: (e) =>
+    upsertEvent: (e) => {
+      if (typeof e.starred === "boolean") {
+        setEventStarred(e.id, e.starred);
+      }
       patchContent((c) => {
         const exists = c.events.some((x) => x.id === e.id);
         return {
           ...c,
           events: exists ? c.events.map((x) => (x.id === e.id ? e : x)) : [...c.events, e],
         };
-      }),
+      });
+    },
     removeEvent: (id) => patchContent((c) => ({ ...c, events: c.events.filter((e) => e.id !== id) })),
+    toggleStarEvent: (idOrSlug) => {
+      const next = toggleEventStarred(idOrSlug);
+      const norm = normalizeEventSlug(idOrSlug);
+      patchContent((c) => ({
+        ...c,
+        events: c.events.map((x) => {
+          const xNorm = normalizeEventSlug(x.id);
+          if (x.id === idOrSlug || xNorm === norm) {
+            return { ...x, starred: next };
+          }
+          return x;
+        }),
+      }));
+    },
+    isEventStarred: (idOrSlug) => isEventStarred(idOrSlug),
     upsertAnnouncement: (a) =>
       patchContent((c) => ({
         ...c,
@@ -277,13 +412,30 @@ export function AppProvider({ children }: { children: ReactNode }) {
           : [...c.sponsors, s],
       })),
     removeSponsor: (id) => patchContent((c) => ({ ...c, sponsors: c.sponsors.filter((s) => s.id !== id) })),
+    upsertTeamMember: (m) =>
+      patchContent((c) => ({
+        ...c,
+        team: (c.team || seedTeam).some((x) => x.id === m.id)
+          ? (c.team || seedTeam).map((x) => (x.id === m.id ? m : x))
+          : [...(c.team || seedTeam), m],
+      })),
+    removeTeamMember: (id) =>
+      patchContent((c) => ({
+        ...c,
+        team: (c.team || seedTeam).filter((m) => m.id !== id),
+      })),
     removeGalleryItem: (id) => patchContent((c) => ({ ...c, gallery: c.gallery.filter((g) => g.id !== id) })),
     addGalleryItem: (g) => patchContent((c) => ({ ...c, gallery: [...c.gallery, g] })),
     updateStream: (s) =>
       patchContent((c) => ({ ...c, streams: c.streams.map((x) => (x.id === s.id ? s : x)) })),
     updateScheduleDay: (d) =>
       patchContent((c) => ({ ...c, schedule: c.schedule.map((x) => (x.id === d.id ? d : x)) })),
-    resetContent: () => setContent(seedContent),
+    resetContent: () => {
+      try {
+        localStorage.removeItem(CONTENT_STORAGE_KEY);
+      } catch {}
+      setContent(seedContent);
+    },
 
     users,
     registrations,
@@ -344,6 +496,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     },
 
     register: (eventId) => {
+      if (!isRegistrationOpen()) return { ok: false, message: "Registration is coming soon." };
       if (!user) return { ok: false, message: "Sign in to hold a slot." };
       if (registrations.some((r) => r.userId === user.id && r.eventId === eventId))
         return { ok: false, message: "Already locked in." };
@@ -411,6 +564,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
       return { ok: true, message: `Volunteer ${newVol.name} enrolled successfully.` };
     },
 
+    regOpen,
+    setRegOpen,
+    showCoreTeam,
+    setShowCoreTeam,
+    showSponsors,
+    setShowSponsors,
+
     ui: {
       authOpen,
       setAuthOpen,
@@ -422,6 +582,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setIntroDone,
       adminUnlocked,
       setAdminUnlocked,
+      regOpen,
+      setRegOpen,
+      showCoreTeam,
+      setShowCoreTeam,
+      showSponsors,
+      setShowSponsors,
     },
   };
 

@@ -1,7 +1,8 @@
 import { useEffect, useRef } from "react";
+import Link from "next/link";
 import { gsap } from "@/lib/anim";
 import { useApp } from "@/lib/store";
-import { useIsMobile, useReducedMotion } from "@/lib/hooks";
+import { useReducedMotion } from "@/lib/hooks";
 import { FocusIn } from "@/components/cinematic/Reveal";
 import type { ScheduleDay } from "@/data/types";
 
@@ -54,30 +55,39 @@ function Panel({ d, i, total }: { d: ScheduleDay; i: number; total: number }) {
 
       <div className="relative z-10 flex h-full flex-col justify-center px-6 md:px-[10vw]">
         <div className="panel-copy max-w-[820px]">
-          <p className="font-mono text-[10px] tracking-[0.4em] text-[#6f9b89]">
-            {d.day} <span className="mx-3 text-[#2e4c40]">/</span> {d.date}
+          <p className="font-mono text-[9px] sm:text-[10px] tracking-[0.35em] sm:tracking-[0.4em] text-[#6f9b89]">
+            {d.day} <span className="mx-2 sm:mx-3 text-[#2e4c40]">/</span> {d.date}
           </p>
           <h3
-            className="t-cond mt-4 text-[17vw] leading-[0.8] text-[#f3fbf7] md:text-[9.5vw]"
+            className="t-cond mt-2 sm:mt-4 text-[14vw] sm:text-[17vw] md:text-[9.5vw] leading-[0.8] text-[#f3fbf7]"
             style={{ textShadow: `0 0 ${40 + d.intensity * 90}px rgba(24,196,124,${0.12 + d.intensity * 0.3})` }}
           >
             {d.title}
           </h3>
-          <p className="t-cond-l mt-5 text-[5.4vw] leading-tight text-[#c3e3d4] md:text-[2.1vw]">{d.statement}</p>
-          <p className="mt-5 max-w-[52ch] text-[13px] leading-relaxed text-[#87a498] md:text-[15px]">
+          <p className="t-cond-l mt-2.5 sm:mt-5 text-[4.8vw] sm:text-[5.4vw] md:text-[2.1vw] leading-tight text-[#c3e3d4]">{d.statement}</p>
+          <p className="mt-2.5 sm:mt-5 max-w-[52ch] text-[12px] sm:text-[13px] md:text-[15px] leading-relaxed text-[#87a498]">
             {d.description}
           </p>
 
-          <ul className="mt-9 max-w-[560px] space-y-[10px]">
+          <ul className="mt-4 sm:mt-9 max-w-[560px] space-y-2 sm:space-y-[10px]">
             {d.beats.map((b) => (
-              <li key={b.time} className="group flex items-center gap-4 border-b border-[rgba(120,160,145,0.1)] pb-[10px]">
-                <span className="font-mono text-[11px] tracking-[0.18em] text-[#18c47c]">{b.time}</span>
-                <span className="font-mono text-[10px] tracking-[0.2em] text-[#8ba79b] md:text-[11px]">
+              <li key={b.time} className="group flex items-center gap-3 sm:gap-4 border-b border-[rgba(120,160,145,0.1)] pb-1.5 sm:pb-[10px]">
+                <span className="font-mono text-[10px] sm:text-[11px] tracking-[0.16em] sm:tracking-[0.18em] text-[#18c47c]">{b.time}</span>
+                <span className="font-mono text-[9px] sm:text-[10px] md:text-[11px] tracking-[0.18em] sm:tracking-[0.2em] text-[#8ba79b]">
                   {b.label}
                 </span>
               </li>
             ))}
           </ul>
+
+          <div className="mt-6 sm:mt-8">
+            <Link
+              href="/schedule"
+              className="inline-flex items-center gap-2 border border-[#18c47c]/30 bg-[#18c47c]/10 px-4 py-2 font-mono text-[9px] uppercase tracking-[0.22em] text-[#7dffc4] transition hover:bg-[#18c47c] hover:text-[#030504]"
+            >
+              EXPLORE {d.day} SCHEDULE & EVENTS →
+            </Link>
+          </div>
         </div>
       </div>
 
@@ -93,11 +103,10 @@ export default function Journey() {
   const days = content.schedule;
   const wrap = useRef<HTMLDivElement | null>(null);
   const reduced = useReducedMotion();
-  const mobile = useIsMobile();
 
   useEffect(() => {
     const el = wrap.current;
-    if (!el || reduced || mobile) return;
+    if (!el || reduced) return;
     const ctx = gsap.context(() => {
       const track = el.querySelector<HTMLElement>(".track");
       if (!track) return;
@@ -136,7 +145,7 @@ export default function Journey() {
         );
         gsap.fromTo(
           p.querySelector(".panel-copy"),
-          { autoAlpha: 0.15, x: 90, filter: "blur(10px)" },
+          { autoAlpha: 0.15, x: 50, filter: "blur(8px)" },
           {
             autoAlpha: 1,
             x: 0,
@@ -154,31 +163,41 @@ export default function Journey() {
       });
     }, el);
     return () => ctx.revert();
-  }, [reduced, mobile, days]);
+  }, [reduced, days]);
 
   return (
     <section id="schedule" className="relative w-full">
-      <div className="relative z-10 px-6 pt-24 md:px-[10vw]">
-        <p className="eyebrow">03 — THE JOURNEY</p>
-        <FocusIn delay={0.05}>
-          <h2 className="t-cond mt-4 text-[12vw] leading-[0.84] text-[#f0f9f5] md:text-[6vw]">
-            IGNITION <span className="text-[#2c4a3e]">→</span> CONVERGENCE{" "}
-            <span className="text-[#2c4a3e]">→</span> <span className="text-[#18c47c]">AFTERSHOCK</span>
-          </h2>
-        </FocusIn>
-        <p className="mt-5 max-w-[56ch] text-[13px] leading-relaxed text-[#7d9a8d] md:text-[15px]">
-          Three days engineered as one continuous escalation. Each stage burns hotter than the last.
-        </p>
+      <div className="relative z-10 flex flex-col justify-between gap-6 px-6 pt-10 sm:pt-14 md:pt-18 md:flex-row md:items-end md:px-[10vw]">
+        <div>
+          <p className="eyebrow">03 — THE JOURNEY</p>
+          <FocusIn delay={0.05}>
+            <h2 className="t-cond mt-4 text-[12vw] leading-[0.84] text-[#f0f9f5] md:text-[6vw]">
+              IGNITION <span className="text-[#2c4a3e]">→</span> CONVERGENCE{" "}
+              <span className="text-[#2c4a3e]">→</span> <span className="text-[#18c47c]">AFTERSHOCK</span>
+            </h2>
+          </FocusIn>
+          <p className="mt-5 max-w-[56ch] text-[13px] leading-relaxed text-[#7d9a8d] md:text-[15px]">
+            Three days engineered as one continuous escalation. Each stage burns hotter than the last.
+          </p>
+        </div>
+        <div className="shrink-0">
+          <Link
+            href="/schedule"
+            className="inline-flex items-center justify-center border border-[#18c47c]/40 bg-[#18c47c]/10 px-5 py-2.5 font-mono text-[10px] uppercase tracking-[0.24em] text-[#18c47c] transition-all hover:bg-[#18c47c] hover:text-[#030504]"
+          >
+            Full Timeline / Schedule →
+          </Link>
+        </div>
       </div>
 
-      {mobile || reduced ? (
-        <div className="mt-16">
+      {reduced ? (
+        <div className="mt-8 sm:mt-10 md:mt-12">
           {days.map((d, i) => (
             <Panel key={d.id} d={d} i={i} total={days.length} />
           ))}
         </div>
       ) : (
-        <div ref={wrap} className="relative mt-16 overflow-hidden">
+        <div ref={wrap} className="relative mt-8 sm:mt-10 md:mt-12 overflow-hidden">
           <div className="track flex w-max will-change-transform">
             {days.map((d, i) => (
               <Panel key={d.id} d={d} i={i} total={days.length} />

@@ -4,21 +4,25 @@ import { cn } from "@/utils/cn";
 import { homepage, navLinks } from "@/data/content";
 import { useApp } from "@/lib/store";
 import { scrollToId, scrollToTop } from "@/lib/scroll";
+import { navigate, markInternalNav } from "@/lib/router";
 import { startAmbience, stopAmbience } from "@/lib/sound";
 import BroadcastTicker from "@/components/ui/BroadcastTicker";
 import Logo from "@/components/ui/Logo";
 import { toast } from "@/components/ui/Toaster";
-import { SITE_CONFIG } from "@/config/site";
+import { SITE_CONFIG, useRegistrationOpen } from "@/config/site";
 
 export default function Nav({ visible = true }: { visible?: boolean }) {
   const { user, ui, logout } = useApp();
+  const regOpen = useRegistrationOpen();
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState("home");
   const [hidden, setHidden] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+  const [moreMenuOpen, setMoreMenuOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const profileMenuRef = useRef<HTMLDivElement>(null);
+  const moreMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -54,8 +58,33 @@ export default function Nav({ visible = true }: { visible?: boolean }) {
   }, [profileMenuOpen]);
 
   useEffect(() => {
+    if (!moreMenuOpen) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (moreMenuRef.current && !moreMenuRef.current.contains(e.target as Node)) {
+        setMoreMenuOpen(false);
+      }
+    };
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMoreMenuOpen(false);
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [moreMenuOpen]);
+
+  useEffect(() => {
     let lastScrollY = typeof window !== "undefined" ? window.scrollY : 0;
     let ticking = false;
+    let scrollStopTimer: ReturnType<typeof setTimeout> | null = null;
+
+    const handleScrollStop = () => {
+      // User has stopped scrolling -> reveal navbar
+      setHidden(false);
+      lastScrollY = Math.max(0, window.scrollY);
+    };
 
     const updateScroll = () => {
       const currentScrollY = Math.max(0, window.scrollY);
@@ -67,13 +96,14 @@ export default function Nav({ visible = true }: { visible?: boolean }) {
         setScrolled(false);
         lastScrollY = currentScrollY;
         ticking = false;
+        if (scrollStopTimer) clearTimeout(scrollStopTimer);
         return;
       }
 
       setScrolled(true);
 
-      // Require a threshold of 8px to prevent jitter from micro-scrolls
-      const threshold = 8;
+      // Require a threshold of 6px to avoid micro-jitter
+      const threshold = 6;
       if (Math.abs(diff) >= threshold) {
         if (diff > 0) {
           // Scrolling down -> hide navbar
@@ -84,6 +114,10 @@ export default function Nav({ visible = true }: { visible?: boolean }) {
         }
         lastScrollY = currentScrollY;
       }
+
+      // Reset scroll-stop detection timer (reveals navbar after 750ms of stillness)
+      if (scrollStopTimer) clearTimeout(scrollStopTimer);
+      scrollStopTimer = setTimeout(handleScrollStop, 750);
 
       ticking = false;
     };
@@ -97,7 +131,10 @@ export default function Nav({ visible = true }: { visible?: boolean }) {
 
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      if (scrollStopTimer) clearTimeout(scrollStopTimer);
+    };
   }, []);
 
   useEffect(() => {
@@ -160,24 +197,20 @@ export default function Nav({ visible = true }: { visible?: boolean }) {
   const go = (id: string) => {
     setOpen(false);
     setHidden(false);
+    setMoreMenuOpen(false);
 
     if (id === "home") {
       const isHome = checkIsHome();
 
       if (isHome) {
         if (window.location.hash && window.location.hash !== "#/" && window.location.hash !== "#" && window.location.hash !== "") {
-          window.location.hash = "/";
-          window.dispatchEvent(new CustomEvent("app:navigate", { detail: "/" }));
+          markInternalNav();
+          navigate("/");
         }
         scrollToTop();
       } else {
-        try {
-          if (window.location.pathname !== "/") {
-            window.history.pushState(null, "", "/");
-          }
-        } catch {}
-        window.location.hash = "/";
-        window.dispatchEvent(new CustomEvent("app:navigate", { detail: "/" }));
+        markInternalNav();
+        navigate("/");
         window.scrollTo({ top: 0, behavior: "smooth" });
         setTimeout(() => {
           scrollToTop();
@@ -193,13 +226,8 @@ export default function Nav({ visible = true }: { visible?: boolean }) {
       if (isHome && document.getElementById(id)) {
         scrollToId(id, -30);
       } else {
-        try {
-          if (window.location.pathname !== "/") {
-            window.history.pushState(null, "", "/");
-          }
-        } catch {}
-        window.location.hash = `/#${id}`;
-        window.dispatchEvent(new CustomEvent("app:navigate", { detail: `/#${id}` }));
+        markInternalNav();
+        navigate(`/#${id}`);
         setTimeout(() => {
           scrollToId(id, -30);
         }, 150);
@@ -208,13 +236,8 @@ export default function Nav({ visible = true }: { visible?: boolean }) {
     }
 
     // Direct pages with dedicated routes (events, venue, schedule, sponsors, contact, dashboard, profile, ticket)
-    try {
-      if (window.location.pathname !== "/") {
-        window.history.pushState(null, "", `/${id}`);
-      }
-    } catch {}
-    window.location.hash = `/${id}`;
-    window.dispatchEvent(new CustomEvent("app:navigate", { detail: `/${id}` }));
+    markInternalNav();
+    navigate(`/${id}`);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -230,7 +253,9 @@ export default function Nav({ visible = true }: { visible?: boolean }) {
     window.dispatchEvent(new CustomEvent("open-cyber-terminal"));
   };
 
-  const isHidden = !visible || (hidden && !open);
+  const secondaryNavIds = ["gallery", "venue", "sponsors", "contact"];
+  const isSecondaryActive = secondaryNavIds.includes(active);
+  const isHidden = !visible || (hidden && !open && !profileMenuOpen && !moreMenuOpen);
 
   return (
     <>
@@ -249,20 +274,20 @@ export default function Nav({ visible = true }: { visible?: boolean }) {
 
         <div
           className={cn(
-            "relative mx-auto flex w-full max-w-[1680px] items-center justify-between px-4 transition-all duration-700 md:px-8 xl:px-10",
+            "relative mx-auto flex w-full max-w-[1680px] items-center justify-between px-3 sm:px-4 md:px-6 xl:px-8 transition-all duration-700",
             scrolled ? "h-[54px]" : "h-[68px]",
           )}
         >
           {/* Logo & Brand mark */}
-          <button onClick={() => go("home")} className="group flex items-center gap-2.5" aria-label="VYUHAM 26 home">
-            <div className="relative flex h-8 w-8 items-center justify-center md:h-9 md:w-9">
+          <button onClick={() => go("home")} className="group flex items-center gap-2 sm:gap-2.5 shrink-0" aria-label="VYUHAM 26 home">
+            <div className="relative flex h-8 w-8 items-center justify-center md:h-9 md:w-9 shrink-0">
               <Logo
                 size="sm"
                 className="relative z-10 h-8 w-8 object-contain drop-shadow-[0_0_12px_rgba(24,196,124,0.5)] transition-transform duration-500 group-hover:scale-110 md:h-9 md:w-9"
               />
             </div>
-            <div className="flex items-baseline gap-1.5">
-              <span className="t-cond text-[19px] tracking-[0.06em] text-[#eef8f3] md:text-[22px]">
+            <div className="flex items-baseline gap-1.5 whitespace-nowrap">
+              <span className="t-cond text-[18px] sm:text-[19px] tracking-[0.06em] text-[#eef8f3] md:text-[22px]">
                 {homepage.brand}
                 <span className="text-[#18c47c]">{homepage.year}</span>
               </span>
@@ -273,34 +298,84 @@ export default function Nav({ visible = true }: { visible?: boolean }) {
           </button>
 
           {/* Desktop primary navigation links */}
-          <nav className="pointer-events-auto absolute left-1/2 top-1/2 hidden -translate-x-1/2 -translate-y-1/2 items-center gap-5 xl:gap-7 lg:flex">
-            {navLinks.map((l) => (
+          <nav className="pointer-events-auto hidden lg:flex flex-1 min-w-0 items-center justify-center gap-1 xl:gap-2.5 2xl:gap-5 px-2">
+            {navLinks.map((l) => {
+              const isSecondary = secondaryNavIds.includes(l.id);
+              return (
+                <button
+                  key={l.id}
+                  onClick={() => go(l.id)}
+                  data-active={active === l.id}
+                  className={cn(
+                    "link-trail items-center min-h-[36px] px-1 xl:px-1.5 py-1 font-mono text-[9px] xl:text-[10px] tracking-[0.14em] xl:tracking-[0.22em] transition-colors duration-500 whitespace-nowrap",
+                    isSecondary ? "hidden xl:inline-flex" : "inline-flex",
+                    active === l.id ? "text-[#c9f3e0]" : "text-[#7f978d] hover:text-[#dff6ec]",
+                  )}
+                >
+                  {l.label}
+                </button>
+              );
+            })}
+
+            {/* MORE dropdown for secondary links on lg screens (1024px - 1279px) */}
+            <div className="relative inline-flex xl:hidden" ref={moreMenuRef}>
               <button
-                key={l.id}
-                onClick={() => go(l.id)}
-                data-active={active === l.id}
+                onClick={() => setMoreMenuOpen((prev) => !prev)}
                 className={cn(
-                  "link-trail inline-flex items-center min-h-[36px] px-1.5 py-1 font-mono text-[10px] tracking-[0.24em] transition-colors duration-500",
-                  active === l.id ? "text-[#c9f3e0]" : "text-[#7f978d] hover:text-[#dff6ec]",
+                  "link-trail inline-flex items-center gap-1 min-h-[36px] px-1.5 py-1 font-mono text-[9px] tracking-[0.14em] transition-colors duration-500 whitespace-nowrap",
+                  isSecondaryActive || moreMenuOpen ? "text-[#c9f3e0]" : "text-[#7f978d] hover:text-[#dff6ec]",
                 )}
+                aria-expanded={moreMenuOpen}
+                aria-haspopup="true"
               >
-                {l.label}
+                <span>MORE</span>
+                <span className={cn("text-[7px] transition-transform duration-300", moreMenuOpen && "rotate-180")}>
+                  ▼
+                </span>
               </button>
-            ))}
+
+              {moreMenuOpen && (
+                <div
+                  className="absolute left-1/2 top-[calc(100%+6px)] z-[110] -translate-x-1/2 w-[160px] overflow-hidden border border-[rgba(24,196,124,0.3)] bg-[#040806]/95 p-1.5 shadow-[0_12px_40px_rgba(0,0,0,0.85),0_0_24px_rgba(24,196,124,0.15)] backdrop-blur-2xl"
+                  style={{ animationDuration: "160ms" }}
+                >
+                  {navLinks
+                    .filter((l) => secondaryNavIds.includes(l.id))
+                    .map((l) => (
+                      <button
+                        key={l.id}
+                        onClick={() => {
+                          setMoreMenuOpen(false);
+                          go(l.id);
+                        }}
+                        className={cn(
+                          "flex w-full items-center justify-between px-3 py-2 font-mono text-[9px] tracking-[0.2em] transition-colors",
+                          active === l.id
+                            ? "bg-[rgba(24,196,124,0.14)] text-[#c9f3e0]"
+                            : "text-[#8fa89d] hover:bg-[rgba(24,196,124,0.08)] hover:text-[#e7f5ee]",
+                        )}
+                      >
+                        <span>{l.label}</span>
+                        {active === l.id && <span className="h-1 w-1 rounded-full bg-[#18c47c]" />}
+                      </button>
+                    ))}
+                </div>
+              )}
+            </div>
           </nav>
 
           {/* Right cluster */}
-          <div className="flex items-center gap-2 sm:gap-2.5 md:gap-3">
+          <div className="flex items-center gap-1.5 sm:gap-2 md:gap-2.5 shrink-0">
             {/* Global CMD Terminal trigger */}
             <button
               onClick={openTerminal}
               aria-label="Open Command Terminal"
-              className="group flex min-h-[36px] items-center gap-1.5 border border-[rgba(24,196,124,0.35)] bg-[rgba(8,26,18,0.5)] px-3 py-1.5 font-mono text-[10px] tracking-[0.16em] text-[#18c47c] transition-all duration-300 hover:border-[#18c47c] hover:bg-[rgba(24,196,124,0.14)] hover:shadow-[0_0_16px_rgba(24,196,124,0.35)]"
+              className="group flex min-h-[36px] items-center gap-1.5 border border-[rgba(24,196,124,0.35)] bg-[rgba(8,26,18,0.5)] px-2.5 sm:px-3 py-1.5 font-mono text-[9px] sm:text-[10px] tracking-[0.12em] sm:tracking-[0.16em] text-[#18c47c] transition-all duration-300 hover:border-[#18c47c] hover:bg-[rgba(24,196,124,0.14)] hover:shadow-[0_0_16px_rgba(24,196,124,0.35)] whitespace-nowrap"
               title="Open Command Terminal (Ctrl + K)"
             >
               <span className="h-1.5 w-1.5 rounded-full bg-[#18c47c] animate-pulse" />
               <span className="font-semibold tracking-wider">CONSOLE</span>
-              <kbd className="hidden rounded bg-[rgba(24,196,124,0.15)] px-1 py-0.5 text-[8px] text-[#8ce4b9] lg:inline">
+              <kbd className="hidden rounded bg-[rgba(24,196,124,0.15)] px-1 py-0.5 text-[8px] text-[#8ce4b9] xl:inline">
                 ⌘K
               </kbd>
             </button>
@@ -309,7 +384,7 @@ export default function Nav({ visible = true }: { visible?: boolean }) {
             <button
               onClick={toggleSound}
               aria-label={ui.sound ? "Mute ambience" : "Play ambience"}
-              className="group flex h-9 min-h-[36px] min-w-[36px] items-center justify-center gap-[3px] rounded px-2 hover:bg-white/5 transition-colors"
+              className="group flex h-9 min-h-[36px] min-w-[36px] items-center justify-center gap-[3px] rounded px-2 hover:bg-white/5 transition-colors shrink-0"
               title={ui.sound ? "Sound on" : "Sound off"}
             >
               {[0, 1, 2, 3].map((i) => (
@@ -327,8 +402,8 @@ export default function Nav({ visible = true }: { visible?: boolean }) {
               ))}
             </button>
 
-            {!SITE_CONFIG.REG_OPEN ? (
-              <span className="hidden sm:inline-flex items-center gap-1.5 border border-amber-500/40 bg-amber-500/10 px-3 py-1 font-mono text-[9px] font-bold tracking-[0.22em] text-amber-300 shadow-[0_0_12px_rgba(245,158,11,0.15)]">
+            {!regOpen ? (
+              <span className="hidden sm:inline-flex items-center gap-1.5 border border-amber-500/40 bg-amber-500/10 px-2 sm:px-2.5 xl:px-3 py-1 font-mono text-[8px] sm:text-[9px] font-bold tracking-[0.16em] sm:tracking-[0.22em] text-amber-300 shadow-[0_0_12px_rgba(245,158,11,0.15)] whitespace-nowrap shrink-0">
                 <span className="h-1.5 w-1.5 rounded-full bg-amber-400 animate-pulse" />
                 COMING SOON
               </span>
@@ -591,7 +666,7 @@ export default function Nav({ visible = true }: { visible?: boolean }) {
               {/* Mobile Bottom actions */}
               <div className="relative z-10 pt-4">
                 <div className="flex gap-3">
-                  {!SITE_CONFIG.REG_OPEN ? (
+                  {!regOpen ? (
                     <div className="flex w-full items-center justify-center border border-amber-500/40 bg-amber-500/10 py-3 font-mono text-[10px] font-bold tracking-[0.24em] text-amber-300 shadow-[0_0_14px_rgba(245,158,11,0.2)]">
                       <span className="h-2 w-2 rounded-full bg-amber-400 animate-pulse mr-2.5" />
                       REGISTRATION COMING SOON

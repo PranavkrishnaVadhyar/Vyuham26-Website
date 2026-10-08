@@ -7,11 +7,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.db import get_db
 from app.core.deps import require_role
 from app.modules.auth.models import Profile
-from app.modules.announcements.schemas import AnnouncementCreate, AnnouncementOut
+from app.modules.announcements.schemas import AnnouncementCreate, AnnouncementOut, AnnouncementUpdate
 from app.modules.announcements.service import (
     create_announcement,
     delete_announcement,
     list_announcements,
+    update_announcement,
 )
 
 router = APIRouter(prefix="/announcements", tags=["announcements"])
@@ -29,6 +30,26 @@ async def post_announcement(
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> object:
     return await create_announcement(db, data)
+
+
+@router.patch("/{announcement_id}", response_model=AnnouncementOut)
+async def patch_announcement(
+    announcement_id: UUID,
+    data: AnnouncementUpdate,
+    _: Annotated[Profile, Depends(require_role("admin", "event_head"))],
+    db: Annotated[AsyncSession, Depends(get_db)],
+) -> object:
+    return await update_announcement(db, announcement_id, data)
+
+
+@router.put("/{announcement_id}", response_model=AnnouncementOut)
+async def put_announcement(
+    announcement_id: UUID,
+    data: AnnouncementUpdate,
+    _: Annotated[Profile, Depends(require_role("admin", "event_head"))],
+    db: Annotated[AsyncSession, Depends(get_db)],
+) -> object:
+    return await update_announcement(db, announcement_id, data)
 
 
 @router.delete("/{announcement_id}", status_code=status.HTTP_204_NO_CONTENT)

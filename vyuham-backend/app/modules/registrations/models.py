@@ -2,7 +2,9 @@ import enum
 from datetime import datetime
 from uuid import UUID, uuid4
 
-from sqlalchemy import DateTime, Enum, ForeignKey, Index, func, text
+from decimal import Decimal
+
+from sqlalchemy import Boolean, DateTime, Enum, ForeignKey, Index, Numeric, String, func, text
 from sqlalchemy.dialects.postgresql import UUID as PGUUID
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -39,6 +41,11 @@ class Registration(Base):
     event_id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), ForeignKey("events.id", ondelete="CASCADE"), nullable=False, index=True)
     user_id: Mapped[UUID | None] = mapped_column(PGUUID(as_uuid=True), ForeignKey("profiles.id", ondelete="SET NULL"), nullable=True, index=True)
     team_id: Mapped[UUID | None] = mapped_column(PGUUID(as_uuid=True), ForeignKey("teams.id", ondelete="CASCADE"), nullable=True, index=True)
+    ticket_code: Mapped[str | None] = mapped_column(String(64), unique=True, index=True, nullable=True)
+    checked_in: Mapped[bool] = mapped_column(Boolean, default=False, server_default="false")
+    checked_in_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    amount_paid: Mapped[Decimal] = mapped_column(Numeric(10, 2), default=Decimal("0.00"), server_default="0.00")
+    payment_reference: Mapped[str | None] = mapped_column(String(120), nullable=True)
     status: Mapped[RegistrationStatus] = mapped_column(
         Enum(RegistrationStatus, name="registration_status"), nullable=False,
         default=RegistrationStatus.pending, server_default=RegistrationStatus.pending.value,

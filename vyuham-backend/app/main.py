@@ -14,6 +14,11 @@ from app.modules.registrations.router import router as registrations_router
 from app.modules.hackathon.router import router as hackathon_router
 from app.modules.ctf.router import router as ctf_router
 from app.modules.announcements.router import router as announcements_router
+from app.modules.checkin.router import router as checkin_router
+from app.modules.payments.router import router as payments_router
+from app.modules.event_results.router import router as event_results_router
+from app.modules.certificates.router import router as certificates_router
+from app.modules.auxiliary.router import router as auxiliary_router
 from app.admin import configure_admin
 
 
@@ -32,11 +37,28 @@ app.add_middleware(
     allow_headers=["*"],
 )
 register_exception_handlers(app)
+
+
+@app.get("/", tags=["Health"])
+async def root():
+    return {
+        "status": "online",
+        "service": "Vyuham '26 API",
+        "version": "0.1.0",
+        "docs": "/docs",
+    }
+
+
 app.include_router(auth_router)
+app.include_router(event_results_router)
 app.include_router(events_router)
 app.include_router(teams_router)
 app.include_router(registrations_router)
+app.include_router(payments_router)
+app.include_router(checkin_router)
+app.include_router(certificates_router)
 app.include_router(hackathon_router)
 app.include_router(ctf_router)
 app.include_router(announcements_router)
+app.include_router(auxiliary_router)
 configure_admin(app)

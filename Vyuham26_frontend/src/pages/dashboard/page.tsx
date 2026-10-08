@@ -28,37 +28,37 @@ import { registrationsApi, eventsApi, type EventRecord, type RegistrationRecord 
 const defaultEvents = [
   {
     stream: "TECH",
-    title: "National Hackathon",
-    venue: "MAIN LAB 01",
-    time: "30 OCT // 10:00 AM",
+    title: "Hackathon — 24HR",
+    venue: "MAIN HALL + COMPUTER LAB",
+    time: "30 OCT // 09:00 AM",
     href: "/events/hackathon",
     action: "ENTER BUILD ZONE",
     code: "EVT-001",
   },
   {
     stream: "TECH",
-    title: "CTF Warzone",
-    venue: "CYBER RANGE",
-    time: "31 OCT // 11:30 AM",
+    title: "Capture the Flag",
+    venue: "COMPUTER LAB",
+    time: "31 OCT // 10:00 AM",
     href: "/events/ctf",
     action: "ENTER CTF PORTAL",
     code: "EVT-002",
   },
   {
-    stream: "CULTURE",
-    title: "Battle of the Bands",
-    venue: "OPEN AMPHITHEATRE",
-    time: "31 OCT // 06:00 PM",
-    href: "/events/battle-of-bands",
+    stream: "CULTURAL",
+    title: "Concert Night",
+    venue: "OPEN AIR STAGE",
+    time: "01 NOV // 07:00 PM",
+    href: "/events/concert",
     action: "VIEW DOSSIER",
     code: "EVT-003",
   },
 ];
 
 const timeline = [
-  ["30 OCT", "10:00 AM", "National Hackathon", "DAY 01 // IGNITION"],
-  ["31 OCT", "11:30 AM", "CTF Warzone", "DAY 02 // CONVERGENCE"],
-  ["31 OCT", "06:00 PM", "Battle of the Bands", "DAY 02 // MAIN STAGE"],
+  ["30 OCT", "09:00 AM", "Hackathon — 24HR", "DAY 01 // HACKATHON BEGINS"],
+  ["31 OCT", "10:00 AM", "Capture the Flag", "DAY 02 // COMPUTER LAB"],
+  ["01 NOV", "07:00 PM", "Concert Night", "DAY 03 // MAIN STAGE CLOSING"],
 ] as const;
 
 function Corner({ className = "" }: { className?: string }) {
@@ -511,7 +511,7 @@ export default function DashboardPage() {
                       {user && user.registeredEvents.length === 0 && (
                         <div className="border border-dashed border-emerald-400/25 bg-emerald-950/20 p-6 text-center">
                           <div className="font-mono text-[9px] uppercase tracking-[0.2em] text-emerald-300">NO EVENT SLOTS RESERVED YET</div>
-                          <p className="mt-2 text-xs text-white/40">Browse our 48 technical, cultural, and gaming competitions to secure your operative slots.</p>
+                          <p className="mt-2 text-xs text-white/40">Browse our 30+ technical, management, cultural, and esports events to secure your operative slots.</p>
                           <Link href="/events" className="mt-4 inline-block border border-emerald-400/40 bg-emerald-400/10 px-4 py-2 font-mono text-[8px] uppercase tracking-widest text-emerald-300 hover:bg-emerald-300 hover:text-black transition">BROWSE EVENT DIRECTORY →</Link>
                         </div>
                       )}

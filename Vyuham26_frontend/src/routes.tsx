@@ -7,8 +7,9 @@ import AnimatedSection from "@/components/motion/AnimatedSection";
 import { Kicker, StreamBadge } from "@/components/ui/Elements";
 import Link from "next/link";
 import EventRegistrationForm from "@/components/forms/EventRegistrationForm";
-import { SITE_CONFIG } from "@/config/site";
+import { SITE_CONFIG, useRegistrationOpen } from "@/config/site";
 import RegistrationComingSoon from "@/components/ui/RegistrationComingSoon";
+import AdminGate from "@/components/admin/AdminGate";
 
 /* ------------------------------------------------------------------ */
 /*  Dynamic Module Loaders                                            */
@@ -103,7 +104,8 @@ export function EventDetailRoute({ params }: { params?: { slug?: string } }) {
 }
 
 export function RegisterSlugRoute({ params }: { params?: { slug?: string } }) {
-  if (!SITE_CONFIG.REG_OPEN) {
+  const regOpen = useRegistrationOpen();
+  if (!regOpen) {
     return <RegistrationComingSoon />;
   }
   const slug = params?.slug || "";
@@ -276,10 +278,17 @@ export function prefetchRoute(path: string): void {
 interface RouteRendererProps {
   routePath: string;
   adminUnlocked: boolean;
+  onAdminUnlock?: () => void;
   siteComponent: React.ComponentType;
 }
 
-export function RouteRenderer({ routePath, adminUnlocked, siteComponent: Site }: RouteRendererProps) {
+export function RouteRenderer({
+  routePath,
+  adminUnlocked,
+  onAdminUnlock,
+  siteComponent: Site,
+}: RouteRendererProps) {
+  const regOpen = useRegistrationOpen();
   const match = matchRouteConfig(routePath);
 
   if (!match) {
@@ -293,10 +302,16 @@ export function RouteRenderer({ routePath, adminUnlocked, siteComponent: Site }:
   }
 
   if (route.requiresAdmin && !adminUnlocked) {
-    return <NotFoundPage />;
+    return (
+      <AdminGate
+        onUnlock={() => {
+          onAdminUnlock?.();
+        }}
+      />
+    );
   }
 
-  if (route.requiresRegistrationOpen && !SITE_CONFIG.REG_OPEN) {
+  if (route.requiresRegistrationOpen && !regOpen) {
     return <RegistrationComingSoon />;
   }
 

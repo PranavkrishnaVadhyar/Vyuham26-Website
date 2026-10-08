@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Optional
 from uuid import UUID
 from pydantic import BaseModel, ConfigDict
 
@@ -10,6 +11,15 @@ class AnnouncementCreate(BaseModel):
     urgent: bool = False
     stream: str = "GENERAL"
     pinned: bool = False
+
+
+class AnnouncementUpdate(BaseModel):
+    title: Optional[str] = None
+    content: Optional[str] = None
+    category: Optional[str] = None
+    urgent: Optional[bool] = None
+    stream: Optional[str] = None
+    pinned: Optional[bool] = None
 
 
 class AnnouncementOut(BaseModel):

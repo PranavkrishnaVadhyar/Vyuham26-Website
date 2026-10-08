@@ -4,7 +4,7 @@ import { AuthProvider } from "@/context/AuthContext";
 import { useReducedMotion } from "@/lib/hooks";
 import { lockScroll, scrollToId } from "@/lib/scroll";
 import { ScrollTrigger } from "@/lib/anim";
-import { usePlatformRoute } from "@/lib/router";
+import { usePlatformRoute, guardRoute, clearNavFlag } from "@/lib/router";
 import { RouteRenderer } from "@/routes";
 
 import Atmosphere from "@/components/cinematic/Atmosphere";
@@ -25,11 +25,48 @@ import About from "@/components/sections/About";
 import Countdown from "@/components/sections/Countdown";
 import FinalReveal from "@/components/sections/FinalReveal";
 import { AuthModal, ProfilePanel } from "@/components/auth/Auth";
-import Toaster from "@/components/ui/Toaster";
+import Toaster, { toast } from "@/components/ui/Toaster";
 import CyberTerminal from "@/components/ui/CyberTerminal";
 import Logo from "@/components/ui/Logo";
 import AdminSecretListener from "@/components/admin/AdminSecretListener";
 import ErrorBoundary from "@/components/ui/ErrorBoundary";
+import { cyberAudio } from "@/lib/cyberAudio";
+
+function GlobalKeyboardShortcuts() {
+  const { ui } = useApp();
+
+  useEffect(() => {
+    const handleGlobalKeys = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement | null;
+      const isInput =
+        target &&
+        (target.tagName === "INPUT" ||
+          target.tagName === "TEXTAREA" ||
+          target.tagName === "SELECT" ||
+          target.isContentEditable);
+
+      if (isInput) return;
+
+      // Key M = Audio Mute toggle
+      if ((e.key === "m" || e.key === "M") && !e.ctrlKey && !e.altKey && !e.metaKey) {
+        const muted = cyberAudio.toggleMute();
+        ui.setSound(!muted);
+        toast(muted ? "🔇 [AUDIO MUTED]" : "🔊 [AUDIO ENABLED]", "info");
+      }
+
+      // Key ? = Help / Terminal
+      if (e.key === "?" && !e.ctrlKey && !e.altKey && !e.metaKey) {
+        e.preventDefault();
+        window.dispatchEvent(new CustomEvent("open-cyber-terminal"));
+      }
+    };
+
+    window.addEventListener("keydown", handleGlobalKeys);
+    return () => window.removeEventListener("keydown", handleGlobalKeys);
+  }, [ui]);
+
+  return null;
+}
 
 /* ------------------------------------------------------------------ */
 /*  Scroll progress rail                                               */
@@ -82,8 +119,12 @@ function Site() {
     lockScroll(introActive);
     if (!introActive) {
       ui.setIntroDone(true);
-      const t = window.setTimeout(() => ScrollTrigger.refresh(), 320);
-      return () => window.clearTimeout(t);
+      const t1 = window.setTimeout(() => ScrollTrigger.refresh(), 320);
+      const t2 = window.setTimeout(() => ScrollTrigger.refresh(), 700);
+      return () => {
+        window.clearTimeout(t1);
+        window.clearTimeout(t2);
+      };
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [introActive]);
@@ -168,9 +209,20 @@ function Site() {
 function Router() {
   const route = usePlatformRoute();
   const { ui } = useApp();
+  const [guarded, setGuarded] = useState(() => !guardRoute(route));
 
+  // On fresh page load, clear navigation flag
   useEffect(() => {
-    lockScroll(false);
+    clearNavFlag();
+  }, []);
+
+  // On every route change, check if the navigation is allowed
+  useEffect(() => {
+    const allowed = guardRoute(route);
+    setGuarded(!allowed);
+    if (allowed) {
+      lockScroll(false);
+    }
   }, [route]);
 
   const isHomepage =
@@ -196,6 +248,9 @@ function Router() {
       window.removeEventListener("offline", handleOffline);
     };
   }, []);
+
+  // If navigation was blocked, render nothing (redirect is in progress)
+  if (guarded) return null;
 
   return (
     <>
@@ -224,6 +279,7 @@ function Router() {
             <RouteRenderer
               routePath={route}
               adminUnlocked={!!ui.adminUnlocked}
+              onAdminUnlock={() => ui.setAdminUnlocked(true)}
               siteComponent={Site}
             />
           ) : (
@@ -233,6 +289,7 @@ function Router() {
                 <RouteRenderer
                   routePath={route}
                   adminUnlocked={!!ui.adminUnlocked}
+                  onAdminUnlock={() => ui.setAdminUnlocked(true)}
                   siteComponent={Site}
                 />
               </CinematicTransition>
@@ -252,6 +309,7 @@ export default function App() {
     <AuthProvider>
       <AppProvider>
         <AdminSecretListener />
+        <GlobalKeyboardShortcuts />
         <CinematicCursor />
         <Router />
         <CyberTerminal />

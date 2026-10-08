@@ -1,25 +1,27 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import AnimatedSection from "@/components/motion/AnimatedSection";
 import { Kicker } from "@/components/ui/Elements";
+import { announcementsApi } from "@/lib/api";
 
 export default function AnnouncementsFeedPage() {
   const reduceMotion = usePrefersReducedMotion();
 
-  const notices = [
+  const fallbackNotices = [
     {
       id: "01",
       priority: "HIGH PRIORITY",
-      title: "CTF WARZONE // ROUND 02",
+      title: "CAPTURE THE FLAG // ROUND 02",
       subtitle: "OPENING SHIFT DETECTED",
       time: "10 MIN AGO",
       stream: "TECH",
       content:
-        "All registered CTF teams are requested to report to the Cyber Range by 11:15 AM for network credential allocation.",
+        "All registered CTF teams are requested to report to the Computer Lab by 11:15 AM for network credential allocation.",
       accent: "green",
     },
     {
@@ -36,15 +38,61 @@ export default function AnnouncementsFeedPage() {
     {
       id: "03",
       priority: "LIVE SIGNAL",
-      title: "BATTLE OF THE BANDS",
-      subtitle: "SOUND CHECK WINDOW OPEN",
+      title: "FASHION SHOW // RUNWAY CALL",
+      subtitle: "DESIGNER LINEUP OPEN",
       time: "02 HRS AGO",
-      stream: "CULTURE",
+      stream: "CULTURAL",
       content:
-        "Stage A sound checks begin at 03:00 PM. Team leads are requested to bring their stage technical riders.",
+        "Open call runway briefing starts at the Open Air Stage. Student designers and models report for rehearsal.",
       accent: "purple",
     },
   ];
+
+  const [liveNotices, setLiveNotices] = useState(fallbackNotices);
+
+  useEffect(() => {
+    announcementsApi
+      .list()
+      .then((records) => {
+        if (records && records.length > 0) {
+          const formatted = records.map((r, index) => {
+            const accent = r.urgent
+              ? "green"
+              : r.stream?.toUpperCase() === "TECH"
+              ? "cyan"
+              : r.stream?.toUpperCase() === "CULTURAL"
+              ? "purple"
+              : "green";
+
+            const priority = r.urgent
+              ? "CRITICAL ALERT"
+              : r.pinned
+              ? "PINNED TRANSMISSION"
+              : r.category?.toUpperCase() || "SYSTEM UPDATE";
+
+            const timeAgo = r.created_at
+              ? new Date(r.created_at).toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })
+              : "JUST NOW";
+
+            return {
+              id: String(index + 1).padStart(2, "0"),
+              priority,
+              title: r.title,
+              subtitle: `${r.category || "TRANSMISSION"} // ACTIVE`,
+              time: timeAgo,
+              stream: r.stream?.toUpperCase() || "GENERAL",
+              content: r.content,
+              accent,
+            };
+          });
+          setLiveNotices(formatted);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   return (
     <>
@@ -234,7 +282,7 @@ export default function AnnouncementsFeedPage() {
                 BROADCAST CARDS
             ===================================================== */}
             <div className="mt-8 space-y-5">
-              {notices.map((notice, idx) => (
+              {liveNotices.map((notice, idx) => (
                 <AnimatedSection
                   key={notice.id}
                   delay={0.15 + idx * 0.08}

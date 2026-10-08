@@ -115,10 +115,14 @@ export function Chip({ children, variant = "upcoming", className = "" }: ChipPro
 /* ─── Stream Badge ─── */
 export type ValidStream =
   | "tech"
+  | "management"
+  | "cultural"
+  | "esports"
+  | "general"
+  | "session"
   | "technology"
   | "culture"
   | "gaming"
-  | "management"
   | "impact";
 
 interface StreamBadgeProps {
@@ -129,19 +133,27 @@ interface StreamBadgeProps {
 const streamColors: Record<string, string> = {
   tech: "bg-green/10 text-green border-green/20",
   technology: "bg-green/10 text-green border-green/20",
-  culture: "bg-purple-500/10 text-purple-400 border-purple-500/20",
-  gaming: "bg-cyan-500/10 text-cyan-400 border-cyan-500/20",
   management: "bg-amber-500/10 text-amber-400 border-amber-500/20",
+  cultural: "bg-purple-500/10 text-purple-400 border-purple-500/20",
+  culture: "bg-purple-500/10 text-purple-400 border-purple-500/20",
+  esports: "bg-cyan-500/10 text-cyan-400 border-cyan-500/20",
+  gaming: "bg-cyan-500/10 text-cyan-400 border-cyan-500/20",
+  session: "bg-blue-500/10 text-blue-400 border-blue-500/20",
+  general: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
   impact: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
 };
 
 const streamLabels: Record<string, string> = {
-  tech: "Technology",
-  technology: "Technology",
-  culture: "Culture",
-  gaming: "Gaming",
+  tech: "Tech",
+  technology: "Tech",
   management: "Management",
-  impact: "Impact",
+  cultural: "Cultural",
+  culture: "Cultural",
+  esports: "Esports",
+  gaming: "Esports",
+  session: "Session",
+  general: "General",
+  impact: "Management",
 };
 
 export function StreamBadge({ stream, className = "" }: StreamBadgeProps) {

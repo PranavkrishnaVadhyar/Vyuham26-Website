@@ -254,6 +254,17 @@ export default function HeroSection() {
   useEffect(() => {
     const timer = window.setTimeout(() => setBooted(true), 1500);
     const onKeyDown = (event: KeyboardEvent) => {
+      const target = event.target as HTMLElement | null;
+      if (
+        target?.tagName === "INPUT" ||
+        target?.tagName === "TEXTAREA" ||
+        target?.isContentEditable ||
+        event.ctrlKey ||
+        event.altKey ||
+        event.metaKey
+      ) {
+        return;
+      }
       const key = event.key.toLowerCase();
       if (key === "v") {
         setLogoClicks((value) => {
@@ -1655,7 +1666,7 @@ export default function HeroSection() {
 
                 <div className="mt-3 rounded-sm border border-emerald-400/10 bg-emerald-400/1.5 px-3 py-2">
                   <CountdownTimer
-                    targetDate="2026-10-30T00:00:00+05:30"
+                    targetDate="2026-10-30T09:00:00+05:30"
                   />
                 </div>
 

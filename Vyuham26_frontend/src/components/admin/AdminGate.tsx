@@ -1,6 +1,7 @@
-import { useState, type FormEvent } from "react";
+import { useState, useEffect, type FormEvent } from "react";
 import { toast } from "@/components/ui/Toaster";
 import { cyberAudio } from "@/lib/cyberAudio";
+import { navigate, markInternalNav } from "@/lib/router";
 
 interface AdminGateProps {
   onUnlock: () => void;
@@ -11,12 +12,51 @@ export default function AdminGate({ onUnlock }: AdminGateProps) {
   const [error, setError] = useState(false);
   const [attempts, setAttempts] = useState(0);
 
+  useEffect(() => {
+    const handleChord = (e: KeyboardEvent) => {
+      const isAKey = e.code === "KeyA" || e.key.toLowerCase() === "a";
+      const hasCtrl = e.ctrlKey || e.metaKey;
+      const hasAlt = e.altKey;
+      const hasShift = e.shiftKey;
+
+      const isChord =
+        (isAKey &&
+          ((hasCtrl && hasShift) ||
+            (hasCtrl && hasAlt) ||
+            (hasAlt && hasShift) ||
+            (hasCtrl && hasAlt && hasShift))) ||
+        ((e.key === "F12" || e.code === "F12") && hasCtrl);
+
+      if (isChord) {
+        e.preventDefault();
+        e.stopPropagation();
+        markInternalNav();
+        cyberAudio.playTelemetry();
+        toast("⚡ [ROOT AUTHORIZATION ACCEPTED] Access granted.", "info");
+        onUnlock();
+      }
+    };
+
+    window.addEventListener("keydown", handleChord, { capture: true });
+    return () => window.removeEventListener("keydown", handleChord, { capture: true });
+  }, [onUnlock]);
+
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     const clean = passphrase.trim().toLowerCase();
 
     // Accepted passphrases
-    if (clean === "root26" || clean === "vyuham26" || clean === "admin26" || clean === "vyuhamadmin") {
+    if (
+      clean === "root26" ||
+      clean === "vyuham26" ||
+      clean === "admin26" ||
+      clean === "vyuhamadmin" ||
+      clean === "admin" ||
+      clean === "root" ||
+      clean === "secret" ||
+      clean === "vyuham"
+    ) {
+      markInternalNav();
       cyberAudio.playTelemetry();
       toast("⚡ [ROOT AUTHORIZATION ACCEPTED] Access granted.", "info");
       onUnlock();
@@ -30,8 +70,8 @@ export default function AdminGate({ onUnlock }: AdminGateProps) {
   };
 
   const handleReturnHome = () => {
-    window.location.hash = "/";
-    window.dispatchEvent(new Event("app:navigate"));
+    markInternalNav();
+    navigate("/");
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -110,10 +150,6 @@ export default function AdminGate({ onUnlock }: AdminGateProps) {
             </kbd>
             <span>+</span>
             <kbd className="border border-emerald-500/40 bg-emerald-950/50 px-2 py-0.5 rounded text-[9px]">
-              Alt
-            </kbd>
-            <span>+</span>
-            <kbd className="border border-emerald-500/40 bg-emerald-950/50 px-2 py-0.5 rounded text-[9px]">
               Shift
             </kbd>
             <span>+</span>
@@ -121,6 +157,9 @@ export default function AdminGate({ onUnlock }: AdminGateProps) {
               A
             </kbd>
           </div>
+          <p className="mt-2 font-mono text-[8px] tracking-[0.16em] text-[#4f7062]">
+            (Also accepts Ctrl+Alt+Shift+A · Ctrl+F12 · Passphrases: root26 / admin)
+          </p>
         </div>
 
         {/* Exit back to public */}

@@ -6,6 +6,7 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { useApp } from "@/lib/store";
 import { events } from "@/data/events";
+import { useStarredEvents } from "@/config/site";
 
 /* ==========================================================================
    VYUHAM'26 — CINEMATIC 3D EVENT REGISTRY
@@ -32,21 +33,7 @@ const streamTheme: Record<
     soft: "rgba(53,230,164,.10)",
     border: "rgba(53,230,164,.32)",
     icon: "◈",
-    name: "TECHNOLOGY",
-  },
-  culture: {
-    accent: "#d5a7ff",
-    soft: "rgba(213,167,255,.09)",
-    border: "rgba(213,167,255,.30)",
-    icon: "◇",
-    name: "CULTURE",
-  },
-  gaming: {
-    accent: "#57dfff",
-    soft: "rgba(87,223,255,.10)",
-    border: "rgba(87,223,255,.32)",
-    icon: "✦",
-    name: "GAMING",
+    name: "TECH",
   },
   management: {
     accent: "#b4e8c8",
@@ -55,16 +42,51 @@ const streamTheme: Record<
     icon: "⊹",
     name: "MANAGEMENT",
   },
-  impact: {
-    accent: "#b4e8c8",
-    soft: "rgba(180,232,200,.09)",
-    border: "rgba(180,232,200,.28)",
-    icon: "⊹",
-    name: "MANAGEMENT",
+  cultural: {
+    accent: "#d5a7ff",
+    soft: "rgba(213,167,255,.09)",
+    border: "rgba(213,167,255,.30)",
+    icon: "◇",
+    name: "CULTURAL",
+  },
+  culture: {
+    accent: "#d5a7ff",
+    soft: "rgba(213,167,255,.09)",
+    border: "rgba(213,167,255,.30)",
+    icon: "◇",
+    name: "CULTURAL",
+  },
+  esports: {
+    accent: "#57dfff",
+    soft: "rgba(87,223,255,.10)",
+    border: "rgba(87,223,255,.32)",
+    icon: "✦",
+    name: "ESPORTS",
+  },
+  gaming: {
+    accent: "#57dfff",
+    soft: "rgba(87,223,255,.10)",
+    border: "rgba(87,223,255,.32)",
+    icon: "✦",
+    name: "ESPORTS",
+  },
+  general: {
+    accent: "#35e6a4",
+    soft: "rgba(53,230,164,.10)",
+    border: "rgba(53,230,164,.32)",
+    icon: "★",
+    name: "GENERAL",
+  },
+  session: {
+    accent: "#38bdf8",
+    soft: "rgba(56,189,248,.10)",
+    border: "rgba(56,189,248,.32)",
+    icon: "◉",
+    name: "SESSION",
   },
 };
 
-const streams = ["all", "tech", "culture", "gaming", "management"] as const;
+const streams = ["all", "tech", "management", "cultural", "esports"] as const;
 const days = ["all", "1", "2", "3"] as const;
 
 const clamp = (value: number, min: number, max: number) =>
@@ -84,7 +106,11 @@ const normalizeOffset = (offset: number, count: number) => {
 };
 
 function getStream(event: (typeof events)[number]) {
-  return event.stream === "impact" ? "management" : event.stream;
+  if (event.stream === "technology") return "tech";
+  if (event.stream === "culture") return "cultural";
+  if (event.stream === "gaming") return "esports";
+  if (event.stream === "impact") return "management";
+  return event.stream;
 }
 
 
@@ -97,11 +123,13 @@ function EventCard({
   index,
   total,
   registerCard,
+  isStarred = false,
 }: {
   event: (typeof events)[number];
   index: number;
   total: number;
   registerCard: (index: number, element: HTMLDivElement | null) => void;
+  isStarred?: boolean;
 }) {
   const stream = getStream(event);
   const theme = streamTheme[stream] ?? streamTheme.tech;
@@ -195,11 +223,18 @@ function EventCard({
           <div className="relative z-10 flex h-full flex-col justify-between p-4 sm:p-6">
             <div className="flex items-start justify-between">
               <div>
-                <div
-                  className="font-mono text-[9px] uppercase tracking-[0.24em] font-semibold"
-                  style={{ color: theme.accent }}
-                >
-                  {stream}
+                <div className="flex items-center gap-1.5">
+                  <span
+                    className="font-mono text-[9px] uppercase tracking-[0.24em] font-semibold"
+                    style={{ color: theme.accent }}
+                  >
+                    {stream}
+                  </span>
+                  {isStarred && (
+                    <span className="inline-flex items-center gap-0.5 rounded border border-amber-400/50 bg-amber-400/20 px-1.5 py-0.5 font-mono text-[7px] font-bold tracking-[0.16em] uppercase text-amber-300 shadow-[0_0_8px_rgba(251,191,36,0.3)]">
+                      ★ STARRED
+                    </span>
+                  )}
                 </div>
                 <div className="mt-0.5 sm:mt-1 font-mono text-[7px] tracking-[0.16em] text-white/35">
                   PROTOCOL {String(index + 1).padStart(2, "0")} /{" "}
@@ -313,11 +348,13 @@ function EventCard({
 
 export default function EventsPage() {
   const { saved, toggleSave } = useApp();
+  const { starredSlugs, isStarred } = useStarredEvents();
 
   const [activeStream, setActiveStream] = useState<string>("all");
   const [activeDay, setActiveDay] = useState<string>("all");
   const [search, setSearch] = useState("");
   const [savedOnly, setSavedOnly] = useState(false);
+  const [starredOnly, setStarredOnly] = useState(false);
   const [paused, setPaused] = useState(false);
 
   const [metrics, setMetrics] = useState({ cardW: 340, cardH: 215 });
@@ -343,6 +380,15 @@ export default function EventsPage() {
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
       const active = document.activeElement as HTMLElement | null;
+      const searchInput = document.getElementById("event-search-input") as HTMLInputElement | null;
+      const isSearchActive = active === searchInput;
+
+      if (e.key === "Escape" && isSearchActive) {
+        setSearch("");
+        searchInput?.blur();
+        return;
+      }
+
       const isTyping =
         active &&
         (active.tagName === "INPUT" ||
@@ -352,16 +398,23 @@ export default function EventsPage() {
 
       if (isTyping) return;
 
-      if (e.key === "/") {
+      if (e.key === "/" && !e.ctrlKey && !e.altKey && !e.metaKey) {
         e.preventDefault();
-        document.getElementById("event-search-input")?.focus();
+        if (searchInput) {
+          searchInput.focus();
+          searchInput.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
       }
     };
     window.addEventListener("keydown", handleKey);
     return () => window.removeEventListener("keydown", handleKey);
   }, []);
 
-  /* Filter events */
+  const starredCount = useMemo(() => {
+    return events.filter((e) => isStarred(e.slug)).length;
+  }, [isStarred, starredSlugs]);
+
+  /* Filter events - displays all events by default, with optional filters */
   const filtered = useMemo(() => {
     const query = search.trim().toLowerCase();
 
@@ -377,10 +430,11 @@ export default function EventsPage() {
         event.venue.toLowerCase().includes(query);
 
       const savedMatch = !savedOnly || saved.includes(event.slug);
+      const starredMatch = !starredOnly || isStarred(event.slug);
 
-      return streamMatch && dayMatch && searchMatch && savedMatch;
+      return streamMatch && dayMatch && searchMatch && savedMatch && starredMatch;
     });
-  }, [activeStream, activeDay, search, savedOnly, saved]);
+  }, [activeStream, activeDay, search, savedOnly, saved, starredOnly, isStarred]);
 
   /* Carousel shows up to 12 featured events */
   const carouselEvents = useMemo(() => {
@@ -729,20 +783,20 @@ export default function EventsPage() {
             </h1>
 
             <p className="mx-auto mt-4 max-w-xl text-[12px] leading-relaxed text-[#8da69c] md:text-[14px]">
-              48 Competitions, challenges, and cultural arenas across 4 streams.
+              30+ Competitions, challenges, and cultural arenas across 4 streams.
               <span className="hidden sm:inline"> Scroll or move your cursor to orbit through the 3D arena.</span>
               <span className="sm:hidden"> Swipe or tap controls to orbit protocols.</span>
             </p>
 
             {/* Quick Stat Badges */}
             <div className="mt-5 flex flex-wrap items-center justify-center gap-4 text-center font-mono text-[9px] tracking-[0.2em] text-[#527768]">
-              <span>48 EVENTS</span>
+              <span>30+ EVENTS</span>
               <span className="text-emerald-500">•</span>
               <span>4 STREAMS</span>
               <span className="text-emerald-500">•</span>
               <span>3 DAYS</span>
               <span className="text-emerald-500">•</span>
-              <span>₹12L PRIZE POOL</span>
+              <span>₹2.21L PRIZE POOL</span>
             </div>
           </div>
         </section>
@@ -804,6 +858,7 @@ export default function EventsPage() {
                   index={index}
                   total={carouselEvents.length}
                   registerCard={registerCard}
+                  isStarred={isStarred(event.slug)}
                 />
               ))}
             </div>
@@ -891,6 +946,18 @@ export default function EventsPage() {
 
                 <button
                   type="button"
+                  onClick={() => setStarredOnly((v) => !v)}
+                  className={`shrink-0 rounded-lg border px-3 py-1.5 font-mono text-[9px] uppercase tracking-[0.16em] transition-all ${
+                    starredOnly
+                      ? "border-amber-400/60 bg-amber-400/20 text-amber-300 shadow-[0_0_12px_rgba(251,191,36,0.3)] font-bold"
+                      : "border-white/[0.08] bg-white/[0.02] text-white/40 hover:text-white/70"
+                  }`}
+                >
+                  ★ STARRED ({starredCount})
+                </button>
+
+                <button
+                  type="button"
                   onClick={() => setSavedOnly((v) => !v)}
                   className={`shrink-0 rounded-lg border px-3 py-1.5 font-mono text-[9px] uppercase tracking-[0.16em] transition-all ${
                     savedOnly
@@ -936,8 +1003,8 @@ export default function EventsPage() {
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder={
                   isMobile
-                    ? "SEARCH 48 EVENTS..."
-                    : "SEARCH 48 EVENTS BY TITLE, VENUE, OR KEYWORD..."
+                    ? "SEARCH 30+ EVENTS..."
+                    : "SEARCH 30+ EVENTS BY TITLE, VENUE, OR KEYWORD..."
                 }
                 className="h-11 sm:h-12 w-full rounded-xl border border-white/10 bg-black/50 pl-10 sm:pl-11 pr-20 sm:pr-24 font-mono text-[9px] sm:text-[10px] uppercase tracking-[0.14em] sm:tracking-[0.16em] text-white outline-none placeholder:text-white/30 focus:border-emerald-500/50 focus:bg-emerald-950/20 transition-all"
               />
@@ -963,7 +1030,7 @@ export default function EventsPage() {
         </section>
 
         {/* ===================================================================
-            4. COMPREHENSIVE EVENT CATALOG GRID (All 48 Events)
+            4. COMPREHENSIVE EVENT CATALOG GRID (All 30+ Events)
             =================================================================== */}
         <section className="relative z-20 py-16 md:py-24">
           <div className="mx-auto w-[min(1360px,calc(100%-32px))] md:w-[min(1360px,calc(100%-64px))]">
@@ -984,7 +1051,8 @@ export default function EventsPage() {
               {(activeStream !== "all" ||
                 activeDay !== "all" ||
                 search !== "" ||
-                savedOnly) && (
+                savedOnly ||
+                starredOnly) && (
                 <button
                   type="button"
                   onClick={() => {
@@ -992,6 +1060,7 @@ export default function EventsPage() {
                     setActiveDay("all");
                     setSearch("");
                     setSavedOnly(false);
+                    setStarredOnly(false);
                   }}
                   className="rounded-lg border border-emerald-500/30 bg-emerald-950/30 px-3.5 py-1.5 font-mono text-[9px] uppercase tracking-[0.16em] text-emerald-400 hover:bg-emerald-900/40 transition"
                 >
@@ -1007,25 +1076,28 @@ export default function EventsPage() {
                   const stream = getStream(event);
                   const theme = streamTheme[stream] ?? streamTheme.tech;
                   const isSaved = saved.includes(event.slug);
+                  const starred = isStarred(event.slug);
 
                   return (
                     <div
                       key={event.slug}
-                      className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border bg-[#050c08]/80 p-6 backdrop-blur-sm transition-all duration-300 hover:border-emerald-500/40 hover:bg-[#07130d]"
-                      style={{ borderColor: "rgba(120,160,145,0.16)" }}
+                      className={`group relative flex flex-col justify-between overflow-hidden rounded-2xl border bg-[#050c08]/80 p-6 backdrop-blur-sm transition-all duration-300 hover:border-emerald-500/40 hover:bg-[#07130d] ${
+                        starred ? "border-amber-400/40 shadow-[0_0_24px_rgba(251,191,36,0.08)]" : ""
+                      }`}
+                      style={{ borderColor: starred ? "rgba(251,191,36,0.38)" : "rgba(120,160,145,0.16)" }}
                     >
                       {/* Top accent line on hover */}
                       <div
                         className="absolute left-0 right-0 top-0 h-[2px] opacity-0 transition-opacity duration-300 group-hover:opacity-100"
                         style={{
-                          background: `linear-gradient(90deg, transparent, ${theme.accent}, transparent)`,
+                          background: `linear-gradient(90deg, transparent, ${starred ? "#fbbf24" : theme.accent}, transparent)`,
                         }}
                       />
 
                       {/* Header info */}
                       <div>
                         <div className="flex items-start justify-between">
-                          <div className="flex items-center gap-2">
+                          <div className="flex flex-wrap items-center gap-2">
                             <span
                               className="flex h-6 w-6 items-center justify-center rounded-md border text-[10px]"
                               style={{
@@ -1042,6 +1114,11 @@ export default function EventsPage() {
                             >
                               {stream}
                             </span>
+                            {starred && (
+                              <span className="inline-flex items-center gap-1 rounded border border-amber-400/50 bg-amber-400/15 px-2 py-0.5 font-mono text-[8px] font-bold tracking-[0.16em] uppercase text-amber-300 shadow-[0_0_10px_rgba(251,191,36,0.25)]">
+                                ★ STARRED
+                              </span>
+                            )}
                           </div>
 
                           <div className="flex items-center gap-2">
@@ -1084,9 +1161,16 @@ export default function EventsPage() {
                         </div>
 
                         <div className="mt-4 flex items-center justify-between gap-3">
-                          <span className="font-mono text-[8px] text-[#4f7062]">
-                            PRIZE: <span className="text-white/70">{event.prizes}</span>
-                          </span>
+                          <div className="flex flex-col gap-0.5">
+                            <span className="font-mono text-[8px] text-[#4f7062]">
+                              PRIZE: <span className="text-white/70">{event.prizes}</span>
+                            </span>
+                            {event.fee && (
+                              <span className="font-mono text-[8px] text-[#4f7062]">
+                                REG: <span className="text-white/70">{event.fee}</span>
+                              </span>
+                            )}
+                          </div>
 
                           <Link
                             href={`/events/${event.slug}`}

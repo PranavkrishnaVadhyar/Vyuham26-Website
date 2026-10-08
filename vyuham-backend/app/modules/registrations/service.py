@@ -1,3 +1,4 @@
+import secrets
 from uuid import UUID
 
 from sqlalchemy import func, or_, select
@@ -22,6 +23,8 @@ async def register_for_event(
     if event is None:
         raise ResourceNotFoundError("Event")
 
+    ticket_code = f"VYU26-TKT-{secrets.token_hex(4).upper()}"
+
     if event.registration_type == RegistrationType.solo:
         if team_id is not None:
             raise ValueError("This is a solo event; do not provide a team_id")
@@ -38,6 +41,7 @@ async def register_for_event(
             event_id=event_id,
             user_id=current_user.id,
             team_id=None,
+            ticket_code=ticket_code,
             status=RegistrationStatus.pending,
         )
     elif event.registration_type == RegistrationType.team:
@@ -74,6 +78,7 @@ async def register_for_event(
             event_id=event_id,
             user_id=current_user.id,
             team_id=team_id,
+            ticket_code=ticket_code,
             status=RegistrationStatus.pending,
         )
     else:

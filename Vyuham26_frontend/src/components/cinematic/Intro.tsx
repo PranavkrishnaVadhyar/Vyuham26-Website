@@ -81,12 +81,15 @@ export default function Intro({ onDone }: { onDone: () => void }) {
       gsap.set(q(".chapter"), { autoAlpha: 0 });
       gsap.set(q(".chapter-plate"), { scale: 1.18, filter: "blur(10px)" });
       gsap.set(q(".flash"), { autoAlpha: 0 });
+      gsap.set(q(".open-line"), { autoAlpha: 0 });
+      gsap.set(q(".open-char"), { autoAlpha: 0 });
 
       /* letterbox settles */
       tl.to(q(".bar"), { scaleY: 0.34, duration: 1.4, ease: "expo.out" }, 0);
-      tl.fromTo(q(".hud"), { autoAlpha: 0 }, { autoAlpha: 1, duration: 1.2 }, 0.25);
+      tl.fromTo(q(".hud"), { autoAlpha: 0.5 }, { autoAlpha: 1, duration: 1.2 }, 0.25);
 
       /* ── THE WORLD IS CHANGING. ───────────────────────── */
+      tl.set(q(".open-line"), { autoAlpha: 1 }, 0.4);
       tl.fromTo(
         q(".open-char"),
         { autoAlpha: 0, filter: "blur(18px)", yPercent: 40 },
@@ -236,10 +239,13 @@ export default function Intro({ onDone }: { onDone: () => void }) {
       ))}
 
       {/* opening statement */}
-      <div className="open-line absolute inset-0 flex items-center justify-center px-6" style={{ letterSpacing: "0.42em" }}>
+      <div
+        className="open-line absolute inset-0 flex items-center justify-center px-6"
+        style={{ letterSpacing: "0.42em", visibility: "hidden" }}
+      >
         <h1 className="t-cond-l max-w-[90vw] text-center text-[7.2vw] leading-[1.05] text-[#dbe8e2] sm:text-[5.4vw] md:text-[3.6vw]">
           {homepage.openingLine.split("").map((ch, i) => (
-            <span key={i} className="open-char inline-block">
+            <span key={i} className="open-char inline-block" style={{ opacity: 0 }}>
               {ch === " " ? "\u00A0" : ch}
             </span>
           ))}
@@ -265,7 +271,10 @@ export default function Intro({ onDone }: { onDone: () => void }) {
       </div>
 
       {/* energy flash */}
-      <div className="flash pointer-events-none absolute inset-0 bg-[#9dffd8] mix-blend-screen" />
+      <div
+        className="flash pointer-events-none absolute inset-0 bg-[#9dffd8] mix-blend-screen opacity-0"
+        style={{ opacity: 0, visibility: "hidden" }}
+      />
 
       {/* letterbox bars */}
       <div className="bar pointer-events-none absolute inset-x-0 top-0 h-[16vh] origin-top bg-[#020403]" />
@@ -273,8 +282,18 @@ export default function Intro({ onDone }: { onDone: () => void }) {
 
       {/* hud */}
       <div className="hud pointer-events-none absolute inset-x-0 bottom-0 z-10 flex items-end justify-between p-5 md:p-8">
-        <div className="font-mono text-[9px] tracking-[0.3em] text-[#4c6a5e]">
-          {ready ? "SEQ.01 / COLD OPEN" : `INITIALISING · ${progress}%`}
+        <div className="flex flex-col gap-1.5">
+          <div className="font-mono text-[9px] tracking-[0.3em] text-[#4c6a5e]">
+            {ready ? "SEQ.01 / COLD OPEN" : `INITIALISING · ${progress}%`}
+          </div>
+          {!ready && (
+            <div className="h-[2px] w-28 overflow-hidden rounded-full bg-[#0a1a12]">
+              <div
+                className="h-full bg-gradient-to-r from-[#0e5a3c] to-[#18c47c] transition-all duration-300 ease-out"
+                style={{ width: `${progress}%` }}
+              />
+            </div>
+          )}
         </div>
         <div className="font-mono text-[9px] tracking-[0.3em] text-[#4c6a5e]">{homepage.dates}</div>
       </div>

@@ -10,10 +10,10 @@ import SignalRing from "@/components/motion/SignalRing";
 import { Kicker, Button } from "@/components/ui/Elements";
 
 const milestones = [
-  { id: "01", title: "Problem Statement", time: "30 OCT • 11:00 AM", status: "COMPLETE", description: "Challenge parameters locked." },
-  { id: "02", title: "Architecture & API", time: "30 OCT • 04:00 PM", status: "COMPLETE", description: "Core system architecture verified." },
-  { id: "03", title: "Prototype Submission", time: "31 OCT • 09:00 AM", status: "ACTIVE", description: "Upload your working prototype." },
-  { id: "04", title: "Final Pitch & Demo", time: "31 OCT • 02:00 PM", status: "LOCKED", description: "Final presentation sequence." },
+  { id: "01", title: "Problem Statement Flag-Off", time: "30 OCT • 09:00 AM", status: "COMPLETE", description: "Agentic AI / Autonomous Systems brief revealed." },
+  { id: "02", title: "Midnight Mentoring Round", time: "30 OCT • OVERNIGHT", status: "ACTIVE", description: "Midnight mentoring session & refreshments in Main Hall." },
+  { id: "03", title: "Hackathon Demos & Judging", time: "31 OCT • 09:00 AM", status: "PENDING", description: "Prototype demonstrations and jury evaluation in Main Hall." },
+  { id: "04", title: "Winners & Prize Distribution", time: "01 NOV • 01:00 PM", status: "LOCKED", description: "₹30,000 prize distribution at Main Hall." },
 ];
 
 const telemetry = [

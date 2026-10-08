@@ -416,8 +416,7 @@ select:focus {
 
 @media (max-width: 767px) {
   .grain::after {
-    animation: none;
-    opacity: 0.035;
+    opacity: 0.03;
   }
 }
 

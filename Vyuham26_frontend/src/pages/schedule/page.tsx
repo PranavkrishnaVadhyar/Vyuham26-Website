@@ -13,38 +13,54 @@ import { Kicker, StreamBadge } from "@/components/ui/Elements";
 import { useApp } from "@/lib/store";
 import { events } from "@/data/events";
 
-const dayNames = ["Ignition", "Convergence", "Aftershock"];
+const dayShortTitles = ["DAY ONE", "DAY TWO", "DAY THREE"];
 
 const dayDates = [
-  "30 October 2026",
-  "31 October 2026",
-  "01 November 2026",
+  "October 30, 2026",
+  "October 31, 2026",
+  "November 1, 2026",
 ];
+
+const dayThemes = [
+  "HACKATHON BEGINS · MANAGEMENT GAMES · INAUGURATION",
+  "HACKATHON JUDGING · CTF · MAIN STAGE NIGHT",
+  "CLOSING CEREMONY · CONCERT NIGHT",
+];
+
+const dayPrizes = ["₹1,20,000", "₹55,000", "₹25,000"];
 
 const streamFilters = [
   { id: "all", label: "ALL", code: "00" },
   { id: "tech", label: "TECH", code: "01" },
-  { id: "culture", label: "CULTURE", code: "02" },
-  { id: "gaming", label: "GAMING", code: "03" },
-  { id: "management", label: "MANAGEMENT", code: "04" },
+  { id: "management", label: "MANAGEMENT", code: "02" },
+  { id: "cultural", label: "CULTURAL", code: "03" },
+  { id: "esports", label: "ESPORTS", code: "04" },
 ];
 
 const streamAccent: Record<string, string> = {
   tech: "text-green border-green/30 bg-green/5",
   technology: "text-green border-green/30 bg-green/5",
+  cultural: "text-purple-300 border-purple-400/30 bg-purple-400/5",
   culture: "text-purple-300 border-purple-400/30 bg-purple-400/5",
+  esports: "text-cyan-300 border-cyan-400/30 bg-cyan-400/5",
   gaming: "text-cyan-300 border-cyan-400/30 bg-cyan-400/5",
   management: "text-amber-300 border-amber-400/30 bg-amber-400/5",
-  impact: "text-emerald-300 border-emerald-400/30 bg-emerald-400/5",
+  impact: "text-amber-300 border-amber-400/30 bg-amber-400/5",
+  general: "text-emerald-300 border-emerald-400/30 bg-emerald-400/5",
+  session: "text-sky-300 border-sky-400/30 bg-sky-400/5",
 };
 
 const streamGlow: Record<string, string> = {
   tech: "group-hover:border-green/40",
   technology: "group-hover:border-green/40",
+  cultural: "group-hover:border-purple-400/40",
   culture: "group-hover:border-purple-400/40",
+  esports: "group-hover:border-cyan-400/40",
   gaming: "group-hover:border-cyan-400/40",
   management: "group-hover:border-amber-400/40",
-  impact: "group-hover:border-emerald-400/40",
+  impact: "group-hover:border-amber-400/40",
+  general: "group-hover:border-emerald-400/40",
+  session: "group-hover:border-sky-400/40",
 };
 
 function ScheduleBackground() {
@@ -321,12 +337,28 @@ function ScheduleContent() {
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "/" && document.activeElement !== searchInputRef.current) {
-        e.preventDefault();
-        searchInputRef.current?.focus();
-      } else if (e.key === "Escape" && document.activeElement === searchInputRef.current) {
+      const active = document.activeElement as HTMLElement | null;
+      const isSearchActive = active === searchInputRef.current;
+
+      if (e.key === "Escape" && isSearchActive) {
         setSearchQuery("");
         searchInputRef.current?.blur();
+        return;
+      }
+
+      const isTyping =
+        active &&
+        (active.tagName === "INPUT" ||
+          active.tagName === "TEXTAREA" ||
+          active.tagName === "SELECT" ||
+          active.isContentEditable);
+
+      if (isTyping) return;
+
+      if (e.key === "/" && !e.ctrlKey && !e.altKey && !e.metaKey) {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+        searchInputRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
       }
     };
     window.addEventListener("keydown", handleKeyDown);
@@ -352,6 +384,12 @@ function ScheduleContent() {
         }
         if (selectedStream === "management") {
           return event.stream === "management" || event.stream === "impact";
+        }
+        if (selectedStream === "cultural") {
+          return event.stream === "cultural" || event.stream === "culture";
+        }
+        if (selectedStream === "esports") {
+          return event.stream === "esports" || event.stream === "gaming";
         }
         return event.stream === selectedStream;
       })
@@ -539,10 +577,7 @@ function ScheduleContent() {
                           : "text-muted group-hover:text-paper"
                         }`}
                     >
-                      {dayDates[day - 1]
-                        .split(" ")
-                        .slice(0, 2)
-                        .join(" ")}
+                      {dayShortTitles[day - 1]} · {dayDates[day - 1].split(",")[0]}
                     </strong>
 
                     <div className="mt-1 flex items-center gap-2">
@@ -554,8 +589,17 @@ function ScheduleContent() {
                       />
 
                       <p className="font-mono text-[9px] uppercase tracking-[0.15em] text-muted">
-                        {dayNames[day - 1]}
+                        {dayThemes[day - 1]}
                       </p>
+                    </div>
+
+                    <div className="mt-2 flex items-center justify-between border-t border-line/30 pt-2">
+                      <span className="font-mono text-[8px] uppercase tracking-[0.18em] text-muted">
+                        PRIZE POOL
+                      </span>
+                      <span className="font-mono text-[9px] font-medium text-green">
+                        {dayPrizes[day - 1]}
+                      </span>
                     </div>
 
                     {/* Mini signal */}
@@ -700,11 +744,15 @@ function ScheduleContent() {
             <span className="h-3 w-px bg-line" />
 
             <span className="font-mono text-[9px] uppercase tracking-[0.18em] text-paper">
-              {dayNames[activeDay - 1]}
+              {dayShortTitles[activeDay - 1]} · {dayDates[activeDay - 1]} — {dayThemes[activeDay - 1]}
             </span>
           </div>
 
           <div className="flex items-center gap-5">
+            <span className="font-mono text-[9px] uppercase tracking-[0.15em] text-muted">
+              DAY PRIZE POOL: <strong className="text-green font-semibold">{dayPrizes[activeDay - 1]}</strong>
+            </span>
+
             <div className="hidden h-1 w-24 overflow-hidden bg-line sm:block">
               <motion.div
                 className="h-full bg-green"
@@ -763,14 +811,14 @@ function ScheduleContent() {
                     <div className="group relative">
                       {/* Timeline node */}
                       <motion.div
-                        className={`absolute -left-[34px] top-7 h-3 w-3 rounded-full border bg-ink md:-left-[46px] ${event.stream === "culture"
+                        className={`absolute -left-[34px] top-7 h-3 w-3 rounded-full border bg-ink md:-left-[46px] ${event.stream === "cultural" || event.stream === "culture"
                             ? "border-purple-300"
-                            : event.stream === "gaming"
+                            : event.stream === "esports" || event.stream === "gaming"
                               ? "border-cyan-300"
                               : event.stream === "management"
                                 ? "border-amber-300"
-                                : event.stream === "impact"
-                                  ? "border-emerald-300"
+                                : event.stream === "session"
+                                  ? "border-sky-300"
                                   : "border-green"
                           }`}
                         whileHover={{
@@ -860,14 +908,24 @@ function ScheduleContent() {
                         </p>
 
                         {/* Metadata */}
-                        <div className="relative z-10 mt-5 grid gap-3 border-t border-line/50 pt-4 sm:grid-cols-3">
+                        <div className="relative z-10 mt-5 grid gap-3 border-t border-line/50 pt-4 grid-cols-2 sm:grid-cols-4">
                           <div>
                             <span className="block font-mono text-[7px] uppercase tracking-[0.2em] text-muted">
-                              LOCATION
+                              VENUE
                             </span>
 
                             <span className="mt-1 block font-mono text-[9px] text-paper">
                               {event.venue}
+                            </span>
+                          </div>
+
+                          <div>
+                            <span className="block font-mono text-[7px] uppercase tracking-[0.2em] text-muted">
+                              REGISTRATION
+                            </span>
+
+                            <span className="mt-1 block font-mono text-[9px] text-paper">
+                              {event.fee || "Free Entry"}
                             </span>
                           </div>
 
@@ -883,16 +941,16 @@ function ScheduleContent() {
 
                           <div>
                             <span className="block font-mono text-[7px] uppercase tracking-[0.2em] text-muted">
-                              REWARD
+                              PRIZE
                             </span>
 
                             <span
-                              className={`mt-1 block font-mono text-[9px] ${event.prizes
+                              className={`mt-1 block font-mono text-[9px] ${event.prizes && event.prizes !== "N/A"
                                   ? "text-green"
                                   : "text-muted"
                                 }`}
                             >
-                              {event.prizes || "CLASSIFIED"}
+                              {event.prizes || "N/A"}
                             </span>
                           </div>
                         </div>
@@ -904,14 +962,14 @@ function ScheduleContent() {
 
                         {/* Stream accent */}
                         <div
-                          className={`absolute bottom-0 left-0 h-px w-0 transition-all duration-700 group-hover:w-full ${event.stream === "culture"
+                          className={`absolute bottom-0 left-0 h-px w-0 transition-all duration-700 group-hover:w-full ${event.stream === "cultural" || event.stream === "culture"
                               ? "bg-purple-300"
-                              : event.stream === "gaming"
+                              : event.stream === "esports" || event.stream === "gaming"
                                 ? "bg-cyan-300"
                                 : event.stream === "management"
                                   ? "bg-amber-300"
-                                  : event.stream === "impact"
-                                    ? "bg-emerald-300"
+                                  : event.stream === "session"
+                                    ? "bg-sky-300"
                                     : "bg-green"
                             }`}
                         />

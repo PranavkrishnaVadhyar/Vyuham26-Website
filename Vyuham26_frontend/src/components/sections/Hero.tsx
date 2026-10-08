@@ -18,11 +18,11 @@ export default function Hero({ active }: { active: boolean }) {
   /* Load the ambience plate only once the cinematic intro has cleared,
      and never on reduced-motion or coarse/low-power contexts. */
   useEffect(() => {
-    if (!active || reduced || mobile) return;
+    if (!active || reduced) return;
     const conn = (navigator as unknown as { connection?: { saveData?: boolean; effectiveType?: string } })
       .connection;
     if (conn?.saveData || (conn?.effectiveType && /2g/.test(conn.effectiveType))) return;
-    const t = window.setTimeout(() => setVideoOn(true), 400);
+    const t = window.setTimeout(() => setVideoOn(true), mobile ? 800 : 400);
     return () => window.clearTimeout(t);
   }, [active, reduced, mobile]);
 

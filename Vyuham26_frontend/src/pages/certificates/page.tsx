@@ -21,8 +21,8 @@ export default function CertificatesPage() {
   const certificates: CertificateItem[] = [
     {
       id: "CERT-VYU-90421",
-      event: "National Hackathon 36",
-      stream: "TECHNOLOGY",
+      event: "Hackathon — 24HR",
+      stream: "TECH",
       participantName: "Aromal S S",
       role: "1ST PLACE WINNER",
       status: "ISSUED & VERIFIED",
@@ -30,8 +30,8 @@ export default function CertificatesPage() {
     },
     {
       id: "CERT-VYU-90422",
-      event: "Capture The Flag Cyber Warfare",
-      stream: "TECHNOLOGY",
+      event: "Capture the Flag",
+      stream: "TECH",
       participantName: "Aromal S S",
       role: "RUNNER-UP SQUAD",
       status: "ISSUED & VERIFIED",
@@ -39,21 +39,21 @@ export default function CertificatesPage() {
     },
     {
       id: "CERT-VYU-90423",
-      event: "AI Arena Deep Learning Battle",
-      stream: "TECHNOLOGY",
+      event: "Prompt War",
+      stream: "TECH",
       participantName: "Aromal S S",
       role: "MERIT OF PARTICIPATION",
       status: "ISSUED & VERIFIED",
-      date: "30 OCT 2026",
+      date: "31 OCT 2026",
     },
     {
       id: "CERT-VYU-90424",
-      event: "UI/UX Cyber Matrix Design Sprint",
-      stream: "CULTURE",
+      event: "Best Manager",
+      stream: "MANAGEMENT",
       participantName: "Aromal S S",
       role: "FINALIST",
       status: "ISSUED & VERIFIED",
-      date: "01 NOV 2026",
+      date: "30 OCT 2026",
     },
   ];
 

@@ -53,6 +53,17 @@ export async function apiFetch<T = any>(
     console.warn("Could not retrieve Supabase session token:", err);
   }
 
+  // Inject Admin Access Key if session is unlocked
+  try {
+    if (
+      typeof window !== "undefined" &&
+      sessionStorage.getItem("vyuham26:admin_unlocked") === "true" &&
+      !headers["X-Admin-Key"]
+    ) {
+      headers["X-Admin-Key"] = "root26";
+    }
+  } catch {}
+
   const response = await fetch(url, {
     ...options,
     headers,
@@ -142,10 +153,15 @@ export interface EventRecord {
 export interface RegistrationRecord {
   id: string;
   event_id: string;
+  event_slug?: string;
   user_id?: string | null;
   team_id?: string | null;
   status: "pending" | "confirmed" | "cancelled";
   ticket_code?: string;
+  checked_in?: boolean;
+  checked_in_at?: string | null;
+  amount_paid?: number;
+  payment_reference?: string | null;
   created_at: string;
 }
 
@@ -326,13 +342,13 @@ export const paymentsApi = {
         college: "Digital University Kerala",
         payment_method: "UPI (Instant Protocol)",
         items: [
-          { title: "National Hackathon", fee: 500, stream: "TECH" },
-          { title: "CTF Warzone", fee: 300, stream: "TECH" },
-          { title: "Battle of the Bands", fee: 400, stream: "CULTURE" },
+          { title: "Hackathon — 24HR", fee: 1000, stream: "TECH" },
+          { title: "Capture the Flag", fee: 400, stream: "TECH" },
+          { title: "Prompt War", fee: 400, stream: "TECH" },
         ],
-        subtotal: 1200,
+        subtotal: 1800,
         platform_fee: 30,
-        total_amount: 1230,
+        total_amount: 1830,
       };
     }
   },
@@ -401,7 +417,7 @@ export const checkinApi = {
         ticket_code: code,
         attendee_name: code.includes("AROMAL") ? "AROMAL S S" : code.includes("NEHA") ? "NEHA SURESH" : "OPERATIVE " + code.slice(-4),
         college: "Digital University Kerala",
-        event_name: "NATIONAL HACKATHON 36",
+        event_name: "HACKATHON — 24HR",
         station: payload.station,
         scanned_by: payload.volunteer_name || "DIVYA MENON",
         status: verdictStatus,
@@ -444,7 +460,7 @@ export const checkinApi = {
           ticket_code: "VYU26-TKT-1082",
           attendee_name: "ARJUN IYER",
           college: "National Institute of Engineering",
-          event_name: "HACK VYUHAM 36",
+          event_name: "Hackathon — 24HR",
           station: station || "Gate 1 - Main Entrance",
           scanned_by: "DIVYA MENON",
           scanned_at: "10:14 AM IST",
@@ -469,8 +485,9 @@ export interface StreamMetrics {
 export interface AdminStatsResponse {
   all: StreamMetrics;
   tech: StreamMetrics;
-  culture: StreamMetrics;
-  gaming: StreamMetrics;
+  management: StreamMetrics;
+  cultural: StreamMetrics;
+  esports: StreamMetrics;
 }
 
 export interface EventResultRecord {
@@ -492,8 +509,9 @@ export const adminApi = {
       return {
         all: { total_registrations: 2480, total_revenue: 684000, total_checkins: 1840, active_events: 18 },
         tech: { total_registrations: 1120, total_revenue: 320000, total_checkins: 890, active_events: 6 },
-        culture: { total_registrations: 780, total_revenue: 210000, total_checkins: 540, active_events: 6 },
-        gaming: { total_registrations: 580, total_revenue: 154000, total_checkins: 410, active_events: 6 },
+        management: { total_registrations: 780, total_revenue: 210000, total_checkins: 540, active_events: 6 },
+        cultural: { total_registrations: 380, total_revenue: 94000, total_checkins: 240, active_events: 3 },
+        esports: { total_registrations: 200, total_revenue: 60000, total_checkins: 170, active_events: 3 },
       };
     }
   },
@@ -517,25 +535,43 @@ export const adminApi = {
       return [
         {
           event_id: "hackathon",
-          event_name: "National Hackathon 36",
+          event_name: "Hackathon — 24HR",
           stream: "tech",
           first_place: "CYBER VIPERS",
           second_place: "BYTE BUSTERS",
           third_place: "NEURAL NODE",
-          prize_distributed: "₹1,00,000",
-          published_at: "31 OCT 2026",
+          prize_distributed: "₹30,000",
+          published_at: "01 NOV 2026",
         },
         {
           event_id: "ctf",
-          event_name: "CTF Warzone",
+          event_name: "Capture the Flag",
           stream: "tech",
           first_place: "ROOT FORCE",
           second_place: "KERNEL PANIC",
           third_place: "NULL POINTERS",
-          prize_distributed: "₹50,000",
+          prize_distributed: "₹15,000",
           published_at: "31 OCT 2026",
         },
       ];
+    }
+  },
+  getRegistrationStatus: async (): Promise<{ reg_open: boolean }> => {
+    try {
+      return await apiFetch<{ reg_open: boolean }>("/registrations/config/status");
+    } catch {
+      return { reg_open: SITE_CONFIG.REG_OPEN };
+    }
+  },
+  setRegistrationStatus: async (reg_open: boolean): Promise<{ reg_open: boolean }> => {
+    try {
+      return await apiFetch<{ reg_open: boolean }>("/registrations/config/status", {
+        method: "PATCH",
+        headers: { "X-Admin-Key": "root26" },
+        body: JSON.stringify({ reg_open }),
+      });
+    } catch {
+      return { reg_open };
     }
   },
 };
@@ -563,7 +599,7 @@ export const announcementsApi = {
       return [
         {
           id: "ann-1",
-          title: "DUK Technocity Gates Open for Operative Check-in",
+          title: "DUK Technocity Gates Open for Fest Check-in",
           content: "All registered operatives proceed to Gate 1 and Gate 2 for QR pass verification and welcome kit collection.",
           category: "LOGISTICS",
           urgent: true,
@@ -573,8 +609,8 @@ export const announcementsApi = {
         },
         {
           id: "ann-2",
-          title: "National Hackathon Problem Statements Released",
-          content: "Round 1 problem statements in Web3, AI, and Cybersecurity are now accessible in the build zone.",
+          title: "Hackathon — 24HR Problem Statement Released",
+          content: "The official Agentic AI / Autonomous Systems hackathon challenge is now accessible in the build zone.",
           category: "TECH",
           urgent: false,
           stream: "TECH",
@@ -595,6 +631,25 @@ export const announcementsApi = {
     apiFetch<AnnouncementRecord>("/announcements", {
       method: "POST",
       body: JSON.stringify(payload),
+    }),
+  update: (
+    announcementId: string,
+    payload: {
+      title?: string;
+      content?: string;
+      category?: string;
+      urgent?: boolean;
+      stream?: string;
+      pinned?: boolean;
+    }
+  ) =>
+    apiFetch<AnnouncementRecord>(`/announcements/${announcementId}`, {
+      method: "PATCH",
+      body: JSON.stringify(payload),
+    }),
+  delete: (announcementId: string) =>
+    apiFetch<void>(`/announcements/${announcementId}`, {
+      method: "DELETE",
     }),
 };
 

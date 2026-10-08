@@ -33,9 +33,9 @@ export default function ReceiptPage() {
   const receiptNo = receipt?.receipt_no || `REC-2026-${txnRef.slice(-5)}`;
   const timestamp = receipt?.timestamp || "30 OCT 2026, 10:14 IST";
   const items = receipt?.items || [
-    { title: "National Hackathon 36 (Squad: CyberVipers)", fee: 500, stream: "TECH" },
-    { title: "CTF Warzone (Squad: CyberVipers)", fee: 300, stream: "TECH" },
-    { title: "AI Arena Machine Learning Challenge", fee: 300, stream: "TECH" },
+    { title: "Hackathon — 24HR (Squad: CyberVipers)", fee: 1000, stream: "TECH" },
+    { title: "Capture the Flag (Squad: CyberVipers)", fee: 400, stream: "TECH" },
+    { title: "Prompt War", fee: 400, stream: "TECH" },
   ];
 
   return (
