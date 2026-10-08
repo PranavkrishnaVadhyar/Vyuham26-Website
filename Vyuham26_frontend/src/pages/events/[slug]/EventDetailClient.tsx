@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
@@ -11,7 +11,7 @@ import AnimatedSection from "@/components/motion/AnimatedSection";
 import SignalRing from "@/components/motion/SignalRing";
 import { Kicker, Button, Chip, StreamBadge } from "@/components/ui/Elements";
 import { type Event } from "@/data/events";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth, isProfileComplete, profileCompletionPath } from "@/context/AuthContext";
 import { registrationsApi, eventsApi, teamsApi, type TeamRecord } from "@/lib/api";
 import { toast } from "@/components/ui/Toaster";
 import { SITE_CONFIG, useRegistrationOpen } from "@/config/site";
@@ -50,14 +50,26 @@ export default function EventDetailClient({ event }: EventDetailClientProps) {
     }
   }, [isAuthenticated, isTeamEvent]);
 
-  // Check if redirected back after authenticating with intent to register
+  // Redirected back after signing in with intent to register: run the real registration
+  // (profile check + backend call) instead of only marking it locally.
+  const registerIntentHandled = useRef(false);
   useEffect(() => {
-    if (!regOpen) return;
-    if (searchParams.get("registered") === "true" && isAuthenticated) {
-      registerForEvent(event.slug);
-      setShowSuccessModal(true);
+    if (!regOpen || registerIntentHandled.current) return;
+    if (searchParams.get("registered") !== "true" || !isAuthenticated) return;
+    registerIntentHandled.current = true;
+
+    // Drop the flag so a reload does not re-trigger registration.
+    router.replace(`/events/${event.slug}`);
+
+    if (isRegistered) return;
+    if (isTeamEvent) {
+      // Team events need a squad picked before the backend accepts them.
+      toast("Signed in. Select your squad and press Register to confirm.", "info");
+      return;
     }
-  }, [searchParams, isAuthenticated, event.slug, registerForEvent, regOpen]);
+    void handleRegisterClick();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams, isAuthenticated, event.slug, regOpen]);
 
   const handleRegisterClick = async () => {
     if (!regOpen) {
@@ -68,6 +80,12 @@ export default function EventDetailClient({ event }: EventDetailClientProps) {
     if (!isAuthenticated) {
       // User is not signed in: move to sign in page
       router.push(`/login?redirect=/events/${event.slug}&event=${event.slug}`);
+      return;
+    }
+
+    if (!isProfileComplete(user)) {
+      toast("Add your college and phone number to your profile before registering.", "warn");
+      router.push(profileCompletionPath(`/events/${event.slug}`));
       return;
     }
 

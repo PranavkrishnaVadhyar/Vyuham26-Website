@@ -6,7 +6,9 @@ import { AnimatePresence, motion } from "framer-motion";
 import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
 import { Button } from "@/components/ui/Elements";
 import { Event } from "@/data/events";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth, isProfileComplete, profileCompletionPath } from "@/context/AuthContext";
+import { navigate } from "@/lib/router";
+import { toast } from "@/components/ui/Toaster";
 import { SITE_CONFIG } from "@/config/site";
 
 export default function EventRegistrationForm({
@@ -15,7 +17,7 @@ export default function EventRegistrationForm({
   event: Event;
 }) {
   const reduceMotion = usePrefersReducedMotion();
-  const { registerForEvent, isAuthenticated } = useAuth();
+  const { registerForEvent, isAuthenticated, user } = useAuth();
 
   const [isTeam, setIsTeam] = useState(true);
   const [teamName, setTeamName] = useState("");
@@ -25,6 +27,11 @@ export default function EventRegistrationForm({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!SITE_CONFIG.REG_OPEN) {
+      return;
+    }
+    if (isAuthenticated && !isProfileComplete(user)) {
+      toast("Add your college and phone number to your profile before registering.", "warn");
+      navigate(profileCompletionPath(`/register/${event.slug}`));
       return;
     }
     if (isAuthenticated) {
