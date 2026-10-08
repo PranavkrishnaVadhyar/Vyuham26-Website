@@ -15,6 +15,14 @@ from app.modules.auth import models as auth_models  # noqa: F401
 from app.modules.events import models as event_models  # noqa: F401
 from app.modules.teams import models as team_models  # noqa: F401
 from app.modules.registrations import models as registration_models  # noqa: F401
+from app.modules.payments import models as payment_models  # noqa: F401
+from app.modules.checkin import models as checkin_models  # noqa: F401
+from app.modules.certificates import models as certificate_models  # noqa: F401
+from app.modules.hackathon import models as hackathon_models  # noqa: F401
+from app.modules.ctf import models as ctf_models  # noqa: F401
+from app.modules.announcements import models as announcement_models  # noqa: F401
+from app.modules.auxiliary import models as auxiliary_models  # noqa: F401
+from app.modules.event_results import models as event_result_models  # noqa: F401
 
 
 def _format_default(value: Any) -> str:
