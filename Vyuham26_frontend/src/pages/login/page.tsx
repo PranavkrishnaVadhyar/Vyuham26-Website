@@ -10,6 +10,7 @@ import AnimatedSection from "@/components/motion/AnimatedSection";
 import { Kicker, Button } from "@/components/ui/Elements";
 import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
 import { useAuth } from "@/context/AuthContext";
+import GoogleSignInButton, { AuthDivider } from "@/components/auth/GoogleSignInButton";
 
 function LoginContent() {
   const reduceMotion = usePrefersReducedMotion();
@@ -499,6 +500,19 @@ function LoginContent() {
                             ? "VERIFYING..."
                             : "AUTHENTICATE"}
                         </Button>
+
+                        <AuthDivider />
+
+                        <GoogleSignInButton
+                          redirectPath={
+                            redirectUrl
+                              ? eventSlug
+                                ? `${redirectUrl}?registered=true`
+                                : redirectUrl
+                              : "/dashboard"
+                          }
+                          onError={setErrorMsg}
+                        />
 
                         {/* SECURITY STATUS */}
                         <div className="flex items-center justify-center gap-2 border-t border-white/5 pt-5 font-mono text-[8px] uppercase tracking-[0.18em] text-muted">

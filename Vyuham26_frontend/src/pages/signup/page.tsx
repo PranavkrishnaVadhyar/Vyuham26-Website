@@ -13,6 +13,7 @@ import AuthTransition from "@/components/motion/AuthTransition";
 import { Kicker, Button } from "@/components/ui/Elements";
 import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
 import { useAuth } from "@/context/AuthContext";
+import GoogleSignInButton, { AuthDivider } from "@/components/auth/GoogleSignInButton";
 
 function SignupContent() {
   const reduceMotion = usePrefersReducedMotion();
@@ -738,6 +739,20 @@ function SignupContent() {
                             ? "PROVISIONING..."
                             : "CREATE IDENTITY"}
                         </Button>
+
+                        <AuthDivider />
+
+                        <GoogleSignInButton
+                          label="SIGN UP WITH GOOGLE"
+                          redirectPath={
+                            redirectUrl
+                              ? eventSlug
+                                ? `${redirectUrl}?registered=true`
+                                : redirectUrl
+                              : "/profile"
+                          }
+                          onError={setError}
+                        />
 
                         {/* SECURITY */}
 

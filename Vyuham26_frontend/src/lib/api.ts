@@ -119,6 +119,7 @@ export interface ProfileUpdatePayload {
   college?: string;
   degree?: string;
   year?: string;
+  avatar_url?: string;
 }
 
 export interface EventRecord {

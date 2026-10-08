@@ -8,8 +8,10 @@ import React, {
   useCallback,
   ReactNode,
 } from "react";
+import type { Session } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase";
 import { authApi, registrationsApi } from "@/lib/api";
+import { navigate } from "@/lib/router";
 import { SITE_CONFIG } from "@/config/site";
 import { events as localEvents } from "@/data/events";
 
@@ -47,7 +49,8 @@ interface AuthContextType {
     year?: string;
     role?: "user" | "volunteer" | "event_head" | "admin";
   }) => Promise<AuthResult>;
-  updateUser: (patch: Partial<AuthUser>) => Promise<void>;
+  loginWithGoogle: (redirectPath?: string) => Promise<AuthResult>;
+  updateUser:(patch: Partial<AuthUser>) => Promise<void>;
   logout: () => Promise<void>;
   registerForEvent: (eventSlug: string) => {
     success: boolean;
@@ -58,6 +61,8 @@ interface AuthContextType {
 }
 
 const STORAGE_KEY = "vyuham_auth_user";
+/** Where to send the user once a Google sign-in redirect comes back. */
+const OAUTH_REDIRECT_KEY = "vyuham26:oauth_redirect";
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -116,7 +121,7 @@ async function fetchBackendProfile(): Promise<Partial<AuthUser> | null> {
 
     return {
       id: profile.id,
-      name: profile.name || "OPERATIVE",
+      name: profile.name || "",
       email: profile.email,
       college: profile.college || "",
       phone: profile.phone || "",
@@ -131,6 +136,79 @@ async function fetchBackendProfile(): Promise<Partial<AuthUser> | null> {
     console.warn("Could not fetch backend profile:", err);
     return null;
   }
+}
+
+/** Display name from OAuth provider metadata (Google sends full_name / name). */
+function providerName(session: Session): string {
+  const meta = session.user.user_metadata || {};
+  return meta.full_name || meta.name || "";
+}
+
+/** Merge the backend profile with the Supabase session and any previously cached user. */
+function mergeSessionUser(
+  session: Session,
+  backendProfile: Partial<AuthUser>,
+  prev: AuthUser | null
+): AuthUser {
+  return {
+    id: backendProfile.id || session.user.id,
+    name:
+      backendProfile.name ||
+      providerName(session) ||
+      prev?.name ||
+      session.user.email?.split("@")[0].toUpperCase() ||
+      "OPERATIVE",
+    email: session.user.email || prev?.email || "",
+    college: backendProfile.college || prev?.college || "",
+    phone: backendProfile.phone || prev?.phone || "",
+    degree: backendProfile.degree || prev?.degree || "",
+    year: backendProfile.year || prev?.year || "",
+    role: backendProfile.role || prev?.role || "user",
+    registeredEvents: backendProfile.registeredEvents?.length
+      ? backendProfile.registeredEvents
+      : prev?.registeredEvents || [],
+    vyuham_id: backendProfile.vyuham_id || prev?.vyuham_id,
+    vyuhamId: backendProfile.vyuhamId || prev?.vyuhamId,
+  };
+}
+
+/** Read and clear the pending Google sign-in destination (null if none pending). */
+function takeOAuthRedirect(): string | null {
+  try {
+    const dest = sessionStorage.getItem(OAUTH_REDIRECT_KEY);
+    sessionStorage.removeItem(OAUTH_REDIRECT_KEY);
+    return dest;
+  } catch {
+    return null;
+  }
+}
+
+/** First Google sign-in: copy name/avatar from Google into the empty backend profile. */
+async function seedProfileFromProvider(session: Session, backendProfile: Partial<AuthUser>) {
+  if (backendProfile.name) return;
+  const meta = session.user.user_metadata || {};
+  const name = providerName(session);
+  const avatarUrl = meta.avatar_url || meta.picture;
+  if (!name && !avatarUrl) return;
+  try {
+    await authApi.updateProfile({ name: name || undefined, avatar_url: avatarUrl || undefined });
+    backendProfile.name = name;
+  } catch (err) {
+    console.warn("Could not seed profile from Google:", err);
+  }
+}
+
+/**
+ * College and phone are mandatory before registering for events.
+ * Google sign-in does not provide them, so those users fill them in on /profile.
+ */
+export function isProfileComplete(profile: Pick<AuthUser, "college" | "phone"> | null | undefined): boolean {
+  return !!profile?.college?.trim() && !!profile?.phone?.trim();
+}
+
+/** /profile route that returns to `next` once the profile is completed and saved. */
+export function profileCompletionPath(next: string): string {
+  return `/profile?next=${encodeURIComponent(next)}`;
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -153,31 +231,38 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setIsReady(true);
     }
 
+    // Pull the backend profile for a Supabase session and cache it locally.
+    // If this session came back from a Google redirect, finish that sign-in too.
+    const syncSession = async (session: Session) => {
+      const oauthDestination = takeOAuthRedirect();
+      const backendProfile = await fetchBackendProfile();
+      if (oauthDestination && backendProfile) {
+        await seedProfileFromProvider(session, backendProfile);
+      }
+      if (backendProfile) {
+        setUser((prev) => {
+          const merged = mergeSessionUser(session, backendProfile, prev);
+          saveUserToStorage(merged);
+          return merged;
+        });
+      }
+      if (oauthDestination) {
+        const needsProfile = !!backendProfile && !isProfileComplete(backendProfile);
+        const target =
+          needsProfile && !oauthDestination.startsWith("/profile")
+            ? profileCompletionPath(oauthDestination)
+            : oauthDestination;
+        navigate(target, { replace: true });
+      }
+    };
+
     // Check existing Supabase session and synchronize with FastAPI backend
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (session) {
-        const backendProfile = await fetchBackendProfile();
-        if (backendProfile) {
-          setUser((prev) => {
-            const merged: AuthUser = {
-              id: backendProfile.id || session.user.id,
-              name: backendProfile.name || prev?.name || session.user.email?.split("@")[0].toUpperCase() || "OPERATIVE",
-              email: session.user.email || prev?.email || "",
-              college: backendProfile.college || prev?.college || "Digital University Kerala",
-              phone: backendProfile.phone || prev?.phone || "",
-              degree: backendProfile.degree || prev?.degree || "B.Tech Computer Science",
-              year: backendProfile.year || prev?.year || "2024–2028",
-              role: backendProfile.role || prev?.role || "user",
-              registeredEvents: backendProfile.registeredEvents?.length
-                ? backendProfile.registeredEvents
-                : prev?.registeredEvents || [],
-              vyuham_id: backendProfile.vyuham_id || prev?.vyuham_id,
-              vyuhamId: backendProfile.vyuhamId || prev?.vyuhamId,
-            };
-            saveUserToStorage(merged);
-            return merged;
-          });
-        }
+        await syncSession(session);
+      } else {
+        // Google sign-in was cancelled or failed; drop the pending redirect.
+        takeOAuthRedirect();
       }
     });
 
@@ -186,28 +271,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
       if ((event === "SIGNED_IN" || event === "TOKEN_REFRESHED") && session) {
-        const backendProfile = await fetchBackendProfile();
-        if (backendProfile) {
-          setUser((prev) => {
-            const merged: AuthUser = {
-              id: backendProfile.id || session.user.id,
-              name: backendProfile.name || prev?.name || session.user.email?.split("@")[0].toUpperCase() || "OPERATIVE",
-              email: session.user.email || prev?.email || "",
-              college: backendProfile.college || prev?.college || "Digital University Kerala",
-              phone: backendProfile.phone || prev?.phone || "",
-              degree: backendProfile.degree || prev?.degree || "B.Tech Computer Science",
-              year: backendProfile.year || prev?.year || "2024–2028",
-              role: backendProfile.role || prev?.role || "user",
-              registeredEvents: backendProfile.registeredEvents?.length
-                ? backendProfile.registeredEvents
-                : prev?.registeredEvents || [],
-              vyuham_id: backendProfile.vyuham_id || prev?.vyuham_id,
-              vyuhamId: backendProfile.vyuhamId || prev?.vyuhamId,
-            };
-            saveUserToStorage(merged);
-            return merged;
-          });
-        }
+        await syncSession(session);
       } else if (event === "SIGNED_OUT") {
         setUser(null);
         saveUserToStorage(null);
@@ -244,16 +308,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 name ||
                 cleanEmail.split("@")[0].toUpperCase(),
               email: cleanEmail,
-              college:
-                backendProfile?.college ||
-                data.user.user_metadata?.college ||
-                "Digital University Kerala",
+              college: backendProfile?.college || data.user.user_metadata?.college || "",
               phone: backendProfile?.phone || data.user.user_metadata?.phone || "",
-              degree:
-                backendProfile?.degree ||
-                data.user.user_metadata?.degree ||
-                "B.Tech Computer Science",
-              year: backendProfile?.year || data.user.user_metadata?.year || "2024–2028",
+              degree: backendProfile?.degree || data.user.user_metadata?.degree || "",
+              year: backendProfile?.year || data.user.user_metadata?.year || "",
               role: (backendProfile?.role as any) || "user",
               registeredEvents: backendProfile?.registeredEvents || [],
               vyuham_id: backendProfile?.vyuham_id,
@@ -377,10 +435,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             options: {
               data: {
                 name: details.name,
-                college: details.college || "Digital University Kerala",
+                college: details.college || "",
                 phone: details.phone || "",
-                degree: details.degree || "B.Tech Computer Science",
-                year: details.year || "2024–2028",
+                degree: details.degree || "",
+                year: details.year || "",
               },
             },
           });
@@ -405,10 +463,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               id: backendProfile?.id || data.user?.id || `VYU26-USR-${Math.floor(1000 + Math.random() * 9000)}`,
               name: details.name,
               email: cleanEmail,
-              college: details.college || "Digital University Kerala",
+              college: details.college || "",
               phone: details.phone || "",
-              degree: details.degree || "B.Tech Computer Science",
-              year: details.year || "2024–2028",
+              degree: details.degree || "",
+              year: details.year || "",
               role: details.role || (backendProfile?.role as any) || "user",
               registeredEvents: [],
               vyuham_id: backendProfile?.vyuham_id,
@@ -442,6 +500,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       setUser(newUser);
       saveUserToStorage(newUser);
+      return { success: true };
+    },
+    []
+  );
+
+  const loginWithGoogle = useCallback(
+    async (redirectPath: string = "/dashboard"): Promise<AuthResult> => {
+      if (!SITE_CONFIG.REG_OPEN) {
+        return { success: false, error: "Registration and login are coming soon." };
+      }
+      try {
+        sessionStorage.setItem(OAUTH_REDIRECT_KEY, redirectPath);
+      } catch {}
+
+      // Return to the site root; syncSession routes to redirectPath (or /profile) afterwards.
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: `${window.location.origin}/`,
+          queryParams: { prompt: "select_account" },
+        },
+      });
+
+      if (error) {
+        takeOAuthRedirect();
+        return { success: false, error: error.message };
+      }
       return { success: true };
     },
     []
@@ -584,6 +669,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isReady,
         login,
         signup,
+        loginWithGoogle,
         updateUser,
         logout,
         registerForEvent,

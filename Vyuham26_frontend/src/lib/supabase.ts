@@ -15,5 +15,8 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     persistSession: true,
     autoRefreshToken: true,
     detectSessionInUrl: true,
+    // PKCE returns OAuth results as ?code=... instead of #access_token=...,
+    // which would otherwise collide with the app's hash-based router.
+    flowType: "pkce",
   },
 });
