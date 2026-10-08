@@ -89,8 +89,8 @@ VYUHAM '26 converges across four core disciplines:
 - **Camera QR Scanner (`/volunteer` / `/checkin`)**: Built-in camera feed scanner for fast gates check-in and pass verification.
 
 ### 🛡️ Admin Command Portal
-- **Role-Based Access**: Multi-tab administration dashboard covering registration analytics, gate logs, and event managers.
-- **Stealth Root Override**:
+- **Role-Based Access**: Multi-tab administration dashboard covering registration analytics, gate logs, and event managers. Live data requires signing in with a Supabase account holding the `admin` role (or supplying the server-configured `ADMIN_ACCESS_KEY` as the `X-Admin-Key` header); the console UI itself is only concealed, never authorized, by the override below.
+- **Stealth Root Override** (UI reveal only — grants no backend permissions):
   - Hotkey: <kbd>Ctrl</kbd> + <kbd>Alt</kbd> + <kbd>Shift</kbd> + <kbd>A</kbd> (or <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>F12</kbd>)
   - Terminal trigger: Type `root26` or `vyuhamadmin` anywhere outside input fields to toggle admin clearance.
 

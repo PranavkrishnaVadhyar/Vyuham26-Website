@@ -46,14 +46,16 @@ export default function VyuhamLogoCore3D({
     const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
     camera.position.set(0, 0, 7.2);
 
+    const isSmall = size < 150 || (typeof window !== "undefined" && window.innerWidth < 768);
+
     /* ── Renderer ── */
     const renderer = new THREE.WebGLRenderer({
-      antialias: true,
+      antialias: !isSmall,
       alpha: true,
       powerPreference: "high-performance",
     });
     renderer.setSize(W, H);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio ?? 1, 2));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio ?? 1, isSmall ? 1.4 : 2));
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.3;
     container.innerHTML = "";
@@ -65,7 +67,7 @@ export default function VyuhamLogoCore3D({
 
     /* 1 · Holographic Rings */
     const makeRing = (radius: number, tube: number, color: number, opacity: number) => {
-      const geom = new THREE.TorusGeometry(radius, tube, 16, 120);
+      const geom = new THREE.TorusGeometry(radius, tube, 12, isSmall ? 60 : 120);
       const mat = new THREE.MeshBasicMaterial({ color, transparent: true, opacity });
       return new THREE.Mesh(geom, mat);
     };
@@ -86,23 +88,33 @@ export default function VyuhamLogoCore3D({
       ring2.add(node);
     }
 
-    /* 2 · Subtle wireframe geometry envelope around perimeter */
-    const wfGeom = new THREE.IcosahedronGeometry(2.1, 1);
-    const wfMat = new THREE.MeshBasicMaterial({
+    /* 2 · Transparent Holographic Energy Sphere & Wireframe Geometry */
+    const sphereGeom = new THREE.SphereGeometry(1.35, isSmall ? 16 : 28, isSmall ? 16 : 28);
+    const sphereMat = new THREE.MeshBasicMaterial({
       color: 0x18c47c,
       wireframe: true,
       transparent: true,
-      opacity: 0.15,
+      opacity: 0.12,
+    });
+    const energySphere = new THREE.Mesh(sphereGeom, sphereMat);
+    coreGroup.add(energySphere);
+
+    const wfGeom = new THREE.IcosahedronGeometry(2.1, 1);
+    const wfMat = new THREE.MeshBasicMaterial({
+      color: 0x00e5ff,
+      wireframe: true,
+      transparent: true,
+      opacity: 0.14,
     });
     const wireframe = new THREE.Mesh(wfGeom, wfMat);
     coreGroup.add(wireframe);
 
     /* 3 · Quantum spark particle swarm */
-    const PC = 90;
+    const PC = isSmall ? 30 : 90;
     const pPos = new Float32Array(PC * 3);
     const pVel = new Float32Array(PC * 3);
     for (let i = 0; i < PC; i++) {
-      const r = 1.6 + Math.random() * 1.5;
+      const r = 1.5 + Math.random() * 1.6;
       const θ = Math.random() * Math.PI * 2;
       const φ = (Math.random() - 0.5) * Math.PI;
       pPos[i * 3] = r * Math.cos(θ) * Math.cos(φ);
@@ -116,9 +128,9 @@ export default function VyuhamLogoCore3D({
     pGeom.setAttribute("position", new THREE.BufferAttribute(pPos, 3));
     const pMat = new THREE.PointsMaterial({
       color: 0x5ff3d2,
-      size: 0.045,
+      size: isSmall ? 0.038 : 0.045,
       transparent: true,
-      opacity: 0.70,
+      opacity: 0.75,
       blending: THREE.AdditiveBlending,
       depthWrite: false,
     });
@@ -126,11 +138,11 @@ export default function VyuhamLogoCore3D({
     coreGroup.add(particles);
 
     /* 4 · Central energy aura point lights */
-    const pLight1 = new THREE.PointLight(0x18c47c, 2.4, 12);
+    const pLight1 = new THREE.PointLight(0x18c47c, 2.6, 12);
     pLight1.position.set(0, 0, 0.5);
     scene.add(pLight1);
 
-    const pLight2 = new THREE.PointLight(0x00e5ff, 1.4, 10);
+    const pLight2 = new THREE.PointLight(0x00e5ff, 1.6, 10);
     pLight2.position.set(1.5, 1.5, 1.5);
     scene.add(pLight2);
 
@@ -152,7 +164,9 @@ export default function VyuhamLogoCore3D({
       ring4.rotation.z = -t * 0.14;
       ring4.rotation.x = Math.cos(t * 0.25) * 0.25;
 
-      // Wireframe envelope
+      // Energy sphere & wireframe counter-rotations
+      energySphere.rotation.y = -t * 0.25;
+      energySphere.rotation.x = t * 0.15;
       wireframe.rotation.y = t * 0.18;
       wireframe.rotation.x = t * 0.12;
 
@@ -163,7 +177,7 @@ export default function VyuhamLogoCore3D({
         pos[i * 3 + 1] += pVel[i * 3 + 1];
         pos[i * 3 + 2] += pVel[i * 3 + 2];
         const dSq = pos[i * 3] ** 2 + pos[i * 3 + 1] ** 2 + pos[i * 3 + 2] ** 2;
-        if (dSq > 12 || dSq < 2.0) {
+        if (dSq > 12 || dSq < 1.8) {
           pVel[i * 3] *= -1;
           pVel[i * 3 + 1] *= -1;
           pVel[i * 3 + 2] *= -1;
@@ -171,8 +185,8 @@ export default function VyuhamLogoCore3D({
       }
       pGeom.attributes.position.needsUpdate = true;
 
-      // Gentle energy pulse
-      pLight1.intensity = 2.2 + Math.sin(t * 2.4) * 0.5;
+      // Soft energy pulse
+      pLight1.intensity = 2.4 + Math.sin(t * 2.5) * 0.6;
 
       renderer.render(scene, camera);
     };
@@ -188,6 +202,8 @@ export default function VyuhamLogoCore3D({
       });
       nodeGeom.dispose();
       nodeMat.dispose();
+      sphereGeom.dispose();
+      sphereMat.dispose();
       wfGeom.dispose();
       wfMat.dispose();
       pGeom.dispose();
@@ -199,7 +215,8 @@ export default function VyuhamLogoCore3D({
     };
   }, [size]);
 
-  const logoImgSize = Math.round(size * 0.44);
+  // Clean logo diameter inside energy core (Point 14: desktop 90-140px, tablet 80-120px, mobile 70-100px)
+  const logoSize = Math.round(size * 0.44);
 
   return (
     <div
@@ -208,18 +225,19 @@ export default function VyuhamLogoCore3D({
         width: `${size}px`,
         height: `${size}px`,
         transform: "translate(-50%, -50%)",
+        background: "transparent",
       }}
       aria-hidden="true"
     >
-      {/* ── Three.js WebGL Holographic Backdrop ── */}
-      <div ref={mountRef} className="absolute inset-0" />
+      {/* ── Three.js WebGL Holographic Backdrop (Energy Sphere, Rings, Particles) ── */}
+      <div ref={mountRef} className="absolute inset-0 pointer-events-none" />
 
-      {/* ── Radial Aura Gradient ── */}
+      {/* ── Radial Energy Aura Glow (Transparent Bloom) ── */}
       <div
         className="pointer-events-none absolute inset-4 rounded-full"
         style={{
           background:
-            "radial-gradient(circle, rgba(24,196,124,0.22) 0%, rgba(0,229,255,0.08) 50%, transparent 72%)",
+            "radial-gradient(circle, rgba(24,196,124,0.32) 0%, rgba(0,229,255,0.14) 45%, transparent 72%)",
         }}
       />
 
@@ -228,18 +246,18 @@ export default function VyuhamLogoCore3D({
         <circle
           cx="50%"
           cy="50%"
-          r={size * 0.46}
+          r={size * 0.45}
           fill="none"
-          stroke="rgba(24,196,124,0.18)"
+          stroke="rgba(24,196,124,0.22)"
           strokeWidth="1"
           strokeDasharray="4 6"
         />
         <circle
           cx="50%"
           cy="50%"
-          r={size * 0.38}
+          r={size * 0.36}
           fill="none"
-          stroke="rgba(0,229,255,0.15)"
+          stroke="rgba(0,229,255,0.18)"
           strokeWidth="1"
         />
         {/* Cardinal tick lines */}
@@ -247,68 +265,49 @@ export default function VyuhamLogoCore3D({
           x1="50%"
           y1={size * 0.04}
           x2="50%"
-          y2={size * 0.09}
-          stroke="rgba(24,196,124,0.5)"
+          y2={size * 0.08}
+          stroke="rgba(24,196,124,0.6)"
           strokeWidth="1.5"
         />
         <line
           x1="50%"
-          y1={size * 0.91}
+          y1={size * 0.92}
           x2="50%"
           y2={size * 0.96}
-          stroke="rgba(24,196,124,0.5)"
+          stroke="rgba(24,196,124,0.6)"
           strokeWidth="1.5"
         />
         <line
           x1={size * 0.04}
           y1="50%"
-          x2={size * 0.09}
+          x2={size * 0.08}
           y2="50%"
-          stroke="rgba(24,196,124,0.5)"
+          stroke="rgba(24,196,124,0.6)"
           strokeWidth="1.5"
         />
         <line
-          x1={size * 0.91}
+          x1={size * 0.92}
           y1="50%"
           x2={size * 0.96}
           y2="50%"
-          stroke="rgba(24,196,124,0.5)"
+          stroke="rgba(24,196,124,0.6)"
           strokeWidth="1.5"
         />
       </svg>
 
-      {/* ── Central Optical Core Housing with VYUHAM'26 Logo ── */}
+      {/* ── Official VYUHAM'26 Logo Floating Directly in the Energy Core (NO RECTANGULAR BOX, NO BLACK BG) ── */}
       <div
-        className="pointer-events-auto relative z-10 flex flex-col items-center justify-center rounded-2xl border border-emerald-400/50 bg-[#020704] p-3 backdrop-blur-2xl shadow-[0_0_35px_rgba(24,196,124,0.38),inset_0_0_20px_rgba(24,196,124,0.15)] transition-transform hover:scale-105"
+        className="pointer-events-auto relative z-10 flex items-center justify-center transition-transform hover:scale-108"
         style={{
-          width: `${logoImgSize + 48}px`,
-          height: `${logoImgSize + 48}px`,
+          width: `${logoSize}px`,
+          height: `${logoSize}px`,
+          background: "transparent",
         }}
       >
-        {/* Cyber Tech Corner Brackets */}
-        <span className="pointer-events-none absolute -left-px -top-px h-3 w-3 border-l-2 border-t-2 border-emerald-400" />
-        <span className="pointer-events-none absolute -right-px -top-px h-3 w-3 border-r-2 border-t-2 border-emerald-400" />
-        <span className="pointer-events-none absolute -bottom-px -left-px h-3 w-3 border-b-2 border-l-2 border-emerald-400" />
-        <span className="pointer-events-none absolute -bottom-px -right-px h-3 w-3 border-b-2 border-r-2 border-emerald-400" />
-
-        {/* Scanline overlay */}
-        <div className="pointer-events-none absolute inset-0 rounded-2xl bg-[linear-gradient(rgba(24,196,124,0)_50%,rgba(0,0,0,0.4)_50%)] bg-[length:100%_4px] opacity-25" />
-
-        {/* Top Tag */}
-        <div className="relative mb-1 flex items-center gap-1 font-mono text-[7px] font-bold uppercase tracking-[0.24em] text-emerald-400">
-          <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-ping" />
-          <span>SYSTEM // CORE</span>
-        </div>
-
-        {/* Official VYUHAM'26 Logo Image */}
         <img
           src="/vyuham_logo.png"
           alt="VYUHAM'26 Official Logo"
-          className="relative object-contain transition-all duration-300 drop-shadow-[0_0_16px_rgba(24,196,124,0.65)]"
-          style={{
-            width: `${logoImgSize}px`,
-            height: `${logoImgSize}px`,
-          }}
+          className="relative h-full w-full object-contain filter drop-shadow-[0_0_26px_rgba(24,196,124,0.95)]"
           onError={(e) => {
             const target = e.target as HTMLImageElement;
             if (target.src.endsWith(".png")) {
@@ -316,11 +315,6 @@ export default function VyuhamLogoCore3D({
             }
           }}
         />
-
-        {/* Bottom Status Tag */}
-        <div className="relative mt-1 font-mono text-[6.5px] uppercase tracking-[0.28em] text-[#63907c]">
-          FESTIVAL NEXUS
-        </div>
       </div>
     </div>
   );

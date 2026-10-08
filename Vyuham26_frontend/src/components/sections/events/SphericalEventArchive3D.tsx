@@ -1,22 +1,23 @@
 "use client";
 
 /**
- * SphericalEventArchive3D — True 3D Spherical Event Archive with Fibonacci Distribution.
+ * SphericalEventArchive3D — 3D Spherical Event Poster Archive with Fibonacci Distribution.
  *
  * ═══════════════════════════════════════════════════════════════════
- *  SPATIAL ARCHITECTURE & HIERARCHY:
+ *  VYUHAM'26 EVENT UNIVERSE ARCHITECTURE:
  *
  *   • CORE:          OFFICIAL VYUHAM'26 LOGO (permanently at x=0, y=0, z=0)
- *                    Counter-rotates to always face user as the central command.
- *                    Unobstructed: cards orbit around the logo with center clearance.
- *   • EVENT SPHERE:  Fibonacci sphere distribution wrapping around the VYUHAM logo.
- *   • ACTIVE POSTER: Front poster in foreground deck highlighted with active beacon & details.
- *   • CLASSIFIED:    Secret Day 3 poster hidden in sphere (NIGHT 03 AFTERSHOCK).
- *
- *  360° ROTATION & MOBILE EXPERIENCE:
- *   - Unclamped continuous 360° yaw rotation in both directions with inertia fling.
- *   - Responsive 2:3 portrait posters calibrated across mobile, tablet, and desktop viewports.
- *   - Immediate tap/click detection without pointer capture stealing child clicks.
+ *                    Floating directly inside a holographic energy core.
+ *                    Transparent background, no rectangular box, unobstructed.
+ *   • EVENT SPHERE:  Fibonacci sphere distribution wrapping around the core.
+ *                    All event cards are uniform 2:3 portrait posters.
+ *                    No artificial special selection or enlargement of any card.
+ *                    Clicking ANY card opens its Event Dossier immediately.
+ *   • ALWAYS-ON AUTO ROTATION:
+ *                    Continuous cinematic rotation of event cards at ~4.0°/s.
+ *                    Pauses during active mouse movement, direct card hover, or drag.
+ *                    Resumes after 2.5s delay from the exact current angle.
+ *   • CLEAN HUD:     No floating arrow buttons. Interaction via 360° drag or auto-orbit.
  * ═══════════════════════════════════════════════════════════════════
  */
 
@@ -26,67 +27,90 @@ import type { FestEvent, StreamId } from "@/data/types";
 import { cyberAudio } from "@/lib/cyberAudio";
 import VyuhamLogoCore3D from "./VyuhamLogoCore3D";
 import EventPosterCard from "./EventPosterCard";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-
-/* ------------------------------------------------------------------ */
-/*  Secret Event Configuration                                         */
-/* ------------------------------------------------------------------ */
-export const SECRET_EVENT_REVEALED = false;
 
 /* ------------------------------------------------------------------ */
 /*  Responsive Sphere Configuration (2:3 Poster Aspect Ratio)          */
 /* ------------------------------------------------------------------ */
 interface SphereCfg {
-  radius: number;     // Sphere radius in px
-  cardW: number;      // Poster width in px
-  cardH: number;      // Poster height in px (2:3 portrait)
-  coreSize: number;   // VYUHAM logo core size in px
-  stageH: number;     // Stage viewport height in px
-  fov: number;        // CSS perspective in px
+  radius: number;          // Sphere radius in px (Desktop: 360–430, Tablet: 280–350, Mobile: 190–250)
+  cardW: number;           // Uniform poster width in px
+  cardH: number;           // Uniform poster height in px (2:3 portrait)
+  coreSize: number;        // Holographic core diameter in px (Desktop: 220–320, Mobile: 150–220)
+  exclusionRadius: number; // Protected central exclusion radius in px (Desktop: 190–230, Mobile: 100–140)
+  stageH: number;          // Stage viewport height in px (Desktop: ~650–740, Mobile: 500–600)
+  fov: number;             // CSS perspective in px
+  isMobile: boolean;       // Phone viewport (< 768px)
+  isTablet: boolean;       // Tablet viewport (768–1023px)
 }
 
 function buildCfg(ww: number): SphereCfg {
   if (ww < 400) {
-    // Narrow Mobile (iPhone SE, Galaxy A-series)
+    // Narrow Mobile (iPhone SE, Galaxy A-series, 360-375px)
     return {
-      radius: 148,
-      cardW: 102,
-      cardH: 153,
-      coreSize: 110,
-      stageH: 480,
-      fov: 760,
+      radius: 205,
+      cardW: 75,
+      cardH: 112,
+      coreSize: 165,
+      exclusionRadius: 115,
+      stageH: 520,
+      fov: 1000,
+      isMobile: true,
+      isTablet: false,
     };
   }
   if (ww < 640) {
-    // Standard Mobile (iPhone 12/13/14/Pro, Galaxy S21/22/23, Pixel)
+    // Standard Mobile (iPhone 12/13/14/15/Pro, Galaxy S21/22/23, Pixel, 390-430px)
     return {
-      radius: 172,
-      cardW: 114,
-      cardH: 171,
-      coreSize: 125,
-      stageH: 520,
-      fov: 840,
+      radius: 215,
+      cardW: 80,
+      cardH: 120,
+      coreSize: 170,
+      exclusionRadius: 120,
+      stageH: 540,
+      fov: 1050,
+      isMobile: true,
+      isTablet: false,
+    };
+  }
+  if (ww < 768) {
+    // Large Phone / Phablet (640-767px)
+    return {
+      radius: 235,
+      cardW: 88,
+      cardH: 132,
+      coreSize: 185,
+      exclusionRadius: 130,
+      stageH: 560,
+      fov: 1150,
+      isMobile: true,
+      isTablet: false,
     };
   }
   if (ww < 1024) {
-    // Tablet
+    // Tablet (768-1023px)
     return {
-      radius: 265,
-      cardW: 142,
-      cardH: 213,
-      coreSize: 165,
-      stageH: 640,
-      fov: 1050,
+      radius: 310,
+      cardW: 120,
+      cardH: 180,
+      coreSize: 210,
+      exclusionRadius: 165,
+      stageH: 620,
+      fov: 1350,
+      isMobile: false,
+      isTablet: true,
     };
   }
-  // Desktop
+  // Desktop (>= 1024px)
   return {
-    radius: 390,
-    cardW: 170,
-    cardH: 255,
-    coreSize: 210,
-    stageH: 800,
-    fov: 1350,
+    radius: 380,
+    cardW: 160,
+    cardH: 240,
+    coreSize: 260,
+    exclusionRadius: 205,
+    stageH: 740,
+    fov: 1600,
+    isMobile: false,
+    isTablet: false,
   };
 }
 
@@ -113,6 +137,7 @@ interface SphericalEventArchive3DProps {
   onOpenEventDossier: (e: FestEvent) => void;
   onOpenClassifiedModal: () => void;
   accentOf: (s: StreamId) => string;
+  isModalOpen?: boolean;
 }
 
 export default function SphericalEventArchive3D({
@@ -122,6 +147,7 @@ export default function SphericalEventArchive3D({
   onOpenEventDossier,
   onOpenClassifiedModal,
   accentOf,
+  isModalOpen = false,
 }: SphericalEventArchive3DProps) {
   /* ── Responsive sizing ── */
   const [ww, setWw] = useState(() =>
@@ -137,70 +163,52 @@ export default function SphericalEventArchive3D({
   const totalPublic = events.length;
 
   /* ── 3D Sphere Rotation State (degrees) ── */
-  const [yaw, setYaw] = useState(0);
-  const [pitch, setPitch] = useState(0);
-
   const yawRef = useRef(0);
   const pitchRef = useRef(0);
 
   /* ── GSAP Tween Reference ── */
   const rotTw = useRef<gsap.core.Tween | null>(null);
 
-  /* ── Drag & Gestures State ── */
+  /* ── Auto Rotation & Interaction State ── */
+  const isInteracting = useRef(false);
+  const isCardHovered = useRef(false);
   const isPointerDown = useRef(false);
   const hasDragged = useRef(false);
+  const resumeTimer = useRef<NodeJS.Timeout | null>(null);
+
+  /* ── Gesture Tracking ── */
+  const touchIntent = useRef<"undecided" | "horizontal" | "vertical">("undecided");
   const dragStartPoint = useRef({ x: 0, y: 0 });
   const lastPoint = useRef({ x: 0, y: 0, time: 0 });
   const velX = useRef(0);
   const velY = useRef(0);
   const capturedPointerId = useRef<number | null>(null);
-  const isManualRotation = useRef(false);
+
+  /* ── DOM Node Elements Ref Map (Direct DOM updates for 60fps) ── */
+  const cardEls = useRef<Map<string, HTMLDivElement>>(new Map());
 
   /* ── Classified hover state ── */
   const [classifiedHovered, setClassifiedHovered] = useState(false);
 
-  /* ── Build Fibonacci Distribution with Center Logo Clearance ── */
+  /* ── Symmetrical Fibonacci 3D Spherical Distribution Around Core ── */
   const nodes: SphereNode[] = useMemo(() => {
     if (totalPublic === 0) return [];
 
-    const totalNodes = totalPublic + 1;
-    // Classified event placed in an upper-flank slot
-    const classifiedSlot = 6;
+    const totalNodes = totalPublic + 1; // e.g. 35 public + 1 classified = 36 nodes
+    const classifiedSlot = 14; // Neutral flank slot
 
-    const GA = Math.PI * (3 - Math.sqrt(5)); // Golden Angle (~2.39996 rad)
     const list: SphereNode[] = [];
-
     let publicCounter = 0;
-    const half = Math.floor(totalNodes / 2);
-    const minDxy = 0.52;
+    const phi = Math.PI * (3 - Math.sqrt(5)); // Golden angle
 
     for (let i = 0; i < totalNodes; i++) {
-      let y: number;
-      if (i < half) {
-        // Northern orbital dome (y: +0.92 down to +0.36)
-        y = 0.92 - (i / Math.max(1, half - 1)) * 0.56;
-      } else {
-        // Southern orbital dome (y: -0.36 down to -0.92)
-        const k = i - half;
-        const count = totalNodes - half;
-        y = -0.36 - (k / Math.max(1, count - 1)) * 0.56;
-      }
-      const rad = Math.sqrt(Math.max(0, 1 - y * y));
-      const theta = i * GA;
-      let x = Math.cos(theta) * rad;
-      let z = Math.sin(theta) * rad;
+      // Symmetrical Y distribution centered around 0 (y in [-0.85, +0.85])
+      const y = (1 - (i / Math.max(1, totalNodes - 1)) * 2) * 0.85;
+      const radius = Math.sqrt(Math.max(0.04, 1 - y * y));
+      const theta = i * phi;
 
-      // Radial clearance: ensure posters orbit around the logo with clear central corridor
-      const dxy = Math.sqrt(x * x + y * y);
-      if (dxy < minDxy) {
-        const factor = minDxy / Math.max(0.01, dxy);
-        x *= factor;
-        y = y >= 0 ? Math.max(0.38, y * factor) : -Math.max(0.38, Math.abs(y * factor));
-        const len = Math.sqrt(x * x + y * y + z * z);
-        x /= len;
-        y /= len;
-        z /= len;
-      }
+      const x = Math.cos(theta) * radius;
+      const z = Math.sin(theta) * radius;
 
       if (i === classifiedSlot) {
         list.push({
@@ -230,74 +238,212 @@ export default function SphericalEventArchive3D({
     return list;
   }, [totalPublic, events]);
 
-  /* ── Smoothly Rotate Sphere to Bring a Node to Front Active Focus ── */
-  const rotateToNode = useCallback(
-    (node: SphereNode, fast = false) => {
-      rotTw.current?.kill();
+  /* ── Helper to Schedule Auto-Rotation Resume after Delay (2.5s) ── */
+  const scheduleResume = useCallback((delayMs = 2500) => {
+    if (resumeTimer.current) clearTimeout(resumeTimer.current);
+    resumeTimer.current = setTimeout(() => {
+      isInteracting.current = false;
+    }, delayMs);
+  }, []);
 
-      // Horizontal angle to center card: yaw = -atan2(node.x, node.z)
-      const targetYawRad = -Math.atan2(node.x, node.z);
-      let targetYawDeg = (targetYawRad * 180) / Math.PI;
+  /* ── Apply Real-Time 3D Camera Projection & Depth Styling to All Cards ── */
+  const applyTransforms = useCallback(
+    (currentYawDeg: number, currentPitchDeg: number) => {
+      if (nodes.length === 0) return;
 
-      // Pitch calculation: gentle responsive sphere tilt
-      const elevationDeg = (Math.asin(Math.max(-0.95, Math.min(0.95, node.y))) * 180) / Math.PI;
-      let targetPitchDeg = elevationDeg * 0.28;
-      targetPitchDeg = Math.max(-20, Math.min(20, targetPitchDeg));
+      const radYaw = (currentYawDeg * Math.PI) / 180;
+      const radPitch = (currentPitchDeg * Math.PI) / 180;
 
-      // Calculate shortest circular path from current yaw
-      let diffYaw = targetYawDeg - (yawRef.current % 360);
-      while (diffYaw > 180) diffYaw -= 360;
-      while (diffYaw < -180) diffYaw += 360;
-      const endYaw = yawRef.current + diffYaw;
+      let bestFrontZ = -999;
+      let frontNode: SphereNode | null = null;
 
-      const o = { y: yawRef.current, p: pitchRef.current };
-      rotTw.current = gsap.to(o, {
-        y: endYaw,
-        p: targetPitchDeg,
-        duration: fast ? 0.38 : 0.75,
-        ease: fast ? "power2.out" : "power3.out",
-        onUpdate() {
-          yawRef.current = o.y;
-          pitchRef.current = o.p;
-          setYaw(o.y);
-          setPitch(o.p);
-        },
-        onComplete() {
-          yawRef.current = endYaw;
-          pitchRef.current = targetPitchDeg;
-          setYaw(endYaw);
-          setPitch(targetPitchDeg);
-        },
-      });
+      for (let i = 0; i < nodes.length; i++) {
+        const n = nodes[i];
+
+        // 1. Rotate around Y axis (Yaw)
+        const x1 = n.x * Math.cos(radYaw) + n.z * Math.sin(radYaw);
+        const y1 = n.y;
+        const z1 = -n.x * Math.sin(radYaw) + n.z * Math.cos(radYaw);
+
+        // 2. Rotate around X axis (Pitch)
+        const x2 = x1;
+        const y2 = y1 * Math.cos(radPitch) - z1 * Math.sin(radPitch);
+        const z2 = y1 * Math.sin(radPitch) + z1 * Math.cos(radPitch);
+
+        // Track closest camera candidate for live event counter
+        if (!n.isClassified && z2 > bestFrontZ) {
+          bestFrontZ = z2;
+          frontNode = n;
+        }
+
+        // 3. Screen coordinates (World Origin at Center: 0, 0)
+        let posX = x2 * cfg.radius;
+        let posY = -y2 * cfg.radius;
+        const posZ = z2 * cfg.radius;
+
+        // 4. Central Core Exclusion Zone: push outward so logo is never obstructed
+        const dist2D = Math.hypot(posX, posY);
+        if (dist2D < cfg.exclusionRadius) {
+          const push = cfg.exclusionRadius / Math.max(1, dist2D);
+          posX *= push;
+          posY *= push;
+        }
+
+        // 5. Depth Hierarchy Calculation (Natural 3D depth for all cards)
+        let scale: number;
+        let opacity: number;
+        let blurPx: number;
+        let brightness: number;
+        let isBack = false;
+
+        if (cfg.isMobile) {
+          // Mobile Depth Bands
+          if (z2 >= 0.65) {
+            const frac = (z2 - 0.65) / 0.35;
+            scale = 0.92 + frac * 0.10;
+            opacity = 0.90 + frac * 0.10;
+            blurPx = 0;
+            brightness = 1.05 + frac * 0.10;
+          } else if (z2 >= 0.25) {
+            const frac = (z2 - 0.25) / 0.40;
+            scale = 0.70 + frac * 0.16;
+            opacity = 0.60 + frac * 0.20;
+            blurPx = 0;
+            brightness = 0.85 + frac * 0.15;
+          } else if (z2 >= -0.20) {
+            const frac = (z2 - (-0.20)) / 0.45;
+            scale = 0.45 + frac * 0.18;
+            opacity = 0.18 + frac * 0.18;
+            blurPx = 1;
+            brightness = 0.50;
+            isBack = true;
+          } else {
+            const frac = Math.max(0, (z2 - (-1)) / 0.80);
+            scale = 0.30 + frac * 0.14;
+            opacity = 0.03 + frac * 0.05;
+            blurPx = 2;
+            brightness = 0.30;
+            isBack = true;
+          }
+        } else {
+          // Desktop / Tablet Depth Bands
+          if (z2 >= 0.55) {
+            const frac = (z2 - 0.55) / 0.45;
+            scale = 0.95 + frac * 0.10;
+            opacity = 0.90 + frac * 0.10;
+            blurPx = 0;
+            brightness = 1.05 + frac * 0.12;
+          } else if (z2 >= 0.12) {
+            const frac = (z2 - 0.12) / 0.43;
+            scale = 0.75 + frac * 0.15;
+            opacity = 0.65 + frac * 0.20;
+            blurPx = (1 - frac) * 0.4;
+            brightness = 0.85 + frac * 0.15;
+          } else if (z2 >= -0.35) {
+            const frac = (z2 - (-0.35)) / 0.47;
+            scale = 0.55 + frac * 0.20;
+            opacity = 0.35 + frac * 0.25;
+            blurPx = 0.5 + (1 - frac) * 0.5;
+            brightness = 0.55 + frac * 0.20;
+          } else {
+            const frac = Math.max(0, (z2 - (-1)) / 0.65);
+            scale = 0.35 + frac * 0.20;
+            opacity = 0.08 + frac * 0.17;
+            blurPx = 1.0 + (1 - frac) * 1.0;
+            brightness = 0.35;
+            isBack = true;
+          }
+        }
+
+        // Controlled subtle tilt
+        const rotY = x2 * (cfg.isMobile ? 12 : 16);
+        const rotX = -y2 * (cfg.isMobile ? 7 : 10);
+        const zIndex = Math.round(10 + ((z2 + 1) / 2) * 85);
+
+        // Update DOM element directly
+        const el = cardEls.current.get(n.id);
+        if (el) {
+          el.style.transform = `translate3d(calc(-50% + ${posX}px), calc(-50% + ${posY}px), ${posZ}px) rotateY(${rotY}deg) rotateX(${rotX}deg) scale(${scale})`;
+          el.style.opacity = String(opacity);
+          el.style.filter = `brightness(${brightness})${blurPx > 0 ? ` blur(${blurPx}px) saturate(0.55)` : ""}`;
+          el.style.zIndex = String(zIndex);
+          el.style.pointerEvents = isBack ? "none" : "auto";
+        }
+      }
+
+      // Update external active counter if front node changed
+      if (frontNode && frontNode.publicIdx !== undefined && frontNode.publicIdx !== activeIndex) {
+        onActiveIndexChange(frontNode.publicIdx);
+      }
     },
-    []
+    [nodes, cfg, activeIndex, onActiveIndexChange]
   );
 
-  /* ── Sync External activeIndex changes (e.g. from parent/keys) ── */
+  /* ── Modal Open / Close Handler ── */
   useEffect(() => {
-    // If the user is currently dragging the sphere freely, DO NOT override with snap
-    if (isManualRotation.current) return;
-
-    const targetNode = nodes.find((n) => !n.isClassified && n.publicIdx === activeIndex);
-    if (targetNode) {
-      rotateToNode(targetNode);
+    if (isModalOpen) {
+      rotTw.current?.kill();
+      isInteracting.current = true;
+      if (resumeTimer.current) clearTimeout(resumeTimer.current);
+    } else {
+      scheduleResume(2500);
     }
-  }, [activeIndex, nodes, rotateToNode]);
+  }, [isModalOpen, scheduleResume]);
 
-  /* ── Pointer Drag / Swipe Handlers (Continuous 360° Rotation) ── */
+  /* ── Continuous Always-On Auto-Rotation Animation Loop ── */
+  useEffect(() => {
+    let rafId: number;
+    let lastTime = performance.now();
+
+    const prefersReducedMotion =
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    // Desktop: 0.07 rad/s (~4.0°/s); Mobile: 0.04 rad/s (~2.3°/s)
+    const autoSpeedDeg = cfg.isMobile ? 2.3 : 4.0;
+
+    const tick = (now: number) => {
+      rafId = requestAnimationFrame(tick);
+      const dt = Math.min(0.1, (now - lastTime) / 1000);
+      lastTime = now;
+
+      const shouldAutoRotate =
+        !isInteracting.current &&
+        !isCardHovered.current &&
+        !isModalOpen &&
+        !prefersReducedMotion;
+
+      if (shouldAutoRotate) {
+        yawRef.current = (yawRef.current + autoSpeedDeg * dt) % 360;
+        applyTransforms(yawRef.current, pitchRef.current);
+      }
+    };
+
+    applyTransforms(yawRef.current, pitchRef.current);
+    rafId = requestAnimationFrame(tick);
+
+    return () => {
+      cancelAnimationFrame(rafId);
+      if (resumeTimer.current) clearTimeout(resumeTimer.current);
+    };
+  }, [cfg, isModalOpen, applyTransforms]);
+
+  /* ── Pointer & Touch Gesture Handlers ── */
   const onDown = (e: React.PointerEvent<HTMLDivElement>) => {
     if (e.button !== 0) return;
     if ((e.target as HTMLElement).closest("button")) return;
 
     rotTw.current?.kill();
+    if (resumeTimer.current) clearTimeout(resumeTimer.current);
+    isInteracting.current = true;
     isPointerDown.current = true;
     hasDragged.current = false;
+    touchIntent.current = "undecided";
     dragStartPoint.current = { x: e.clientX, y: e.clientY };
     lastPoint.current = { x: e.clientX, y: e.clientY, time: performance.now() };
     velX.current = 0;
     velY.current = 0;
     capturedPointerId.current = null;
-    // Note: Do not setPointerCapture here so taps and clicks reach children cleanly
   };
 
   const onMove = (e: React.PointerEvent<HTMLDivElement>) => {
@@ -305,23 +451,29 @@ export default function SphericalEventArchive3D({
 
     const totalDx = e.clientX - dragStartPoint.current.x;
     const totalDy = e.clientY - dragStartPoint.current.y;
-    const totalDist = Math.hypot(totalDx, totalDy);
+    const absDx = Math.abs(totalDx);
+    const absDy = Math.abs(totalDy);
 
-    // If movement exceeds 7px, enter 3D rotation drag mode
-    if (!hasDragged.current && totalDist > 7) {
-      hasDragged.current = true;
-      isManualRotation.current = true;
-      try {
-        (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
-        capturedPointerId.current = e.pointerId;
-      } catch {
-        /* ok */
+    if (touchIntent.current === "undecided") {
+      if (absDx < 8 && absDy < 8) return;
+      if (absDy >= absDx) {
+        touchIntent.current = "vertical";
+        isPointerDown.current = false;
+        scheduleResume(1500);
+        return;
+      } else {
+        touchIntent.current = "horizontal";
+        hasDragged.current = true;
+        try {
+          (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+          capturedPointerId.current = e.pointerId;
+        } catch {}
       }
     }
 
-    if (!hasDragged.current) return;
+    if (touchIntent.current !== "horizontal" || !hasDragged.current) return;
 
-    const sens = ww < 640 ? 0.54 : 0.40;
+    const sens = cfg.isMobile ? 0.22 : 0.36;
     const stepX = e.clientX - lastPoint.current.x;
     const stepY = e.clientY - lastPoint.current.y;
     const now = performance.now();
@@ -329,451 +481,318 @@ export default function SphericalEventArchive3D({
 
     velX.current = (stepX / dt) * sens;
     velY.current = -(stepY / dt) * sens;
-
     lastPoint.current = { x: e.clientX, y: e.clientY, time: now };
 
-    // Continuous unclamped 360° yaw rotation:
-    yawRef.current += stepX * sens;
-    // Pitch clamped between -26° and +26°:
-    pitchRef.current = Math.max(-26, Math.min(26, pitchRef.current - stepY * sens * 0.45));
+    yawRef.current = (yawRef.current + stepX * sens) % 360;
+    pitchRef.current = Math.max(-8, Math.min(8, pitchRef.current - stepY * sens * 0.15));
 
-    setYaw(yawRef.current);
-    setPitch(pitchRef.current);
+    applyTransforms(yawRef.current, pitchRef.current);
   };
 
   const onUp = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (!isPointerDown.current) return;
+    if (!isPointerDown.current && touchIntent.current !== "horizontal") return;
     isPointerDown.current = false;
 
     if (capturedPointerId.current !== null) {
       try {
         (e.currentTarget as HTMLElement).releasePointerCapture(capturedPointerId.current);
-      } catch {
-        /* ok */
-      }
+      } catch {}
       capturedPointerId.current = null;
     }
 
     if (hasDragged.current) {
       const vX = velX.current;
-      // Fling momentum with natural damping
-      if (Math.abs(vX) > 0.05) {
-        const o = { y: yawRef.current };
-        const fling = vX * (ww < 640 ? 95 : 75);
+      if (Math.abs(vX) > 0.04) {
+        const o = { y: yawRef.current, p: pitchRef.current };
+        const fling = vX * (cfg.isMobile ? 50 : 65);
         rotTw.current = gsap.to(o, {
           y: yawRef.current + fling,
-          duration: 0.95,
+          p: 0,
+          duration: 0.85,
           ease: "power2.out",
           onUpdate() {
             yawRef.current = o.y;
-            setYaw(o.y);
+            pitchRef.current = o.p;
+            applyTransforms(o.y, o.p);
           },
           onComplete() {
-            setTimeout(() => {
-              isManualRotation.current = false;
-            }, 120);
+            scheduleResume(2500);
           },
         });
       } else {
-        setTimeout(() => {
-          isManualRotation.current = false;
-        }, 120);
+        const o = { p: pitchRef.current };
+        rotTw.current = gsap.to(o, {
+          p: 0,
+          duration: 0.4,
+          ease: "power2.out",
+          onUpdate() {
+            pitchRef.current = o.p;
+            applyTransforms(yawRef.current, o.p);
+          },
+          onComplete() {
+            scheduleResume(2500);
+          },
+        });
       }
       cyberAudio.playHover();
+    } else {
+      scheduleResume(2500);
     }
+    touchIntent.current = "undecided";
+  };
+
+  /* ── Desktop Stage Mouse Movement (Pause on motion, resume after stillness) ── */
+  const onStageMouseMove = () => {
+    if (cfg.isMobile || isPointerDown.current) return;
+    isInteracting.current = true;
+    scheduleResume(2500);
+  };
+
+  const onStageMouseLeave = () => {
+    if (cfg.isMobile) return;
+    isCardHovered.current = false;
+    scheduleResume(2000);
   };
 
   /* ── Mouse Wheel Rotation ── */
   const onWheel = useCallback(
     (e: React.WheelEvent<HTMLDivElement>) => {
       if (Math.abs(e.deltaY) < 15) return;
-      isManualRotation.current = false;
-      const dir = e.deltaY > 0 ? 1 : -1;
-      const nextIdx = ((activeIndex + dir) % totalPublic + totalPublic) % totalPublic;
-      const targetNode = nodes.find((n) => !n.isClassified && n.publicIdx === nextIdx);
-      if (targetNode) rotateToNode(targetNode);
-      onActiveIndexChange(nextIdx);
+      if (resumeTimer.current) clearTimeout(resumeTimer.current);
+      isInteracting.current = true;
+
+      const step = (e.deltaY > 0 ? 1 : -1) * 12;
+      yawRef.current = (yawRef.current + step) % 360;
+      applyTransforms(yawRef.current, pitchRef.current);
       cyberAudio.playHover();
+      scheduleResume(2500);
     },
-    [activeIndex, totalPublic, nodes, rotateToNode, onActiveIndexChange]
+    [applyTransforms, scheduleResume]
   );
 
-  /* ── Keyboard Arrow Navigation ── */
-  useEffect(() => {
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
-        return;
-      }
-      if (e.key === "ArrowLeft") {
-        isManualRotation.current = false;
-        cyberAudio.playClick();
-        const prevIdx = ((activeIndex - 1) % totalPublic + totalPublic) % totalPublic;
-        const targetNode = nodes.find((n) => !n.isClassified && n.publicIdx === prevIdx);
-        if (targetNode) rotateToNode(targetNode);
-        onActiveIndexChange(prevIdx);
-      } else if (e.key === "ArrowRight") {
-        isManualRotation.current = false;
-        cyberAudio.playClick();
-        const nextIdx = (activeIndex + 1) % totalPublic;
-        const targetNode = nodes.find((n) => !n.isClassified && n.publicIdx === nextIdx);
-        if (targetNode) rotateToNode(targetNode);
-        onActiveIndexChange(nextIdx);
-      }
-    };
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, [activeIndex, totalPublic, nodes, rotateToNode, onActiveIndexChange]);
-
-  /* ── Calculate Real-Time 3D Depth in Camera Space ── */
-  const { renderedNodes, frontPublicIdx } = useMemo(() => {
-    if (nodes.length === 0) return { renderedNodes: [], frontPublicIdx: 0 };
-
-    const radYaw = (yaw * Math.PI) / 180;
-    const radPitch = (pitch * Math.PI) / 180;
-
-    let bestScore = -999;
-    let closestPublicIdx = activeIndex;
-
-    const list = nodes.map((n, idx) => {
-      // 1. Rotate around Y axis by yaw:
-      const x1 = n.x * Math.cos(radYaw) + n.z * Math.sin(radYaw);
-      const y1 = n.y;
-      const z1 = -n.x * Math.sin(radYaw) + n.z * Math.cos(radYaw);
-
-      // 2. Rotate around X axis by pitch:
-      const x2 = x1;
-      const y2 = y1 * Math.cos(radPitch) - z1 * Math.sin(radPitch);
-      const z2 = y1 * Math.sin(radPitch) + z1 * Math.cos(radPitch);
-
-      // Track front-most card (prioritizing forward deck: high z2 and moderate y2)
-      if (!n.isClassified) {
-        const score = z2 - (y2 > 0 ? y2 * 0.35 : 0);
-        if (score > bestScore) {
-          bestScore = score;
-          if (n.publicIdx !== undefined) closestPublicIdx = n.publicIdx;
-        }
-      }
-
-      // Visibility tiers based on camera depth (z2 in [-1, +1])
-      // Front (z2 >= 0.35): sharp, bright, prominent
-      // Side (0 <= z2 < 0.35): medium size and opacity
-      // Back (z2 < 0): smaller, darker, lower opacity
-      const normDepth = (z2 + 1) / 2;
-      let scale = 0.52 + normDepth * 0.48; // 0.52 -> 1.00
-      let opacity: number;
-
-      if (z2 >= 0.35) {
-        opacity = 0.84 + ((z2 - 0.35) / 0.65) * 0.16; // 0.84 -> 1.00
-      } else if (z2 >= 0.0) {
-        opacity = 0.40 + (z2 / 0.35) * 0.44; // 0.40 -> 0.84
-      } else {
-        const backRatio = Math.max(0, (z2 + 1.0) / 1.0);
-        opacity = 0.05 + Math.pow(backRatio, 2.0) * 0.35; // 0.05 -> 0.40
-      }
-
-      // Occlusion clearance: posters behind the center logo (z2 < 0.20 and 2D near origin) fade
-      const dist2D = Math.sqrt(x2 * x2 + y2 * y2);
-      if (z2 < 0.20 && dist2D < 0.38) {
-        opacity *= Math.max(0.08, dist2D / 0.38);
-      }
-
-      // Subtle 3D perspective orientation (faces camera while retaining spherical curve)
-      const subtleTiltY = x2 * 13 + (z2 < 0 ? (x2 >= 0 ? 8 : -8) : 0);
-      const subtleTiltX = -y2 * 9;
-
-      let brightness = 0.45 + normDepth * 0.65;
-      let zIndex = Math.round(10 + normDepth * 85);
-      let isBack = z2 < -0.05;
-
-      return {
-        node: n,
-        x: n.x,
-        y: n.y,
-        z: n.z,
-        camZ: z2,
-        normDepth,
-        scale,
-        opacity,
-        brightness,
-        zIndex,
-        isBack,
-        subtleTiltY,
-        subtleTiltX,
-        index: idx,
-      };
-    });
-
-    // Sort back-to-front for accurate DOM rendering
-    list.sort((a, b) => a.camZ - b.camZ);
-
-    return { renderedNodes: list, frontPublicIdx: closestPublicIdx };
-  }, [nodes, yaw, pitch, activeIndex]);
-
-  // Keep parent activeIndex updated with front card during free rotation
-  useEffect(() => {
-    if (isManualRotation.current && frontPublicIdx !== activeIndex) {
-      onActiveIndexChange(frontPublicIdx);
-    }
-  }, [frontPublicIdx, activeIndex, onActiveIndexChange]);
-
-  /* ── Card Click Handler (Guaranteed Execution on Tap/Click) ── */
-  const handleCardClick = (item: (typeof renderedNodes)[0]) => {
+  /* ── Card Click Handler: Opens Event Dossier immediately for ANY card ── */
+  const handleCardClick = (node: SphereNode) => {
     if (hasDragged.current) return;
-    isManualRotation.current = false;
     cyberAudio.playClick();
 
-    if (item.node.isClassified) {
-      rotateToNode(item.node, true);
-      setTimeout(() => {
-        onOpenClassifiedModal();
-      }, 260);
+    if (node.isClassified) {
+      onOpenClassifiedModal();
       return;
     }
 
-    if (item.node.event) {
-      if (item.node.publicIdx !== undefined) {
-        onActiveIndexChange(item.node.publicIdx);
+    if (node.event) {
+      if (node.publicIdx !== undefined) {
+        onActiveIndexChange(node.publicIdx);
       }
-
-      // If card is already in the forward deck, open dossier directly
-      if (item.camZ > 0.38) {
-        onOpenEventDossier(item.node.event);
-      } else {
-        // If card is on flank/rear, rotate it forward first then open dossier
-        rotateToNode(item.node, true);
-        setTimeout(() => {
-          onOpenEventDossier(item.node.event!);
-        }, 340);
-      }
+      onOpenEventDossier(node.event);
     }
   };
 
   return (
-    <div
-      id="event-stage"
-      className="relative w-full select-none touch-pan-y overflow-hidden"
-      style={{
-        height: `${cfg.stageH}px`,
-        perspective: `${cfg.fov}px`,
-        perspectiveOrigin: "50% 50%",
-      }}
-      onWheel={onWheel}
-      onPointerDown={onDown}
-      onPointerMove={onMove}
-      onPointerUp={onUp}
-      onPointerCancel={onUp}
-    >
-      {/* ── Central Atmospheric Cyber Radiance ── */}
+    <div className="relative w-full select-none">
+      {/* ───────────────────────────────────────────────────────────── */}
+      {/*  3D SPHERICAL ARCHIVE STAGE VIEWPORT                          */}
+      {/* ───────────────────────────────────────────────────────────── */}
       <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0"
+        id="event-stage"
+        className="relative w-full select-none touch-pan-y overflow-hidden"
         style={{
-          background:
-            "radial-gradient(ellipse 65% 55% at 50% 50%, rgba(16,77,50,0.32) 0%, rgba(3,15,10,0.12) 55%, transparent 75%)",
+          height: `${cfg.stageH}px`,
+          perspective: `${cfg.fov}px`,
+          perspectiveOrigin: "50% 50%",
         }}
-      />
-
-      {/* ── Outer Orbital Guides (SVG Atmospheric Grid) ── */}
-      <svg
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 h-full w-full"
-        style={{ zIndex: 5 }}
+        onWheel={onWheel}
+        onPointerDown={onDown}
+        onPointerMove={onMove}
+        onPointerUp={onUp}
+        onPointerCancel={onUp}
+        onMouseMove={onStageMouseMove}
+        onMouseLeave={onStageMouseLeave}
       >
-        <circle
-          cx="50%"
-          cy="50%"
-          r={cfg.radius + (ww < 640 ? 18 : 32)}
-          fill="none"
-          stroke="rgba(24,196,124,0.12)"
-          strokeWidth="1"
-          strokeDasharray="6 8"
+        {/* ── Central Atmospheric Cyber Radiance ── */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0"
+          style={{
+            background:
+              "radial-gradient(ellipse 65% 55% at 50% 50%, rgba(16,77,50,0.32) 0%, rgba(3,15,10,0.12) 55%, transparent 75%)",
+          }}
         />
-        <circle
-          cx="50%"
-          cy="50%"
-          r={cfg.radius}
-          fill="none"
-          stroke="rgba(0,229,255,0.08)"
-          strokeWidth="1"
-        />
-      </svg>
 
-      {/* ════════════════════════════════════════════════════════════
-          EVENT WORLD — 0×0 ORIGIN AT CENTER (50%, 50%)
-          Rotates around X and Y axes according to user pitch & yaw.
-         ════════════════════════════════════════════════════════════ */}
-      <div
-        id="event-world"
-        className="absolute"
-        style={{
-          top: "50%",
-          left: "50%",
-          width: 0,
-          height: 0,
-          transformStyle: "preserve-3d",
-          transform: `rotateX(${pitch}deg) rotateY(${yaw}deg)`,
-        }}
-      >
+        {/* ── Outer Orbital Guides (SVG Atmospheric Grid) ── */}
+        <svg
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 h-full w-full"
+          style={{ zIndex: 5 }}
+        >
+          <circle
+            cx="50%"
+            cy="50%"
+            r={cfg.radius + (cfg.isMobile ? 18 : 28)}
+            fill="none"
+            stroke="rgba(24,196,124,0.12)"
+            strokeWidth="1"
+            strokeDasharray="6 8"
+          />
+          <circle
+            cx="50%"
+            cy="50%"
+            r={cfg.exclusionRadius}
+            fill="none"
+            stroke="rgba(0,229,255,0.08)"
+            strokeWidth="1"
+          />
+        </svg>
+
+        {/* ── NON-INTERACTIVE STATUS INDICATOR (● LIVE ORBIT) ── */}
+        <div className="pointer-events-none absolute top-3 left-3 sm:top-4 sm:left-4 z-[90] flex items-center gap-2 rounded-full border border-emerald-500/25 bg-black/60 px-3 py-1 backdrop-blur-md font-mono text-[7.5px] sm:text-[8px] tracking-[0.24em] text-emerald-400">
+          <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+          <span>LIVE ORBIT</span>
+        </div>
+
+        <div className="pointer-events-none absolute top-3 right-3 sm:top-4 sm:right-4 z-[90] hidden xs:flex items-center gap-2 rounded-full border border-emerald-500/20 bg-black/60 px-3 py-1 backdrop-blur-md font-mono text-[7.5px] sm:text-[8px] tracking-[0.22em] text-[#558270]">
+          <span>3D ARCHIVE</span>
+        </div>
+
         {/* ════════════════════════════════════════════════════════════
-            EVENT SPHERE — FIBONACCI 3D DISTRIBUTED EVENT POSTERS
-            Surrounds the VYUHAM Logo Core in true 3D space.
+            EVENT WORLD — 0×0 ORIGIN AT EXACT CENTER (50%, 50%)
            ════════════════════════════════════════════════════════════ */}
         <div
-          id="event-sphere"
+          id="event-world"
           className="absolute"
           style={{
-            top: 0,
-            left: 0,
+            top: "50%",
+            left: "50%",
             width: 0,
             height: 0,
             transformStyle: "preserve-3d",
           }}
         >
-          {renderedNodes.map((item) => {
-            const {
-              node,
-              x,
-              y,
-              z,
-              camZ,
-              scale,
-              opacity,
-              brightness,
-              zIndex,
-              isBack,
-              subtleTiltY,
-              subtleTiltX,
-              index,
-            } = item;
-            const isFrontActive = !node.isClassified && node.publicIdx === activeIndex && camZ > 0.32;
-            const accent = node.event ? accentOf(node.event.stream) : "#18c47c";
+          {/* ════════════════════════════════════════════════════════════
+              EVENT SPHERE — UNIFORM FIBONACCI 3D POSTER ARCHIVE
+             ════════════════════════════════════════════════════════════ */}
+          <div
+            id="event-sphere"
+            className="absolute"
+            style={{
+              top: 0,
+              left: 0,
+              width: 0,
+              height: 0,
+              transformStyle: "preserve-3d",
+            }}
+          >
+            {nodes.map((node, index) => {
+              const accent = node.event ? accentOf(node.event.stream) : "#18c47c";
+              const cardWidth = cfg.cardW;
+              const cardHeight = cfg.cardH;
 
-            /* ── Poster Coordinates on 3D Fibonacci Sphere ── */
-            const posX = x * cfg.radius;
-            const posY = -y * cfg.radius;
-            const posZ = z * cfg.radius;
+              return (
+                <div
+                  key={node.id}
+                  ref={(el) => {
+                    if (el) cardEls.current.set(node.id, el);
+                    else cardEls.current.delete(node.id);
+                  }}
+                  className="absolute cursor-pointer will-change-transform"
+                  style={{
+                    width: `${cardWidth}px`,
+                    height: `${cardHeight}px`,
+                    top: 0,
+                    left: 0,
+                    transition: hasDragged.current
+                      ? "none"
+                      : "filter 0.2s ease-out, transform 0.1s linear",
+                  }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleCardClick(node);
+                  }}
+                  onMouseEnter={() => {
+                    cyberAudio.playHover();
+                    if (!cfg.isMobile) {
+                      isCardHovered.current = true;
+                      if (resumeTimer.current) clearTimeout(resumeTimer.current);
+                    }
+                    if (node.isClassified) setClassifiedHovered(true);
+                  }}
+                  onMouseLeave={() => {
+                    if (!cfg.isMobile) {
+                      isCardHovered.current = false;
+                      scheduleResume(2500);
+                    }
+                    if (node.isClassified) setClassifiedHovered(false);
+                  }}
+                >
+                  <EventPosterCard
+                    event={node.event}
+                    isClassified={node.isClassified}
+                    publicIdx={node.publicIdx}
+                    accent={accent}
+                    isBack={false}
+                    camZ={0}
+                    width={cardWidth}
+                    height={cardHeight}
+                    index={index}
+                    isMobile={cfg.isMobile}
+                  />
+                </div>
+              );
+            })}
+          </div>
+          {/* End Event Sphere */}
 
-            const finalScale = isFrontActive ? Math.max(scale, 1.08) : scale;
-            const rotY = -yaw + subtleTiltY;
-            const rotX = -pitch + subtleTiltX;
-
-            return (
-              <div
-                key={node.id}
-                className="absolute cursor-pointer"
-                style={{
-                  width: `${cfg.cardW}px`,
-                  height: `${cfg.cardH}px`,
-                  top: 0,
-                  left: 0,
-                  transform: `translate3d(calc(-50% + ${posX}px), calc(-50% + ${posY}px), ${posZ}px) rotateY(${rotY}deg) rotateX(${rotX}deg) scale(${finalScale})`,
-                  opacity: isFrontActive ? 1.0 : opacity,
-                  filter: `brightness(${isFrontActive ? 1.15 : brightness})${isBack ? " blur(2px) saturate(0.55)" : ""}`,
-                  zIndex: isFrontActive ? 95 : zIndex,
-                  pointerEvents: isBack ? "none" : "auto",
-                  transition: hasDragged.current ? "none" : "filter 0.2s ease-out, transform 0.12s linear",
-                }}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleCardClick(item);
-                }}
-                onMouseEnter={() => {
-                  cyberAudio.playHover();
-                  if (node.isClassified) setClassifiedHovered(true);
-                }}
-                onMouseLeave={() => {
-                  if (node.isClassified) setClassifiedHovered(false);
-                }}
-              >
-                <EventPosterCard
-                  event={node.event}
-                  isClassified={node.isClassified}
-                  publicIdx={node.publicIdx}
-                  isFrontActive={isFrontActive}
-                  accent={accent}
-                  isBack={isBack}
-                  camZ={camZ}
-                  width={cfg.cardW}
-                  height={cfg.cardH}
-                  index={index}
-                />
-              </div>
-            );
-          })}
+          {/* ════════════════════════════════════════════════════════════
+              VYUHAM CORE — OFFICIAL VYUHAM'26 LOGO & HOLOGRAPHIC SCENE
+              Permanently at exact origin (0, 0, 0).
+             ════════════════════════════════════════════════════════════ */}
+          <div
+            id="vyuham-core"
+            className="absolute"
+            style={{
+              top: 0,
+              left: 0,
+              width: 0,
+              height: 0,
+              transformStyle: "preserve-3d",
+              zIndex: 50,
+            }}
+          >
+            <VyuhamLogoCore3D size={cfg.coreSize} />
+          </div>
         </div>
-        {/* End Event Sphere */}
+        {/* End Event World */}
 
-        {/* ════════════════════════════════════════════════════════════
-            VYUHAM CORE — OFFICIAL VYUHAM'26 LOGO & HOLOGRAPHIC SCENE
-            Originates at 0×0. Counter-rotates to permanently face user.
-           ════════════════════════════════════════════════════════════ */}
-        <div
-          id="vyuham-core"
-          className="absolute"
-          style={{
-            top: 0,
-            left: 0,
-            width: 0,
-            height: 0,
-            transformStyle: "preserve-3d",
-            transform: `rotateY(${-yaw}deg) rotateX(${-pitch}deg)`,
-            zIndex: 50,
-          }}
-        >
-          <VyuhamLogoCore3D size={cfg.coreSize} />
+        {/* ── Desktop Drag Guidance ── */}
+        <div className="pointer-events-none absolute bottom-2 inset-x-0 hidden sm:flex justify-center z-[90]">
+          <div className="flex items-center gap-2 rounded-full border border-emerald-500/20 bg-black/60 px-3 py-0.5 backdrop-blur-md font-mono text-[8px] tracking-[0.24em] text-[#558270]">
+            <span>◈ &nbsp; DRAG 360° SPHERE · SCROLL TO ROTATE &nbsp; ◈</span>
+            {classifiedHovered && (
+              <span className="text-amber-400 font-bold animate-pulse">
+                [ UNKNOWN SIGNAL ]
+              </span>
+            )}
+          </div>
         </div>
       </div>
-      {/* End Event World */}
 
-      {/* ── PREV / NEXT FLOATING NAV BUTTONS ── */}
-      <div
-        className="pointer-events-none absolute inset-x-2 sm:inset-x-6 z-[100] flex justify-between"
-        style={{ top: "50%", transform: "translateY(-50%)" }}
-      >
-        <button
-          type="button"
-          aria-label="Previous event"
-          onClick={() => {
-            isManualRotation.current = false;
-            cyberAudio.playClick();
-            const prevIdx = ((activeIndex - 1) % totalPublic + totalPublic) % totalPublic;
-            const targetNode = nodes.find((n) => !n.isClassified && n.publicIdx === prevIdx);
-            if (targetNode) rotateToNode(targetNode);
-            onActiveIndexChange(prevIdx);
-          }}
-          className="pointer-events-auto flex h-9 w-9 sm:h-12 sm:w-12 items-center justify-center rounded-full border border-emerald-500/35 bg-[#020704]/90 text-[#8ca89c] shadow-[0_0_20px_rgba(24,196,124,0.18)] backdrop-blur-md transition-all hover:border-emerald-300 hover:bg-emerald-950 hover:text-emerald-300 hover:scale-110 active:scale-95"
-        >
-          <ChevronLeft className="h-4 w-4 sm:h-6 sm:w-6" />
-        </button>
-        <button
-          type="button"
-          aria-label="Next event"
-          onClick={() => {
-            isManualRotation.current = false;
-            cyberAudio.playClick();
-            const nextIdx = (activeIndex + 1) % totalPublic;
-            const targetNode = nodes.find((n) => !n.isClassified && n.publicIdx === nextIdx);
-            if (targetNode) rotateToNode(targetNode);
-            onActiveIndexChange(nextIdx);
-          }}
-          className="pointer-events-auto flex h-9 w-9 sm:h-12 sm:w-12 items-center justify-center rounded-full border border-emerald-500/35 bg-[#020704]/90 text-[#8ca89c] shadow-[0_0_20px_rgba(24,196,124,0.18)] backdrop-blur-md transition-all hover:border-emerald-300 hover:bg-emerald-950 hover:text-emerald-300 hover:scale-110 active:scale-95"
-        >
-          <ChevronRight className="h-4 w-4 sm:h-6 sm:w-6" />
-        </button>
-      </div>
-
-      {/* ── Drag & Navigation Instructions ── */}
-      <div className="pointer-events-none absolute bottom-3 inset-x-0 flex justify-center z-[100]">
-        <div className="flex items-center gap-2 rounded-full border border-emerald-500/20 bg-black/60 px-3 py-1 backdrop-blur-md font-mono text-[7px] sm:text-[8px] tracking-[0.20em] sm:tracking-[0.24em] text-[#558270]">
-          <span className="hidden sm:inline">◈ &nbsp; DRAG TO ROTATE 360° · SCROLL · ARROWS &nbsp; ◈</span>
-          <span className="sm:hidden">◈ &nbsp; DRAG 360° SPHERE · TAP TO OPEN &nbsp; ◈</span>
-          {classifiedHovered && (
-            <span className="text-amber-400 font-bold animate-pulse">
-              [ UNKNOWN SIGNAL ]
+      {/* ───────────────────────────────────────────────────────────── */}
+      {/*  MOBILE DEDICATED CLEAN EVENT COUNTER                         */}
+      {/* ───────────────────────────────────────────────────────────── */}
+      {cfg.isMobile && (
+        <div className="relative mt-2 flex justify-center py-1">
+          <div className="flex items-center gap-2 rounded-full border border-emerald-500/30 bg-black/60 px-4 py-1 backdrop-blur-md font-mono text-xs font-bold tracking-[0.2em] text-emerald-400">
+            <span className="text-[7.5px] text-[#558270] tracking-[0.24em]">EVENT</span>
+            <span className="text-emerald-300">
+              {String(activeIndex + 1).padStart(2, "0")}
             </span>
-          )}
+            <span className="text-[#305747]">/</span>
+            <span className="text-[#6f9b89]">
+              {String(totalPublic).padStart(2, "0")}
+            </span>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

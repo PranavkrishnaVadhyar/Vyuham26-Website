@@ -33,6 +33,26 @@ export default function EventDetailClient({ event }: EventDetailClientProps) {
 
   const isRegistered = isEventRegistered(event.slug);
   const isTeamEvent = event.teamSize && !event.teamSize.toLowerCase().includes("solo");
+  const [remoteRegistrationUrl, setRemoteRegistrationUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    eventsApi
+      .getBySlug(event.slug)
+      .then((remote) => {
+        if (remote?.registration_url || remote?.makemypass_url) {
+          setRemoteRegistrationUrl(remote.registration_url || remote.makemypass_url || null);
+        }
+      })
+      .catch(() => {});
+  }, [event.slug]);
+
+  const targetRegistrationUrl = (
+    remoteRegistrationUrl ||
+    event.registration_url ||
+    event.makemypass_url ||
+    ""
+  ).trim();
+
 
   // Load squads if authenticated and team event
   useEffect(() => {
@@ -50,26 +70,21 @@ export default function EventDetailClient({ event }: EventDetailClientProps) {
     }
   }, [isAuthenticated, isTeamEvent]);
 
-  // Redirected back after signing in with intent to register: run the real registration
-  // (profile check + backend call) instead of only marking it locally.
+  // Redirected back after arriving with intent to register: open MakeMyPass page if available
   const registerIntentHandled = useRef(false);
   useEffect(() => {
-    if (!regOpen || registerIntentHandled.current) return;
-    if (searchParams.get("registered") !== "true" || !isAuthenticated) return;
+    if (registerIntentHandled.current) return;
+    if (searchParams.get("registered") !== "true") return;
     registerIntentHandled.current = true;
 
     // Drop the flag so a reload does not re-trigger registration.
     router.replace(`/events/${event.slug}`);
 
-    if (isRegistered) return;
-    if (isTeamEvent) {
-      // Team events need a squad picked before the backend accepts them.
-      toast("Signed in. Select your squad and press Register to confirm.", "info");
-      return;
+    if (targetRegistrationUrl) {
+      window.open(targetRegistrationUrl, "_blank", "noopener,noreferrer");
     }
-    void handleRegisterClick();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams, isAuthenticated, event.slug, regOpen]);
+  }, [searchParams, event.slug, targetRegistrationUrl, router]);
+
 
   const handleRegisterClick = async () => {
     if (!regOpen) {
@@ -497,7 +512,7 @@ export default function EventDetailClient({ event }: EventDetailClientProps) {
                           <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#2ee59d] opacity-75" />
                           <span className="relative inline-flex h-2 w-2 rounded-full bg-[#2ee59d]" />
                         </span>
-                        ✓ REGISTERED SUCCESSFULLY
+                        ✓ REGISTRATION RECORD ACTIVE
                       </div>
 
                       <div className="flex items-center justify-between font-mono text-[9px] uppercase tracking-[0.15em] text-white/40">
@@ -509,76 +524,58 @@ export default function EventDetailClient({ event }: EventDetailClientProps) {
                           View in Dashboard →
                         </Link>
                       </div>
+
+                      {targetRegistrationUrl && (
+                        <div className="pt-1">
+                          <a
+                            href={targetRegistrationUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex w-full items-center justify-center gap-2 rounded border border-[#2ee59d]/40 bg-black/40 py-2.5 font-mono text-[10px] uppercase tracking-[0.16em] text-[#2ee59d] transition hover:bg-[#2ee59d]/10"
+                          >
+                            <span>VIEW ON MAKEMYPASS</span>
+                            <span>↗</span>
+                          </a>
+                        </div>
+                      )}
                     </div>
                   ) : (
                     <div className="space-y-3">
-                      {isTeamEvent && (
-                        <div className="rounded border border-[#2ee59d]/20 bg-[#07100c]/80 p-3.5 font-mono text-[10px]">
-                          <div className="flex items-center justify-between text-muted">
-                            <span className="uppercase tracking-wider">TEAM PROTOCOL:</span>
-                            <Link href="/teams" className="text-[#2ee59d] hover:underline">
-                              + Manage Squads
-                            </Link>
-                          </div>
-                          {squads.length > 0 ? (
-                            <div className="mt-2">
-                              <label className="block text-[8px] uppercase tracking-wider text-white/40">SELECT SQUAD:</label>
-                              <select
-                                value={selectedSquadId}
-                                onChange={(e) => setSelectedSquadId(e.target.value)}
-                                className="mt-1 w-full rounded border border-[#2ee59d]/30 bg-black/60 px-2.5 py-1.5 font-mono text-xs text-paper outline-none"
-                              >
-                                {squads.map((sq) => (
-                                  <option key={sq.id} value={sq.id}>
-                                    {sq.name} ({sq.invite_code})
-                                  </option>
-                                ))}
-                              </select>
-                            </div>
-                          ) : (
-                            <p className="mt-2 text-white/50 text-[9px]">
-                              No squad found. <Link href="/teams" className="text-[#2ee59d] underline">Create or join a squad</Link> to compete as a team.
-                            </p>
-                          )}
-                        </div>
+                      {targetRegistrationUrl ? (
+                        <a
+                          href={targetRegistrationUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="group relative flex w-full cursor-pointer items-center justify-center overflow-hidden border border-[#2ee59d]/60 bg-[#2ee59d]/15 px-6 py-4 font-mono text-xs font-extrabold uppercase tracking-[0.18em] text-[#2ee59d] transition-all duration-300 hover:border-[#2ee59d] hover:bg-[#2ee59d]/25 hover:shadow-[0_0_30px_rgba(46,229,157,0.3)] active:scale-[0.99]"
+                        >
+                          {/* Button scan */}
+                          <span className="absolute inset-y-0 left-0 w-1/3 -translate-x-full bg-gradient-to-r from-transparent via-[#2ee59d]/30 to-transparent transition-transform duration-700 group-hover:translate-x-[400%]" />
+
+                          <span className="relative z-10 flex items-center gap-2">
+                            <span>REGISTER NOW</span>
+                            <span className="text-base transition-transform duration-300 group-hover:translate-x-1">
+                              ↗
+                            </span>
+                          </span>
+                        </a>
+                      ) : (
+                        <button
+                          type="button"
+                          disabled
+                          className="flex w-full cursor-not-allowed items-center justify-center border border-white/10 bg-white/5 px-6 py-4 font-mono text-xs font-semibold uppercase tracking-[0.16em] text-white/40"
+                          title="Registration link not available for this event yet on MakeMyPass"
+                        >
+                          REGISTRATION UNAVAILABLE
+                        </button>
                       )}
 
-                      <button
-                        type="button"
-                        onClick={handleRegisterClick}
-                        disabled={isRegistering || !regOpen}
-                        className={`group relative flex w-full cursor-pointer items-center justify-center overflow-hidden border px-6 py-4 font-mono text-xs font-extrabold uppercase tracking-[0.18em] transition-all duration-300 ${
-                          !regOpen
-                            ? "border-amber-500/40 bg-amber-500/10 text-amber-300 hover:border-amber-400 hover:bg-amber-500/20 shadow-[0_0_20px_rgba(245,158,11,0.15)]"
-                            : "border-[#2ee59d]/50 bg-[#2ee59d]/10 text-[#2ee59d] hover:border-[#2ee59d] hover:bg-[#2ee59d]/20 hover:shadow-[0_0_30px_rgba(46,229,157,0.2)] active:scale-[0.99] disabled:opacity-70"
-                        }`}
-                      >
-                      {/* Button scan */}
-                      <span className="absolute inset-y-0 left-0 w-1/3 -translate-x-full bg-gradient-to-r from-transparent via-[#2ee59d]/30 to-transparent transition-transform duration-700 group-hover:translate-x-[400%]" />
+                      <div className="flex items-center justify-between font-mono text-[8px] uppercase tracking-[0.15em] text-white/35 px-1">
+                        <span>OFFICIAL TICKETING: MAKEMYPASS</span>
+                        <span>DIRECT & SECURE</span>
+                      </div>
+                    </div>
+                  )}
 
-                      <span className="relative z-10 flex items-center gap-2">
-                        {!regOpen ? (
-                          <>
-                            <span className="h-2 w-2 rounded-full bg-amber-400 animate-pulse" />
-                            COMING SOON
-                          </>
-                        ) : isRegistering ? (
-                          <>
-                            <span className="inline-block h-3.5 w-3.5 animate-spin rounded-full border-2 border-[#2ee59d] border-t-transparent" />
-                            CONFIRMING PROTOCOL...
-                          </>
-                        ) : (
-                          <>
-                            Register for this event
-                            <span className="ml-2 text-base transition-transform duration-300 group-hover:translate-x-1">
-                              →
-                            </span>
-                          </>
-                        )}
-                      </span>
-                    </button>
-                  </div>
-                )}
                 </div>
               </AnimatedSection>
             </div>

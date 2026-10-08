@@ -68,10 +68,10 @@ export default function AdminDashboardPage() {
   }, []);
 
   const rawMetrics = stats ? stats[filter] : {
-    total_registrations: 2480,
-    total_revenue: 684000,
-    total_checkins: 1890,
-    active_events: 32,
+    total_registrations: 0,
+    total_revenue: 0,
+    total_checkins: 0,
+    active_events: 0,
   };
 
   const currentMetrics = {

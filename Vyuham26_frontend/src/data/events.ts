@@ -18,6 +18,8 @@ export interface Event {
   poster?: string;
   featured?: boolean;
   starred?: boolean;
+  registration_url?: string;
+  makemypass_url?: string;
 }
 
 export const events: Event[] = [
@@ -47,6 +49,8 @@ export const events: Event[] = [
     teamSize: "2–4 members",
     status: "upcoming",
     featured: true,
+    registration_url: "https://makemypass.com/event/vyuham26-hackathon",
+    makemypass_url: "https://makemypass.com/event/vyuham26-hackathon",
   },
   {
     slug: "best-manager",
@@ -58,16 +62,19 @@ export const events: Event[] = [
     description: "Aptitude, crisis management & leadership interview.",
     rules: [
       "Individual participation",
-      "Multi-tier evaluation: Aptitude screening, spontaneous crisis handling, and executive board interview",
-      "Final leadership ranking by corporate jury",
+      "Rounds: Aptitude test, Case study, Stress interview",
+      "Judged by corporate HR leaders",
     ],
-    prizes: "₹15,000",
-    fee: "₹200",
-    eligibility: "Open to all undergraduate and postgraduate students",
-    teamSize: "Individual",
+    prizes: "₹25,000",
+    fee: "₹300",
+    eligibility: "UG/PG students across India",
+    teamSize: "Solo",
     status: "upcoming",
     featured: true,
+    registration_url: "https://makemypass.com/event/vyuham26-best-manager",
+    makemypass_url: "https://makemypass.com/event/vyuham26-best-manager",
   },
+
   {
     slug: "best-management-team",
     title: "Best Management Team",

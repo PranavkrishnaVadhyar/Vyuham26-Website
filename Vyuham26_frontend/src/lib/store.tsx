@@ -25,6 +25,8 @@ import type {
 } from "@/data/types";
 import { useLocalState } from "./hooks";
 import { useAuth } from "@/context/AuthContext";
+import { eventsApi } from "@/lib/api";
+
 import {
   isRegistrationOpen,
   setRegistrationOpen,
@@ -229,6 +231,42 @@ export function AppProvider({ children }: { children: ReactNode }) {
     window.addEventListener("vyuham:starred_events_toggle", handleStarredSync);
     return () => window.removeEventListener("vyuham:starred_events_toggle", handleStarredSync);
   }, []);
+
+  // Synchronize MakeMyPass registration URLs dynamically from the backend events API
+
+  useEffect(() => {
+    let active = true;
+    eventsApi
+      .list()
+      .then((remoteList) => {
+        if (!active || !Array.isArray(remoteList) || remoteList.length === 0) return;
+        setContent((prev) => {
+          const updated = prev.events.map((ev) => {
+            const slug = ev.id.replace(/^ev-/, "").toLowerCase();
+            const remote = remoteList.find(
+              (r) => r.slug?.toLowerCase() === slug || r.id === ev.id
+            );
+            if (!remote) return ev;
+            const regUrl =
+              remote.registration_url ||
+              remote.makemypass_url ||
+              ev.registration_url ||
+              ev.makemypass_url;
+            return {
+              ...ev,
+              registration_url: regUrl || undefined,
+              makemypass_url: regUrl || undefined,
+            };
+          });
+          return { ...prev, events: updated };
+        });
+      })
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, []);
+
   const [users, setUsers] = useLocalState<UserAccount[]>("vyuham26:users:v1", seedUsers);
   const [registrations, setRegistrations] = useLocalState<Registration[]>(
     "vyuham26:regs:v1",
@@ -353,6 +391,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
           sessionStorage.setItem("vyuham26:admin_unlocked", "true");
         } else {
           sessionStorage.removeItem("vyuham26:admin_unlocked");
+          // Locking also forgets any operator-typed backend access key so it
+          // does not linger in session storage for the rest of the tab session.
+          sessionStorage.removeItem("vyuham26:admin_key");
         }
       }
     } catch {}

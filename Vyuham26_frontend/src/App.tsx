@@ -31,6 +31,7 @@ import Logo from "@/components/ui/Logo";
 import AdminSecretListener from "@/components/admin/AdminSecretListener";
 import ErrorBoundary from "@/components/ui/ErrorBoundary";
 import { cyberAudio } from "@/lib/cyberAudio";
+import { syncRegistrationGateFromBackend } from "@/config/site";
 
 function GlobalKeyboardShortcuts() {
   const { ui } = useApp();
@@ -313,6 +314,13 @@ function Router() {
 /*  Main Application Root                                              */
 /* ------------------------------------------------------------------ */
 export default function App() {
+  // The backend site_settings row is the single authoritative source for the
+  // registration gate — refresh the local mirror once at startup so every
+  // consumer (auth modal, store guard, terminal readout) sees the real state.
+  useEffect(() => {
+    syncRegistrationGateFromBackend();
+  }, []);
+
   return (
     <AuthProvider>
       <AppProvider>

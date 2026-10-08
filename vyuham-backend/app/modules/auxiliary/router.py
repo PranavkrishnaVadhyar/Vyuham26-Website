@@ -5,6 +5,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.db import get_db
+from app.core.deps import get_verified_user_id
 from app.modules.auxiliary.models import ContactInquiry, Feedback
 from app.modules.auxiliary.schemas import ContactCreateRequest, FeedbackCreateRequest
 
@@ -33,16 +34,13 @@ async def submit_contact(
 async def submit_feedback(
     payload: FeedbackCreateRequest,
     db: Annotated[AsyncSession, Depends(get_db)],
+    verified_user_id: Annotated[UUID | None, Depends(get_verified_user_id)],
 ) -> dict:
-    user_uuid = None
-    if payload.user_id:
-        try:
-            user_uuid = UUID(payload.user_id)
-        except Exception:
-            pass
-
+    # Attribution comes ONLY from a verified bearer token. The client-supplied
+    # payload.user_id field is intentionally ignored so feedback cannot be
+    # attributed to arbitrary users.
     fb = Feedback(
-        user_id=user_uuid,
+        user_id=verified_user_id,
         rating=payload.rating,
         comments=payload.comments,
     )

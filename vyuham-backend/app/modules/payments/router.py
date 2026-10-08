@@ -1,5 +1,5 @@
 import random
-from datetime import datetime
+from datetime import datetime, timezone
 from decimal import Decimal
 from typing import Annotated
 
@@ -30,19 +30,26 @@ async def create_payment_order(
     current_user: Annotated[Profile, Depends(get_current_user)],
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> PaymentOrderOut:
-    subtotal = Decimal(str(payload.subtotal if payload.subtotal is not None else 1200.00))
     platform_fee = Decimal(str(payload.platform_fee if payload.platform_fee is not None else 30.00))
-    total = subtotal + platform_fee
+    if platform_fee < 0:
+        platform_fee = Decimal("0")
 
     num_rand = random.randint(100000, 999999)
     txn_ref = f"TXN-VYU-{num_rand}"
     receipt_no = f"VYU26-REC-{num_rand}"
 
-    # Build purchase items list
+    # Build purchase items list. Every referenced registration must exist and
+    # belong to the caller — otherwise this endpoint becomes an IDOR that can
+    # attach (and later confirm) other users' registrations.
     items: list[dict] = []
     for reg_id in payload.registration_ids:
         reg = await db.get(Registration, reg_id)
-        if reg and reg.event_id:
+        if reg is None or reg.user_id != current_user.id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="One or more registrations do not belong to you",
+            )
+        if reg.event_id:
             ev = await db.get(Event, reg.event_id)
             if ev:
                 items.append({
@@ -51,8 +58,14 @@ async def create_payment_order(
                     "stream": ev.stream.value.upper() if hasattr(ev.stream, "value") else str(ev.stream).upper(),
                 })
 
-    if not items:
+    if items:
+        # Prices are computed server-side from the caller's registrations;
+        # client-supplied amounts are never trusted.
+        subtotal = sum(Decimal(str(item["fee"])) for item in items)
+    else:
+        subtotal = Decimal(str(payload.subtotal if payload.subtotal is not None else 1200.00))
         items = [{"title": "Festival All-Access Registration", "fee": float(subtotal), "stream": "TECH"}]
+    total = subtotal + platform_fee
 
     order = Order(
         user_id=current_user.id,
@@ -83,67 +96,62 @@ async def create_payment_order(
 @router.post("/verify")
 async def verify_payment(
     payload: PaymentVerifyRequest,
+    current_user: Annotated[Profile, Depends(get_current_user)],
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> dict:
     order = await db.scalar(
         select(Order).where(Order.transaction_ref == payload.transaction_ref)
     )
-    if not order:
-        return {
-            "status": "completed",
-            "transaction_ref": payload.transaction_ref,
-            "confirmed_registrations": 1,
-        }
+    # Unknown refs used to return a fabricated "completed" response; and any
+    # authenticated user could confirm any order. Now: 404 for unknown refs,
+    # 404 for orders that belong to someone else (no existence oracle).
+    if order is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Payment order not found")
+    if order.user_id != current_user.id and current_user.role.value != "admin":
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Payment order not found")
 
-    order.status = "completed"
-    order.completed_at = datetime.utcnow()
+    if order.status != "completed":
+        order.status = "completed"
+        order.completed_at = datetime.now(timezone.utc)
 
-    confirmed_count = 0
-    # Confirm associated registrations and stamp payment reference
-    for reg_id_str in order.registration_ids:
-        try:
-            reg = await db.get(Registration, reg_id_str)
-            if reg:
-                reg.status = RegistrationStatus.confirmed
-                reg.payment_reference = order.transaction_ref
-                reg.amount_paid = order.total_amount
-                confirmed_count += 1
-        except Exception:
-            pass
+        confirmed_count = 0
+        # Confirm associated registrations and stamp payment reference
+        for reg_id_str in order.registration_ids:
+            try:
+                reg = await db.get(Registration, reg_id_str)
+                if reg:
+                    reg.status = RegistrationStatus.confirmed
+                    reg.payment_reference = order.transaction_ref
+                    reg.amount_paid = order.total_amount
+                    confirmed_count += 1
+            except Exception:
+                pass
 
-    await db.commit()
+        await db.commit()
+    else:
+        confirmed_count = sum(1 for r in order.registration_ids if r)
+
     return {
         "status": "completed",
         "transaction_ref": order.transaction_ref,
-        "confirmed_registrations": max(1, confirmed_count),
+        "confirmed_registrations": confirmed_count,
     }
 
 
 @router.get("/receipt/{transaction_ref}", response_model=ReceiptDataOut)
 async def get_receipt(
     transaction_ref: str,
+    current_user: Annotated[Profile, Depends(get_current_user)],
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> ReceiptDataOut:
     order = await db.scalar(
         select(Order).where(Order.transaction_ref == transaction_ref)
     )
-    if not order:
-        # Fallback structured receipt
-        return ReceiptDataOut(
-            receipt_no=f"VYU26-REC-{transaction_ref[-6:]}",
-            transaction_ref=transaction_ref,
-            timestamp=datetime.now().strftime("%d %b %Y, %I:%M %p"),
-            attendee_name="OPERATIVE ATTENDEE",
-            college="Digital University Kerala",
-            payment_method="UPI (Instant Protocol)",
-            items=[
-                ReceiptItem(title="Hackathon — 24HR", fee=1000.0, stream="TECH"),
-                ReceiptItem(title="Capture the Flag", fee=400.0, stream="TECH"),
-            ],
-            subtotal=1400.0,
-            platform_fee=30.0,
-            total_amount=1430.0,
-        )
+    if order is None or (
+        order.user_id != current_user.id and current_user.role.value != "admin"
+    ):
+        # No fabricated fallback receipt: unknown or foreign refs are 404.
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Receipt not found")
 
     user = await db.get(Profile, order.user_id)
     attendee_name = user.name if user and user.name else "OPERATIVE ATTENDEE"

@@ -5,6 +5,10 @@ const REG_STORAGE_KEY = "vyuham26:registration_open";
 /**
  * Returns whether registration is currently open.
  * Reads from localStorage if available in browser; otherwise defaults to false.
+ *
+ * localStorage is only a mirror: `syncRegistrationGateFromBackend()` keeps it
+ * aligned with the backend `site_settings` table, which is the single
+ * authoritative source for the registration gate.
  */
 export function isRegistrationOpen(): boolean {
   if (typeof window === "undefined") {
@@ -21,11 +25,8 @@ export function isRegistrationOpen(): boolean {
   return false;
 }
 
-/**
- * Toggles or sets registration gate status.
- * Persists to localStorage and notifies all components via custom event.
- */
-export function setRegistrationOpen(open: boolean): void {
+/** Mirror the gate into localStorage and notify all listeners. No backend call. */
+function writeRegistrationOpen(open: boolean): void {
   try {
     if (typeof window !== "undefined") {
       localStorage.setItem(REG_STORAGE_KEY, String(open));
@@ -34,21 +35,64 @@ export function setRegistrationOpen(open: boolean): void {
           detail: { open },
         })
       );
-      // Synchronize with backend if API is reachable
-      import("@/lib/api")
-        .then(({ adminApi }) => {
-          adminApi.setRegistrationStatus(open).catch(() => {});
-        })
-        .catch(() => {});
     }
   } catch {
     // ignore security/quota errors
   }
 }
 
+let regGateSyncInFlight: Promise<boolean> | null = null;
+
+/**
+ * Pull the registration gate from the backend (authoritative) and mirror it
+ * into localStorage. Safe to call often: calls are single-flighted and the
+ * mirror is only written when the value actually differs.
+ * On network failure the current local value is kept.
+ */
+export function syncRegistrationGateFromBackend(): Promise<boolean> {
+  if (typeof window === "undefined") {
+    return Promise.resolve(false);
+  }
+  if (regGateSyncInFlight) {
+    return regGateSyncInFlight;
+  }
+  regGateSyncInFlight = import("@/lib/api")
+    .then(({ adminApi }) => adminApi.getRegistrationStatus())
+    .then((res) => {
+      const remote = !!res?.reg_open;
+      if (remote !== isRegistrationOpen()) {
+        writeRegistrationOpen(remote);
+      }
+      return remote;
+    })
+    .catch(() => isRegistrationOpen())
+    .finally(() => {
+      regGateSyncInFlight = null;
+    });
+  return regGateSyncInFlight;
+}
+
+/**
+ * Toggles or sets registration gate status.
+ * Optimistically updates the local mirror, pushes the change to the backend;
+ * if the push fails we re-pull the backend state so the UI can never diverge
+ * from the authoritative value.
+ */
+export function setRegistrationOpen(open: boolean): void {
+  writeRegistrationOpen(open);
+  if (typeof window !== "undefined") {
+    import("@/lib/api")
+      .then(({ adminApi }) =>
+        adminApi.setRegistrationStatus(open).catch(() => syncRegistrationGateFromBackend())
+      )
+      .catch(() => {});
+  }
+}
+
 /**
  * React hook that returns live registration open status and auto-updates
  * when any admin toggles registration anywhere in the application.
+ * Also re-syncs from the authoritative backend on mount.
  */
 export function useRegistrationOpen(): boolean {
   const [open, setOpen] = useState<boolean>(isRegistrationOpen);
@@ -65,6 +109,9 @@ export function useRegistrationOpen(): boolean {
 
     window.addEventListener("vyuham:reg_toggle", handleToggle);
     window.addEventListener("storage", handleToggle);
+
+    // Authoritative source: refresh from the backend once on mount.
+    syncRegistrationGateFromBackend().then((remote) => setOpen(remote));
 
     return () => {
       window.removeEventListener("vyuham:reg_toggle", handleToggle);

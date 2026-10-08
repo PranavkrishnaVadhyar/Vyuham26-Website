@@ -30,6 +30,9 @@ class EventFields(BaseModel):
     start_time: datetime | None = None
     end_time: datetime | None = None
     description: str | None = None
+    registration_url: str | None = Field(default=None, max_length=500)
+    makemypass_url: str | None = Field(default=None, max_length=500)
+
 
     @field_validator("stream", mode="before")
     @classmethod
@@ -78,6 +81,9 @@ class EventUpdate(BaseModel):
     start_time: datetime | None = None
     end_time: datetime | None = None
     description: str | None = None
+    registration_url: str | None = Field(default=None, max_length=500)
+    makemypass_url: str | None = Field(default=None, max_length=500)
+
 
     @field_validator("stream", mode="before")
     @classmethod
@@ -132,7 +138,10 @@ class EventOut(BaseModel):
     start_time: datetime | None
     end_time: datetime | None
     description: str | None
+    registration_url: str | None = None
+    makemypass_url: str | None = None
     created_at: datetime
+
 
     @computed_field
     @property

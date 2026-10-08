@@ -9,7 +9,6 @@ import {
   Check,
   ChevronRight,
   Crosshair,
-  Cpu,
   Gauge,
   Radio,
   ScanLine,
@@ -23,42 +22,19 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { useAuth } from "@/context/AuthContext";
 import { events as catalogEvents } from "@/data/events";
-import { registrationsApi, eventsApi, type EventRecord, type RegistrationRecord } from "@/lib/api";
+import {
+  registrationsApi,
+  eventsApi,
+  teamsApi,
+  type EventRecord,
+  type RegistrationRecord,
+  type TeamRecord,
+} from "@/lib/api";
 
-const defaultEvents = [
-  {
-    stream: "TECH",
-    title: "Hackathon — 24HR",
-    venue: "MAIN HALL + COMPUTER LAB",
-    time: "30 OCT // 09:00 AM",
-    href: "/events/hackathon",
-    action: "ENTER BUILD ZONE",
-    code: "EVT-001",
-  },
-  {
-    stream: "TECH",
-    title: "Capture the Flag",
-    venue: "COMPUTER LAB",
-    time: "31 OCT // 10:00 AM",
-    href: "/events/ctf",
-    action: "ENTER CTF PORTAL",
-    code: "EVT-002",
-  },
-  {
-    stream: "CULTURAL",
-    title: "Concert Night",
-    venue: "OPEN AIR STAGE",
-    time: "01 NOV // 07:00 PM",
-    href: "/events/concert",
-    action: "VIEW DOSSIER",
-    code: "EVT-003",
-  },
-];
-
-const timeline = [
-  ["30 OCT", "09:00 AM", "Hackathon — 24HR", "DAY 01 // HACKATHON BEGINS"],
-  ["31 OCT", "10:00 AM", "Capture the Flag", "DAY 02 // COMPUTER LAB"],
-  ["01 NOV", "07:00 PM", "Concert Night", "DAY 03 // MAIN STAGE CLOSING"],
+const festivalMilestones = [
+  ["30 OCT", "09:00 AM", "Festival Opening & Keynote", "DAY 01 // MAIN ARENA"],
+  ["31 OCT", "10:00 AM", "Flagship Technical Competitions", "DAY 02 // LABS & HUBS"],
+  ["01 NOV", "07:00 PM", "Grand Pro-Show & Award Ceremony", "DAY 03 // OPEN AIR STAGE"],
 ] as const;
 
 function Corner({ className = "" }: { className?: string }) {
@@ -132,97 +108,40 @@ function Reactor({ reduced }: { reduced: boolean }) {
   );
 }
 
-function BootSequence({ reduced, onComplete }: { reduced: boolean; onComplete: () => void }) {
-  const [progress, setProgress] = useState(reduced ? 100 : 0);
-
-  useEffect(() => {
-    if (reduced) {
-      onComplete();
-      return;
-    }
-    const timer = window.setInterval(() => {
-      setProgress((p) => {
-        const next = Math.min(100, p + Math.ceil(Math.random() * 7));
-        if (next >= 100) {
-          window.clearInterval(timer);
-          window.setTimeout(onComplete, 550);
-        }
-        return next;
-      });
-    }, 75);
-    return () => window.clearInterval(timer);
-  }, [onComplete, reduced]);
-
-  if (reduced) return null;
-
-  return (
-    <motion.div
-      initial={{ opacity: 1 }}
-      exit={{ opacity: 0, scale: 1.02 }}
-      transition={{ duration: 0.65 }}
-      className="fixed inset-0 z-[100] flex items-center justify-center overflow-hidden bg-[#020504] text-white"
-    >
-      <div className="absolute inset-0 opacity-20 [background-image:linear-gradient(rgba(52,211,153,.25)_1px,transparent_1px),linear-gradient(90deg,rgba(52,211,153,.25)_1px,transparent_1px)] [background-size:50px_50px]" />
-      <motion.div
-        className="absolute left-0 right-0 h-px bg-linear-to-r from-transparent via-emerald-300 to-transparent"
-        animate={{ top: ["0%", "100%"] }}
-        transition={{ duration: 2.8, repeat: Infinity, ease: "linear" }}
-      />
-      <div className="relative w-[min(560px,88vw)] font-mono">
-        <div className="mb-3 flex items-center justify-between text-[9px] tracking-[0.3em] text-emerald-300/60">
-          <span>VYUHAM&apos;26 // COMMAND NETWORK</span>
-          <span>SECURE</span>
-        </div>
-        <div className="border border-emerald-400/25 bg-emerald-400/[0.03] p-6 sm:p-8">
-          <div className="flex items-center gap-3 text-emerald-300">
-            <Cpu className="h-5 w-5" />
-            <span className="text-xs tracking-[0.35em]">SYSTEM INITIALIZATION</span>
-          </div>
-          <div className="mt-8 text-5xl font-black tracking-[0.08em] sm:text-7xl">VYUHAM</div>
-          <div className="mt-1 text-[10px] tracking-[0.45em] text-white/40">OPERATIVE INTERFACE // 26</div>
-          <div className="mt-10 flex items-end justify-between">
-            <div>
-              <div className="text-[8px] tracking-[0.3em] text-white/40">LOADING COMMAND DECK</div>
-              <div className="mt-2 text-2xl text-emerald-300">{String(progress).padStart(3, "0")}%</div>
-            </div>
-            <div className="text-right text-[8px] tracking-[0.22em] text-white/30">
-              <div>AUTH: PASS</div>
-              <div>LINK: STABLE</div>
-              <div>CORE: READY</div>
-            </div>
-          </div>
-          <div className="mt-4 h-1 overflow-hidden bg-white/5">
-            <motion.div className="h-full bg-emerald-300" animate={{ width: `${progress}%` }} />
-          </div>
-        </div>
-      </div>
-    </motion.div>
-  );
-}
 
 export default function DashboardPage() {
   const { user, isAuthenticated } = useAuth();
   const reduceMotion = usePrefersReducedMotion();
-  const [booting, setBooting] = useState(!reduceMotion);
   const [activeTab, setActiveTab] = useState<"events" | "squads" | "schedule">("events");
   const [cursor, setCursor] = useState({ x: 50, y: 50 });
   const [scan, setScan] = useState(0);
 
   const [myRegistrations, setMyRegistrations] = useState<RegistrationRecord[]>([]);
   const [allEvents, setAllEvents] = useState<EventRecord[]>([]);
+  const [myTeams, setMyTeams] = useState<TeamRecord[]>([]);
   const [loadingRegs, setLoadingRegs] = useState(true);
+  const [loadingTeams, setLoadingTeams] = useState(true);
 
   useEffect(() => {
-    if (!isAuthenticated) return;
+    if (!isAuthenticated) {
+      setLoadingRegs(false);
+      setLoadingTeams(false);
+      return;
+    }
     Promise.all([
       registrationsApi.listMine().catch(() => [] as RegistrationRecord[]),
       eventsApi.list().catch(() => [] as EventRecord[]),
+      teamsApi.listMine().catch(() => [] as TeamRecord[]),
     ])
-      .then(([regs, evList]) => {
+      .then(([regs, evList, teamsList]) => {
         if (Array.isArray(regs)) setMyRegistrations(regs);
         if (Array.isArray(evList)) setAllEvents(evList);
+        if (Array.isArray(teamsList)) setMyTeams(teamsList);
       })
-      .finally(() => setLoadingRegs(false));
+      .finally(() => {
+        setLoadingRegs(false);
+        setLoadingTeams(false);
+      });
   }, [isAuthenticated]);
 
   const initials = useMemo(() => {
@@ -282,18 +201,21 @@ export default function DashboardPage() {
       });
     }
 
-    return defaultEvents;
+    // No registrations -> empty list (no demo mock fallback)
+    return [];
   }, [myRegistrations, allEvents, user]);
 
   const statLabels = useMemo(() => {
-    const eventCount = myRegistrations.length > 0 ? myRegistrations.length : (user ? user.registeredEvents.length : 3);
+    const eventCount = myRegistrations.length > 0 ? myRegistrations.length : (user?.registeredEvents?.length ?? 0);
+    const squadCount = myTeams.length;
+    const hasPass = eventCount > 0;
     return [
       { label: "EVENTS", value: eventCount, suffix: " REGISTERED", icon: Radio },
-      { label: "SQUADS", value: user?.role === "admin" ? 4 : 2, suffix: " ACTIVE", icon: Users },
-      { label: "PASS", value: 100, suffix: "% VERIFIED", icon: ShieldCheck },
-      { label: "FOOD", value: 450, prefix: "₹", suffix: " CREDITS", icon: Zap },
+      { label: "SQUADS", value: squadCount, suffix: " ACTIVE", icon: Users },
+      { label: "PASS", value: hasPass ? 100 : 0, suffix: hasPass ? "% VERIFIED" : "% ACTIVE", icon: ShieldCheck },
+      { label: "CREDITS", value: 0, prefix: "₹", suffix: " CREDITS", icon: Zap },
     ];
-  }, [myRegistrations, user]);
+  }, [myRegistrations, myTeams, user]);
 
   useEffect(() => {
     if (reduceMotion) return;
@@ -312,10 +234,6 @@ export default function DashboardPage() {
 
   return (
     <>
-      <AnimatePresence>
-        {booting && <BootSequence reduced={reduceMotion} onComplete={() => setBooting(false)} />}
-      </AnimatePresence>
-
       <Navbar />
 
       <main className="relative min-h-screen overflow-hidden bg-[#020604] pt-23 text-white">
@@ -473,7 +391,13 @@ export default function DashboardPage() {
                   <div className="flex items-center gap-2 font-mono text-[8px] tracking-[0.3em] text-emerald-300"><Crosshair className="h-3.5 w-3.5" />MISSION CONTROL</div>
                   <h2 className="mt-2 font-display text-2xl font-bold uppercase tracking-tight">Operative Modules</h2>
                 </div>
-                <div className="font-mono text-[7px] tracking-[0.25em] text-white/25">3 NODES // ALL CONFIRMED</div>
+                <div className="font-mono text-[7px] tracking-[0.25em] text-white/25">
+                  {activeTab === "events"
+                    ? `${registeredEventsList.length} ${registeredEventsList.length === 1 ? "SLOT" : "SLOTS"} // ${registeredEventsList.length > 0 ? "CONFIRMED" : "STANDBY"}`
+                    : activeTab === "squads"
+                    ? `${myTeams.length} ${myTeams.length === 1 ? "SQUAD" : "SQUADS"} // ${myTeams.length > 0 ? "ACTIVE" : "STANDBY"}`
+                    : `${registeredEventsList.length > 0 ? registeredEventsList.length : 3} MILESTONES // TIMELINE`}
+                </div>
               </div>
 
               <div className="mt-5 flex gap-5 overflow-x-auto border-b border-white/5 font-mono text-[8px] uppercase tracking-[0.18em]">
@@ -493,59 +417,185 @@ export default function DashboardPage() {
                 <AnimatePresence mode="wait">
                   {activeTab === "events" && (
                     <motion.div key="events" initial={{ opacity: 0, x: 12 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -12 }} className="space-y-3">
-                      {registeredEventsList.map((event, index) => (
-                        <motion.div key={event.code + event.title} whileHover={reduceMotion ? {} : { x: 5 }} className="group relative overflow-hidden border border-white/8 bg-black/20 p-5 transition hover:border-emerald-300/35">
-                          <motion.div className="absolute inset-y-0 left-0 w-px bg-emerald-300" initial={{ scaleY: 0 }} whileInView={{ scaleY: 1 }} viewport={{ once: true }} />
-                          {!reduceMotion && <motion.div className="absolute inset-y-0 w-24 bg-linear-to-r from-transparent via-emerald-300/10 to-transparent" animate={{ x: ["-120px", "900px"] }} transition={{ duration: 3.5, repeat: Infinity, delay: index * 0.7 }} />}
-                          <div className="relative flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
-                            <div className="min-w-0">
-                              <div className="flex items-center gap-3 font-mono text-[7px] tracking-[0.25em] text-emerald-300/70"><span>{event.code}</span><span className="h-1 w-1 rounded-full bg-emerald-300" />CONFIRMED</div>
-                              <h3 className="mt-2 font-display text-xl font-bold uppercase">{event.title}</h3>
-                              <div className="mt-2 flex flex-wrap gap-x-5 gap-y-1 font-mono text-[8px] tracking-[0.15em] text-white/30"><span>{event.venue}</span><span>{event.time}</span><span>{event.stream}</span></div>
-                            </div>
-                            <Link href={event.href} className="shrink-0 border border-white/10 px-4 py-3 font-mono text-[8px] tracking-[0.15em] text-white/60 transition hover:border-emerald-300 hover:text-emerald-300">{event.action} →</Link>
-                          </div>
-                        </motion.div>
-                      ))}
-
-                      {user && user.registeredEvents.length === 0 && (
-                        <div className="border border-dashed border-emerald-400/25 bg-emerald-950/20 p-6 text-center">
-                          <div className="font-mono text-[9px] uppercase tracking-[0.2em] text-emerald-300">NO EVENT SLOTS RESERVED YET</div>
-                          <p className="mt-2 text-xs text-white/40">Browse our 30+ technical, management, cultural, and esports events to secure your operative slots.</p>
-                          <Link href="/events" className="mt-4 inline-block border border-emerald-400/40 bg-emerald-400/10 px-4 py-2 font-mono text-[8px] uppercase tracking-widest text-emerald-300 hover:bg-emerald-300 hover:text-black transition">BROWSE EVENT DIRECTORY →</Link>
+                      {loadingRegs ? (
+                        <div className="border border-white/5 bg-black/20 p-8 text-center font-mono text-[9px] uppercase tracking-[0.25em] text-white/40">
+                          <span className="inline-block h-2 w-2 animate-ping mr-2 bg-emerald-400 rounded-full" />
+                          SYNCING EVENT REGISTRATIONS...
                         </div>
+                      ) : registeredEventsList.length === 0 ? (
+                        <div className="relative overflow-hidden border border-emerald-400/20 bg-[#06100d]/70 p-8 sm:p-10 text-center">
+                          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full border border-emerald-400/30 bg-emerald-400/5 text-emerald-300">
+                            <Radio className="h-5 w-5" />
+                          </div>
+                          <div className="mt-4 font-mono text-[9px] uppercase tracking-[0.3em] text-emerald-300">
+                            NO EVENT SLOTS RESERVED YET
+                          </div>
+                          <p className="mx-auto mt-2 max-w-md text-xs leading-relaxed text-white/45">
+                            Your operative profile is live and connected. You have not registered for any festival events yet. Browse our 30+ technical, cultural, management, and esports events to secure your slots.
+                          </p>
+                          <div className="mt-6 flex flex-wrap justify-center gap-3">
+                            <Link
+                              href="/events"
+                              className="inline-flex items-center gap-2 border border-emerald-300 bg-emerald-300 px-5 py-2.5 font-mono text-[9px] font-bold uppercase tracking-[0.18em] text-black transition hover:bg-white"
+                            >
+                              BROWSE EVENT DIRECTORY →
+                            </Link>
+                          </div>
+                        </div>
+                      ) : (
+                        registeredEventsList.map((event, index) => (
+                          <motion.div
+                            key={event.code + event.title}
+                            whileHover={reduceMotion ? {} : { x: 5 }}
+                            className="group relative overflow-hidden border border-white/8 bg-black/20 p-5 transition hover:border-emerald-300/35"
+                          >
+                            <motion.div className="absolute inset-y-0 left-0 w-px bg-emerald-300" initial={{ scaleY: 0 }} whileInView={{ scaleY: 1 }} viewport={{ once: true }} />
+                            {!reduceMotion && (
+                              <motion.div
+                                className="absolute inset-y-0 w-24 bg-linear-to-r from-transparent via-emerald-300/10 to-transparent"
+                                animate={{ x: ["-120px", "900px"] }}
+                                transition={{ duration: 3.5, repeat: Infinity, delay: index * 0.7 }}
+                              />
+                            )}
+                            <div className="relative flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
+                              <div className="min-w-0">
+                                <div className="flex items-center gap-3 font-mono text-[7px] tracking-[0.25em] text-emerald-300/70">
+                                  <span>{event.code}</span>
+                                  <span className="h-1 w-1 rounded-full bg-emerald-300" />
+                                  <span>{event.status?.toUpperCase() || "CONFIRMED"}</span>
+                                </div>
+                                <h3 className="mt-2 font-display text-xl font-bold uppercase">{event.title}</h3>
+                                <div className="mt-2 flex flex-wrap gap-x-5 gap-y-1 font-mono text-[8px] tracking-[0.15em] text-white/30">
+                                  <span>{event.venue}</span>
+                                  <span>{event.time}</span>
+                                  <span>{event.stream}</span>
+                                </div>
+                              </div>
+                              <Link
+                                href={event.href}
+                                className="shrink-0 border border-white/10 px-4 py-3 font-mono text-[8px] tracking-[0.15em] text-white/60 transition hover:border-emerald-300 hover:text-emerald-300"
+                              >
+                                {event.action} →
+                              </Link>
+                            </div>
+                          </motion.div>
+                        ))
                       )}
                     </motion.div>
                   )}
 
                   {activeTab === "squads" && (
                     <motion.div key="squads" initial={{ opacity: 0, x: 12 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -12 }} className="space-y-4">
-                      <div className="relative overflow-hidden border border-emerald-300/20 bg-black/20 p-6">
-                        <div className="flex flex-col justify-between gap-5 md:flex-row md:items-center">
-                          <div>
-                            <div className="font-mono text-[8px] tracking-[0.3em] text-emerald-300">SQUAD_NODE_01 // LEADER</div>
-                            <h3 className="mt-2 font-display text-3xl font-bold uppercase">CyberVipers</h3>
-                            <p className="mt-2 font-mono text-[8px] leading-6 tracking-[0.12em] text-white/35">3 MEMBERS // {user ? user.name.toUpperCase() : "AROMAL S."} // NEHA S. // ROHAN K.<br />LINKED OPERATIONS // HACKATHON + CTF</p>
+                      {loadingTeams ? (
+                        <div className="border border-white/5 bg-black/20 p-8 text-center font-mono text-[9px] uppercase tracking-[0.25em] text-white/40">
+                          <span className="inline-block h-2 w-2 animate-ping mr-2 bg-emerald-400 rounded-full" />
+                          CONNECTING TO SQUAD NETWORK...
+                        </div>
+                      ) : myTeams.length === 0 ? (
+                        <div className="relative overflow-hidden border border-emerald-400/20 bg-[#06100d]/70 p-8 sm:p-10 text-center">
+                          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full border border-emerald-400/30 bg-emerald-400/5 text-emerald-300">
+                            <Users className="h-5 w-5" />
                           </div>
-                          <Link href="/teams" className="border border-emerald-300/30 px-4 py-3 font-mono text-[8px] tracking-[0.15em] text-emerald-300 hover:bg-emerald-300 hover:text-black">MANAGE SQUAD →</Link>
+                          <div className="mt-4 font-mono text-[9px] uppercase tracking-[0.3em] text-emerald-300">
+                            NO ACTIVE SQUADS FORMED YET
+                          </div>
+                          <p className="mx-auto mt-2 max-w-md text-xs leading-relaxed text-white/45">
+                            You are not currently enrolled in any operative squads. Form a new squad or join an existing unit with an invite code for team-based competitions and hackathons.
+                          </p>
+                          <div className="mt-6 flex flex-wrap justify-center gap-3">
+                            <Link
+                              href="/teams"
+                              className="inline-flex items-center gap-2 border border-emerald-300 bg-emerald-300 px-5 py-2.5 font-mono text-[9px] font-bold uppercase tracking-[0.18em] text-black transition hover:bg-white"
+                            >
+                              CREATE OR JOIN SQUAD →
+                            </Link>
+                          </div>
                         </div>
-                        <div className="mt-6 grid grid-cols-3 gap-2 border-t border-white/5 pt-5">
-                          {[user ? user.name.toUpperCase() : "AROMAL S.", "NEHA S.", "ROHAN K."].map((member, i) => <div key={member} className="border border-white/5 bg-white/[0.02] p-3 font-mono text-[7px] tracking-[0.12em] text-white/45"><span className="mr-2 text-emerald-300">0{i + 1}</span>{member}</div>)}
-                        </div>
+                      ) : (
+                        myTeams.map((team, i) => (
+                          <div key={team.id} className="relative overflow-hidden border border-emerald-300/20 bg-black/20 p-6">
+                            <div className="flex flex-col justify-between gap-5 md:flex-row md:items-center">
+                              <div>
+                                <div className="font-mono text-[8px] tracking-[0.3em] text-emerald-300">
+                                  SQUAD_NODE_0{i + 1} // {team.created_by === user?.id ? "LEADER" : "OPERATIVE"}
+                                </div>
+                                <h3 className="mt-2 font-display text-3xl font-bold uppercase">{team.name}</h3>
+                                <p className="mt-2 font-mono text-[8px] leading-6 tracking-[0.12em] text-white/35">
+                                  {team.member_count} {team.member_count === 1 ? "MEMBER" : "MEMBERS"} // INVITE CODE: {team.invite_code}
+                                </p>
+                              </div>
+                              <Link
+                                href="/teams"
+                                className="border border-emerald-300/30 px-4 py-3 font-mono text-[8px] tracking-[0.15em] text-emerald-300 hover:bg-emerald-300 hover:text-black transition"
+                              >
+                                MANAGE SQUAD →
+                              </Link>
+                            </div>
+                            {team.members && team.members.length > 0 && (
+                              <div className="mt-6 grid grid-cols-2 sm:grid-cols-3 gap-2 border-t border-white/5 pt-5">
+                                {team.members.map((member, idx) => (
+                                  <div key={member.user_id} className="border border-white/5 bg-white/[0.02] p-3 font-mono text-[7px] tracking-[0.12em] text-white/45">
+                                    <span className="mr-2 text-emerald-300">0{idx + 1}</span>
+                                    {member.name ? member.name.toUpperCase() : member.email.split("@")[0].toUpperCase()}
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        ))
+                      )}
+
+                      <div className="flex items-center justify-between border border-dashed border-white/10 p-5 font-mono text-[8px] tracking-[0.2em] text-white/25">
+                        <span>NETWORK FORMATIONS</span>
+                        <span className="text-emerald-300/60">{String(myTeams.length).padStart(2, "0")} ACTIVE</span>
                       </div>
-                      <div className="flex items-center justify-between border border-dashed border-white/10 p-5 font-mono text-[8px] tracking-[0.2em] text-white/25"><span>NETWORK FORMATIONS</span><span className="text-emerald-300/60">02 ACTIVE</span></div>
                     </motion.div>
                   )}
 
                   {activeTab === "schedule" && (
                     <motion.div key="schedule" initial={{ opacity: 0, x: 12 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -12 }} className="relative space-y-2">
                       <div className="absolute bottom-8 left-4 top-8 w-px bg-linear-to-b from-emerald-300/50 via-emerald-300/10 to-transparent" />
-                      {timeline.map((item, i) => (
-                        <div key={item[0] + item[1]} className="relative flex gap-5 py-4">
-                          <div className="relative z-10 mt-1 flex h-8 w-8 shrink-0 items-center justify-center border border-emerald-300/40 bg-[#06100d] font-mono text-[7px] text-emerald-300">0{i + 1}</div>
-                          <div><div className="font-mono text-[8px] tracking-[0.18em] text-emerald-300">{item[0]} // {item[1]}</div><h3 className="mt-1 font-display text-lg font-bold uppercase">{item[2]}</h3><p className="mt-1 font-mono text-[7px] tracking-[0.18em] text-white/30">{item[3]}</p></div>
+                      {registeredEventsList.length > 0 ? (
+                        registeredEventsList.map((item, i) => (
+                          <div key={item.code + item.title} className="relative flex gap-5 py-4">
+                            <div className="relative z-10 mt-1 flex h-8 w-8 shrink-0 items-center justify-center border border-emerald-300/40 bg-[#06100d] font-mono text-[7px] text-emerald-300">
+                              0{i + 1}
+                            </div>
+                            <div>
+                              <div className="font-mono text-[8px] tracking-[0.18em] text-emerald-300">
+                                {item.time} // {item.stream}
+                              </div>
+                              <h3 className="mt-1 font-display text-lg font-bold uppercase">{item.title}</h3>
+                              <p className="mt-1 font-mono text-[7px] tracking-[0.18em] text-white/30">
+                                VENUE: {item.venue} // STATUS: {item.status?.toUpperCase() || "CONFIRMED"}
+                              </p>
+                            </div>
+                          </div>
+                        ))
+                      ) : (
+                        <div className="space-y-4">
+                          <div className="relative overflow-hidden border border-emerald-400/20 bg-[#06100d]/70 p-6 text-center">
+                            <div className="font-mono text-[9px] uppercase tracking-[0.2em] text-emerald-300">
+                              OFFICIAL FESTIVAL TIMELINE MILESTONES
+                            </div>
+                            <p className="mt-1 text-xs text-white/40">
+                              Register for events to construct your personal mission timeline. General festival milestones are shown below.
+                            </p>
+                          </div>
+                          {festivalMilestones.map((item, i) => (
+                            <div key={item[0] + item[1]} className="relative flex gap-5 py-4">
+                              <div className="relative z-10 mt-1 flex h-8 w-8 shrink-0 items-center justify-center border border-emerald-300/40 bg-[#06100d] font-mono text-[7px] text-emerald-300">
+                                0{i + 1}
+                              </div>
+                              <div>
+                                <div className="font-mono text-[8px] tracking-[0.18em] text-emerald-300">{item[0]} // {item[1]}</div>
+                                <h3 className="mt-1 font-display text-lg font-bold uppercase">{item[2]}</h3>
+                                <p className="mt-1 font-mono text-[7px] tracking-[0.18em] text-white/30">{item[3]}</p>
+                              </div>
+                            </div>
+                          ))}
                         </div>
-                      ))}
+                      )}
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -596,9 +646,19 @@ export default function DashboardPage() {
 
               <Link href="/ticket" className="group block">
                 <HudPanel className="p-5 transition hover:border-emerald-300/50 md:p-6">
-                  <div className="flex items-center justify-between font-mono text-[7px] tracking-[0.25em] text-white/30"><span>SECURE ACCESS</span><span className="text-emerald-300">VERIFIED</span></div>
+                  <div className="flex items-center justify-between font-mono text-[7px] tracking-[0.25em] text-white/30">
+                    <span>SECURE ACCESS</span>
+                    <span className={registeredEventsList.length > 0 ? "text-emerald-300" : "text-white/40"}>
+                      {registeredEventsList.length > 0 ? "VERIFIED" : "STANDBY"}
+                    </span>
+                  </div>
                   <div className="mt-5 flex items-center justify-between gap-4">
-                    <div><div className="font-display text-2xl font-bold uppercase">QR PASS</div><div className="mt-1 font-mono text-[7px] tracking-[0.18em] text-white/30">GENERATE EVENT ACCESS TOKEN</div></div>
+                    <div>
+                      <div className="font-display text-2xl font-bold uppercase">QR PASS</div>
+                      <div className="mt-1 font-mono text-[7px] tracking-[0.18em] text-white/30">
+                        {registeredEventsList.length > 0 ? "VIEW DIGITAL PASS & TOKEN" : "RESERVE SLOTS TO ACTIVATE"}
+                      </div>
+                    </div>
                     <div className="relative flex h-14 w-14 items-center justify-center border border-emerald-300/30"><div className="h-8 w-8 bg-[linear-gradient(90deg,#fff_10%,transparent_10%_20%,#fff_20%_30%,transparent_30%_45%,#fff_45%_55%,transparent_55%_70%,#fff_70%)] opacity-70" /><motion.div className="absolute inset-x-0 h-px bg-emerald-300 shadow-[0_0_8px_rgba(52,211,153,.9)]" animate={reduceMotion ? {} : { top: ["15%", "85%", "15%"] }} transition={{ duration: 2, repeat: Infinity }} /></div>
                   </div>
                 </HudPanel>

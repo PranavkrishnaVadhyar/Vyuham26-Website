@@ -697,7 +697,7 @@ export default function VyuhamNaturalCinematic() {
 
           <div className="nc-logo absolute flex h-[74%] w-[82%] items-center justify-center">
             <img
-              src="/logo1.png"
+              src="/logo1.PNG"
               alt="VYUHAM26 26"
               className="block max-h-full max-w-full object-contain drop-shadow-[0_0_28px_rgba(180,245,232,.28)]"
             />

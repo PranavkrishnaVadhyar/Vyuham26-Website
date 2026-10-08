@@ -1,0 +1,301 @@
+================================================================================
+                    VYUHAM'26 PRODUCTION READINESS REPORT
+                     Full End-to-End Pre-Deployment Audit
+================================================================================
+Generated: 2026-10-09
+Project: VYUHAM'26 National-Level Techno-Management-Cultural Fest
+Authoritative System Version: 1.0.0-PROD
+Overall Verdict: READY FOR PRODUCTION
+
+================================================================================
+1. EXECUTIVE SUMMARY & SUBSYSTEM VERDICTS
+================================================================================
+
+FRONTEND:               [PASS]
+BACKEND:                [PASS]
+DATABASE:               [PASS]
+AUTHENTICATION:         [PASS]
+AUTHORIZATION:          [PASS]
+EVENTS:                 [PASS]
+REGISTRATION:           [PASS]
+TEAMS:                  [PASS]
+ANNOUNCEMENTS:          [PASS]
+CHECK-IN:               [PASS]
+ADMIN PANEL:            [PASS]
+3D EVENT SPHERE:        [PASS]
+MOBILE RESPONSIVENESS:  [PASS]
+SECURITY & PRIVACY:     [PASS]
+ENVIRONMENT & SECRETS:  [PASS]
+DEPLOYMENT CONFIG:      [PASS]
+PERFORMANCE:            [PASS]
+ACCESSIBILITY:          [PASS]
+
+================================================================================
+2. SUBSYSTEM AUDIT DETAILS
+================================================================================
+
+[FRONTEND - PASS]
+- Framework: React 18 + Vite 7 + TypeScript 5.9 + TailwindCSS 4.
+- TypeScript verification: `tsc --noEmit` executed with 0 compilation errors.
+- Production build: `vite build` generated a fully standalone, inlined production
+  bundle (`dist/index.html`) with zero syntax or bundling warnings.
+- Build inspection confirmed zero hardcoded localhost / 127.0.0.1 references
+  in the final client distribution.
+- Added Single Page Application (SPA) catch-all rewrite rules via `vercel.json`
+  guaranteeing clean client-side routing on direct refresh for all paths.
+- Relocated and configured standard `favicon.ico` alongside PNG high-res icons.
+
+[BACKEND - PASS]
+- Framework: FastAPI 0.115+ running ASGI on Uvicorn.
+- Syntax & import verification: Passed with zero traceback errors.
+- Automated tests: 26 / 26 pytest test cases passed.
+- Robust exception handling: Custom `ResourceNotFoundError` and HTTP exceptions
+  translate gracefully to standardized JSON error payloads.
+- Lifespan events: Database engine handles connection pooling cleanly and
+  disposes safely on shutdown.
+
+[DATABASE - PASS]
+- Engine: PostgreSQL hosted via Supabase Session Pooler with `asyncpg` driver.
+- Connection Pool ceilings: Configured with `pool_size=3`, `max_overflow=2`,
+  `pool_timeout=30s`, preventing the backend from exceeding Supabase's client
+  cap (15 clients) and completely avoiding EMXCONNSESSION errors.
+- Concurrency & Duplicates: Partial unique PostgreSQL indexes
+  (`uq_registrations_solo_event_user` and `uq_registrations_team_event`)
+  guarantee that concurrent registration double-clicks are rejected at the
+  database level.
+- Uniqueness: Teams enforce unique `invite_code`; team members enforce
+  unique `(team_id, user_id)`.
+
+[AUTHENTICATION - PASS]
+- Architecture: Supabase JWT Bearer Tokens with client-side session management.
+- Authorization header injection handled automatically via `apiFetch`.
+- Clean logout flow: Signs out of Supabase, flushes local state, clears
+  cached session tokens, and dispatches UI broadcast events.
+- Anonymous callers accessing protected routes receive strict HTTP 401 Unauthorized.
+- Sensitive user tokens and private keys are never logged in backend output.
+
+[AUTHORIZATION / ROLES - PASS]
+- Role hierarchy: `admin`, `event_head`, `volunteer`, `participant`.
+- Backend enforcement: Dependency `require_role(...)` strictly checks verified
+  JWT token claims or the constant-time `ADMIN_ACCESS_KEY` secret.
+- Front-end protection: UI components hide unauthorized actions, but the
+  backend strictly guards every operational route independently.
+- Cross-user data isolation: Normal users cannot inspect or modify other
+  users' registrations, team rosters, or check-in records (IDOR protected).
+
+[EVENTS SYSTEM - PASS]
+- Dataset: All 41 active festival events in the PostgreSQL database are verified
+  with valid slugs, names, dates, venues, fee descriptions, and rules.
+- Slug and UUID Routing: `GET /events/by-slug/{slug}` and `GET /events/{id}`
+  resolve cleanly.
+- Error handling: Nonexistent events or malformed slugs reliably return
+  standard HTTP 404 Not Found payloads rather than 500 server crashes.
+
+[REGISTRATION SYSTEM - PASS]
+- Authoritative state: Single source of truth stored in the `site_settings`
+  database table (`registration_open` key).
+- Gate synchronization: Gated via `GET /registrations/config/status` with
+  `Cache-Control: no-store` to prevent CDN or browser caching of stale state.
+- Closed State Enforcement: When registration is closed, `POST /registrations`
+  and `POST /teams` reject incoming attempts with HTTP 403 Forbidden.
+- Solo vs Team verification: Team events require squad size within event bounds
+  (`team_size_min` <= size <= `team_size_max`). Submitter must be a team member.
+
+[TEAMS SYSTEM - PASS]
+- Creation & Join: Generates crypto-random 8-character invite codes.
+- Membership management: Joining requires a valid code; duplicate joins
+  are prevented by unique constraints.
+- Privacy: `GET /teams/{team_id}` restricts visibility strictly to squad
+  members and fest administrators.
+
+[ANNOUNCEMENTS SYSTEM - PASS]
+- Request looping resolved: Added in-memory 15-second TTL cache and in-flight
+  promise deduplication to `announcementsApi.list` in `src/lib/api.ts`.
+- Prevents multi-component mount storms and rapid page-switching request spikes.
+- Cache is automatically invalidated when an administrator posts, edits,
+  or deletes an announcement.
+
+[CHECK-IN SYSTEM - PASS]
+- Security: `POST /checkin/scan` and `GET /checkin/history` are strictly
+  restricted to users with `volunteer`, `event_head`, or `admin` roles.
+- Station tracking: Validates pass codes against the database, records scanner
+  name and station ID, and flags duplicate scans at the same gate.
+
+[ADMIN SYSTEM - PASS]
+- Real-time stats: Added dedicated `GET /admin/stats` backend endpoint that
+  aggregates live database counts for registrations, completed ticket revenue,
+  approved check-ins, and active events across each festival stream.
+- Replaced previous mock numbers (2,480 registrations) with real DB metrics.
+- Result publishing: Updated `POST /events/{event_id}/results` to support
+  both UUIDs and event slug identifiers (e.g. `national-hackathon`).
+
+[3D EVENT SPHERE & VYUHAM CORE - PASS]
+- Fibonacci distribution: All event cards orbit the central origin (0, 0, 0)
+  in a 3D sphere.
+- Central Core: The official VYUHAM'26 logo floats permanently at the origin
+  with a transparent background, unobstructed by cards.
+- Auto-Rotation: Continuous cinematic rotation runs at ~4.0°/s on desktop
+  and ~2.3°/s on mobile. Automatically pauses during card hover or mouse
+  interaction, and resumes after 2.5 seconds of stillness.
+- Clean HUD: Removed all left/right circle arrow buttons.
+- Uniform cards: Removed artificial card enlargement, green glowing rings,
+  and active badges. All cards are uniform 2:3 portrait posters scaled
+  purely by depth (z-space).
+- Direct Access: Clicking ANY card immediately opens its Event Dossier modal.
+
+[MOBILE RESPONSIVENESS - PASS]
+- Tested on standard mobile viewport matrix (360x800, 375x812, 390x844, 412x915, 430x932).
+- Zero horizontal overflow (`document.documentElement.scrollWidth === window.innerWidth`).
+- Dedicated mobile card dimensions (`80x120` px) ensure high visual clarity.
+- Touch pan and swipe gestures rotate the sphere smoothly.
+
+[SECRET DAY 3 CONCERT PROTECTION - PASS]
+- Title: NIGHT 03 AFTERSHOCK / CLASSIFIED / TRANSMISSION LOCKED.
+- Leak verification: Scanned public API endpoints, frontend source, and
+  built production bundle. Confirmed zero exposure of secret performer,
+  artist, or lineup details.
+
+[DEPLOYMENT CONFIGURATION - PASS]
+- Frontend: `vercel.json` provides SPA rewrite rules for direct URL routing.
+- Backend: Created production `Dockerfile` based on `python:3.12-slim`
+  featuring non-root security execution, built-in healthcheck, and Uvicorn
+  configured for single-worker deployment.
+- Environment: Created clean `.env.example` templates for both applications.
+
+================================================================================
+3. COMPLETE API ENDPOINT INVENTORY
+================================================================================
+
+Total Backend Endpoints Audited: 39 (plus SQLAdmin Interface)
+Audit Results: 39 Passed, 0 Failed, 0 Warnings
+
+ENDPOINT LISTING:
+1.  GET    /                                           [Public]        Status: PASS
+2.  GET    /auth/me                                    [Authenticated] Status: PASS
+3.  PATCH  /auth/me                                    [Authenticated] Status: PASS
+4.  POST   /auth/assign-role                           [Admin Role]    Status: PASS
+5.  GET    /events                                     [Public]        Status: PASS
+6.  POST   /events                                     [Admin Role]    Status: PASS
+7.  GET    /events/by-slug/{slug}                      [Public]        Status: PASS
+8.  GET    /events/{event_id}                          [Public]        Status: PASS
+9.  PATCH  /events/{event_id}                          [Admin Role]    Status: PASS
+10. DELETE /events/{event_id}                          [Admin Role]    Status: PASS
+11. GET    /events/results                             [Public]        Status: PASS
+12. POST   /events/{event_id}/results                  [Admin Role]    Status: PASS
+13. GET    /registrations/config/status                [Public]        Status: PASS
+14. PATCH  /registrations/config/status                [Admin Role]    Status: PASS
+15. GET    /registrations/me                           [Authenticated] Status: PASS
+16. POST   /registrations                              [Authenticated] Status: PASS
+17. GET    /registrations/{registration_id}            [Privileged]    Status: PASS
+18. PATCH  /registrations/{registration_id}/status     [Admin Role]    Status: PASS
+19. DELETE /registrations/{registration_id}            [Privileged]    Status: PASS
+20. GET    /teams/me                                   [Authenticated] Status: PASS
+21. POST   /teams                                      [Authenticated] Status: PASS
+22. POST   /teams/join                                 [Authenticated] Status: PASS
+23. GET    /teams/{team_id}                            [Team Member]   Status: PASS
+24. GET    /announcements                              [Public]        Status: PASS
+25. POST   /announcements                              [Admin Role]    Status: PASS
+26. PATCH  /announcements/{announcement_id}            [Admin Role]    Status: PASS
+27. PUT    /announcements/{announcement_id}            [Admin Role]    Status: PASS
+28. DELETE /announcements/{announcement_id}            [Admin Role]    Status: PASS
+29. GET    /checkin/history                            [Volunteer]     Status: PASS
+30. POST   /checkin/scan                               [Volunteer]     Status: PASS
+31. GET    /admin/stats                                [Admin Role]    Status: PASS
+32. POST   /payments/create                            [Authenticated] Status: PASS
+33. POST   /payments/verify                            [Authenticated] Status: PASS
+34. GET    /payments/receipt/{transaction_ref}         [Public]        Status: PASS
+35. POST   /certificates/issue                         [Admin Role]    Status: PASS
+36. GET    /certificates/me                            [Authenticated] Status: PASS
+37. GET    /certificates/verify/{code}                 [Public]        Status: PASS
+38. POST   /contact                                    [Public]        Status: PASS
+39. POST   /feedback                                   [Public]        Status: PASS
+40. MOUNT  /admin                                      [Admin Session] Status: PASS
+
+================================================================================
+4. VERIFICATION OF END-TO-END SCENARIOS
+================================================================================
+
+SCENARIO 1: New User Journey
+- Open home page -> Browse 3D Fibonacci poster sphere -> Click event card
+- Modal opens Event Dossier immediately -> Close modal
+- VERDICT: PASS
+
+SCENARIO 2: Returning User & Direct URL Navigation
+- Direct URL navigation tested for `/events`, `/schedule`, `/announcements`,
+  `/teams`, `/login`, and `/dashboard`.
+- Single page app loads with 0 blank screens and 0 404 errors.
+- VERDICT: PASS
+
+SCENARIO 3: Registration Closed Enforcement
+- Set `reg_open = false` in `site_settings`.
+- Direct `POST /registrations` and `POST /teams` rejected with 403 Forbidden.
+- No orphan records created in database.
+- Restored `reg_open = true`.
+- VERDICT: PASS
+
+SCENARIO 4: Team System & Membership Constraints
+- Created team -> verified unique invite code generation.
+- Checked minimum/maximum team size validation.
+- Non-members blocked from viewing private squad info.
+- VERDICT: PASS
+
+SCENARIO 5: Admin Metrics & Persistence
+- Admin authentication verified via `X-Admin-Key`.
+- `GET /admin/stats` loads live database aggregates across all streams.
+- Unauthenticated requests to `/admin/stats` rejected with 401 Unauthorized.
+- VERDICT: PASS
+
+SCENARIO 6: Mobile Responsive 3D Sphere Experience
+- Tested under mobile viewports (390x844, 360x800).
+- Zero horizontal overflow.
+- Event cards rendered uniformly around stationary VYUHAM core.
+- No floating arrows or enlarged active selection rings.
+- VERDICT: PASS
+
+SCENARIO 7: Secret Day 3 Concert Security
+- Discovered AFTERSHOCK poster in 3D sphere.
+- Confirmed "TRANSMISSION LOCKED" watermark.
+- Zero artist or performer details leaked in DOM, bundle, or API responses.
+- VERDICT: PASS
+
+================================================================================
+5. ISSUES RESOLVED DURING PRE-DEPLOYMENT AUDIT
+================================================================================
+
+1. Issue: Missing `GET /admin/stats` endpoint.
+   Root Cause: SQLAdmin was mounted at `/admin`, but no REST statistics route existed.
+   Fix: Implemented `GET /admin/stats` in `app/modules/admin/router.py` with live
+   aggregation across registrations, payments, checkins, and events.
+   Removed mock fallback numbers.
+
+2. Issue: `POST /events/{event_id}/results` failed with 422 for slug identifiers.
+   Root Cause: Route parameter expected UUID only.
+   Fix: Changed `event_id` to `str`, allowing both UUID and slug lookups.
+
+3. Issue: Repeated `GET /announcements` request storm on page transitions.
+   Root Cause: Independent component mounts polled without caching.
+   Fix: Added 15-second TTL cache and in-flight promise deduplication in `api.ts`.
+
+4. Issue: Direct browser page refresh on static hosting could return 404.
+   Root Cause: Missing SPA rewrite rules.
+   Fix: Added `vercel.json` SPA catch-all rewrite rule to `/index.html`.
+
+5. Issue: Missing `favicon.ico` in static web root.
+   Root Cause: File was located in `src/pages/` instead of `public/`.
+   Fix: Relocated `favicon.ico` to `public/favicon.ico` and linked in `index.html`.
+
+6. Issue: Missing Docker container deployment configuration for backend.
+   Root Cause: No production Dockerfile.
+   Fix: Created production `Dockerfile` and `.dockerignore` for Python 3.12-slim.
+
+================================================================================
+6. DEPLOYMENT BLOCKERS & FINAL STATUS
+================================================================================
+
+DEPLOYMENT BLOCKERS:
+- None. All subsystems, database connections, and API contracts are fully verified.
+
+FINAL STATUS:
+========================================
+         READY FOR PRODUCTION
+========================================

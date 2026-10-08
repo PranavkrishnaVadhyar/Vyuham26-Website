@@ -17,8 +17,6 @@ import ClassifiedTransmissionIntro from "./events/ClassifiedTransmissionIntro";
 import {
   RotateCcw,
   Sparkles,
-  ChevronLeft,
-  ChevronRight,
   ArrowRight,
   Radio,
   SlidersHorizontal,
@@ -47,12 +45,12 @@ export const secretEvent = {
 /* ------------------------------------------------------------------ */
 /*  CATEGORY FILTERS                                                  */
 /* ------------------------------------------------------------------ */
-const CATEGORIES: { id: StreamId | "all"; label: string }[] = [
-  { id: "all", label: "ALL" },
-  { id: "tech", label: "TECHNOLOGY" },
-  { id: "management", label: "MANAGEMENT" },
-  { id: "cultural", label: "CULTURE" },
-  { id: "esports", label: "GAMING" },
+const CATEGORIES: { id: StreamId | "all"; label: string; shortLabel: string }[] = [
+  { id: "all", label: "ALL", shortLabel: "ALL" },
+  { id: "tech", label: "TECHNOLOGY", shortLabel: "TECH" },
+  { id: "management", label: "MANAGEMENT", shortLabel: "MGMT" },
+  { id: "cultural", label: "CULTURE", shortLabel: "CULTURE" },
+  { id: "esports", label: "GAMING", shortLabel: "GAMING" },
 ];
 
 export default function Events() {
@@ -144,7 +142,7 @@ export default function Events() {
   return (
     <section
       id="events"
-      className="relative w-full overflow-hidden px-4 sm:px-6 pt-20 sm:pt-28 md:pt-36 pb-14 sm:pb-20 md:px-[6vw] bg-[#020504] scroll-mt-24"
+      className="relative w-full overflow-hidden px-3.5 sm:px-6 pt-8 sm:pt-16 md:pt-20 pb-12 sm:pb-20 md:px-[6vw] bg-[#020504] scroll-mt-20 sm:scroll-mt-24"
     >
       {/* Background Atmosphere & Radial Grid */}
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_45%,rgba(16,77,50,0.18),transparent_75%)]" />
@@ -153,44 +151,44 @@ export default function Events() {
       {/* ───────────────────────────────────────────────────────────── */}
       {/*  SECTION HEADER                                               */}
       {/* ───────────────────────────────────────────────────────────── */}
-      <div className="relative z-10 flex flex-col justify-between gap-6 lg:flex-row lg:items-end">
+      <div className="relative z-10 flex flex-col justify-between gap-3 sm:gap-6 lg:flex-row lg:items-end">
         <div>
-          <div className="flex flex-wrap items-center gap-3">
-            <p className="eyebrow">04 — EVENT MATRIX</p>
-            <div className="flex items-center gap-1.5 rounded border border-emerald-500/30 bg-emerald-950/40 px-2 py-0.5 font-mono text-[8px] uppercase tracking-[0.2em] text-emerald-400">
-              <Radio className="h-3 w-3 animate-pulse text-emerald-400" />
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+            <p className="eyebrow text-[9px] sm:text-[10px]">04 — EVENT MATRIX</p>
+            <div className="flex items-center gap-1 rounded border border-emerald-500/30 bg-emerald-950/40 px-1.5 sm:px-2 py-0.5 font-mono text-[7px] sm:text-[8px] uppercase tracking-[0.2em] text-emerald-400">
+              <Radio className="h-2.5 w-2.5 sm:h-3 sm:w-3 animate-pulse text-emerald-400" />
               <span>3D SPHERICAL ARCHIVE</span>
             </div>
           </div>
 
-          <h2 className="t-cond mt-4 text-[13vw] sm:text-[10vw] md:text-[6vw] leading-[0.85] text-[#f0f9f5]">
+          <h2 className="t-cond mt-2 sm:mt-4 text-[28px] xs:text-[32px] sm:text-[10vw] md:text-[6vw] leading-[0.9] text-[#f0f9f5]">
             <MaskReveal>THE PROGRAMME</MaskReveal>
           </h2>
 
-          <p className="mt-4 max-w-[56ch] text-[13px] leading-relaxed text-[#7d9a8d] md:text-[15px]">
+          <p className="mt-2 sm:mt-4 hidden sm:block max-w-[56ch] text-[13px] leading-relaxed text-[#7d9a8d] md:text-[15px]">
             Explore 30+ festival competitions orbiting the official VYUHAM&apos;26 command core in true 3D space.
             Rotate the sphere to discover competitions or switch to the matrix view for instant lookup.
           </p>
         </div>
 
         {/* Right actions: Mode Toggle, Replay intro & View Directory */}
-        <div className="flex flex-wrap items-center gap-3 shrink-0 font-mono text-[9px] uppercase tracking-[0.2em]">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3 shrink-0 font-mono text-[8px] sm:text-[9px] uppercase tracking-[0.18em] sm:tracking-[0.2em]">
           {/* Mode Switcher: 3D Explore vs Find Matrix */}
-          <div className="flex items-center rounded-lg border border-emerald-500/30 bg-black/60 p-1">
+          <div className="flex items-center rounded-lg border border-emerald-500/30 bg-black/60 p-0.5 sm:p-1">
             <button
               type="button"
               onClick={() => {
                 cyberAudio.playClick();
                 setViewMode("3d");
               }}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md transition-all ${
+              className={`flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-md transition-all ${
                 viewMode === "3d"
                   ? "bg-emerald-400 text-black font-bold shadow-[0_0_16px_rgba(24,196,124,0.4)]"
                   : "text-[#7ca290] hover:text-emerald-300"
               }`}
             >
               <Globe className="h-3 w-3" />
-              <span>3D EXPLORE</span>
+              <span>3D SPHERE</span>
             </button>
             <button
               type="button"
@@ -198,21 +196,21 @@ export default function Events() {
                 cyberAudio.playClick();
                 setViewMode("grid");
               }}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md transition-all ${
+              className={`flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-md transition-all ${
                 viewMode === "grid"
                   ? "bg-emerald-400 text-black font-bold shadow-[0_0_16px_rgba(24,196,124,0.4)]"
                   : "text-[#7ca290] hover:text-emerald-300"
               }`}
             >
               <LayoutGrid className="h-3 w-3" />
-              <span>FIND MATRIX</span>
+              <span>MATRIX</span>
             </button>
           </div>
 
           <button
             type="button"
             onClick={handleReplayIntro}
-            className="flex items-center gap-1.5 border border-[rgba(120,160,145,0.2)] bg-black/40 px-3.5 py-2 text-[#7d9a8d] transition hover:border-emerald-400/50 hover:text-emerald-300"
+            className="hidden sm:flex items-center gap-1.5 border border-[rgba(120,160,145,0.2)] bg-black/40 px-3.5 py-2 text-[#7d9a8d] transition hover:border-emerald-400/50 hover:text-emerald-300"
             title="Replay classified signal interruption intro"
           >
             <RotateCcw className="h-3.5 w-3.5" />
@@ -221,10 +219,11 @@ export default function Events() {
 
           <Link
             href="/events"
-            className="inline-flex items-center gap-2 border border-emerald-500/40 bg-emerald-950/40 px-4 py-2 text-emerald-300 transition hover:bg-emerald-900/60 hover:text-emerald-200"
+            className="inline-flex items-center gap-1.5 border border-emerald-500/40 bg-emerald-950/40 px-2.5 sm:px-4 py-1.5 sm:py-2 text-emerald-300 transition hover:bg-emerald-900/60 hover:text-emerald-200"
           >
-            <span>ALL 30+ DIRECTORY</span>
-            <ArrowRight className="h-3 w-3" />
+            <span className="hidden sm:inline">ALL 30+ DIRECTORY</span>
+            <span className="sm:hidden inline">ALL (35)</span>
+            <ArrowRight className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
           </Link>
         </div>
       </div>
@@ -232,21 +231,23 @@ export default function Events() {
       {/* ───────────────────────────────────────────────────────────── */}
       {/*  CATEGORY FILTER RAIL                                         */}
       {/* ───────────────────────────────────────────────────────────── */}
-      <div className="relative z-10 no-scrollbar mt-8 sm:mt-10 flex items-center justify-between gap-3 overflow-x-auto border-y border-[rgba(120,160,145,0.12)] py-3">
-        <div className="flex gap-2 shrink-0">
+      <div className="relative z-10 no-scrollbar mt-3 sm:mt-10 flex items-center justify-between gap-2 overflow-x-auto whitespace-nowrap border-y border-[rgba(120,160,145,0.12)] py-2 sm:py-3 scroll-smooth">
+        <div className="flex gap-1.5 sm:gap-2 shrink-0">
           {CATEGORIES.map((c) => {
             const isActive = selectedCategory === c.id;
             return (
               <button
                 key={c.id}
                 onClick={() => handleCategorySelect(c.id)}
-                className={`shrink-0 rounded-lg border px-4 py-2 font-mono text-[9px] uppercase tracking-[0.22em] transition-all duration-300 ${
+                className={`shrink-0 rounded-lg border px-3 sm:px-4 py-1.5 sm:py-2 font-mono text-[8.5px] sm:text-[9px] uppercase tracking-[0.20em] sm:tracking-[0.22em] transition-all duration-300 ${
                   isActive
                     ? "border-emerald-400 bg-emerald-400 text-[#020504] font-bold shadow-[0_0_24px_rgba(24,196,124,0.4)]"
                     : "border-[rgba(120,160,145,0.16)] bg-black/30 text-[#84a094] hover:border-emerald-500/40 hover:text-[#dff6ec]"
                 }`}
               >
-                {c.label} {c.id === "all" ? `(${publicEvents.length})` : ""}
+                <span className="hidden sm:inline">{c.label}</span>
+                <span className="sm:hidden inline">{c.shortLabel}</span>
+                {c.id === "all" ? ` (${publicEvents.length})` : ""}
               </button>
             );
           })}
@@ -281,6 +282,7 @@ export default function Events() {
             onOpenEventDossier={setSelectedDossierEvent}
             onOpenClassifiedModal={() => setIsClassifiedModalOpen(true)}
             accentOf={accentOf}
+            isModalOpen={Boolean(selectedDossierEvent || isClassifiedModalOpen)}
           />
         ) : (
           /* ── FIND MATRIX: RESPONSIVE CYBER GRID VIEW ── */
@@ -367,7 +369,11 @@ export default function Events() {
       {/*  FOOTER CONTROLS & LIVE NUMBER COUNTER                        */}
       {/* ───────────────────────────────────────────────────────────── */}
       {!showIntro && (
-        <div className="relative z-10 mt-6 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-[rgba(120,160,145,0.14)] pt-5">
+        <div
+          className={`relative z-10 mt-6 sm:mt-8 items-center justify-between gap-4 border-t border-[rgba(120,160,145,0.14)] pt-4 sm:pt-5 ${
+            viewMode === "3d" ? "hidden sm:flex" : "flex flex-col sm:flex-row"
+          }`}
+        >
           {/* Left: Interactive Guidance */}
           <div className="flex items-center gap-2 font-mono text-[9px] tracking-[0.22em] text-[#6f9b89]">
             <SlidersHorizontal className="h-3.5 w-3.5 text-emerald-400" />
@@ -391,31 +397,10 @@ export default function Events() {
             </div>
           </div>
 
-          {/* Right: Quick Step Nav */}
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => {
-                cyberAudio.playClick();
-                setActiveIndex(((activeIndex - 1) % totalEvents + totalEvents) % totalEvents);
-              }}
-              className="flex items-center gap-1.5 border border-[rgba(120,160,145,0.2)] bg-black/40 px-3 py-1.5 font-mono text-[9px] uppercase tracking-[0.18em] text-[#8ca89c] transition hover:border-emerald-400/50 hover:text-emerald-300"
-            >
-              <ChevronLeft className="h-3.5 w-3.5" />
-              <span>PREV</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => {
-                cyberAudio.playClick();
-                setActiveIndex((activeIndex + 1) % totalEvents);
-              }}
-              className="flex items-center gap-1.5 border border-[rgba(120,160,145,0.2)] bg-black/40 px-3 py-1.5 font-mono text-[9px] uppercase tracking-[0.18em] text-[#8ca89c] transition hover:border-emerald-400/50 hover:text-emerald-300"
-            >
-              <span>NEXT</span>
-              <ChevronRight className="h-3.5 w-3.5" />
-            </button>
+          {/* Right: Live Orbit Status */}
+          <div className="flex items-center gap-2 border border-[rgba(120,160,145,0.2)] bg-black/40 px-3 py-1.5 font-mono text-[9px] uppercase tracking-[0.2em] text-[#8ca89c]">
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            <span>ORBIT ACTIVE</span>
           </div>
         </div>
       )}

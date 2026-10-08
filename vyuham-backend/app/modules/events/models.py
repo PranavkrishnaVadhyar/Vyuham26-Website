@@ -51,4 +51,6 @@ class Event(Base):
     start_time: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     end_time: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    registration_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    makemypass_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default=func.now())

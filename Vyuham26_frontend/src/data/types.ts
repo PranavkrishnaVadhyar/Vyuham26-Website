@@ -44,7 +44,10 @@ export interface FestEvent {
   featured?: boolean;
   starred?: boolean;
   status: "open" | "closing" | "full";
+  registration_url?: string;
+  makemypass_url?: string;
 }
+
 
 export interface ScheduleDay {
   id: string;
