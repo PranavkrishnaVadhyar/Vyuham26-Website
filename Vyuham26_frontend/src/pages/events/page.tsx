@@ -949,11 +949,11 @@ export default function EventsPage() {
                   onClick={() => setStarredOnly((v) => !v)}
                   className={`shrink-0 rounded-lg border px-3 py-1.5 font-mono text-[9px] uppercase tracking-[0.16em] transition-all ${
                     starredOnly
-                      ? "border-amber-400/60 bg-amber-400/20 text-amber-300 shadow-[0_0_12px_rgba(251,191,36,0.3)] font-bold"
+                      ? "border-emerald-400/60 bg-emerald-400/20 text-emerald-300 font-bold"
                       : "border-white/[0.08] bg-white/[0.02] text-white/40 hover:text-white/70"
                   }`}
                 >
-                  ★ STARRED ({starredCount})
+                  CURATED ({starredCount})
                 </button>
 
                 <button
@@ -1081,16 +1081,13 @@ export default function EventsPage() {
                   return (
                     <div
                       key={event.slug}
-                      className={`group relative flex flex-col justify-between overflow-hidden rounded-2xl border bg-[#050c08]/80 p-6 backdrop-blur-sm transition-all duration-300 hover:border-emerald-500/40 hover:bg-[#07130d] ${
-                        starred ? "border-amber-400/40 shadow-[0_0_24px_rgba(251,191,36,0.08)]" : ""
-                      }`}
-                      style={{ borderColor: starred ? "rgba(251,191,36,0.38)" : "rgba(120,160,145,0.16)" }}
+                      className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-[rgba(120,160,145,0.16)] bg-[#050c08]/80 p-6 backdrop-blur-sm transition-all duration-300 hover:border-emerald-500/40 hover:bg-[#07130d]"
                     >
                       {/* Top accent line on hover */}
                       <div
                         className="absolute left-0 right-0 top-0 h-[2px] opacity-0 transition-opacity duration-300 group-hover:opacity-100"
                         style={{
-                          background: `linear-gradient(90deg, transparent, ${starred ? "#fbbf24" : theme.accent}, transparent)`,
+                          background: `linear-gradient(90deg, transparent, ${theme.accent}, transparent)`,
                         }}
                       />
 
@@ -1114,11 +1111,6 @@ export default function EventsPage() {
                             >
                               {stream}
                             </span>
-                            {starred && (
-                              <span className="inline-flex items-center gap-1 rounded border border-amber-400/50 bg-amber-400/15 px-2 py-0.5 font-mono text-[8px] font-bold tracking-[0.16em] uppercase text-amber-300 shadow-[0_0_10px_rgba(251,191,36,0.25)]">
-                                ★ STARRED
-                              </span>
-                            )}
                           </div>
 
                           <div className="flex items-center gap-2">

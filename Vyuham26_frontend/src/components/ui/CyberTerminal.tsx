@@ -546,13 +546,10 @@ Manage your participant information and VYUHAM activity.`,
         case "admin26":
         case "vyuhamadmin":
           addOutput(
-            `[ACCESS RESTRICTED // AUTHENTICATION REQUIRED]
-
-The Admin Operations Console cannot be unlocked via terminal commands.
-Administrators must authenticate directly at the secure Admin Portal (/admin).`,
-            "/admin",
-            "Go to Admin Login Portal →",
-            "system"
+            `[ACCESS DENIED] Unknown command or insufficient privileges. Type 'help' for available commands.`,
+            undefined,
+            undefined,
+            "error"
           );
           break;
 
@@ -849,13 +846,10 @@ STATUS        : NOMINAL`
         case "registration:close":
         case "reg-close":
           addOutput(
-            `[ACCESS RESTRICTED // ADMIN PAGE ONLY]
-
-Registration open/close controls are disabled in the console.
-Festival registration can only be opened or closed by authorized administrators directly inside the Admin Dashboard (/admin).`,
-            "/admin",
-            "Go to Admin Dashboard →",
-            "system"
+            `[ACCESS RESTRICTED] Registration controls require administrative authentication.`,
+            undefined,
+            undefined,
+            "error"
           );
           break;
 
@@ -865,9 +859,9 @@ Festival registration can only be opened or closed by authorized administrators 
             `FESTIVAL REGISTRATION STATUS:
 
 GATE STATUS : ${isRegistrationOpen() ? "OPEN (LIVE)" : "CLOSED (COMING SOON)"}
-MANAGEMENT  : ADMIN DASHBOARD EXCLUSIVE (/admin)
+MANAGEMENT  : FESTIVAL OPERATIONS DESK
 
-Registration open/close is controlled exclusively by administrators from the Admin Dashboard.`
+Registration open/close is controlled exclusively by festival administrators.`
           );
           break;
 
@@ -880,8 +874,8 @@ Registration open/close is controlled exclusively by administrators from the Adm
               `[RESTRICTED PROTOCOL // ROOT PRIVILEGE REQUIRED]
 
 Administrative root clearance required to execute core showcase overrides.`,
-              "/admin",
-              "Open Admin Gateway (Cyber Gate) →",
+              undefined,
+              undefined,
               "error"
             );
             break;
@@ -906,8 +900,8 @@ THE CORE SHOWCASE: ACTIVATED & VISIBLE
               `[RESTRICTED PROTOCOL // ROOT PRIVILEGE REQUIRED]
 
 Administrative root clearance required to execute core showcase overrides.`,
-              "/admin",
-              "Open Admin Gateway (Cyber Gate) →",
+              undefined,
+              undefined,
               "error"
             );
             break;
@@ -938,8 +932,8 @@ ACCESS      : ADMIN ROOT TOGGLEABLE`
           if (!consoleConfig.showRootGateway && !ui.adminUnlocked) {
             addOutput(
               `[RESTRICTED PROTOCOL // ROOT PRIVILEGE REQUIRED]`,
-              "/admin",
-              "Open Admin Gateway (Cyber Gate) →",
+              undefined,
+              undefined,
               "error"
             );
             break;
@@ -954,8 +948,8 @@ ACCESS      : ADMIN ROOT TOGGLEABLE`
           if (!consoleConfig.showRootGateway && !ui.adminUnlocked) {
             addOutput(
               `[RESTRICTED PROTOCOL // ROOT PRIVILEGE REQUIRED]`,
-              "/admin",
-              "Open Admin Gateway (Cyber Gate) →",
+              undefined,
+              undefined,
               "error"
             );
             break;

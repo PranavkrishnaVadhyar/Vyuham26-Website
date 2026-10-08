@@ -88,6 +88,7 @@ export default function AnnouncementManager() {
       setNewUrgent(false);
       setNewPinned(false);
       setIsCreating(false);
+      window.dispatchEvent(new CustomEvent("vyuham:announcement_update"));
       toast("Broadcast transmission successfully published live!", "ok");
     } catch (err: any) {
       toast(err?.message || "Failed to publish announcement", "warn");
@@ -131,6 +132,7 @@ export default function AnnouncementManager() {
         prev.map((item) => (item.id === editingItem.id ? updated : item))
       );
       setEditingItem(null);
+      window.dispatchEvent(new CustomEvent("vyuham:announcement_update"));
       toast("Announcement updated successfully!", "ok");
     } catch (err: any) {
       toast(err?.message || "Failed to update announcement", "warn");
@@ -148,6 +150,7 @@ export default function AnnouncementManager() {
       cyberAudio.playTelemetry();
       await announcementsApi.delete(id);
       setAnnouncements((prev) => prev.filter((item) => item.id !== id));
+      window.dispatchEvent(new CustomEvent("vyuham:announcement_update"));
       toast("Announcement deleted from database.", "ok");
     } catch (err: any) {
       toast(err?.message || "Failed to delete announcement", "warn");

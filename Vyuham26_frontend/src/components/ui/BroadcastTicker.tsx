@@ -3,9 +3,11 @@ import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useApp } from "@/lib/store";
 import { announcementsApi, type AnnouncementRecord } from "@/lib/api";
+import { useRegistrationOpen } from "@/config/site";
 
 export default function BroadcastTicker({ visible = true }: { visible?: boolean }) {
   const { content } = useApp();
+  const regOpen = useRegistrationOpen();
   const [minimized, setMinimized] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -25,7 +27,11 @@ export default function BroadcastTicker({ visible = true }: { visible?: boolean 
     };
     fetchBulletins();
     const poll = setInterval(fetchBulletins, 30000);
-    return () => clearInterval(poll);
+    window.addEventListener("vyuham:announcement_update", fetchBulletins);
+    return () => {
+      clearInterval(poll);
+      window.removeEventListener("vyuham:announcement_update", fetchBulletins);
+    };
   }, []);
 
   useEffect(() => {
@@ -48,36 +54,67 @@ export default function BroadcastTicker({ visible = true }: { visible?: boolean 
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [modalOpen]);
 
-  const defaultBulletins = [
-    {
-      id: "b1",
-      category: "TRANSMISSION",
-      title: "DUK TECHNOCITY // VYUHAM'26 THREE-DAY CONVERGENCE OPENS 30 OCT 2026",
-      time: "OFFICIAL FESTIVAL BROADCAST",
-      urgent: false,
-    },
-    {
-      id: "b2",
-      category: "REGISTRATIONS",
-      title: "HACKATHON — 24HR AT 85% CAPACITY — REGISTER SQUADS BEFORE LOCKOUT",
-      time: "TECH STREAM // PRIZE POOL ₹30,000",
-      urgent: true,
-    },
-    {
-      id: "b3",
-      category: "CYBER WARFARE",
-      title: "CAPTURE THE FLAG REGISTRATIONS OPEN IN COMPUTER LAB",
-      time: "COMPUTER LAB // PRIZE POOL ₹15,000",
-      urgent: false,
-    },
-    {
-      id: "b4",
-      category: "CAMPUS INTEL",
-      title: "FREE CAMPUS SHUTTLES RUNNING FROM KAZHAKKOOTTAM TO TECHNOCITY",
-      time: "LOGISTICS // TRANSIT DECK",
-      urgent: false,
-    },
-  ];
+  const defaultBulletins = regOpen
+    ? [
+        {
+          id: "b1",
+          category: "TRANSMISSION",
+          title: "DUK TECHNOCITY // VYUHAM'26 THREE-DAY CONVERGENCE OPENS 30 OCT 2026",
+          time: "OFFICIAL FESTIVAL BROADCAST",
+          urgent: false,
+        },
+        {
+          id: "b2",
+          category: "REGISTRATIONS",
+          title: "FESTIVAL REGISTRATIONS OPEN // HOLD SLOTS FOR HACKATHON & KEY EVENTS",
+          time: "TECH STREAM // PRIZE POOL ₹30,000",
+          urgent: true,
+        },
+        {
+          id: "b3",
+          category: "CYBER WARFARE",
+          title: "CAPTURE THE FLAG REGISTRATIONS ACCEPTING SQUADS",
+          time: "COMPUTER LAB // PRIZE POOL ₹15,000",
+          urgent: false,
+        },
+        {
+          id: "b4",
+          category: "CAMPUS INTEL",
+          title: "FREE CAMPUS SHUTTLES RUNNING FROM KAZHAKKOOTTAM TO TECHNOCITY",
+          time: "LOGISTICS // TRANSIT DECK",
+          urgent: false,
+        },
+      ]
+    : [
+        {
+          id: "b1",
+          category: "TRANSMISSION",
+          title: "DUK TECHNOCITY // VYUHAM'26 THREE-DAY CONVERGENCE OPENS 30 OCT 2026",
+          time: "OFFICIAL FESTIVAL BROADCAST",
+          urgent: false,
+        },
+        {
+          id: "b2",
+          category: "STANDBY",
+          title: "EVENT REGISTRATION GATEWAY OPENS SOON — PREPARE YOUR SQUADS",
+          time: "OFFICIAL FESTIVAL NOTICE",
+          urgent: false,
+        },
+        {
+          id: "b3",
+          category: "DOSSIER",
+          title: "EXPLORE COMPLETE 30+ EVENT ROSTER & RULEBOOKS IN FULL DIRECTORY",
+          time: "TECH · CULTURAL · ESPORTS · MANAGEMENT",
+          urgent: false,
+        },
+        {
+          id: "b4",
+          category: "CAMPUS INTEL",
+          title: "FREE CAMPUS SHUTTLES RUNNING FROM KAZHAKKOOTTAM TO TECHNOCITY",
+          time: "LOGISTICS // TRANSIT DECK",
+          urgent: false,
+        },
+      ];
 
   const bulletins =
     remoteAnnouncements.length > 0

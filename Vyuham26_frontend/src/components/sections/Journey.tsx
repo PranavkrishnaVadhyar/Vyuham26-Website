@@ -39,6 +39,32 @@ function Panel({ d, i, total }: { d: ScheduleDay; i: number; total: number }) {
         />
       </div>
 
+      {/* Stage progress pills at top */}
+      <div className="absolute top-6 left-6 z-20 flex items-center gap-2 md:left-[10vw]">
+        {Array.from({ length: total }).map((_, k) => (
+          <div
+            key={k}
+            className={`flex items-center gap-1.5 border px-2.5 py-1 font-mono text-[9px] tracking-[0.2em] transition-all duration-300 ${
+              k === i
+                ? "border-[#18c47c] bg-[#18c47c]/15 text-[#7dffc4] shadow-[0_0_12px_rgba(24,196,124,0.35)]"
+                : "border-[rgba(120,160,145,0.18)] bg-[rgba(2,10,7,0.5)] text-[#557e6d]"
+            }`}
+          >
+            <span
+              className={`h-1.5 w-1.5 rounded-full ${
+                k === i ? "bg-[#18c47c] shadow-[0_0_6px_#18c47c]" : "bg-[#2e4c40]"
+              }`}
+            />
+            <span>STAGE 0{k + 1}</span>
+            {k === 2 && k === i && (
+              <span className="ml-1 text-[8px] font-bold uppercase tracking-[0.16em] text-emerald-300">
+                [LOCKED]
+              </span>
+            )}
+          </div>
+        ))}
+      </div>
+
       {/* intensity ladder */}
       <div className="absolute left-5 top-1/2 z-10 hidden -translate-y-1/2 flex-col gap-1 md:flex">
         {Array.from({ length: 18 }).map((_, k) => (
@@ -80,19 +106,41 @@ function Panel({ d, i, total }: { d: ScheduleDay; i: number; total: number }) {
             ))}
           </ul>
 
-          <div className="mt-6 sm:mt-8">
+          <div className="mt-6 sm:mt-8 flex flex-wrap items-center gap-3">
             <Link
               href="/schedule"
               className="inline-flex items-center gap-2 border border-[#18c47c]/30 bg-[#18c47c]/10 px-4 py-2 font-mono text-[9px] uppercase tracking-[0.22em] text-[#7dffc4] transition hover:bg-[#18c47c] hover:text-[#030504]"
             >
               EXPLORE {d.day} SCHEDULE & EVENTS →
             </Link>
+
+            {i === 2 ? (
+              <div className="inline-flex items-center gap-2 border border-emerald-500/40 bg-emerald-950/60 px-3.5 py-2 font-mono text-[9px] uppercase tracking-[0.2em] text-emerald-300 shadow-[0_0_15px_rgba(24,196,124,0.2)]">
+                <span className="relative flex h-2 w-2">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+                </span>
+                <span>DAY 03 LOCKED IN VIEW • SCROLL DOWN TO CONTINUE ↓</span>
+              </div>
+            ) : (
+              <span className="hidden sm:inline-flex items-center gap-1.5 font-mono text-[9px] tracking-[0.22em] text-[#557e6d]">
+                <span>SCROLL TO ADVANCE STAGE</span>
+                <span className="text-[#18c47c]">→</span>
+              </span>
+            )}
           </div>
         </div>
       </div>
 
-      <div className="absolute bottom-6 right-6 z-10 font-mono text-[9px] tracking-[0.3em] text-[#3f6152] md:bottom-10 md:right-10">
-        {String(i + 1).padStart(2, "0")} / {String(total).padStart(2, "0")}
+      <div className="absolute bottom-6 right-6 z-10 flex items-center gap-3 font-mono text-[9px] tracking-[0.3em] text-[#3f6152] md:bottom-10 md:right-10">
+        {i === 2 && (
+          <span className="hidden sm:inline-flex items-center gap-1.5 border border-emerald-500/30 bg-emerald-950/40 px-2 py-0.5 text-[8px] tracking-[0.2em] text-emerald-400">
+            FINAL PHASE // LOCKED
+          </span>
+        )}
+        <span className="text-[#7d9a8d]">
+          {String(i + 1).padStart(2, "0")} / {String(total).padStart(2, "0")}
+        </span>
       </div>
     </article>
   );
@@ -111,55 +159,156 @@ export default function Journey() {
       const track = el.querySelector<HTMLElement>(".track");
       if (!track) return;
       const panels = gsap.utils.toArray<HTMLElement>(".panel", track);
+      if (panels.length === 0) return;
 
-      const sweep = gsap.to(track, {
-        x: () => -(track.scrollWidth - window.innerWidth),
-        ease: "none",
+      // Master horizontal journey scroll timeline
+      // Total scroll budget = innerHeight * 5.2 (calm, readable pacing)
+      // Generous reading hold on Day 1, smooth transition to Day 2, reading hold on Day 2,
+      // smooth transition to Day 3, and a substantial LOCKED hold on Day 3!
+      const tl = gsap.timeline({
         scrollTrigger: {
           trigger: el,
           start: "top top",
-          end: () => `+=${track.scrollWidth - window.innerWidth}`,
-          scrub: 0.8,
+          end: () => `+=${window.innerHeight * 5.2}`,
+          scrub: 1.2,
           pin: true,
           anticipatePin: 1,
           invalidateOnRefresh: true,
         },
       });
 
-      panels.forEach((p) => {
-        gsap.fromTo(
-          p.querySelector(".panel-bg"),
-          { xPercent: 12, scale: 1.05 },
-          {
-            xPercent: -12,
-            scale: 1,
-            ease: "none",
-            scrollTrigger: {
-              trigger: p,
-              containerAnimation: sweep,
-              start: "left right",
-              end: "right left",
-              scrub: true,
-            },
-          },
-        );
-        gsap.fromTo(
-          p.querySelector(".panel-copy"),
-          { autoAlpha: 0.15, x: 50, filter: "blur(8px)" },
-          {
-            autoAlpha: 1,
-            x: 0,
-            filter: "blur(0px)",
-            ease: "power2.out",
-            scrollTrigger: {
-              trigger: p,
-              containerAnimation: sweep,
-              start: "left 85%",
-              end: "left 25%",
-              scrub: true,
-            },
-          },
-        );
+      // Pacing breakdown (Total: 14.0 timeline units):
+      // 0.0 -> 1.5: Day 1 hold (stationary at 0)
+      // 1.5 -> 5.0: Smooth eased transition Day 1 -> Day 2 (-100vw)
+      // 5.0 -> 7.0: Day 2 hold (stationary at -100vw)
+      // 7.0 -> 10.5: Smooth eased transition Day 2 -> Day 3 (-200vw)
+      // 10.5 -> 14.0: Day 3 LOCKED in full view (stationary at -200vw)
+      //               Only after completing this full 3.5 units does it unpin!
+
+      tl.to(
+        track,
+        {
+          x: () => -window.innerWidth,
+          ease: "power2.inOut",
+          duration: 3.5,
+        },
+        1.5
+      );
+
+      tl.to(
+        track,
+        {
+          x: () => -2 * window.innerWidth,
+          ease: "power2.inOut",
+          duration: 3.5,
+        },
+        7.0
+      );
+
+      // Dedicated Day 3 lock hold
+      tl.to(
+        track,
+        {
+          x: () => -2 * window.innerWidth,
+          ease: "none",
+          duration: 3.5,
+        },
+        10.5
+      );
+
+      panels.forEach((p, idx) => {
+        const bg = p.querySelector<HTMLElement>(".panel-bg");
+        const copy = p.querySelector<HTMLElement>(".panel-copy");
+
+        if (bg) {
+          gsap.fromTo(
+            bg,
+            { xPercent: idx === 0 ? 0 : 8, scale: 1.05 },
+            {
+              xPercent: idx === 2 ? 0 : -8,
+              scale: 1,
+              ease: "none",
+              scrollTrigger: {
+                trigger: p,
+                containerAnimation: tl,
+                start: "left right",
+                end: "right left",
+                scrub: true,
+              },
+            }
+          );
+        }
+
+        if (copy) {
+          if (idx === 0) {
+            // Day 1 starts crisp and sharp
+            gsap.set(copy, { autoAlpha: 1, x: 0, filter: "blur(0px)" });
+            gsap.to(copy, {
+              autoAlpha: 0.15,
+              x: -40,
+              filter: "blur(6px)",
+              ease: "power2.in",
+              scrollTrigger: {
+                trigger: p,
+                containerAnimation: tl,
+                start: "right 90%",
+                end: "right 30%",
+                scrub: true,
+              },
+            });
+          } else if (idx === 1) {
+            // Day 2 glides in, rests clearly, then glides out
+            gsap.fromTo(
+              copy,
+              { autoAlpha: 0.1, x: 50, filter: "blur(8px)" },
+              {
+                autoAlpha: 1,
+                x: 0,
+                filter: "blur(0px)",
+                ease: "power2.out",
+                scrollTrigger: {
+                  trigger: p,
+                  containerAnimation: tl,
+                  start: "left 85%",
+                  end: "left 25%",
+                  scrub: true,
+                },
+              }
+            );
+            gsap.to(copy, {
+              autoAlpha: 0.15,
+              x: -40,
+              filter: "blur(6px)",
+              ease: "power2.in",
+              scrollTrigger: {
+                trigger: p,
+                containerAnimation: tl,
+                start: "right 90%",
+                end: "right 30%",
+                scrub: true,
+              },
+            });
+          } else {
+            // Day 3 (Final slide) glides in to crystal-clear focus and REMAINS LOCKED
+            gsap.fromTo(
+              copy,
+              { autoAlpha: 0.1, x: 50, filter: "blur(8px)" },
+              {
+                autoAlpha: 1,
+                x: 0,
+                filter: "blur(0px)",
+                ease: "power2.out",
+                scrollTrigger: {
+                  trigger: p,
+                  containerAnimation: tl,
+                  start: "left 85%",
+                  end: "left 20%",
+                  scrub: true,
+                },
+              }
+            );
+          }
+        }
       });
     }, el);
     return () => ctx.revert();

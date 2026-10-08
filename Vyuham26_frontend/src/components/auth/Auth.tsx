@@ -4,6 +4,7 @@ import { useApp } from "@/lib/store";
 import { toast } from "@/components/ui/Toaster";
 import { MEDIA } from "@/data/media";
 import { SITE_CONFIG, isRegistrationOpen } from "@/config/site";
+import { markInternalNav } from "@/lib/router";
 
 /* ================================================================== */
 /*  AUTH MODAL                                                         */
@@ -379,7 +380,11 @@ export function ProfilePanel() {
             {user?.role === "admin" && (
               <a
                 href="#/admin"
-                onClick={() => ui.setProfileOpen(false)}
+                onClick={() => {
+                  ui.setAdminUnlocked(true);
+                  markInternalNav();
+                  ui.setProfileOpen(false);
+                }}
                 className="link-trail font-mono text-[9px] tracking-[0.26em] text-[#9fe9c6]"
               >
                 ADMIN CONSOLE ↗

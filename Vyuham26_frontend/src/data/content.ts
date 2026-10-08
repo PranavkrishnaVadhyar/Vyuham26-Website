@@ -253,7 +253,7 @@ export const events: FestEvent[] = rawEvents.map((e) => {
     image: imageByStream[e.stream] || MEDIA.lab,
     featured: e.featured,
     starred: e.starred ?? (e.featured || ["hackathon", "best-manager", "valorant", "concert"].includes(e.slug)),
-    status: isClosing ? "closing" : "open",
+    status: "open",
   };
 });
 

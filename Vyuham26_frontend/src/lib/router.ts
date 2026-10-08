@@ -50,24 +50,68 @@ export function isHomeRoute(path: string): boolean {
 }
 
 /**
+ * Checks if the current session has administrator clearance.
+ */
+export function isAdminUnlocked(): boolean {
+  if (typeof window === "undefined") return false;
+  try {
+    if (sessionStorage.getItem("vyuham26:admin_unlocked") === "true") {
+      return true;
+    }
+    const authData = localStorage.getItem("vyuham_auth_user");
+    if (authData) {
+      const parsed = JSON.parse(authData);
+      if (parsed?.role === "admin") return true;
+    }
+  } catch {}
+  return false;
+}
+
+/**
  * Guard that redirects to home if the route was reached by direct URL
- * access (typing in address bar / pasting) rather than internal navigation.
+ * access (typing in address bar / pasting) rather than internal navigation,
+ * or if a user attempts to access /admin directly without authorized clearance.
  * Returns true if the route is allowed, false if redirected.
  */
 export function guardRoute(currentPath: string): boolean {
   if (typeof window === "undefined") return true;
-  if (isHomeRoute(currentPath)) return true;
-  if (isInternalNavigation()) return true;
 
-  // Admin routes have their own security gate and should never be blocked by nav guard
   const normalized = normalizePath(currentPath);
-  if (normalized === "/admin" || normalized.startsWith("/admin/")) {
+  const isAdminPath = normalized === "/admin" || normalized.startsWith("/admin/");
+
+  // Admin routes: strictly hidden from users/students.
+  // Direct typing of /admin or unauthorized navigation MUST immediately bounce to home.
+  if (isAdminPath) {
+    if (!isAdminUnlocked()) {
+      try {
+        window.history.replaceState(null, "", "/");
+      } catch {}
+      window.location.hash = "";
+      if (window.location.pathname !== "/") {
+        window.location.replace("/");
+      } else {
+        window.dispatchEvent(new CustomEvent("app:navigate", { detail: "/" }));
+        window.dispatchEvent(new Event("popstate"));
+      }
+      return false;
+    }
     return true;
   }
 
+  if (isHomeRoute(currentPath)) return true;
+  if (isInternalNavigation()) return true;
+
   // Not an internal navigation — redirect to home
+  try {
+    window.history.replaceState(null, "", "/");
+  } catch {}
   window.location.hash = "";
-  window.location.replace(window.location.pathname);
+  if (window.location.pathname !== "/") {
+    window.location.replace("/");
+  } else {
+    window.dispatchEvent(new CustomEvent("app:navigate", { detail: "/" }));
+    window.dispatchEvent(new Event("popstate"));
+  }
   return false;
 }
 
