@@ -73,7 +73,7 @@ export default function Events() {
   };
 
   return (
-    <section id="events" className="relative w-full px-5 py-10 sm:py-14 md:py-20 md:px-[6vw]">
+    <section id="events" className="relative w-full px-5 pt-16 sm:pt-24 md:pt-32 pb-12 sm:pb-16 md:pb-20 md:px-[6vw]">
       {/* header */}
       <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
         <div>
@@ -83,10 +83,10 @@ export default function Events() {
               ★ MAIN STAGE HIGHLIGHTS ({starredBaseList.length})
             </span>
           </div>
-          <h2 className="t-cond mt-4 text-[13vw] leading-[0.82] text-[#f0f9f5] md:text-[6.4vw]">
+          <h2 className="t-cond mt-5 sm:mt-6 text-[13vw] leading-[0.82] text-[#f0f9f5] md:text-[6.4vw]">
             <MaskReveal>THE PROGRAMME</MaskReveal>
           </h2>
-          <p className="mt-5 max-w-[50ch] text-[13px] leading-relaxed text-[#7d9a8d] md:text-[15px]">
+          <p className="mt-5 sm:mt-6 max-w-[50ch] text-[13px] leading-relaxed text-[#7d9a8d] md:text-[15px]">
             Marquee attractions & flagship tournaments hand-picked for the main stage. Looking for the complete 30+ event roster?{" "}
             <Link href="/events" className="text-[#18c47c] underline underline-offset-4 hover:text-[#7dffc4] transition-colors">
               View All 30+ Events in Full Directory →
