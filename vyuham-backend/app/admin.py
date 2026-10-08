@@ -31,19 +31,17 @@ ROOT_ADMIN_ID = UUID("00000000-0000-0000-0000-000000000001")
 
 
 def _is_valid_admin_secret(token: str | None) -> bool:
+    """Accept only the env-configured ADMIN_ACCESS_KEY (constant-time).
+
+    Hardcoded literals and the Supabase service-role key were removed: they
+    turned every publicly shipped string into a root credential.
+    """
     if not token:
         return False
-    valid_keys = {
-        "root26",
-        "admin26",
-        "vyuhamadmin",
-        "vyuham26",
-    }
-    if getattr(settings, "admin_access_key", None):
-        valid_keys.add(settings.admin_access_key.strip())
-    if getattr(settings, "supabase_service_role_key", None):
-        valid_keys.add(settings.supabase_service_role_key.strip())
-    return token.strip() in valid_keys
+    configured = (getattr(settings, "admin_access_key", None) or "").strip()
+    if not configured:
+        return False
+    return secrets.compare_digest(token.strip(), configured)
 
 
 async def _is_admin_token(token: str) -> UUID | None:

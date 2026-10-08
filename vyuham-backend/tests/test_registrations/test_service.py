@@ -1,6 +1,6 @@
 import unittest
 from types import SimpleNamespace
-from unittest.mock import patch
+from unittest.mock import AsyncMock, patch
 from uuid import uuid4
 
 from fastapi import HTTPException
@@ -61,7 +61,11 @@ class RegistrationServiceTests(unittest.IsolatedAsyncioTestCase):
         request = RegistrationCreate(event_id=uuid4())
         db = FakeSession()
 
-        with patch("app.modules.registrations.router.is_registration_open", return_value=False):
+        with patch(
+            "app.modules.registrations.router.get_registration_open",
+            new_callable=AsyncMock,
+            return_value=False,
+        ):
             with self.assertRaises(HTTPException) as raised:
                 await post_registration(request, SimpleNamespace(id=uuid4()), db)
 
@@ -75,7 +79,11 @@ class RegistrationServiceTests(unittest.IsolatedAsyncioTestCase):
         request = RegistrationCreate(event_id=uuid4(), team_id=uuid4())
         db = FakeSession(gets=[event])
 
-        with patch("app.modules.registrations.router.is_registration_open", return_value=True):
+        with patch(
+            "app.modules.registrations.router.get_registration_open",
+            new_callable=AsyncMock,
+            return_value=True,
+        ):
             with self.assertRaises(HTTPException) as raised:
                 await post_registration(request, SimpleNamespace(id=uuid4()), db)
 
@@ -87,7 +95,11 @@ class RegistrationServiceTests(unittest.IsolatedAsyncioTestCase):
         request = RegistrationCreate(event_id=uuid4())
         db = FakeSession(gets=[event])
 
-        with patch("app.modules.registrations.router.is_registration_open", return_value=True):
+        with patch(
+            "app.modules.registrations.router.get_registration_open",
+            new_callable=AsyncMock,
+            return_value=True,
+        ):
             with self.assertRaises(HTTPException) as raised:
                 await post_registration(request, SimpleNamespace(id=uuid4()), db)
 

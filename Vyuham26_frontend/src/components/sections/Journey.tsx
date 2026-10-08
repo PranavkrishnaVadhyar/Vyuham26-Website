@@ -96,8 +96,8 @@ function Panel({ d, i, total }: { d: ScheduleDay; i: number; total: number }) {
           </p>
 
           <ul className="mt-4 sm:mt-9 max-w-[560px] space-y-2 sm:space-y-[10px]">
-            {d.beats.map((b) => (
-              <li key={b.time} className="group flex items-center gap-3 sm:gap-4 border-b border-[rgba(120,160,145,0.1)] pb-1.5 sm:pb-[10px]">
+            {d.beats.map((b, idx) => (
+              <li key={`${b.time}-${idx}`} className="group flex items-center gap-3 sm:gap-4 border-b border-[rgba(120,160,145,0.1)] pb-1.5 sm:pb-[10px]">
                 <span className="font-mono text-[10px] sm:text-[11px] tracking-[0.16em] sm:tracking-[0.18em] text-[#18c47c]">{b.time}</span>
                 <span className="font-mono text-[9px] sm:text-[10px] md:text-[11px] tracking-[0.18em] sm:tracking-[0.2em] text-[#8ba79b]">
                   {b.label}

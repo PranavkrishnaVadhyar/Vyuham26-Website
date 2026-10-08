@@ -353,6 +353,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
           sessionStorage.setItem("vyuham26:admin_unlocked", "true");
         } else {
           sessionStorage.removeItem("vyuham26:admin_unlocked");
+          // Locking also forgets any operator-typed backend access key so it
+          // does not linger in session storage for the rest of the tab session.
+          sessionStorage.removeItem("vyuham26:admin_key");
         }
       }
     } catch {}

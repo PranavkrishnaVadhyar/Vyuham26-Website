@@ -1,10 +1,14 @@
 import { supabase } from "@/lib/supabase";
 import { SITE_CONFIG } from "@/config/site";
 
+// Backend origin. Resolution order:
+//   1. VITE_API_URL (production builds: set at build time; dev: .env.development)
+//   2. Same-origin fallback ("") — production must never fall back to a
+//      localhost URL, which would bake http://localhost:8000 into the bundle.
 export const API_BASE_URL =
   import.meta.env.VITE_API_URL ||
   (import.meta.env as any).API_URL ||
-  "http://localhost:8000";
+  "";
 
 export class ApiError extends Error {
   status: number;
@@ -53,14 +57,22 @@ export async function apiFetch<T = any>(
     console.warn("Could not retrieve Supabase session token:", err);
   }
 
-  // Inject Admin Access Key if session is unlocked
+  // Inject the admin access key when the admin console is unlocked.
+  // Sources (in order): the passphrase the operator typed at unlock time
+  // (sessionStorage) or the build-time VITE_ADMIN_ACCESS_KEY variable.
+  // Nothing is hardcoded in the bundle: without a configured key the header
+  // is omitted and the backend only accepts real admin-role tokens.
   try {
     if (
       typeof window !== "undefined" &&
       sessionStorage.getItem("vyuham26:admin_unlocked") === "true" &&
       !headers["X-Admin-Key"]
     ) {
-      headers["X-Admin-Key"] = "root26";
+      const adminKey =
+        sessionStorage.getItem("vyuham26:admin_key") ||
+        (import.meta.env.VITE_ADMIN_ACCESS_KEY as string | undefined) ||
+        "";
+      if (adminKey) headers["X-Admin-Key"] = adminKey;
     }
   } catch {}
 
@@ -508,11 +520,11 @@ export const adminApi = {
       return await apiFetch<AdminStatsResponse>("/admin/stats");
     } catch {
       return {
-        all: { total_registrations: 2480, total_revenue: 684000, total_checkins: 1840, active_events: 18 },
-        tech: { total_registrations: 1120, total_revenue: 320000, total_checkins: 890, active_events: 6 },
-        management: { total_registrations: 780, total_revenue: 210000, total_checkins: 540, active_events: 6 },
-        cultural: { total_registrations: 380, total_revenue: 94000, total_checkins: 240, active_events: 3 },
-        esports: { total_registrations: 200, total_revenue: 60000, total_checkins: 170, active_events: 3 },
+        all: { total_registrations: 0, total_revenue: 0, total_checkins: 0, active_events: 0 },
+        tech: { total_registrations: 0, total_revenue: 0, total_checkins: 0, active_events: 0 },
+        management: { total_registrations: 0, total_revenue: 0, total_checkins: 0, active_events: 0 },
+        cultural: { total_registrations: 0, total_revenue: 0, total_checkins: 0, active_events: 0 },
+        esports: { total_registrations: 0, total_revenue: 0, total_checkins: 0, active_events: 0 },
       };
     }
   },
@@ -565,15 +577,13 @@ export const adminApi = {
     }
   },
   setRegistrationStatus: async (reg_open: boolean): Promise<{ reg_open: boolean }> => {
-    try {
-      return await apiFetch<{ reg_open: boolean }>("/registrations/config/status", {
-        method: "PATCH",
-        headers: { "X-Admin-Key": "root26" },
-        body: JSON.stringify({ reg_open }),
-      });
-    } catch {
-      return { reg_open };
-    }
+    // Let apiFetch attach credentials (admin JWT or unlocked admin key);
+    // on failure rethrow so the caller can show the real backend state
+    // instead of pretending the change succeeded.
+    return await apiFetch<{ reg_open: boolean }>("/registrations/config/status", {
+      method: "PATCH",
+      body: JSON.stringify({ reg_open }),
+    });
   },
 };
 
@@ -592,48 +602,74 @@ export interface AnnouncementRecord {
   created_at: string;
 }
 
+let _announcementsCache: { data: AnnouncementRecord[]; timestamp: number } | null = null;
+let _announcementsInFlight: Promise<AnnouncementRecord[]> | null = null;
+
+export function invalidateAnnouncementsCache() {
+  _announcementsCache = null;
+}
+
 export const announcementsApi = {
-  list: async (): Promise<AnnouncementRecord[]> => {
-    try {
-      return await apiFetch<AnnouncementRecord[]>("/announcements");
-    } catch {
-      return [
-        {
-          id: "ann-1",
-          title: "DUK Technocity Gates Open for Fest Check-in",
-          content: "All registered operatives proceed to Gate 1 and Gate 2 for QR pass verification and welcome kit collection.",
-          category: "LOGISTICS",
-          urgent: true,
-          stream: "ALL",
-          pinned: true,
-          created_at: "Just Now",
-        },
-        {
-          id: "ann-2",
-          title: "Hackathon — 24HR Problem Statement Released",
-          content: "The official Agentic AI / Autonomous Systems hackathon challenge is now accessible in the build zone.",
-          category: "TECH",
-          urgent: false,
-          stream: "TECH",
-          pinned: false,
-          created_at: "10 mins ago",
-        },
-      ];
+  list: async (forceRefresh = false): Promise<AnnouncementRecord[]> => {
+    const now = Date.now();
+    if (!forceRefresh && _announcementsCache && now - _announcementsCache.timestamp < 15000) {
+      return _announcementsCache.data;
     }
+    if (_announcementsInFlight) {
+      return _announcementsInFlight;
+    }
+
+    _announcementsInFlight = (async () => {
+      try {
+        const records = await apiFetch<AnnouncementRecord[]>("/announcements");
+        _announcementsCache = { data: records, timestamp: Date.now() };
+        return records;
+      } catch {
+        if (_announcementsCache) return _announcementsCache.data;
+        return [
+          {
+            id: "ann-1",
+            title: "DUK Technocity Gates Open for Fest Check-in",
+            content: "All registered operatives proceed to Gate 1 and Gate 2 for QR pass verification and welcome kit collection.",
+            category: "LOGISTICS",
+            urgent: true,
+            stream: "ALL",
+            pinned: true,
+            created_at: "Just Now",
+          },
+          {
+            id: "ann-2",
+            title: "Hackathon — 24HR Problem Statement Released",
+            content: "The official Agentic AI / Autonomous Systems hackathon challenge is now accessible in the build zone.",
+            category: "TECH",
+            urgent: false,
+            stream: "TECH",
+            pinned: false,
+            created_at: "10 mins ago",
+          },
+        ];
+      } finally {
+        _announcementsInFlight = null;
+      }
+    })();
+
+    return _announcementsInFlight;
   },
-  create: (payload: {
+  create: async (payload: {
     title: string;
     content: string;
     category?: string;
     urgent?: boolean;
     stream?: string;
     pinned?: boolean;
-  }) =>
-    apiFetch<AnnouncementRecord>("/announcements", {
+  }) => {
+    invalidateAnnouncementsCache();
+    return apiFetch<AnnouncementRecord>("/announcements", {
       method: "POST",
       body: JSON.stringify(payload),
-    }),
-  update: (
+    });
+  },
+  update: async (
     announcementId: string,
     payload: {
       title?: string;
@@ -643,15 +679,19 @@ export const announcementsApi = {
       stream?: string;
       pinned?: boolean;
     }
-  ) =>
-    apiFetch<AnnouncementRecord>(`/announcements/${announcementId}`, {
+  ) => {
+    invalidateAnnouncementsCache();
+    return apiFetch<AnnouncementRecord>(`/announcements/${announcementId}`, {
       method: "PATCH",
       body: JSON.stringify(payload),
-    }),
-  delete: (announcementId: string) =>
-    apiFetch<void>(`/announcements/${announcementId}`, {
+    });
+  },
+  delete: async (announcementId: string) => {
+    invalidateAnnouncementsCache();
+    return apiFetch<void>(`/announcements/${announcementId}`, {
       method: "DELETE",
-    }),
+    });
+  },
 };
 
 export const auxiliaryApi = {

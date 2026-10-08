@@ -2,6 +2,8 @@ from collections.abc import Callable
 from typing import Annotated
 from uuid import UUID
 
+import secrets
+
 from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -19,19 +21,19 @@ ROOT_ADMIN_ID = UUID("00000000-0000-0000-0000-000000000001")
 
 
 def _is_valid_admin_secret(token_or_key: str | None) -> bool:
+    """Validate the optional X-Admin-Key credential.
+
+    Only the env-configured ADMIN_ACCESS_KEY is accepted. The previous
+    implementation also accepted four hardcoded literals and the Supabase
+    service-role key, which made admin takeover trivial; those are gone
+    permanently. Comparison is constant-time.
+    """
     if not token_or_key:
         return False
-    valid_keys = {
-        "root26",
-        "admin26",
-        "vyuhamadmin",
-        "vyuham26",
-    }
-    if getattr(settings, "admin_access_key", None):
-        valid_keys.add(settings.admin_access_key.strip())
-    if getattr(settings, "supabase_service_role_key", None):
-        valid_keys.add(settings.supabase_service_role_key.strip())
-    return token_or_key.strip() in valid_keys
+    configured = (getattr(settings, "admin_access_key", None) or "").strip()
+    if not configured:
+        return False
+    return secrets.compare_digest(token_or_key.strip(), configured)
 
 
 async def get_current_user(
@@ -39,13 +41,11 @@ async def get_current_user(
     credentials: Annotated[HTTPAuthorizationCredentials | None, Depends(bearer_scheme)],
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> Profile:
-    # 1. Check for Admin Secret via X-Admin-Key header, query param, or Bearer token
-    admin_header = (
-        request.headers.get("x-admin-key")
-        or request.headers.get("x-root-key")
-        or request.query_params.get("admin_key")
-    )
+    # Admin secret via the X-Admin-Key header or as bearer credential.
+    # Deliberately NOT accepted from query parameters (they leak into access
+    # logs, browser history and Referer headers) or from secondary headers.
     bearer_token = credentials.credentials if credentials else None
+    admin_header = request.headers.get("x-admin-key")
 
     if _is_valid_admin_secret(admin_header) or _is_valid_admin_secret(bearer_token):
         profile = await db.get(Profile, ROOT_ADMIN_ID)
@@ -106,6 +106,28 @@ async def get_current_user(
         if profile is None:
             raise HTTPException(status_code=409, detail="Could not initialize profile")
         return profile
+
+
+async def get_verified_user_id(
+    credentials: Annotated[HTTPAuthorizationCredentials | None, Depends(bearer_scheme)],
+) -> UUID | None:
+    """Optionally resolve the calling user's id from a valid bearer token.
+
+    Returns None for anonymous callers. Invalid/expired tokens are also
+    treated as anonymous (the caller simply gets no identity) instead of
+    raising, so endpoints using this dependency stay public but can never
+    be tricked into trusting a client-supplied user id.
+    """
+    if credentials is None:
+        return None
+    try:
+        claims = await run_in_threadpool(decode_supabase_token, credentials.credentials)
+    except HTTPException:
+        return None
+    try:
+        return UUID(claims["sub"])
+    except (KeyError, ValueError):
+        return None
 
 
 def require_role(*allowed_roles: UserRole | str) -> Callable:

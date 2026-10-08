@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, Query
@@ -6,6 +6,7 @@ from sqlalchemy import desc, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.db import get_db
+from app.core.deps import require_role
 from app.modules.checkin.models import CheckIn
 from app.modules.checkin.schemas import (
     CheckInHistoryItem,
@@ -18,14 +19,22 @@ from app.modules.auth.models import Profile
 
 router = APIRouter(prefix="/checkin", tags=["checkin"])
 
+# Gate check-in endpoints behind operational roles. Anonymous callers (and
+# participants) must never be able to read the gate log or write scan records.
+ScanAuth = Annotated[Profile, Depends(require_role("volunteer", "event_head", "admin"))]
+
 
 @router.post("/scan", response_model=CheckInScanResponse)
 async def scan_pass(
     payload: CheckInScanRequest,
+    scanner: ScanAuth,
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> CheckInScanResponse:
     code = payload.ticket_code.strip().upper()
     now_str = datetime.now().strftime("%I:%M:%S %p")
+    # The authenticated scanner identity is authoritative; the client-supplied
+    # volunteer name is only a cosmetic fallback.
+    scanned_by = scanner.name or payload.volunteer_name or "VOLUNTEER"
 
     # Check for duplicate scan at the same station
     existing_scan = await db.scalar(
@@ -63,14 +72,21 @@ async def scan_pass(
             event_obj = await db.get(Event, event_id)
             if event_obj:
                 event_name = event_obj.name
-    elif not (code.startswith("VYU26-") or code.startswith("EVT-") or code.startswith("TKT-") or len(code) >= 6):
-        # Invalid ticket format
+    else:
+        # Unknown ticket: no matching registration exists. This must never be
+        # reported as "approved" — previously any barcode-shaped string passed.
+        format_ok = (
+            code.startswith("VYU26-")
+            or code.startswith("EVT-")
+            or code.startswith("TKT-")
+            or len(code) >= 6
+        )
         invalid_rec = CheckIn(
             ticket_code=code,
             station=payload.station,
-            scanned_by_name=payload.volunteer_name or "VOLUNTEER",
+            scanned_by_name=scanned_by,
             status="invalid",
-            notes="Unrecognized barcode sequence",
+            notes="Unrecognized barcode sequence" if not format_ok else "Ticket not found in registry",
         )
         db.add(invalid_rec)
         await db.commit()
@@ -79,7 +95,7 @@ async def scan_pass(
             ticket_code=code,
             station=payload.station,
             scanned_at=now_str,
-            notes="Invalid pass signature",
+            notes="Invalid pass signature" if not format_ok else "No registration found for this ticket",
         )
 
     if existing_scan is not None:
@@ -88,7 +104,7 @@ async def scan_pass(
         status_verdict = "approved"
         if reg:
             reg.checked_in = True
-            reg.checked_in_at = datetime.utcnow()
+            reg.checked_in_at = datetime.now(timezone.utc)
 
     scan_record = CheckIn(
         ticket_code=code,
@@ -96,7 +112,7 @@ async def scan_pass(
         event_id=event_id,
         user_id=user_id,
         station=payload.station,
-        scanned_by_name=payload.volunteer_name or "GATE VOLUNTEER",
+        scanned_by_name=scanned_by,
         status=status_verdict,
     )
     db.add(scan_record)
@@ -115,6 +131,7 @@ async def scan_pass(
 
 @router.get("/history", response_model=list[CheckInHistoryItem])
 async def get_checkin_history(
+    scanner: ScanAuth,
     station: Annotated[str | None, Query()] = None,
     limit: Annotated[int, Query(ge=1, le=100)] = 50,
     db: Annotated[AsyncSession, Depends(get_db)] = None,

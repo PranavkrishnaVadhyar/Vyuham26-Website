@@ -1,7 +1,7 @@
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Response, status
+from fastapi import APIRouter, Depends, HTTPException, Response, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.db import get_db
@@ -55,7 +55,10 @@ async def patch_event(
     _: Annotated[Profile, Depends(require_role("admin"))],
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> object:
-    return await update_event(db, event_id, data)
+    try:
+        return await update_event(db, event_id, data)
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
 
 
 @router.delete("/{event_id}", status_code=status.HTTP_204_NO_CONTENT)

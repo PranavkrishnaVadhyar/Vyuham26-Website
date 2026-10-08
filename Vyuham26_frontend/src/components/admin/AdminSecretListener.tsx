@@ -113,22 +113,34 @@ export default function AdminSecretListener() {
         }, 2500);
 
         const buf = bufferRef.current;
-        if (
-          buf.endsWith("root26") ||
-          buf.endsWith("admin26") ||
-          buf.endsWith("vyuhamadmin") ||
-          buf.endsWith("vyuham26") ||
-          buf.endsWith("admin") ||
-          buf.endsWith("root") ||
-          buf.endsWith("secret") ||
-          buf.endsWith("vyuham")
-        ) {
+        const matchedWord = [
+          "root26",
+          "admin26",
+          "vyuhamadmin",
+          "vyuham26",
+          "admin",
+          "root",
+          "secret",
+          "vyuham",
+        ].find((w) => buf.endsWith(w));
+        if (matchedWord) {
           bufferRef.current = "";
           const currentPath = getAppPath();
           const isOnAdmin = currentPath === "/admin" || currentPath.startsWith("/admin/");
           const willUnlock = !isOnAdmin;
 
           ui.setAdminUnlocked(willUnlock);
+          // The typed passphrase doubles as the X-Admin-Key credential for
+          // backend admin calls (only matches if the operator configured the
+          // backend ADMIN_ACCESS_KEY to the same value; otherwise the backend
+          // rejects it and only real admin-role JWTs are accepted).
+          try {
+            if (willUnlock) {
+              sessionStorage.setItem("vyuham26:admin_key", matchedWord);
+            } else {
+              sessionStorage.removeItem("vyuham26:admin_key");
+            }
+          } catch {}
           playRootChime(willUnlock);
           markInternalNav();
 

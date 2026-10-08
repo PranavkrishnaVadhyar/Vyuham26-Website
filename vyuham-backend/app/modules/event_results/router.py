@@ -43,17 +43,26 @@ async def list_event_results(
 
 @router.post("/{event_id}/results", response_model=EventResultOut)
 async def publish_event_result(
-    event_id: UUID,
+    event_id: str,
     payload: EventResultCreate,
     current_admin: Annotated[Profile, Depends(require_role("admin"))],
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> EventResultOut:
-    ev = await db.get(Event, event_id)
+    ev = None
+    try:
+        parsed_id = UUID(event_id)
+        ev = await db.get(Event, parsed_id)
+    except ValueError:
+        ev = await db.scalar(select(Event).where(Event.slug == event_id))
+        if not ev:
+            ev = await db.scalar(select(Event).where(Event.slug.ilike(f"%{event_id}%")))
+
     if not ev:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Event not found")
 
+    real_event_id = ev.id
     existing = await db.scalar(
-        select(EventResult).where(EventResult.event_id == event_id)
+        select(EventResult).where(EventResult.event_id == real_event_id)
     )
     if existing:
         existing.first_place = payload.first_place
@@ -64,7 +73,7 @@ async def publish_event_result(
         db_obj = existing
     else:
         db_obj = EventResult(
-            event_id=event_id,
+            event_id=real_event_id,
             first_place=payload.first_place,
             second_place=payload.second_place,
             third_place=payload.third_place,

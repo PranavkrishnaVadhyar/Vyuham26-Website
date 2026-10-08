@@ -6,9 +6,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from pydantic import BaseModel
 
-from app.core.config import is_registration_open, set_runtime_registration_open
 from app.core.db import get_db
 from app.core.deps import get_current_user, require_role
+from app.core.site_settings import get_registration_open, set_registration_open
 from app.modules.auth.models import Profile
 from app.modules.registrations.schemas import RegistrationCreate, RegistrationOut, RegistrationStatusUpdate
 from app.modules.registrations.service import (
@@ -28,17 +28,23 @@ class RegistrationGatewayStatus(BaseModel):
 
 
 @router.get("/config/status", response_model=RegistrationGatewayStatus)
-async def get_registration_gateway_status() -> dict[str, bool]:
-    return {"reg_open": is_registration_open()}
+async def get_registration_gateway_status(
+    response: Response,
+    db: Annotated[AsyncSession, Depends(get_db)],
+) -> dict[str, bool]:
+    # Registration gating must never be served stale by browsers/CDNs.
+    response.headers["Cache-Control"] = "no-store"
+    return {"reg_open": await get_registration_open(db)}
 
 
 @router.patch("/config/status", response_model=RegistrationGatewayStatus)
 async def set_registration_gateway_status(
     data: RegistrationGatewayStatus,
     _: Annotated[Profile, Depends(require_role("admin"))],
+    db: Annotated[AsyncSession, Depends(get_db)],
 ) -> dict[str, bool]:
-    set_runtime_registration_open(data.reg_open)
-    return {"reg_open": is_registration_open()}
+    await set_registration_open(db, data.reg_open)
+    return {"reg_open": data.reg_open}
 
 
 @router.post("", response_model=RegistrationOut, status_code=status.HTTP_201_CREATED)
@@ -47,7 +53,7 @@ async def post_registration(
     current_user: Annotated[Profile, Depends(get_current_user)],
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> object:
-    if not is_registration_open():
+    if not await get_registration_open(db):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Registration is coming soon",

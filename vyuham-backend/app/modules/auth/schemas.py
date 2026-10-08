@@ -1,7 +1,7 @@
 from typing import Any
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, EmailStr, Field, computed_field, field_serializer, field_validator
+from pydantic import BaseModel, ConfigDict, Field, computed_field, field_serializer, field_validator
 
 from app.modules.auth.models import UserRole
 
@@ -10,7 +10,11 @@ class ProfileOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: UUID
-    email: EmailStr
+    # Response-side email: must NOT use EmailStr, because strict response
+    # validation would 500 on emails from reserved domains (e.g. *.test,
+    # *.local) that Supabase may legitimately hold. Input validation happens
+    # at the auth provider, not here.
+    email: str
     name: str | None
     phone: str | None
     college: str | None
