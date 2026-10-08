@@ -43,7 +43,8 @@ def set_runtime_registration_open(val: bool) -> None:
 def is_registration_open() -> bool:
     """
     Check if registration is open based on runtime override, settings, or site.ts.
-    Defaults strictly to False (CLOSED) if missing, unreadable, or undefined.
+    Explicit runtime or environment settings take precedence. Registration defaults
+    to open when no setting is configured; admins can close it through the API.
     """
     global _runtime_reg_open
     if _runtime_reg_open is not None:
@@ -69,13 +70,15 @@ def is_registration_open() -> bool:
         if path.is_file():
             try:
                 content = path.read_text(encoding="utf-8")
+                # Ignore commented examples such as `// REG_OPEN: false`.
+                content = re.sub(r"(?m)^\s*//.*$", "", content)
                 match = re.search(r"REG_OPEN\s*:\s*(true|false)", content, re.IGNORECASE)
                 if match:
                     return match.group(1).lower() == "true"
             except Exception:
                 pass
 
-    return False
+    return True
 
 
 @lru_cache
