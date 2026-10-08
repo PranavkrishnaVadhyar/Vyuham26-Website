@@ -1,5 +1,5 @@
 import React, { lazy } from "react";
-import { matchPath, normalizePath } from "@/lib/router";
+import { matchPath, normalizePath, navigate, isAdminUnlocked } from "@/lib/router";
 import { events, getEventBySlug } from "@/data/events";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
@@ -301,14 +301,19 @@ export function RouteRenderer({
     return <Site />;
   }
 
-  if (route.requiresAdmin && !adminUnlocked) {
-    return (
-      <AdminGate
-        onUnlock={() => {
-          onAdminUnlock?.();
-        }}
-      />
-    );
+  if (route.requiresAdmin && !adminUnlocked && !isAdminUnlocked()) {
+    if (typeof window !== "undefined") {
+      try {
+        window.history.replaceState(null, "", "/");
+      } catch {}
+      window.location.hash = "";
+      if (window.location.pathname !== "/") {
+        window.location.replace("/");
+      } else {
+        navigate("/", { replace: true });
+      }
+    }
+    return <Site />;
   }
 
   if (route.requiresRegistrationOpen && !regOpen) {

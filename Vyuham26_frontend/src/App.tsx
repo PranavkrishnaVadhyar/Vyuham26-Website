@@ -1,6 +1,6 @@
 import { Suspense, useEffect, useRef, useState } from "react";
 import { AppProvider, useApp } from "@/lib/store";
-import { AuthProvider } from "@/context/AuthContext";
+import { AuthProvider, useAuth } from "@/context/AuthContext";
 import { useReducedMotion } from "@/lib/hooks";
 import { lockScroll, scrollToId } from "@/lib/scroll";
 import { ScrollTrigger } from "@/lib/anim";
@@ -209,7 +209,15 @@ function Site() {
 function Router() {
   const route = usePlatformRoute();
   const { ui } = useApp();
+  const auth = useAuth();
+  const isAdmin = !!ui.adminUnlocked || auth.user?.role === "admin";
   const [guarded, setGuarded] = useState(() => !guardRoute(route));
+
+  useEffect(() => {
+    if (auth.user?.role === "admin" && !ui.adminUnlocked) {
+      ui.setAdminUnlocked(true);
+    }
+  }, [auth.user?.role, ui]);
 
   // On fresh page load, clear navigation flag
   useEffect(() => {
@@ -278,7 +286,7 @@ function Router() {
           {isHomepage ? (
             <RouteRenderer
               routePath={route}
-              adminUnlocked={!!ui.adminUnlocked}
+              adminUnlocked={isAdmin}
               onAdminUnlock={() => ui.setAdminUnlocked(true)}
               siteComponent={Site}
             />
@@ -288,7 +296,7 @@ function Router() {
               <CinematicTransition routeKey={route}>
                 <RouteRenderer
                   routePath={route}
-                  adminUnlocked={!!ui.adminUnlocked}
+                  adminUnlocked={isAdmin}
                   onAdminUnlock={() => ui.setAdminUnlocked(true)}
                   siteComponent={Site}
                 />

@@ -182,6 +182,7 @@ function getInitialContent(): Content {
     const syncedEvents = (parsed.events || seedContent.events).map((e) => ({
       ...e,
       starred: typeof e.starred === "boolean" ? e.starred : isEventStarred(e.id),
+      status: e.status === "closing" ? "open" : e.status || "open",
     }));
     return { ...parsed, events: syncedEvents };
   } catch {
