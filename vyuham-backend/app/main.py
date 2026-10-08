@@ -32,6 +32,7 @@ async def lifespan(_: FastAPI):
     # serving traffic.
     await ensure_site_settings_table(engine)
 
+<<<<<<< HEAD
     # Ensure events table supports MakeMyPass registration URLs idempotently
     from sqlalchemy import text
     async with engine.begin() as conn:
@@ -47,6 +48,8 @@ async def lifespan(_: FastAPI):
         )
 
 
+=======
+>>>>>>> 3adc49d8404c0d13a5916ee3357d8216be1de4c1
     yield
 
     # Cleanly dispose database connections when the
