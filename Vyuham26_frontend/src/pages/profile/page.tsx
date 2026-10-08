@@ -7,20 +7,26 @@ import Footer from "@/components/layout/Footer";
 import AnimatedSection from "@/components/motion/AnimatedSection";
 import { Kicker, Button, StreamBadge } from "@/components/ui/Elements";
 import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
-import { useAuth } from "@/context/AuthContext";
+import { useSearchParams } from "next/navigation";
+import { useAuth, isProfileComplete } from "@/context/AuthContext";
+import { navigate } from "@/lib/router";
 import { toast } from "@/components/ui/Toaster";
 
 export default function ProfilePage() {
   const { user, updateUser, isAuthenticated } = useAuth();
+  const searchParams = useSearchParams();
+  // Where to return after completing the profile (set by Google sign-in and event registration)
+  const rawNext = searchParams.get("next");
+  const nextPath = rawNext && rawNext.startsWith("/") && !rawNext.startsWith("//") ? rawNext : null;
   const reduceMotion = usePrefersReducedMotion();
 
   const [profile, setProfile] = useState({
-    name: user?.name || "Aromal S S",
-    email: user?.email || "aromal.s24@duk.ac.in",
-    college: user?.college || "Digital University Kerala",
-    phone: user?.phone || "+91 98470 12345",
-    degree: user?.degree || "M.Tech Cyber Security",
-    year: user?.year || "2024–2026",
+    name: user?.name || "",
+    email: user?.email || "",
+    college: user?.college || "",
+    phone: user?.phone || "",
+    degree: user?.degree || "",
+    year: user?.year || "",
     vyuhamId: user?.id || "VYU26-OPER-8042",
   });
 
@@ -69,6 +75,11 @@ export default function ProfilePage() {
 
       setSaved(true);
       toast("Personnel dossier synchronized with central command.", "ok");
+
+      if (nextPath && isProfileComplete(profile)) {
+        navigate(nextPath, { replace: true });
+        return;
+      }
 
       setTimeout(() => {
         setSaved(false);
@@ -145,6 +156,13 @@ export default function ProfilePage() {
 
         <section className="py-16 md:py-24">
           <div className="mx-auto w-[min(1100px,calc(100%-32px))] md:w-[min(1100px,calc(100%-64px))]">
+
+            {isAuthenticated && !isProfileComplete(user) && (
+              <div className="mb-8 rounded border border-amber-400/30 bg-amber-400/5 p-4 font-mono text-xs text-amber-300 backdrop-blur-md">
+                PROFILE INCOMPLETE // Add your institution and contact number below to register for events.
+                {nextPath && " You will be returned to where you left off after saving."}
+              </div>
+            )}
 
             {!isAuthenticated && (
               <div className="mb-8 flex flex-wrap items-center justify-between gap-4 rounded border border-green/30 bg-green/5 p-4 font-mono text-xs text-green backdrop-blur-md">
@@ -399,7 +417,7 @@ export default function ProfilePage() {
                     </h2>
 
                     <p className="mt-1 font-mono text-[10px] text-muted">
-                      {profile.college}
+                      {profile.college || "Institution not set"}
                     </p>
                   </div>
 
@@ -519,6 +537,8 @@ export default function ProfilePage() {
 
                         <input
                           id="name"
+                          placeholder="Arjun V."
+                          required
                           type="text"
                           value={profile.name}
                           onChange={(e) =>
@@ -541,6 +561,7 @@ export default function ProfilePage() {
 
                         <input
                           id="email"
+                          placeholder="operator@university.edu"
                           type="email"
                           value={profile.email}
                           onChange={(e) =>
@@ -570,6 +591,8 @@ export default function ProfilePage() {
 
                         <input
                           id="college"
+                          placeholder="Digital University Kerala"
+                          required
                           type="text"
                           value={profile.college}
                           onChange={(e) =>
@@ -592,6 +615,8 @@ export default function ProfilePage() {
 
                         <input
                           id="phone"
+                          placeholder="+91 98765 43210"
+                          required
                           type="tel"
                           value={profile.phone}
                           onChange={(e) =>
@@ -621,6 +646,7 @@ export default function ProfilePage() {
 
                         <input
                           id="degree"
+                          placeholder="B.Tech Computer Science"
                           type="text"
                           value={profile.degree}
                           onChange={(e) =>
@@ -643,6 +669,7 @@ export default function ProfilePage() {
 
                         <input
                           id="year"
+                          placeholder="2024–2028"
                           type="text"
                           value={profile.year}
                           onChange={(e) =>

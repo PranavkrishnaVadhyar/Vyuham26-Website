@@ -5,6 +5,10 @@ import { cyberAudio } from "@/lib/cyberAudio";
 import { useApp } from "@/lib/store";
 import { useRegistrationOpen } from "@/config/site";
 import { toast } from "@/components/ui/Toaster";
+import { navigate } from "@/lib/router";
+import { useAuth, isProfileComplete, profileCompletionPath } from "@/context/AuthContext";
+import { setAuthReturnPath } from "@/components/auth/GoogleSignInButton";
+import { getEventBySlug } from "@/data/events";
 import type { FestEvent } from "@/data/types";
 import { X, Calendar, Clock, MapPin, Trophy, Users, Shield, ArrowRight } from "lucide-react";
 
@@ -15,6 +19,7 @@ interface EventDossierModalProps {
 
 export default function EventDossierModal({ event, onClose }: EventDossierModalProps) {
   const { register, isRegistered, toggleSave, saved, user, ui } = useApp();
+  const { user: authUser, isEventRegistered } = useAuth();
   const regOpen = useRegistrationOpen();
   const [mounted, setMounted] = useState(false);
 
@@ -34,22 +39,44 @@ export default function EventDossierModal({ event, onClose }: EventDossierModalP
 
   if (!event || !mounted) return null;
 
+  const eventSlug = event.id.replace(/^ev-/, "");
+  const eventPath = `/events/${eventSlug}`;
+  const hasDetailPage = !!getEventBySlug(eventSlug);
+
   const handleRegister = () => {
     cyberAudio.playClick();
     if (!regOpen) {
       toast("Event registration opens soon! Explore the rulebook below.", "info");
       return;
     }
+    // Events with a detail page register through it (backend call + squad selection);
+    // ?registered=true makes that page start the registration on arrival.
+    const registerPath = hasDetailPage ? `${eventPath}?registered=true` : null;
     if (!user) {
+      // Google sign-in reloads the page, so bring the user back to this event afterwards.
+      setAuthReturnPath(registerPath);
       ui.setAuthOpen("login");
       toast("Sign in to hold a slot.", "warn");
       return;
     }
+    if (authUser && !isProfileComplete(authUser)) {
+      toast("Add your college and phone number to your profile before registering.", "warn");
+      onClose();
+      navigate(profileCompletionPath(registerPath ?? "/"));
+      return;
+    }
+    if (registerPath) {
+      onClose();
+      navigate(registerPath);
+      return;
+    }
+    // Events without a detail page (e.g. added from the admin panel) keep local-only registration.
     const res = register(event.id);
     toast(res.message, res.ok ? "ok" : "warn");
   };
 
   const isSaved = saved.includes(event.id);
+  const alreadyRegistered = isRegistered(event.id) || isEventRegistered(eventSlug);
 
   return createPortal(
     <div
@@ -172,7 +199,7 @@ export default function EventDossierModal({ event, onClose }: EventDossierModalP
             >
               {!regOpen
                 ? "REGISTRATION OPENS SOON"
-                : isRegistered(event.id)
+                : alreadyRegistered
                 ? "REGISTERED ✓"
                 : "REGISTER FOR EVENT"}
             </button>

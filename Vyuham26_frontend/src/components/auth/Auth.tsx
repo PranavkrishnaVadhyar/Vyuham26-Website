@@ -4,6 +4,8 @@ import { useApp } from "@/lib/store";
 import { toast } from "@/components/ui/Toaster";
 import { MEDIA } from "@/data/media";
 import { SITE_CONFIG, isRegistrationOpen } from "@/config/site";
+import { getAppPath } from "@/lib/router";
+import GoogleSignInButton, { AuthDivider, setAuthReturnPath } from "@/components/auth/GoogleSignInButton";
 import { markInternalNav } from "@/lib/router";
 
 /* ================================================================== */
@@ -19,7 +21,10 @@ export function AuthModal() {
   const [err, setErr] = useState("");
 
   useEffect(() => {
-    if (!mode) setErr("");
+    if (!mode) {
+      setErr("");
+      setAuthReturnPath(null);
+    }
   }, [mode]);
 
   useEffect(() => {
@@ -161,6 +166,15 @@ export function AuthModal() {
               {mode === "login" ? "ENTER" : "CREATE ACCESS"}
             </button>
           </form>
+
+          <div className="mt-4 space-y-4">
+            <AuthDivider />
+            <GoogleSignInButton
+              label={mode === "login" ? "CONTINUE WITH GOOGLE" : "SIGN UP WITH GOOGLE"}
+              redirectPath={getAppPath()}
+              onError={setErr}
+            />
+          </div>
         </div>
       </div>
     </div>
