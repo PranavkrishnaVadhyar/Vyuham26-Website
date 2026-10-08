@@ -1,6 +1,5 @@
-"use client";
-
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { cyberAudio } from "@/lib/cyberAudio";
 import { Lock, Radio, ShieldAlert, X } from "lucide-react";
 
@@ -15,6 +14,12 @@ interface ClassifiedModalProps {
  * Strictly maintains secrecy without revealing concert or artist details.
  */
 export default function ClassifiedModal({ isOpen, onClose }: ClassifiedModalProps) {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape" && isOpen) {
@@ -25,11 +30,13 @@ export default function ClassifiedModal({ isOpen, onClose }: ClassifiedModalProp
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isOpen, onClose]);
 
-  if (!isOpen) return null;
+  if (!isOpen || !mounted) return null;
 
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in"
+      role="dialog"
+      aria-modal="true"
+      className="fixed inset-0 z-[200] flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-md animate-fade-in"
       onClick={onClose}
     >
       <div
@@ -64,29 +71,29 @@ export default function ClassifiedModal({ isOpen, onClose }: ClassifiedModalProp
         </div>
 
         {/* Warning Banner */}
-        <div className="mt-5 border-l-2 border-amber-400/80 bg-amber-950/20 px-3.5 py-2.5">
+        <div className="mt-5 border-l-2 border-amber-400/80 bg-amber-950/30 px-3.5 py-2.5">
           <div className="flex items-center gap-2">
             <ShieldAlert className="h-4 w-4 text-amber-400 shrink-0" />
             <p className="font-mono text-[9px] font-bold tracking-[0.2em] text-amber-400 uppercase">
-              CLASSIFIED TRANSMISSION // LEVEL-0
+              CLASSIFIED TRANSMISSION // TRANSMISSION LOCKED
             </p>
           </div>
-          <p className="mt-1 font-mono text-[8px] tracking-[0.14em] text-amber-200/70">
-            THIS SIGNAL IS NOT READY. THE TRANSMISSION WILL BE DECRYPTED SOON.
+          <p className="mt-1 font-mono text-[8.5px] tracking-[0.14em] text-amber-200/80">
+            THIS SIGNAL IS NOT READY. THIS EVENT HAS NOT BEEN CLEARED FOR PUBLIC RELEASE.
           </p>
         </div>
 
         {/* Core Content */}
         <div className="mt-6 text-center">
           <p className="font-mono text-[10px] tracking-[0.3em] text-[#558270] uppercase">
-            TARGET PHASE: DAY 03 · NIGHTTIME
+            NIGHT 03 // AFTERSHOCK
           </p>
           <h2 className="t-cond mt-2 text-[12vw] sm:text-[42px] leading-tight text-[#f3fbf7] drop-shadow-[0_0_20px_rgba(24,196,124,0.4)]">
             AFTERSHOCK
           </h2>
           <p className="mt-3 font-mono text-[11px] leading-relaxed text-[#8ca89c]">
             An encrypted high-priority festival transmission has been locked into the core mainframe.
-            Frequency resonance indicates a massive festival finale scheduled for the closing hours.
+            Frequency resonance indicates a classified festival finale scheduled for the closing hours.
           </p>
         </div>
 
@@ -133,6 +140,7 @@ export default function ClassifiedModal({ isOpen, onClose }: ClassifiedModalProp
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

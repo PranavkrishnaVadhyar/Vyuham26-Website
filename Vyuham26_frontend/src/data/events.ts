@@ -15,6 +15,7 @@ export interface Event {
   eligibility: string;
   teamSize: string;
   status: "upcoming" | "live" | "completed";
+  poster?: string;
   featured?: boolean;
   starred?: boolean;
 }

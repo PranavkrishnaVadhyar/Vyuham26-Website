@@ -11,7 +11,7 @@ class Settings(BaseSettings):
     supabase_url: str
     supabase_jwt_secret: str
     supabase_service_role_key: str
-    frontend_origins: str = "http://localhost:5173,http://127.0.0.1:5173,http://localhost:5500,http://127.0.0.1:5500"
+    frontend_origins: str = "http://localhost:5173,http://127.0.0.1:5173,http://localhost:5174,http://127.0.0.1:5174,http://localhost:5500,http://127.0.0.1:5500"
     reg_open: Optional[bool] = None
     admin_access_key: str = "root26"
 

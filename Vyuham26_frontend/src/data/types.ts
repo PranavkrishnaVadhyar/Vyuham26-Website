@@ -39,6 +39,8 @@ export interface FestEvent {
   seats: number;
   registered: number;
   image: string;
+  poster?: string;
+  category?: string;
   featured?: boolean;
   starred?: boolean;
   status: "open" | "closing" | "full";

@@ -1,6 +1,5 @@
-"use client";
-
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { cyberAudio } from "@/lib/cyberAudio";
 import { useApp } from "@/lib/store";
@@ -17,6 +16,11 @@ interface EventDossierModalProps {
 export default function EventDossierModal({ event, onClose }: EventDossierModalProps) {
   const { register, isRegistered, toggleSave, saved, user, ui } = useApp();
   const regOpen = useRegistrationOpen();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -28,7 +32,7 @@ export default function EventDossierModal({ event, onClose }: EventDossierModalP
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [event, onClose]);
 
-  if (!event) return null;
+  if (!event || !mounted) return null;
 
   const handleRegister = () => {
     cyberAudio.playClick();
@@ -47,9 +51,11 @@ export default function EventDossierModal({ event, onClose }: EventDossierModalP
 
   const isSaved = saved.includes(event.id);
 
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in"
+      role="dialog"
+      aria-modal="true"
+      className="fixed inset-0 z-[200] flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-md animate-fade-in"
       onClick={onClose}
     >
       <div
@@ -77,8 +83,21 @@ export default function EventDossierModal({ event, onClose }: EventDossierModalP
           </button>
         </div>
 
+        {/* Poster banner preview in dossier */}
+        <div className="relative mt-5 h-44 sm:h-52 w-full overflow-hidden rounded-xl border border-emerald-500/30 bg-black/50 shadow-inner">
+          <img
+            src={event.poster || event.image}
+            alt={event.name}
+            className="h-full w-full object-cover"
+            onError={(e) => {
+              (e.target as HTMLImageElement).src = event.image || "/logo-original.png";
+            }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#040c08] via-transparent to-black/30" />
+        </div>
+
         {/* Title and Blurb */}
-        <div className="mt-6">
+        <div className="mt-5">
           <h2 className="t-cond text-[9vw] sm:text-[38px] leading-[0.9] text-[#f2fbf6]">
             {event.name}
           </h2>
@@ -180,6 +199,7 @@ export default function EventDossierModal({ event, onClose }: EventDossierModalP
           </Link>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
