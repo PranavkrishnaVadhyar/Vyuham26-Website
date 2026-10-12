@@ -77,7 +77,7 @@ function SignupContent() {
         phone: formData.phone,
       });
 
-      if (!res.success) {
+      if (res.success === false) {
         setStatus("idle");
         setError(res.error || "Account creation failed. Please try again.");
         return;

@@ -37,7 +37,7 @@ function LoginContent() {
     setStatus("verifying");
     try {
       const res = await login(email, password);
-      if (!res.success) {
+      if (res.success === false) {
         setStatus("idle");
         setErrorMsg(res.error || "Could not sign in. Check your email and password.");
         return;

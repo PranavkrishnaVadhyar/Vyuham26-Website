@@ -36,7 +36,7 @@ export default function GoogleSignInButton({
     try {
       const res = await loginWithGoogle(returnPathOverride ?? redirectPath);
       // On success the browser is already navigating to Google.
-      if (!res.success) {
+      if (res.success === false) {
         setPending(false);
         onError?.(res.error || "Google sign-in failed.");
       }

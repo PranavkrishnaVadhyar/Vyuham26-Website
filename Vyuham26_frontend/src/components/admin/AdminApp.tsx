@@ -642,7 +642,7 @@ export default function AdminApp() {
               setAdminAuthPending(true);
               try {
                 const result = await auth.login(email, pw);
-                if (!result.success) {
+                if (result.success === false) {
                   setAdminAuthError(result.error || "Sign in failed. Check your email and password.");
                   return;
                 }

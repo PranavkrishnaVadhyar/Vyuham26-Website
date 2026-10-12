@@ -53,7 +53,7 @@ export function AuthModal() {
         mode === "login"
           ? await login(email, password)
           : await signup({ name: name || "PARTICIPANT", email, password, college });
-      if (!res.success) {
+      if (res.success === false) {
         setErr(res.error || "Authentication failed. Please try again.");
         return;
       }

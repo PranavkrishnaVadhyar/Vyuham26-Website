@@ -218,7 +218,7 @@ export default function VolunteerScannerPage() {
         toast(`Scanner error: ${err?.message || "Network error"}`, "error");
       }
     },
-    [station, user, auth.user, addCheckin, loadHistory, rapidMode]
+    [station, auth.user, addCheckin, loadHistory, rapidMode]
   );
 
   const startCamera = useCallback(async () => {
@@ -374,7 +374,7 @@ export default function VolunteerScannerPage() {
                     setAuthPending(true);
                     try {
                       const result = await auth.login(authEmail, authPw);
-                      if (!result.success) {
+                      if (result.success === false) {
                         setAuthError(result.error);
                       } else {
                         setAuthPw("");
