@@ -222,7 +222,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (saved) {
         const parsed = JSON.parse(saved);
         if (parsed && typeof parsed === "object" && parsed.email) {
-          setUser(parsed);
+          if (parsed.id === "u-admin" || parsed.role === "admin") {
+            // Remove the retired local-only demo administrator session.
+            saveUserToStorage(null);
+          } else {
+            setUser(parsed);
+          }
         }
       }
     } catch (err) {
@@ -285,9 +290,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = useCallback(
     async (email: string, password?: string, name?: string): Promise<AuthResult> => {
-      if (!SITE_CONFIG.REG_OPEN) {
-        return { success: false, error: "Registration and login are coming soon." };
-      }
+      // Authentication is independent of event registration availability.
+      // Previous shared-gate behavior retained for reference:
+      // if (!SITE_CONFIG.REG_OPEN) {
+      //   return { success: false, error: "Registration and login are coming soon." };
+      // }
       const cleanEmail = email.trim().toLowerCase();
 
       // 1. Try Supabase Auth if password is provided
@@ -324,11 +331,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           }
 
           // If Supabase returned an error and it's not a seed demo account, return error
-          if (
-            error &&
-            cleanEmail !== "admin@vyuham26.in" &&
-            cleanEmail !== "volunteer@vyuham26.in"
-          ) {
+          if (error && cleanEmail !== "volunteer@vyuham26.in") {
             return { success: false, error: error.message };
           }
         } catch (err: any) {
@@ -380,10 +383,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       } catch {}
 
-      if (cleanEmail === "admin@vyuham26.in") {
-        existingRole = "admin";
-        if (!name) name = "VYUHAM CORE";
-      } else if (cleanEmail === "volunteer@vyuham26.in") {
+      if (cleanEmail === "volunteer@vyuham26.in") {
         existingRole = "volunteer";
         if (!name) name = "DIVYA MENON";
       }
@@ -421,9 +421,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       year?: string;
       role?: "user" | "volunteer" | "event_head" | "admin";
     }): Promise<AuthResult> => {
-      if (!SITE_CONFIG.REG_OPEN) {
-        return { success: false, error: "Registration is coming soon." };
-      }
+      // Account creation remains available while event registration is closed.
+      // Previous shared-gate behavior retained for reference:
+      // if (!SITE_CONFIG.REG_OPEN) {
+      //   return { success: false, error: "Registration is coming soon." };
+      // }
       const cleanEmail = details.email.trim().toLowerCase();
 
       // 1. Try Supabase signUp if password is provided
@@ -507,9 +509,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const loginWithGoogle = useCallback(
     async (redirectPath: string = "/dashboard"): Promise<AuthResult> => {
-      if (!SITE_CONFIG.REG_OPEN) {
-        return { success: false, error: "Registration and login are coming soon." };
-      }
+      // OAuth sign-in remains available while event registration is closed.
+      // Previous shared-gate behavior retained for reference:
+      // if (!SITE_CONFIG.REG_OPEN) {
+      //   return { success: false, error: "Registration and login are coming soon." };
+      // }
       try {
         sessionStorage.setItem(OAUTH_REDIRECT_KEY, redirectPath);
       } catch {}

@@ -3,9 +3,8 @@ import { createPortal } from "react-dom";
 import Link from "next/link";
 import { cyberAudio } from "@/lib/cyberAudio";
 import { useApp } from "@/lib/store";
-import { useRegistrationOpen } from "@/config/site";
 import type { FestEvent } from "@/data/types";
-import { X, Calendar, Clock, MapPin, Trophy, Users, Shield, ArrowRight, ExternalLink } from "lucide-react";
+import { X, Calendar, Clock, MapPin, Trophy, Users, Shield, ArrowRight } from "lucide-react";
 
 interface EventDossierModalProps {
   event: FestEvent | null;
@@ -14,7 +13,6 @@ interface EventDossierModalProps {
 
 export default function EventDossierModal({ event, onClose }: EventDossierModalProps) {
   const { toggleSave, saved } = useApp();
-  const regOpen = useRegistrationOpen();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -33,8 +31,6 @@ export default function EventDossierModal({ event, onClose }: EventDossierModalP
 
   if (!event || !mounted) return null;
 
-  const eventSlug = event.id.replace(/^ev-/, "");
-  const registrationUrl = (event.registration_url || event.makemypass_url || "").trim();
   const isSaved = saved.includes(event.id);
 
 
@@ -153,6 +149,7 @@ export default function EventDossierModal({ event, onClose }: EventDossierModalP
         {/* Action Buttons */}
         <div className="mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-[rgba(24,196,124,0.18)] pt-5">
           <div className="flex flex-wrap items-center gap-3">
+            {/* Registration and MakeMyPass links are intentionally inactive until launch.
             {registrationUrl ? (
               <a
                 href={registrationUrl}
@@ -174,6 +171,15 @@ export default function EventDossierModal({ event, onClose }: EventDossierModalP
                 REGISTRATION UNAVAILABLE
               </button>
             )}
+            */}
+            <button
+              type="button"
+              disabled
+              className="cursor-not-allowed border border-white/10 bg-white/5 px-4 py-2.5 font-mono text-[10px] tracking-[0.16em] uppercase text-white/40"
+              aria-label="Event registration coming soon"
+            >
+              REGISTRATION COMING SOON
+            </button>
 
             <button
               type="button"

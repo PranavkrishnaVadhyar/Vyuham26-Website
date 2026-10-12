@@ -2,7 +2,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
-import { defineConfig, type PluginOption } from "vite";
+import { defineConfig, loadEnv, type PluginOption } from "vite";
 import { viteSingleFile } from "vite-plugin-singlefile";
 import { visualizer } from "rollup-plugin-visualizer";
 
@@ -11,19 +11,25 @@ const __dirname = path.dirname(__filename);
 
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, __dirname, "");
+  const apiProxyTarget = (env.API_URL || env.VITE_API_URL || "").replace(/\/+$/, "");
   const isSplit = mode === "split" || mode === "analyze";
   const isAnalyze = mode === "analyze";
 
   return {
     server: {
       port: 5173,
-      proxy: {
-        "/api": {
-          target: "https://vyuham26-backend.vercel.app/",
-          changeOrigin: true,
-          rewrite: (path) => path.replace(/^\/api/, ""),
-        },
-      },
+      ...(apiProxyTarget
+        ? {
+            proxy: {
+              "/api": {
+                target: apiProxyTarget,
+                changeOrigin: true,
+                rewrite: (path: string) => path.replace(/^\/api/, ""),
+              },
+            },
+          }
+        : {}),
     },
     plugins: [
       react(),

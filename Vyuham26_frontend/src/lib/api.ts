@@ -1,21 +1,16 @@
 import { supabase } from "@/lib/supabase";
 import { SITE_CONFIG } from "@/config/site";
 
-// Backend origin. Resolution order:
-//   1. VITE_API_URL (production builds: set at build time; dev: .env.development)
-//   2. Same-origin fallback ("") — production must never fall back to a
-//      localhost URL, which would bake http://localhost:8000 into the bundle.
+// Browser-visible backend origin. Vite exposes VITE_* values to client code;
+// API_URL is used by vite.config.ts for its development proxy only.
 export const API_BASE_URL =
-  import.meta.env.VITE_API_URL ||
-  (import.meta.env as any).API_URL ||
-  "";
+  (import.meta.env.VITE_API_URL || "").replace(/\/+$/, "");
 
-// Events are the only API currently given a deployed-origin fallback. Other
-// API clients continue to use API_BASE_URL so this does not silently redirect
-// auth, registration, or admin traffic.
-const EVENTS_API_BASE_URL = (
-  API_BASE_URL || "https://vyuham26-backend.vercel.app"
-).replace(/\/+$/, "");
+// When no browser API origin is configured, the events client uses /api so
+// Vite can proxy through the server-side API_URL setting during development.
+// The production build should set VITE_API_URL.
+const eventsApiBasePath = API_BASE_URL || "/api";
+const eventsApiPath = (path = "") => `${eventsApiBasePath}/events${path}`;
 
 export class ApiError extends Error {
   status: number;
@@ -208,11 +203,11 @@ export const authApi = {
 };
 
 export const eventsApi = {
-  list: () => apiFetch<EventRecord[]>(`${EVENTS_API_BASE_URL}/events`),
+  list: () => apiFetch<EventRecord[]>(eventsApiPath()),
   getBySlug: (slug: string) =>
-    apiFetch<EventRecord>(`${EVENTS_API_BASE_URL}/events/by-slug/${encodeURIComponent(slug)}`),
+    apiFetch<EventRecord>(eventsApiPath(`/by-slug/${encodeURIComponent(slug)}`)),
   getById: (id: string) =>
-    apiFetch<EventRecord>(`${EVENTS_API_BASE_URL}/events/${encodeURIComponent(id)}`),
+    apiFetch<EventRecord>(eventsApiPath(`/${encodeURIComponent(id)}`)),
 };
 
 export const registrationsApi = {

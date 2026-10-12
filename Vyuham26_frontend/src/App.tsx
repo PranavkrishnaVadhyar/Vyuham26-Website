@@ -28,7 +28,6 @@ import { AuthModal, ProfilePanel } from "@/components/auth/Auth";
 import Toaster, { toast } from "@/components/ui/Toaster";
 import CyberTerminal from "@/components/ui/CyberTerminal";
 import Logo from "@/components/ui/Logo";
-import AdminSecretListener from "@/components/admin/AdminSecretListener";
 import ErrorBoundary from "@/components/ui/ErrorBoundary";
 import { cyberAudio } from "@/lib/cyberAudio";
 import { syncRegistrationGateFromBackend } from "@/config/site";
@@ -324,7 +323,6 @@ export default function App() {
   return (
     <AuthProvider>
       <AppProvider>
-        <AdminSecretListener />
         <GlobalKeyboardShortcuts />
         <CinematicCursor />
         <Router />

@@ -196,6 +196,8 @@ export interface RouteConfig {
   requiresAdmin?: boolean;
   requiresAuth?: boolean;
   requiresRegistrationOpen?: boolean;
+  /** Permanently gated in this frontend build, independent of backend flags. */
+  comingSoon?: boolean;
   exact?: boolean;
 }
 
@@ -231,27 +233,29 @@ export const routes: RouteConfig[] = [
   { id: "leaderboard", pattern: "/leaderboard", component: LeaderboardPage },
   { id: "results", pattern: "/results", component: ResultsPage },
   { id: "certificates", pattern: "/certificates", component: CertificatesPage },
-  { id: "ticket", pattern: "/ticket", component: TicketPage, requiresRegistrationOpen: true },
+  { id: "ticket", pattern: "/ticket", component: TicketPage, requiresRegistrationOpen: true, comingSoon: true },
   { id: "volunteer", pattern: ["/volunteer", "/checkin"], component: VolunteerScannerPage },
 
   // Commerce, Food & Operations
-  { id: "checkout", pattern: "/checkout", component: CheckoutPage, requiresRegistrationOpen: true },
-  { id: "payment", pattern: "/payment", component: PaymentPage, requiresRegistrationOpen: true },
-  { id: "receipt", pattern: "/receipt", component: ReceiptPage, requiresRegistrationOpen: true },
-  { id: "confirmation", pattern: "/confirmation", component: ConfirmationPage },
+  { id: "checkout", pattern: "/checkout", component: CheckoutPage, requiresRegistrationOpen: true, comingSoon: true },
+  { id: "payment", pattern: "/payment", component: PaymentPage, requiresRegistrationOpen: true, comingSoon: true },
+  { id: "receipt", pattern: "/receipt", component: ReceiptPage, requiresRegistrationOpen: true, comingSoon: true },
+  { id: "confirmation", pattern: "/confirmation", component: ConfirmationPage, comingSoon: true },
   { id: "food", pattern: "/food", component: FoodPage },
   { id: "food-topup", pattern: "/food/topup", component: FoodTopupPage },
   { id: "food-wallet", pattern: "/food/wallet", component: FoodWalletPage },
   { id: "food-vendor", pattern: "/food/vendor", component: FoodVendorPage },
 
   // Auth, Profile & Teams
-  { id: "teams", pattern: "/teams", component: TeamsPage, requiresRegistrationOpen: true },
-  { id: "login", pattern: "/login", component: LoginPage, requiresRegistrationOpen: true },
-  { id: "signup", pattern: "/signup", component: SignupPage, requiresRegistrationOpen: true },
-  { id: "dashboard", pattern: "/dashboard", component: DashboardPage, requiresRegistrationOpen: true },
-  { id: "profile", pattern: "/profile", component: ProfilePage, requiresRegistrationOpen: true },
-  { id: "register", pattern: "/register", component: RegisterPage, requiresRegistrationOpen: true },
-  { id: "register-slug", pattern: "/register/:slug", component: RegisterSlugRoute, requiresRegistrationOpen: true },
+  { id: "teams", pattern: "/teams", component: TeamsPage, requiresRegistrationOpen: true, comingSoon: true },
+  // Auth/profile routes were previously tied to the event-registration flag.
+  // requiresRegistrationOpen: true,
+  { id: "login", pattern: "/login", component: LoginPage },
+  { id: "signup", pattern: "/signup", component: SignupPage },
+  { id: "dashboard", pattern: "/dashboard", component: DashboardPage },
+  { id: "profile", pattern: "/profile", component: ProfilePage },
+  { id: "register", pattern: "/register", component: RegisterPage, requiresRegistrationOpen: true, comingSoon: true },
+  { id: "register-slug", pattern: "/register/:slug", component: RegisterSlugRoute, requiresRegistrationOpen: true, comingSoon: true },
 
   // Restricted Administrative Control Center
   { id: "admin-analytics", pattern: "/admin/analytics", component: AdminAnalyticsPage, requiresAdmin: true },
@@ -346,8 +350,34 @@ export function RouteRenderer({
     return <Site />;
   }
 
-  if (route.requiresRegistrationOpen && !regOpen) {
-    return <RegistrationComingSoon />;
+  if (route.comingSoon || (route.requiresRegistrationOpen && !regOpen)) {
+    const comingSoonCopy: Record<string, { title: string; subtitle: string }> = {
+      teams: {
+        title: "TEAM FEATURES COMING SOON",
+        subtitle: "Team creation and team management will be available when event registration opens.",
+      },
+      checkout: {
+        title: "CHECKOUT COMING SOON",
+        subtitle: "Event checkout and payment are not active yet. All event registrations are coming soon.",
+      },
+      payment: {
+        title: "PAYMENTS COMING SOON",
+        subtitle: "Payments will be enabled when event registration launches.",
+      },
+      receipt: {
+        title: "TICKETS COMING SOON",
+        subtitle: "Event tickets and receipts will be available when registration launches.",
+      },
+      confirmation: {
+        title: "CHECKOUT COMING SOON",
+        subtitle: "Event checkout and payment are not active yet.",
+      },
+      ticket: {
+        title: "TICKETS COMING SOON",
+        subtitle: "Event tickets will be available when registration launches.",
+      },
+    };
+    return <RegistrationComingSoon {...comingSoonCopy[route.id]} />;
   }
 
   const Component = route.component;

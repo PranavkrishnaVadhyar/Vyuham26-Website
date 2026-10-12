@@ -279,6 +279,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [saved, setSaved] = useLocalState<string[]>("vyuham26:saved:v1", []);
   const [userId, setUserId] = useLocalState<string | null>("vyuham26:session:v1", null);
 
+  // Drop the retired local-only administrator demo account from existing browsers.
+  useEffect(() => {
+    setUsers((current) => current.filter((account) => account.id !== "u-admin"));
+    setUserId((current) => (current === "u-admin" ? null : current));
+  }, [setUsers, setUserId]);
+
   // Bidirectional sync with AuthContext
   useEffect(() => {
     if (!auth.isReady) return;

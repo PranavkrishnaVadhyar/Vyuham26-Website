@@ -615,9 +615,6 @@ export default function DashboardPage() {
                   </div>
                   <div>
                     <div className="font-display text-xl font-bold">{user ? user.name : "Guest Operative"}</div>
-                    <div className="mt-1 font-mono text-[7px] tracking-[0.18em] text-white/30">
-                      {user ? user.id : "VYU26-GUEST-MODE"}
-                    </div>
                   </div>
                 </div>
                 <div className="mt-6 grid grid-cols-2 gap-px bg-white/5">

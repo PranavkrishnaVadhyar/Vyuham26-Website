@@ -17,7 +17,7 @@ interface RegistrationComingSoonProps {
 
 export default function RegistrationComingSoon({
   title = "REGISTRATION COMING SOON",
-  subtitle = "Event registrations, operative logins, and mission loadout configuration for VYUHAM'26 are undergoing final calibration. Full portal access will launch shortly.",
+  subtitle = "Event registrations, team features, and ticketing for VYUHAM'26 are undergoing final calibration. Sign in and create an account are available now.",
   withLayout = true,
 }: RegistrationComingSoonProps) {
   const content = (

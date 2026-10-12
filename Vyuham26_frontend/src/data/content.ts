@@ -405,16 +405,6 @@ export const announcements: Announcement[] = [
 
 export const seedUsers: UserAccount[] = [
   {
-    id: "u-admin",
-    name: "VYUHAM CORE",
-    email: "admin@vyuham26.in",
-    password: "vyuham26",
-    role: "admin",
-    college: "Digital University Kerala",
-    station: "Central Command",
-    joined: "2026-01-04",
-  },
-  {
     id: "u-volunteer",
     name: "DIVYA MENON",
     email: "volunteer@vyuham26.in",

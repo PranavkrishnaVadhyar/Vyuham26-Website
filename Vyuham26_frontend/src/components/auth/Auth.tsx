@@ -3,8 +3,8 @@ import { cn } from "@/utils/cn";
 import { useApp } from "@/lib/store";
 import { toast } from "@/components/ui/Toaster";
 import { MEDIA } from "@/data/media";
-import { SITE_CONFIG, isRegistrationOpen } from "@/config/site";
 import { getAppPath } from "@/lib/router";
+import { useAuth } from "@/context/AuthContext";
 import GoogleSignInButton, { AuthDivider, setAuthReturnPath } from "@/components/auth/GoogleSignInButton";
 import { markInternalNav } from "@/lib/router";
 
@@ -12,7 +12,8 @@ import { markInternalNav } from "@/lib/router";
 /*  AUTH MODAL                                                         */
 /* ================================================================== */
 export function AuthModal() {
-  const { ui, login, signup } = useApp();
+  const { ui } = useApp();
+  const { login, signup } = useAuth();
   const mode = ui.authOpen;
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -35,20 +36,22 @@ export function AuthModal() {
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!isRegistrationOpen()) {
-      setErr("Registration & login are currently closed. Coming soon!");
-      return;
-    }
+    // Authentication remains available while event registration is closed.
+    // Previous shared-gate behavior retained for reference:
+    // if (!isRegistrationOpen()) {
+    //   setErr("Registration & login are currently closed. Coming soon!");
+    //   return;
+    // }
     const res =
       mode === "login"
         ? await login(email, password)
-        : await signup(name || "PARTICIPANT", email, password, college);
-    if (res.ok) {
+        : await signup({ name: name || "PARTICIPANT", email, password, college });
+    if (res.success) {
       ui.setAuthOpen(false);
-      toast(res.message);
+      toast(mode === "login" ? "Signed in successfully." : "Account created successfully.");
       setPassword("");
     } else {
-      setErr(res.message);
+      setErr(res.error || "Authentication failed.");
     }
   };
 

@@ -20,6 +20,9 @@ interface EventDetailClientProps {
   event: Event;
 }
 
+// Event registrations, including MakeMyPass links, are intentionally paused.
+const EVENT_REGISTRATION_ACTIVE = false;
+
 export default function EventDetailClient({ event }: EventDetailClientProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -56,7 +59,7 @@ export default function EventDetailClient({ event }: EventDetailClientProps) {
 
   // Load squads if authenticated and team event
   useEffect(() => {
-    if (isAuthenticated && isTeamEvent) {
+    if (EVENT_REGISTRATION_ACTIVE && isAuthenticated && isTeamEvent) {
       teamsApi.listMine()
         .then((list) => {
           if (Array.isArray(list)) {
@@ -70,7 +73,7 @@ export default function EventDetailClient({ event }: EventDetailClientProps) {
     }
   }, [isAuthenticated, isTeamEvent]);
 
-  // Redirected back after arriving with intent to register: open MakeMyPass page if available
+  // Redirected back after arriving with intent to register: do not open MakeMyPass while paused.
   const registerIntentHandled = useRef(false);
   useEffect(() => {
     if (registerIntentHandled.current) return;
@@ -80,13 +83,17 @@ export default function EventDetailClient({ event }: EventDetailClientProps) {
     // Drop the flag so a reload does not re-trigger registration.
     router.replace(`/events/${event.slug}`);
 
-    if (targetRegistrationUrl) {
-      window.open(targetRegistrationUrl, "_blank", "noopener,noreferrer");
-    }
+    // Previous behavior, kept for when registration launches:
+    // if (targetRegistrationUrl) window.open(targetRegistrationUrl, "_blank", "noopener,noreferrer");
   }, [searchParams, event.slug, targetRegistrationUrl, router]);
 
 
   const handleRegisterClick = async () => {
+    if (!EVENT_REGISTRATION_ACTIVE) {
+      toast("Event registration is coming soon!", "info");
+      return;
+    }
+
     if (!regOpen) {
       toast("Event registration is coming soon!", "info");
       return;
@@ -505,7 +512,7 @@ export default function EventDetailClient({ event }: EventDetailClientProps) {
                   </div>
 
                   {/* Register Block */}
-                  {isRegistered ? (
+                  {EVENT_REGISTRATION_ACTIVE && isRegistered ? (
                     <div className="space-y-3">
                       <div className="flex w-full items-center justify-center gap-2.5 rounded border border-[#2ee59d]/60 bg-[#2ee59d]/10 py-4 font-mono text-xs font-bold uppercase tracking-[0.18em] text-[#2ee59d] shadow-[0_0_25px_rgba(46,229,157,0.15)]">
                         <span className="relative flex h-2 w-2">
@@ -527,51 +534,31 @@ export default function EventDetailClient({ event }: EventDetailClientProps) {
 
                       {targetRegistrationUrl && (
                         <div className="pt-1">
-                          <a
-                            href={targetRegistrationUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex w-full items-center justify-center gap-2 rounded border border-[#2ee59d]/40 bg-black/40 py-2.5 font-mono text-[10px] uppercase tracking-[0.16em] text-[#2ee59d] transition hover:bg-[#2ee59d]/10"
-                          >
-                            <span>VIEW ON MAKEMYPASS</span>
-                            <span>↗</span>
-                          </a>
+                          {/* Previous active MakeMyPass link kept as a comment while registrations are paused.
+                          <a href={targetRegistrationUrl} target="_blank" rel="noopener noreferrer">VIEW ON MAKEMYPASS ↗</a>
+                          */}
+                          <button type="button" disabled className="flex w-full cursor-not-allowed items-center justify-center gap-2 rounded border border-white/10 bg-white/5 py-2.5 font-mono text-[10px] uppercase tracking-[0.16em] text-white/40">
+                            REGISTRATION COMING SOON
+                          </button>
                         </div>
                       )}
                     </div>
                   ) : (
                     <div className="space-y-3">
-                      {targetRegistrationUrl ? (
-                        <a
-                          href={targetRegistrationUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="group relative flex w-full cursor-pointer items-center justify-center overflow-hidden border border-[#2ee59d]/60 bg-[#2ee59d]/15 px-6 py-4 font-mono text-xs font-extrabold uppercase tracking-[0.18em] text-[#2ee59d] transition-all duration-300 hover:border-[#2ee59d] hover:bg-[#2ee59d]/25 hover:shadow-[0_0_30px_rgba(46,229,157,0.3)] active:scale-[0.99]"
-                        >
-                          {/* Button scan */}
-                          <span className="absolute inset-y-0 left-0 w-1/3 -translate-x-full bg-gradient-to-r from-transparent via-[#2ee59d]/30 to-transparent transition-transform duration-700 group-hover:translate-x-[400%]" />
-
-                          <span className="relative z-10 flex items-center gap-2">
-                            <span>REGISTER NOW</span>
-                            <span className="text-base transition-transform duration-300 group-hover:translate-x-1">
-                              ↗
-                            </span>
-                          </span>
-                        </a>
-                      ) : (
-                        <button
-                          type="button"
-                          disabled
-                          className="flex w-full cursor-not-allowed items-center justify-center border border-white/10 bg-white/5 px-6 py-4 font-mono text-xs font-semibold uppercase tracking-[0.16em] text-white/40"
-                          title="Registration link not available for this event yet on MakeMyPass"
-                        >
-                          REGISTRATION UNAVAILABLE
-                        </button>
-                      )}
+                      {/* Previous active MakeMyPass link retained for launch:
+                      <a href={targetRegistrationUrl} target="_blank" rel="noopener noreferrer">REGISTER NOW ↗</a>
+                      */}
+                      <button
+                        type="button"
+                        disabled
+                        className="flex w-full cursor-not-allowed items-center justify-center border border-white/10 bg-white/5 px-6 py-4 font-mono text-xs font-semibold uppercase tracking-[0.16em] text-white/40"
+                      >
+                        REGISTRATION COMING SOON
+                      </button>
 
                       <div className="flex items-center justify-between font-mono text-[8px] uppercase tracking-[0.15em] text-white/35 px-1">
-                        <span>OFFICIAL TICKETING: MAKEMYPASS</span>
-                        <span>DIRECT & SECURE</span>
+                        <span>EVENT REGISTRATION</span>
+                        <span>COMING SOON</span>
                       </div>
                     </div>
                   )}

@@ -273,10 +273,10 @@ function EventCard({
                 </span>
 
                 <span
-                  className="flex items-center gap-1 font-mono text-[8px] uppercase tracking-[0.18em] transition-transform duration-300 group-hover:translate-x-1"
-                  style={{ color: theme.accent }}
+                  className="flex items-center gap-1 font-mono text-[8px] uppercase tracking-[0.18em]"
+                  style={{ color: "#fbbf24" }}
                 >
-                  ENTER PROTOCOL →
+                  REGISTRATION COMING SOON
                 </span>
               </div>
             </div>

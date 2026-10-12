@@ -320,7 +320,7 @@ export default function AdminApp() {
   const [consoleConfig] = useConsoleConfig();
   const [editing, setEditing] = useState<FestEvent | null>(null);
   const [navOpen, setNavOpen] = useState(false);
-  const [email, setEmail] = useState("admin@vyuham26.in");
+  const [email, setEmail] = useState("");
   const [pw, setPw] = useState("");
 
   // Volunteer enrollment state

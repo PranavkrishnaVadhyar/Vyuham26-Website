@@ -373,16 +373,6 @@ export default function VolunteerScannerPage() {
                       <span className="block font-bold">▶ DIVYA MENON</span>
                       <span className="text-[8px] text-cyan-400/80">Role: Gate Volunteer</span>
                     </button>
-                    <button
-                      onClick={() => {
-                        const r = login("admin@vyuham26.in", "vyuham26");
-                        toast(r.message, r.ok ? "info" : "warn");
-                      }}
-                      className="flex-1 border border-emerald-500/60 bg-emerald-900/40 px-3 py-2 text-left font-mono text-[10px] tracking-[0.14em] text-emerald-300 transition-colors hover:bg-emerald-800/60"
-                    >
-                      <span className="block font-bold">▶ VYUHAM CORE</span>
-                      <span className="text-[8px] text-emerald-400/80">Role: Administrator</span>
-                    </button>
                   </div>
                 </div>
 
