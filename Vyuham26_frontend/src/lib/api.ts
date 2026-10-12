@@ -167,6 +167,32 @@ export interface EventRecord {
   teamSize: string;
 }
 
+export interface EventWritePayload {
+  name: string;
+  slug: string;
+  stream: EventRecord["stream"];
+  registration_type?: EventRecord["registration_type"];
+  team_size_min?: number | null;
+  team_size_max?: number | null;
+  prize_amount?: number | null;
+  venue?: string | null;
+  fee?: string | null;
+  day?: number | null;
+  time?: string | null;
+  rules?: string[] | null;
+  eligibility?: string | null;
+  seats_total?: number | null;
+  image?: string | null;
+  featured?: boolean;
+  status?: string;
+  blurb?: string | null;
+  start_time?: string | null;
+  end_time?: string | null;
+  description?: string | null;
+  registration_url?: string | null;
+  makemypass_url?: string | null;
+}
+
 
 export interface RegistrationRecord {
   id: string;
@@ -180,6 +206,35 @@ export interface RegistrationRecord {
   checked_in_at?: string | null;
   amount_paid?: number;
   payment_reference?: string | null;
+  created_at: string;
+}
+
+export interface AdminUserRecord {
+  id: string;
+  email: string;
+  name: string | null;
+  phone: string | null;
+  college: string | null;
+  degree: string | null;
+  year: string | null;
+  station: string | null;
+  role: "user" | "admin" | "volunteer" | "event_head" | "participant";
+  created_at: string;
+}
+
+export interface AdminRegistrationRecord {
+  id: string;
+  event_id: string;
+  event_slug: string;
+  event_name: string;
+  user_id: string | null;
+  user_email: string | null;
+  user_name: string | null;
+  team_id: string | null;
+  status: "pending" | "confirmed" | "cancelled";
+  ticket_code: string | null;
+  checked_in: boolean;
+  amount_paid: number;
   created_at: string;
 }
 
@@ -208,6 +263,18 @@ export const eventsApi = {
     apiFetch<EventRecord>(eventsApiPath(`/by-slug/${encodeURIComponent(slug)}`)),
   getById: (id: string) =>
     apiFetch<EventRecord>(eventsApiPath(`/${encodeURIComponent(id)}`)),
+  create: (payload: EventWritePayload) =>
+    apiFetch<EventRecord>(eventsApiPath(), {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
+  update: (id: string, payload: Partial<EventWritePayload>) =>
+    apiFetch<EventRecord>(eventsApiPath(`/${encodeURIComponent(id)}`), {
+      method: "PATCH",
+      body: JSON.stringify(payload),
+    }),
+  delete: (id: string) =>
+    apiFetch<void>(eventsApiPath(`/${encodeURIComponent(id)}`), { method: "DELETE" }),
 };
 
 export const registrationsApi = {
@@ -522,19 +589,16 @@ export interface EventResultRecord {
 }
 
 export const adminApi = {
-  getStats: async (): Promise<AdminStatsResponse> => {
-    try {
-      return await apiFetch<AdminStatsResponse>("/admin/stats");
-    } catch {
-      return {
-        all: { total_registrations: 0, total_revenue: 0, total_checkins: 0, active_events: 0 },
-        tech: { total_registrations: 0, total_revenue: 0, total_checkins: 0, active_events: 0 },
-        management: { total_registrations: 0, total_revenue: 0, total_checkins: 0, active_events: 0 },
-        cultural: { total_registrations: 0, total_revenue: 0, total_checkins: 0, active_events: 0 },
-        esports: { total_registrations: 0, total_revenue: 0, total_checkins: 0, active_events: 0 },
-      };
-    }
-  },
+  getStats: () => apiFetch<AdminStatsResponse>("/admin/stats"),
+  listUsers: (limit = 100, offset = 0) =>
+    apiFetch<{ items: AdminUserRecord[]; total: number; limit: number; offset: number }>(
+      `/admin/users?limit=${limit}&offset=${offset}`,
+    ),
+  listRegistrations: (limit = 100, offset = 0) =>
+    apiFetch<{ items: AdminRegistrationRecord[]; total: number; limit: number; offset: number }>(
+      `/admin/registrations?limit=${limit}&offset=${offset}`,
+    ),
+  listCheckins: () => apiFetch<CheckInHistoryItem[]>("/checkin/history?limit=100"),
   publishResults: (
     eventId: string,
     payload: {
@@ -617,6 +681,12 @@ export function invalidateAnnouncementsCache() {
 }
 
 export const announcementsApi = {
+  // Admin console must never present fallback/demo announcements as database records.
+  listForAdmin: async (): Promise<AnnouncementRecord[]> => {
+    const records = await apiFetch<AnnouncementRecord[]>("/announcements");
+    _announcementsCache = { data: records, timestamp: Date.now() };
+    return records;
+  },
   list: async (forceRefresh = false): Promise<AnnouncementRecord[]> => {
     const now = Date.now();
     if (!forceRefresh && _announcementsCache && now - _announcementsCache.timestamp < 15000) {

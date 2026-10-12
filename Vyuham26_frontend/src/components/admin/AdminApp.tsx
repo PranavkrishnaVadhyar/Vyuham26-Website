@@ -1,13 +1,26 @@
-import { useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { cn } from "@/utils/cn";
 import { useApp } from "@/lib/store";
+import { useAuth } from "@/context/AuthContext";
 import { toast } from "@/components/ui/Toaster";
 import { cyberAudio } from "@/lib/cyberAudio";
-import type { Announcement, FestEvent, Sponsor, StreamId, TeamMember } from "@/data/types";
+import type { FestEvent, Sponsor, StreamId } from "@/data/types";
+import {
+  adminApi,
+  authApi,
+  eventsApi,
+  type AdminRegistrationRecord,
+  type AdminUserRecord,
+  type AdminStatsResponse,
+  type CheckInHistoryItem,
+  type EventRecord,
+  type EventWritePayload,
+} from "@/lib/api";
+import { mapEventRecordToFestEvent } from "@/lib/eventMapping";
 import ConsoleManager from "./ConsoleManager";
 import AnnouncementManager from "./AnnouncementManager";
 import { useConsoleConfig } from "@/config/consoleConfig";
-import { useStarredEvents } from "@/config/site";
+import { setRegistrationOpen } from "@/config/site";
 
 /* ------------------------------------------------------------------ */
 /*  primitives                                                         */
@@ -111,22 +124,26 @@ const blankEvent = (): FestEvent => ({
 });
 
 function RegistrationGatePanel() {
-  const { regOpen, setRegOpen } = useApp();
+  const { regOpen } = useApp();
   const [loading, setLoading] = useState(false);
 
-  const handleToggle = () => {
+  const handleToggle = async () => {
     setLoading(true);
     cyberAudio.playTelemetry();
     const nextState = !regOpen;
-    setRegOpen(nextState);
-    setTimeout(() => {
-      setLoading(false);
+    try {
+      await adminApi.setRegistrationStatus(nextState);
+      setRegistrationOpen(nextState, false);
       if (nextState) {
         toast("🟢 [GATEWAY ACTIVATED] Festival registration is now OPEN live across all public portals.", "ok");
       } else {
         toast("🟠 [GATEWAY LOCKED] Festival registration is CLOSED. Public sees COMING SOON.", "warn");
       }
-    }, 200);
+    } catch (error: any) {
+      toast(error?.message || "Could not update the registration gateway.", "warn");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -315,10 +332,26 @@ function CoreTeamGatePanel() {
 /* ------------------------------------------------------------------ */
 export default function AdminApp() {
   const app = useApp();
-  const { content, users, registrations, user } = app;
+  const auth = useAuth();
+  const { content } = app;
+  const { user } = auth;
   const [section, setSection] = useState<Section>("Overview");
   const [consoleConfig] = useConsoleConfig();
   const [editing, setEditing] = useState<FestEvent | null>(null);
+  const [editingBackendId, setEditingBackendId] = useState<string | null>(null);
+  const [editingRegistrationType, setEditingRegistrationType] = useState<"solo" | "team">("solo");
+  const [editingTeamMin, setEditingTeamMin] = useState(2);
+  const [editingTeamMax, setEditingTeamMax] = useState(5);
+  const [savingEvent, setSavingEvent] = useState(false);
+  const [adminStats, setAdminStats] = useState<AdminStatsResponse | null>(null);
+  const [adminUsers, setAdminUsers] = useState<AdminUserRecord[]>([]);
+  const [adminUsersTotal, setAdminUsersTotal] = useState(0);
+  const [adminRegistrations, setAdminRegistrations] = useState<AdminRegistrationRecord[]>([]);
+  const [adminRegistrationsTotal, setAdminRegistrationsTotal] = useState(0);
+  const [backendEvents, setBackendEvents] = useState<EventRecord[]>([]);
+  const [adminCheckins, setAdminCheckins] = useState<CheckInHistoryItem[]>([]);
+  const [dashboardLoading, setDashboardLoading] = useState(true);
+  const [dashboardErrors, setDashboardErrors] = useState<string[]>([]);
   const [navOpen, setNavOpen] = useState(false);
   const [email, setEmail] = useState("");
   const [pw, setPw] = useState("");
@@ -340,31 +373,192 @@ export default function AdminApp() {
   const [detectedSpan, setDetectedSpan] = useState<"wide" | "tall" | "std">("std");
   const [detectedInfo, setDetectedInfo] = useState<string>("");
 
-  const { starredSlugs, isStarred } = useStarredEvents();
   const [eventStarFilter, setEventStarFilter] = useState<"all" | "starred" | "unstarred">("all");
 
+  useEffect(() => {
+    let active = true;
+    const loadAdminData = async () => {
+      setDashboardLoading(true);
+      const results = await Promise.allSettled([
+        adminApi.getStats(),
+        adminApi.listUsers(500),
+        adminApi.listRegistrations(500),
+        eventsApi.list(),
+        adminApi.listCheckins(),
+      ]);
+      if (!active) return;
+
+      const errors: string[] = [];
+      const [statsResult, usersResult, registrationsResult, eventsResult, checkinsResult] = results;
+      if (statsResult.status === "fulfilled") setAdminStats(statsResult.value);
+      else errors.push("Could not load admin statistics.");
+      if (usersResult.status === "fulfilled") {
+        setAdminUsers(usersResult.value.items);
+        setAdminUsersTotal(usersResult.value.total);
+      } else errors.push("Could not load user profiles.");
+      if (registrationsResult.status === "fulfilled") {
+        setAdminRegistrations(registrationsResult.value.items);
+        setAdminRegistrationsTotal(registrationsResult.value.total);
+      } else errors.push("Could not load registrations.");
+      if (eventsResult.status === "fulfilled") setBackendEvents(eventsResult.value);
+      else errors.push("Could not load events.");
+      if (checkinsResult.status === "fulfilled") setAdminCheckins(checkinsResult.value);
+      else errors.push("Could not load gate check-ins.");
+      setDashboardErrors(errors);
+      setDashboardLoading(false);
+    };
+
+    void loadAdminData();
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const users = useMemo(
+    () =>
+      adminUsers.map((profile) => ({
+        id: profile.id,
+        name: profile.name || profile.email.split("@")[0],
+        email: profile.email,
+        role: (profile.role === "participant" ? "user" : profile.role) as "user" | "admin" | "volunteer" | "event_head",
+        college: profile.college || "",
+        station: profile.station || "",
+        joined: profile.created_at,
+        password: "",
+      })),
+    [adminUsers],
+  );
+
+  const adminEventRows = useMemo(
+    () =>
+      backendEvents.map((record) => ({
+        ...mapEventRecordToFestEvent(record, content.events),
+        starred: record.featured,
+      })),
+    [backendEvents, content.events],
+  );
+
+  const findBackendEvent = (event: FestEvent) =>
+    backendEvents.find(
+      (record) =>
+        record.id === event.id ||
+        `ev-${record.slug}` === event.id ||
+        record.name.toLowerCase() === event.name.toLowerCase(),
+    );
+
   const starredEventCount = useMemo(() => {
-    return content.events.filter((e) => isStarred(e.id) || !!e.starred).length;
-  }, [content.events, starredSlugs, isStarred]);
+    return backendEvents.filter((event) => event.featured).length;
+  }, [backendEvents]);
 
   const displayEvents = useMemo(() => {
-    return content.events.filter((e) => {
-      const starred = isStarred(e.id) || !!e.starred;
+    return adminEventRows.filter((e) => {
+      const starred = e.starred === true;
       if (eventStarFilter === "starred") return starred;
       if (eventStarFilter === "unstarred") return !starred;
       return true;
     });
-  }, [content.events, eventStarFilter, isStarred, starredSlugs]);
+  }, [adminEventRows, eventStarFilter]);
 
-  const handleToggleStar = (e: FestEvent) => {
+  const handleToggleStar = async (e: FestEvent) => {
     cyberAudio.playTelemetry();
-    app.toggleStarEvent(e.id);
-    const currentlyStarred = isStarred(e.id) || !!e.starred;
+    const record = findBackendEvent(e);
+    if (!record) {
+      toast("This event is not available in the backend catalog yet.", "warn");
+      return;
+    }
+    const currentlyStarred = record.featured;
     const nextStarred = !currentlyStarred;
-    if (nextStarred) {
-      toast(`★ '${e.name}' is now STARRED and listed on the Main Page!`, "ok");
-    } else {
-      toast(`☆ '${e.name}' unstarred. Removed from Main Page (remains listed on Events directory).`, "info");
+    try {
+      const updated = await eventsApi.update(record.id, { featured: nextStarred });
+      setBackendEvents((current) => current.map((item) => (item.id === updated.id ? updated : item)));
+      app.toggleStarEvent(e.id);
+      app.upsertEvent({ ...e, featured: nextStarred, starred: nextStarred });
+      toast(nextStarred
+        ? `★ '${e.name}' is now featured on the homepage.`
+        : `☆ '${e.name}' was removed from homepage features.`, "ok");
+    } catch (error: any) {
+      toast(error?.message || "Could not update the event feature flag.", "warn");
+    }
+  };
+
+  const handleSaveEvent = async () => {
+    if (!editing || !editing.name.trim()) {
+      toast("Event name is required.", "warn");
+      return;
+    }
+    const streamAliases: Record<string, EventRecord["stream"]> = {
+      technology: "tech", tech: "tech", cultural: "culture", culture: "culture",
+      esports: "gaming", gaming: "gaming", impact: "impact", management: "management",
+    };
+    const slug = editing.name.trim().toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+    const prize = Number((editing.prize || "").replace(/[^0-9.]/g, ""));
+    const payload: EventWritePayload = {
+      name: editing.name.trim(),
+      slug,
+      stream: streamAliases[String(editing.stream).toLowerCase()] || "tech",
+      registration_type: editingRegistrationType,
+      team_size_min: editingRegistrationType === "team" ? editingTeamMin : null,
+      team_size_max: editingRegistrationType === "team" ? editingTeamMax : null,
+      venue: editing.venue || null,
+      fee: editing.fee || null,
+      day: editing.day,
+      time: editing.time || null,
+      prize_amount: Number.isFinite(prize) && prize > 0 ? prize : null,
+      seats_total: editing.seats > 0 ? editing.seats : null,
+      image: editing.image || null,
+      featured: !!editing.starred,
+      status: editing.status,
+      blurb: editing.blurb || null,
+      description: editing.blurb || null,
+    };
+
+    setSavingEvent(true);
+    try {
+      const saved = editingBackendId
+        ? await eventsApi.update(editingBackendId, payload)
+        : await eventsApi.create(payload);
+      setBackendEvents((current) => {
+        const exists = current.some((item) => item.id === saved.id);
+        return exists ? current.map((item) => item.id === saved.id ? saved : item) : [saved, ...current];
+      });
+      app.upsertEvent({ ...mapEventRecordToFestEvent(saved, content.events), starred: saved.featured });
+      setEditing(null);
+      setEditingBackendId(null);
+      toast("Event saved to the backend.", "ok");
+    } catch (error: any) {
+      toast(error?.message || "Could not save event to the backend.", "warn");
+    } finally {
+      setSavingEvent(false);
+    }
+  };
+
+  const handleDeleteEvent = async (event: FestEvent) => {
+    const record = findBackendEvent(event);
+    if (!record) {
+      toast("This event is not available in the backend catalog.", "warn");
+      return;
+    }
+    if (!window.confirm(`Delete '${event.name}' from the event catalog?`)) return;
+    try {
+      await eventsApi.delete(record.id);
+      setBackendEvents((current) => current.filter((item) => item.id !== record.id));
+      app.removeEvent(event.id);
+      toast("Event deleted from the backend.", "ok");
+    } catch (error: any) {
+      toast(error?.message || "Could not delete event.", "warn");
+    }
+  };
+
+  const handleAssignRole = async (profileId: string, name: string, role: "user" | "admin" | "volunteer" | "event_head") => {
+    try {
+      const updated = await authApi.assignRole(profileId, role);
+      setAdminUsers((current) => current.map((profile) => profile.id === updated.id
+        ? { ...profile, role: updated.role as AdminUserRecord["role"] }
+        : profile));
+      toast(`Updated ${name}'s role to ${role.toUpperCase()}.`, "ok");
+    } catch (error: any) {
+      toast(error?.message || "Could not update the user's role.", "warn");
     }
   };
 
@@ -451,15 +645,13 @@ export default function AdminApp() {
     }
   };
 
-  const stats = useMemo(() => {
-    const active = content.events.filter((e) => e.status !== "full").length;
-    return {
-      events: content.events.length,
-      users: users.length,
-      regs: registrations.length,
-      active,
-    };
-  }, [content.events, users, registrations]);
+  const statsCategory = adminStats?.all;
+  const stats = {
+    events: backendEvents.length,
+    users: adminUsersTotal,
+    regs: statsCategory?.total_registrations ?? 0,
+    active: statsCategory?.active_events ?? 0,
+  };
 
   /* ---------------- gate ---------------- */
   if (!user || user.role !== "admin") {
@@ -475,8 +667,25 @@ export default function AdminApp() {
             className="mt-7 space-y-3"
             onSubmit={(e) => {
               e.preventDefault();
-              const r = app.login(email, pw);
-              toast(r.message, r.ok ? "ok" : "warn");
+              void (async () => {
+                const result = await auth.login(email, pw);
+                if (!result.success) {
+                  toast(result.error || "Sign in failed.", "warn");
+                  return;
+                }
+                try {
+                  const profile = await authApi.getMe();
+                  if (profile.role !== "admin") {
+                    await auth.logout();
+                    toast("This Supabase profile does not have the admin role.", "warn");
+                    return;
+                  }
+                  toast("Admin authenticated.", "ok");
+                } catch (error: any) {
+                  await auth.logout();
+                  toast(error?.message || "Could not verify admin access with the backend.", "warn");
+                }
+              })();
             }}
           >
             <input className="field" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" />
@@ -558,7 +767,7 @@ export default function AdminApp() {
               </span>
               <button
                 onClick={() => {
-                  app.logout();
+                  void auth.logout();
                   toast("Signed out.", "warn");
                 }}
                 className="font-mono text-[9px] tracking-[0.24em] text-[#6f8b80] hover:text-[#f2a98a]"
@@ -569,11 +778,24 @@ export default function AdminApp() {
           </header>
 
           <div className="space-y-5 p-5">
+            {dashboardErrors.length > 0 && (
+              <div className="border border-red-400/30 bg-red-950/20 px-4 py-3 font-mono text-[10px] leading-relaxed text-red-200">
+                Backend data could not be fully loaded: {dashboardErrors.join(" ")}
+              </div>
+            )}
+            {["Console", "Streams", "Schedule", "Gallery", "Sponsors", "Team", "Homepage", "Settings"].includes(section) && (
+              <div className="border border-amber-400/25 bg-amber-950/15 px-4 py-3 font-mono text-[9px] leading-relaxed tracking-[0.12em] text-amber-200">
+                THIS SECTION STILL USES BROWSER-LOCAL CONTENT. CHANGES HERE ARE NOT SAVED TO THE BACKEND.
+              </div>
+            )}
             {/* ---------------- OVERVIEW ---------------- */}
             {section === "Overview" && (
               <>
                 <RegistrationGatePanel />
                 <CoreTeamGatePanel />
+                <p className="border border-amber-400/25 bg-amber-950/15 px-4 py-3 font-mono text-[9px] leading-relaxed tracking-[0.12em] text-amber-200">
+                  CORE TEAM AND SPONSOR VISIBILITY SETTINGS ARE STILL STORED IN THIS BROWSER ONLY.
+                </p>
 
                 {/* Cyber Terminal Console Policy Quick Status */}
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border border-[rgba(120,160,145,0.16)] bg-[#060a09] p-4">
@@ -631,7 +853,7 @@ export default function AdminApp() {
                       </span>
                     </div>
                     <p className="font-mono text-[10px] text-[#b8d4c7]">
-                      Only starred events are featured on the homepage (Section 04). All {content.events.length} events remain listed on the public Events catalog.
+                      Only starred events are featured on the homepage (Section 04). All {backendEvents.length} backend events remain listed on the public Events catalog.
                     </p>
                   </div>
                   <button
@@ -644,18 +866,20 @@ export default function AdminApp() {
                 </div>
 
                 <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
-                  <Stat label="TOTAL EVENTS" value={stats.events} hint="ACROSS 4 STREAMS" />
+                  <Stat label="TOTAL EVENTS" value={dashboardLoading ? "…" : stats.events} hint="BACKEND CATALOG" />
                   <Stat label="MAIN PAGE STARRED" value={starredEventCount} hint="DISPLAYED IN SEC 04" />
-                  <Stat label="TOTAL USERS" value={stats.users} hint="REGISTERED ACCOUNTS" />
-                  <Stat label="TOTAL REGISTRATIONS" value={stats.regs} hint="SLOTS HELD" />
-                  <Stat label="ACTIVE EVENTS" value={stats.active} hint="ACCEPTING ENTRIES" />
+                  <Stat label="TOTAL USERS" value={dashboardLoading ? "…" : stats.users} hint="PROFILES IN DATABASE" />
+                  <Stat label="TOTAL REGISTRATIONS" value={dashboardLoading ? "…" : stats.regs} hint="DATABASE RECORDS" />
+                  <Stat label="ACTIVE EVENTS" value={dashboardLoading ? "…" : stats.active} hint="DATABASE STATUS" />
+                  <Stat label="PAID REVENUE" value={`₹${(statsCategory?.total_revenue ?? 0).toLocaleString("en-IN")}`} hint="BACKEND ORDERS" />
+                  <Stat label="APPROVED CHECK-INS" value={statsCategory?.total_checkins ?? 0} hint="GATE SCANS" />
                 </div>
 
                 <div className="grid gap-5 xl:grid-cols-2">
                   <Panel title="Stream distribution">
                     <div className="space-y-4">
                       {content.streams.map((s) => {
-                        const n = content.events.filter((e) => e.stream === s.id).length;
+                        const n = adminEventRows.filter((e) => e.stream === s.id).length;
                         const pct = stats.events ? (n / stats.events) * 100 : 0;
                         return (
                           <div key={s.id}>
@@ -677,18 +901,18 @@ export default function AdminApp() {
 
                   <Panel title="Capacity load">
                     <div className="space-y-3">
-                      {content.events.slice(0, 6).map((e) => (
+                      {adminEventRows.slice(0, 6).map((e) => (
                         <div key={e.id}>
                           <div className="flex items-center justify-between font-mono text-[9px] tracking-[0.18em] text-[#9fc4b4]">
                             <span className="truncate pr-3">{e.name}</span>
                             <span className="text-[#4f6f61]">
-                              {e.registered}/{e.seats}
+                              {adminRegistrations.filter((r) => r.event_id === findBackendEvent(e)?.id).length}/{e.seats}
                             </span>
                           </div>
                           <div className="mt-[6px] h-[2px] bg-[rgba(120,160,145,0.14)]">
                             <div
                               className="h-full bg-[#18c47c]"
-                              style={{ width: `${Math.min(100, (e.registered / e.seats) * 100)}%` }}
+                              style={{ width: `${Math.min(100, (adminRegistrations.filter((r) => r.event_id === findBackendEvent(e)?.id).length / Math.max(1, e.seats)) * 100)}%` }}
                             />
                           </div>
                         </div>
@@ -708,20 +932,17 @@ export default function AdminApp() {
                       </tr>
                     </thead>
                     <tbody>
-                      {registrations
-                        .slice(-8)
-                        .reverse()
-                        .map((r) => (
+                      {adminRegistrations.slice(0, 8).map((r) => (
                           <Row key={r.id}>
-                            <Td>{r.userName}</Td>
-                            <Td>{r.eventName}</Td>
-                            <Td>{r.createdAt}</Td>
+                            <Td>{r.user_name || r.user_email || "Deleted profile"}</Td>
+                            <Td>{r.event_name}</Td>
+                            <Td>{new Date(r.created_at).toLocaleDateString()}</Td>
                             <Td className={r.status === "confirmed" ? "text-[#18c47c]" : "text-[#f2c98a]"}>
                               {r.status.toUpperCase()}
                             </Td>
                           </Row>
                         ))}
-                      {registrations.length === 0 && (
+                      {adminRegistrations.length === 0 && (
                         <Row>
                           <Td>NO REGISTRATIONS YET.</Td>
                         </Row>
@@ -738,14 +959,20 @@ export default function AdminApp() {
             {/* ---------------- EVENTS ---------------- */}
             {section === "Events" && (
               <Panel
-                title={`Events (${content.events.length})`}
+                title={`Events (${backendEvents.length})`}
                 action={
                   <div className="flex items-center gap-3">
                     <span className="hidden sm:inline-flex items-center gap-1.5 font-mono text-[9px] text-amber-300 bg-amber-400/10 border border-amber-400/30 px-2 py-0.5 rounded">
                       ★ {starredEventCount} on Main Page
                     </span>
                     <button
-                      onClick={() => setEditing(blankEvent())}
+                      onClick={() => {
+                        setEditingBackendId(null);
+                        setEditingRegistrationType("solo");
+                        setEditingTeamMin(2);
+                        setEditingTeamMax(5);
+                        setEditing(blankEvent());
+                      }}
                       className="font-mono text-[9px] tracking-[0.24em] text-[#18c47c] hover:text-[#7dffc4]"
                     >
                       + NEW EVENT
@@ -766,7 +993,7 @@ export default function AdminApp() {
                       </span>
                     </div>
                     <p className="mt-1 text-xs text-[#9fc4b4] leading-relaxed">
-                      Only events marked with <strong className="text-amber-300 font-semibold">★ STARRED</strong> appear on the public Homepage. All {content.events.length} events remain listed on the full <a href="/events" target="_blank" rel="noopener noreferrer" className="text-emerald-400 underline underline-offset-2 hover:text-emerald-300">Events Directory</a>.
+                      Featured events are stored in the backend catalog. All {backendEvents.length} events remain listed on the full <a href="/events" target="_blank" rel="noopener noreferrer" className="text-emerald-400 underline underline-offset-2 hover:text-emerald-300">Events Directory</a>.
                     </p>
                   </div>
 
@@ -779,7 +1006,7 @@ export default function AdminApp() {
                           : "border-white/10 text-white/40 hover:text-white"
                       }`}
                     >
-                      ALL ({content.events.length})
+                      ALL ({backendEvents.length})
                     </button>
                     <button
                       onClick={() => setEventStarFilter("starred")}
@@ -799,7 +1026,7 @@ export default function AdminApp() {
                           : "border-white/10 text-white/40 hover:text-white"
                       }`}
                     >
-                      UNSTARRED ({content.events.length - starredEventCount})
+                      UNSTARRED ({backendEvents.length - starredEventCount})
                     </button>
                   </div>
                 </div>
@@ -820,7 +1047,7 @@ export default function AdminApp() {
                     </thead>
                     <tbody>
                       {displayEvents.map((e) => {
-                        const starred = isStarred(e.id) || !!e.starred;
+                        const starred = e.starred === true;
                         return (
                           <Row key={e.id}>
                             <Td>
@@ -856,14 +1083,18 @@ export default function AdminApp() {
                             <Td>{e.status.toUpperCase()}</Td>
                             <Td>
                               <div className="flex gap-3">
-                                <button onClick={() => setEditing(e)} className="text-[#18c47c] hover:text-[#7dffc4]">
+                                <button onClick={() => {
+                                  const record = findBackendEvent(e);
+                                  setEditingBackendId(record?.id || null);
+                                  setEditingRegistrationType(record?.registration_type || "solo");
+                                  setEditingTeamMin(record?.team_size_min || 2);
+                                  setEditingTeamMax(record?.team_size_max || 5);
+                                  setEditing(e);
+                                }} className="text-[#18c47c] hover:text-[#7dffc4]">
                                   EDIT
                                 </button>
                                 <button
-                                  onClick={() => {
-                                    app.removeEvent(e.id);
-                                    toast("Event removed.", "warn");
-                                  }}
+                                  onClick={() => void handleDeleteEvent(e)}
                                   className="text-[#6f8b80] hover:text-[#f2a98a]"
                                 >
                                   DELETE
@@ -888,7 +1119,7 @@ export default function AdminApp() {
 
             {/* ---------------- REGISTRATIONS ---------------- */}
             {section === "Registrations" && (
-              <Panel title={`Registrations (${registrations.length})`}>
+              <Panel title={`Registrations (${adminRegistrationsTotal})`}>
                 <div className="overflow-x-auto">
                   <table className="w-full min-w-[620px]">
                     <thead>
@@ -901,12 +1132,12 @@ export default function AdminApp() {
                       </tr>
                     </thead>
                     <tbody>
-                      {registrations.map((r) => (
+                      {adminRegistrations.map((r) => (
                         <Row key={r.id}>
                           <Td className="text-[#4f6f61]">{r.id}</Td>
-                          <Td>{r.userName}</Td>
-                          <Td>{r.eventName}</Td>
-                          <Td>{r.createdAt}</Td>
+                          <Td>{r.user_name || r.user_email || "Deleted profile"}</Td>
+                          <Td>{r.event_name}</Td>
+                          <Td>{new Date(r.created_at).toLocaleDateString()}</Td>
                           <Td className={r.status === "confirmed" ? "text-[#18c47c]" : "text-[#f2c98a]"}>
                             {r.status.toUpperCase()}
                           </Td>
@@ -922,7 +1153,7 @@ export default function AdminApp() {
             {section === "Users" && (
               <div className="space-y-6">
                 <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-                  <Stat label="Total Users" value={users.length} />
+                  <Stat label="Total Users" value={adminUsersTotal} />
                   <Stat
                     label="Volunteers Assigned"
                     value={users.filter((u) => u.role === "volunteer").length}
@@ -931,13 +1162,13 @@ export default function AdminApp() {
                   <Stat label="Administrators" value={users.filter((u) => u.role === "admin").length} />
                   <Stat
                     label="Gate Check-Ins"
-                    value={app.checkins.length}
-                    hint={`${app.checkins.filter((c) => c.status === "approved").length} Approved`}
+                    value={adminStats?.all.total_checkins ?? 0}
+                    hint={`${adminCheckins.filter((c) => c.status === "approved").length} recent approved`}
                   />
                 </div>
 
                 <Panel
-                  title={`Users & Assigned Personnel (${users.length})`}
+                  title={`Users & Assigned Personnel (${adminUsersTotal})`}
                   action={
                     <div className="flex items-center gap-3">
                       <button
@@ -949,12 +1180,9 @@ export default function AdminApp() {
                       >
                         OPEN SCANNER PORTAL ↗
                       </button>
-                      <button
-                        onClick={() => setVolModalOpen(true)}
-                        className="font-mono text-[9px] tracking-[0.24em] text-[#18c47c] hover:text-[#7dffc4]"
-                      >
-                        + ENROLL VOLUNTEER
-                      </button>
+                      <span className="font-mono text-[8px] tracking-[0.16em] text-[#6f8b80]">
+                        CREATE AUTH USERS IN SUPABASE; ASSIGN THEIR ROLE HERE
+                      </span>
                     </div>
                   }
                 >
@@ -995,29 +1223,20 @@ export default function AdminApp() {
                               <select
                                 value={u.role}
                                 onChange={(e) => {
-                                  const newRole = e.target.value as "user" | "admin" | "volunteer";
-                                  app.updateUserRole(u.id, newRole);
-                                  toast(`Updated ${u.name} role to ${newRole.toUpperCase()}`, "ok");
+                                  const newRole = e.target.value as "user" | "admin" | "volunteer" | "event_head";
+                                  void handleAssignRole(u.id, u.name, newRole);
                                 }}
+                                disabled={u.id === user.id}
                                 className="border border-white/10 bg-[#050907] px-2 py-1 font-mono text-[9px] text-[#9fc4b4] outline-none"
                               >
                                 <option value="user">User</option>
                                 <option value="volunteer">Volunteer</option>
+                                <option value="event_head">Event Head</option>
                                 <option value="admin">Admin</option>
                               </select>
                             </Td>
                             <Td>
-                              {u.id !== user.id && (
-                                <button
-                                  onClick={() => {
-                                    app.removeUser(u.id);
-                                    toast("User removed.", "warn");
-                                  }}
-                                  className="text-[#6f8b80] hover:text-[#f2a98a]"
-                                >
-                                  REMOVE
-                                </button>
-                              )}
+                              <span className="font-mono text-[8px] text-[#4f6f61]">SUPABASE AUTH</span>
                             </Td>
                           </Row>
                         ))}
@@ -1027,24 +1246,7 @@ export default function AdminApp() {
                 </Panel>
 
                 {/* Live Check-ins Feed in Admin */}
-                <Panel
-                  title={`Live Gate Check-In Audit (${app.checkins.length})`}
-                  action={
-                    app.checkins.length > 0 && (
-                      <button
-                        onClick={() => {
-                          if (confirm("Clear all check-in records?")) {
-                            app.clearCheckins();
-                            toast("Check-ins cleared.", "warn");
-                          }
-                        }}
-                        className="font-mono text-[9px] tracking-[0.2em] text-[#6f8b80] hover:text-red-400"
-                      >
-                        CLEAR CHECK-INS
-                      </button>
-                    )
-                  }
-                >
+                <Panel title={`Live Gate Check-In Audit (${adminCheckins.length} recent)`}>
                   <div className="overflow-x-auto">
                     <table className="w-full min-w-[720px]">
                       <thead>
@@ -1059,14 +1261,14 @@ export default function AdminApp() {
                         </tr>
                       </thead>
                       <tbody>
-                        {app.checkins.slice(0, 10).map((c) => (
+                        {adminCheckins.slice(0, 10).map((c) => (
                           <Row key={c.id}>
-                            <Td className="font-mono text-[9px] text-[#719888]">{c.ticketCode}</Td>
-                            <Td className="text-white font-medium">{c.attendeeName}</Td>
-                            <Td className="text-[#a3c9b7]">{c.eventName}</Td>
+                            <Td className="font-mono text-[9px] text-[#719888]">{c.ticket_code}</Td>
+                            <Td className="text-white font-medium">{c.attendee_name}</Td>
+                            <Td className="text-[#a3c9b7]">{c.event_name}</Td>
                             <Td className="text-[9px]">{c.station}</Td>
-                            <Td className="text-[9px] text-[#719888]">{c.scannedBy}</Td>
-                            <Td className="text-[9px]">{c.scannedAt}</Td>
+                            <Td className="text-[9px] text-[#719888]">{c.scanned_by}</Td>
+                            <Td className="text-[9px]">{new Date(c.scanned_at).toLocaleTimeString()}</Td>
                             <Td>
                               <span
                                 className={`rounded px-1.5 py-0.5 font-mono text-[8px] font-bold ${
@@ -1082,7 +1284,7 @@ export default function AdminApp() {
                             </Td>
                           </Row>
                         ))}
-                        {app.checkins.length === 0 && (
+                        {adminCheckins.length === 0 && (
                           <Row>
                             <Td>NO CHECK-INS LOGGED YET.</Td>
                           </Row>
@@ -1403,7 +1605,23 @@ export default function AdminApp() {
                   ))}
                 </select>
               </label>
-              <Input label="Date" value={editing.date} onChange={(v) => setEditing({ ...editing, date: v })} />
+              <label className="block">
+                <span className="mb-[6px] block font-mono text-[8px] tracking-[0.28em] text-[#4f6f61]">REGISTRATION TYPE</span>
+                <select
+                  className="field"
+                  value={editingRegistrationType}
+                  onChange={(e) => setEditingRegistrationType(e.target.value as "solo" | "team")}
+                >
+                  <option value="solo">Individual</option>
+                  <option value="team">Team</option>
+                </select>
+              </label>
+              {editingRegistrationType === "team" && (
+                <>
+                  <Input label="Minimum team size" type="number" value={editingTeamMin} onChange={(v) => setEditingTeamMin(Math.max(1, Number(v) || 1))} />
+                  <Input label="Maximum team size" type="number" value={editingTeamMax} onChange={(v) => setEditingTeamMax(Math.max(editingTeamMin, Number(v) || editingTeamMin))} />
+                </>
+              )}
               <Input label="Time" value={editing.time} onChange={(v) => setEditing({ ...editing, time: v })} />
               <Input label="Venue" value={editing.venue} onChange={(v) => setEditing({ ...editing, venue: v })} />
               <Input label="Prize" value={editing.prize ?? ""} onChange={(v) => setEditing({ ...editing, prize: v })} />
@@ -1412,12 +1630,6 @@ export default function AdminApp() {
                 type="number"
                 value={editing.seats}
                 onChange={(v) => setEditing({ ...editing, seats: Number(v) || 0 })}
-              />
-              <Input
-                label="Registered"
-                type="number"
-                value={editing.registered}
-                onChange={(v) => setEditing({ ...editing, registered: Number(v) || 0 })}
               />
               <label className="block">
                 <span className="mb-[6px] block font-mono text-[8px] tracking-[0.28em] text-[#4f6f61]">STATUS</span>
@@ -1454,35 +1666,23 @@ export default function AdminApp() {
                 <Input label="Blurb" area value={editing.blurb} onChange={(v) => setEditing({ ...editing, blurb: v })} />
               </div>
               <div className="flex flex-wrap items-center gap-4 md:col-span-2">
-                <label className="flex items-center gap-2 font-mono text-[9px] tracking-[0.22em] text-[#6f8b80]">
-                  <input
-                    type="checkbox"
-                    checked={!!editing.featured}
-                    onChange={(e) => setEditing({ ...editing, featured: e.target.checked })}
-                  />
-                  FLAGSHIP FEATURED
-                </label>
-
                 <label className="flex items-center gap-2 rounded border border-amber-400/40 bg-amber-400/10 px-3 py-1.5 font-mono text-[9px] font-bold tracking-[0.2em] text-amber-300">
                   <input
                     type="checkbox"
                     checked={!!editing.starred}
                     onChange={(e) => setEditing({ ...editing, starred: e.target.checked })}
                   />
-                  ★ STARRED (LIST ON MAIN PAGE)
+                  ★ FEATURED IN HOMEPAGE
                 </label>
               </div>
             </div>
             <div className="mt-7 flex gap-3">
               <button
-                onClick={() => {
-                  app.upsertEvent(editing);
-                  setEditing(null);
-                  toast("Event saved.");
-                }}
-                className="btn-cine btn-cine--solid"
+                onClick={() => void handleSaveEvent()}
+                disabled={savingEvent}
+                className="btn-cine btn-cine--solid disabled:cursor-wait disabled:opacity-60"
               >
-                SAVE EVENT
+                {savingEvent ? "SAVING…" : "SAVE EVENT"}
               </button>
               <button onClick={() => setEditing(null)} className="btn-cine">
                 CANCEL

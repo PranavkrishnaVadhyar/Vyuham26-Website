@@ -50,7 +50,7 @@ export default function AnnouncementManager() {
   const loadAnnouncements = async () => {
     setLoading(true);
     try {
-      const data = await announcementsApi.list();
+      const data = await announcementsApi.listForAdmin();
       setAnnouncements(data);
     } catch (err: any) {
       toast(err?.message || "Failed to load announcements from Supabase", "warn");

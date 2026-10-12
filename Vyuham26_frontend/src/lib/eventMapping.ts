@@ -94,7 +94,8 @@ export function mapEventRecordToFestEvent(
     poster: record.image || fallback?.poster || imageFallback?.image,
     category: stream.charAt(0).toUpperCase() + stream.slice(1),
     featured: record.featured,
-    starred: fallback?.starred ?? record.featured,
+    // The backend feature flag is authoritative so homepage curation survives across browsers.
+    starred: record.featured,
     status: status === "full" ? "full" : status === "closing" ? "closing" : "open",
     registration_url: record.registration_url || fallback?.registration_url,
     makemypass_url: record.makemypass_url || fallback?.makemypass_url,

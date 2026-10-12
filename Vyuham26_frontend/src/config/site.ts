@@ -78,9 +78,9 @@ export function syncRegistrationGateFromBackend(): Promise<boolean> {
  * if the push fails we re-pull the backend state so the UI can never diverge
  * from the authoritative value.
  */
-export function setRegistrationOpen(open: boolean): void {
+export function setRegistrationOpen(open: boolean, persist = true): void {
   writeRegistrationOpen(open);
-  if (typeof window !== "undefined") {
+  if (persist && typeof window !== "undefined") {
     import("@/lib/api")
       .then(({ adminApi }) =>
         adminApi.setRegistrationStatus(open).catch(() => syncRegistrationGateFromBackend())

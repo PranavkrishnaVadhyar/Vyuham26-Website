@@ -1,4 +1,10 @@
-from pydantic import BaseModel
+from datetime import datetime
+from uuid import UUID
+
+from pydantic import BaseModel, ConfigDict
+
+from app.modules.auth.models import UserRole
+from app.modules.registrations.models import RegistrationStatus
 
 
 class AdminStatsCategory(BaseModel):
@@ -14,3 +20,48 @@ class AdminStatsResponse(BaseModel):
     management: AdminStatsCategory
     cultural: AdminStatsCategory
     esports: AdminStatsCategory
+
+
+class AdminUserOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    email: str
+    name: str | None
+    phone: str | None
+    college: str | None
+    degree: str | None
+    year: str | None
+    station: str | None
+    role: UserRole
+    created_at: datetime
+
+
+class AdminUserListOut(BaseModel):
+    items: list[AdminUserOut]
+    total: int
+    limit: int
+    offset: int
+
+
+class AdminRegistrationOut(BaseModel):
+    id: UUID
+    event_id: UUID
+    event_slug: str
+    event_name: str
+    user_id: UUID | None
+    user_email: str | None
+    user_name: str | None
+    team_id: UUID | None
+    status: RegistrationStatus
+    ticket_code: str | None
+    checked_in: bool
+    amount_paid: float
+    created_at: datetime
+
+
+class AdminRegistrationListOut(BaseModel):
+    items: list[AdminRegistrationOut]
+    total: int
+    limit: int
+    offset: int

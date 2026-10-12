@@ -1,13 +1,18 @@
 from decimal import Decimal
 from typing import Annotated
 
-from fastapi import APIRouter, Depends
-from sqlalchemy import func, select
+from fastapi import APIRouter, Depends, Query
+from sqlalchemy import desc, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.db import get_db
 from app.core.deps import require_role
-from app.modules.admin.schemas import AdminStatsCategory, AdminStatsResponse
+from app.modules.admin.schemas import (
+    AdminRegistrationListOut,
+    AdminStatsCategory,
+    AdminStatsResponse,
+    AdminUserListOut,
+)
 from app.modules.auth.models import Profile
 from app.modules.checkin.models import CheckIn
 from app.modules.events.models import Event, EventStream
@@ -15,6 +20,64 @@ from app.modules.payments.models import Order
 from app.modules.registrations.models import Registration
 
 router = APIRouter(prefix="/admin", tags=["admin"])
+
+
+@router.get("/users", response_model=AdminUserListOut)
+async def list_admin_users(
+    _: Annotated[Profile, Depends(require_role("admin"))],
+    db: Annotated[AsyncSession, Depends(get_db)],
+    limit: Annotated[int, Query(ge=1, le=500)] = 100,
+    offset: Annotated[int, Query(ge=0)] = 0,
+) -> dict:
+    total = await db.scalar(select(func.count(Profile.id))) or 0
+    records = (
+        await db.scalars(
+            select(Profile)
+            .order_by(desc(Profile.created_at), Profile.email)
+            .limit(limit)
+            .offset(offset)
+        )
+    ).all()
+    return {"items": records, "total": total, "limit": limit, "offset": offset}
+
+
+@router.get("/registrations", response_model=AdminRegistrationListOut)
+async def list_admin_registrations(
+    _: Annotated[Profile, Depends(require_role("admin"))],
+    db: Annotated[AsyncSession, Depends(get_db)],
+    limit: Annotated[int, Query(ge=1, le=500)] = 100,
+    offset: Annotated[int, Query(ge=0)] = 0,
+) -> dict:
+    total = await db.scalar(select(func.count(Registration.id))) or 0
+    rows = (
+        await db.execute(
+            select(Registration, Event.slug, Event.name, Profile.email, Profile.name)
+            .join(Event, Registration.event_id == Event.id)
+            .outerjoin(Profile, Registration.user_id == Profile.id)
+            .order_by(desc(Registration.created_at))
+            .limit(limit)
+            .offset(offset)
+        )
+    ).all()
+    items = [
+        {
+            "id": registration.id,
+            "event_id": registration.event_id,
+            "event_slug": event_slug,
+            "event_name": event_name,
+            "user_id": registration.user_id,
+            "user_email": user_email,
+            "user_name": user_name,
+            "team_id": registration.team_id,
+            "status": registration.status,
+            "ticket_code": registration.ticket_code,
+            "checked_in": registration.checked_in,
+            "amount_paid": registration.amount_paid,
+            "created_at": registration.created_at,
+        }
+        for registration, event_slug, event_name, user_email, user_name in rows
+    ]
+    return {"items": items, "total": total, "limit": limit, "offset": offset}
 
 
 @router.get("/stats", response_model=AdminStatsResponse)
