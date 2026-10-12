@@ -355,14 +355,8 @@ export default function AdminApp() {
   const [navOpen, setNavOpen] = useState(false);
   const [email, setEmail] = useState("");
   const [pw, setPw] = useState("");
-
-  // Volunteer enrollment state
-  const [volModalOpen, setVolModalOpen] = useState(false);
-  const [volName, setVolName] = useState("");
-  const [volEmail, setVolEmail] = useState("");
-  const [volPw, setVolPw] = useState("");
-  const [volCollege, setVolCollege] = useState("");
-  const [volStation, setVolStation] = useState("Gate 1 - Main Entrance");
+  const [adminAuthPending, setAdminAuthPending] = useState(false);
+  const [adminAuthError, setAdminAuthError] = useState("");
 
   // Gallery auto-allocation modal state
   const [galleryModalOpen, setGalleryModalOpen] = useState(false);
@@ -622,29 +616,6 @@ export default function AdminApp() {
     setMediaSpan("auto");
   };
 
-  const handleEnrollVolunteer = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!volName.trim() || !volEmail.trim() || !volPw) {
-      toast("Please provide name, email, and password.", "warn");
-      return;
-    }
-    const r = app.addVolunteer({
-      name: volName,
-      email: volEmail,
-      password: volPw,
-      college: volCollege,
-      station: volStation,
-    });
-    toast(r.message, r.ok ? "ok" : "warn");
-    if (r.ok) {
-      setVolModalOpen(false);
-      setVolName("");
-      setVolEmail("");
-      setVolPw("");
-      setVolCollege("");
-    }
-  };
-
   const statsCategory = adminStats?.all;
   const stats = {
     events: backendEvents.length,
@@ -665,39 +636,46 @@ export default function AdminApp() {
           </p>
           <form
             className="mt-7 space-y-3"
-            onSubmit={(e) => {
+            onSubmit={async (e) => {
               e.preventDefault();
-              void (async () => {
+              setAdminAuthError("");
+              setAdminAuthPending(true);
+              try {
                 const result = await auth.login(email, pw);
                 if (!result.success) {
-                  toast(result.error || "Sign in failed.", "warn");
+                  setAdminAuthError(result.error || "Sign in failed. Check your email and password.");
                   return;
                 }
-                try {
-                  const profile = await authApi.getMe();
-                  if (profile.role !== "admin") {
-                    await auth.logout();
-                    toast("This Supabase profile does not have the admin role.", "warn");
-                    return;
-                  }
-                  toast("Admin authenticated.", "ok");
-                } catch (error: any) {
+                const profile = await authApi.getMe();
+                if (profile.role !== "admin") {
                   await auth.logout();
-                  toast(error?.message || "Could not verify admin access with the backend.", "warn");
+                  setAdminAuthError("This account does not have the admin role. Ask an administrator to assign access.");
+                  return;
                 }
-              })();
+                if (result.warning) toast(result.warning, "warn");
+                else toast("Admin authenticated.", "ok");
+              } catch (error: any) {
+                await auth.logout();
+                setAdminAuthError(error?.message || "Could not verify admin access with the backend. Try again.");
+              } finally {
+                setAdminAuthPending(false);
+              }
             }}
           >
-            <input className="field" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" />
+            <input className="field" type="email" required disabled={adminAuthPending} value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" />
             <input
               className="field"
               type="password"
+              required
+              disabled={adminAuthPending}
               value={pw}
               onChange={(e) => setPw(e.target.value)}
               placeholder="Password"
             />
-            <button className="btn-cine btn-cine--solid w-full justify-center" type="submit">
-              AUTHENTICATE
+            {adminAuthError && <p role="alert" aria-live="assertive" className="border border-[rgba(242,169,138,0.2)] bg-[rgba(242,169,138,0.05)] px-3 py-2 font-mono text-[10px] leading-relaxed tracking-[0.08em] text-[#f2a98a]">{adminAuthError}</p>}
+            <button disabled={adminAuthPending} aria-busy={adminAuthPending} className="btn-cine btn-cine--solid flex w-full items-center justify-center gap-2 disabled:cursor-wait disabled:opacity-60" type="submit">
+              {adminAuthPending && <span aria-hidden="true" className="h-3 w-3 animate-spin rounded-full border border-black/25 border-t-black" />}
+              {adminAuthPending ? "VERIFYING ADMIN ACCESS..." : "AUTHENTICATE"}
             </button>
           </form>
           <a href="#/" className="link-trail mt-6 inline-block font-mono text-[9px] tracking-[0.26em] text-[#6f8b80]">
@@ -1688,54 +1666,6 @@ export default function AdminApp() {
                 CANCEL
               </button>
             </div>
-          </div>
-        </div>
-      )}
-
-      {/* Volunteer Enrollment Modal */}
-      {volModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 px-4 backdrop-blur-md">
-          <div className="w-full max-w-[460px] border border-cyan-500/40 bg-[#060e0a] p-6 shadow-2xl">
-            <div className="flex items-center justify-between border-b border-cyan-500/20 pb-3">
-              <span className="font-mono text-xs font-bold tracking-[0.2em] text-cyan-400">
-                ENROL NEW FESTIVAL VOLUNTEER
-              </span>
-              <button onClick={() => setVolModalOpen(false)} className="text-sm text-muted hover:text-white">
-                ✕
-              </button>
-            </div>
-            <form onSubmit={handleEnrollVolunteer} className="mt-5 space-y-3.5">
-              <Input label="Full Name" value={volName} onChange={setVolName} />
-              <Input label="Login Email" value={volEmail} onChange={setVolEmail} />
-              <Input label="Password" type="password" value={volPw} onChange={setVolPw} />
-              <Input label="College / Dept" value={volCollege} onChange={setVolCollege} />
-              <div>
-                <label className="block font-mono text-[9px] tracking-[0.24em] text-[#4f6f61]">
-                  ASSIGNED STATION / GATE
-                </label>
-                <select
-                  value={volStation}
-                  onChange={(e) => setVolStation(e.target.value)}
-                  className="mt-1 w-full border border-[rgba(120,160,145,0.18)] bg-[#030605] px-3 py-2 font-mono text-[11px] text-[#eef8f3] outline-none"
-                >
-                  <option value="Gate 1 - Main Entrance">Gate 1 - Main Entrance</option>
-                  <option value="Gate 2 - Tech & Hackathon Arena">Gate 2 - Tech & Hackathon Arena</option>
-                  <option value="Gate 3 - Cyber CTF Deck">Gate 3 - Cyber CTF Deck</option>
-                  <option value="Gate 4 - Cultural Amphitheatre">Gate 4 - Cultural Amphitheatre</option>
-                  <option value="Station 5 - Food Court & Wallet Deck">Station 5 - Food Court & Wallet Deck</option>
-                  <option value="Station 6 - VIP & Speaker Deck">Station 6 - VIP & Speaker Deck</option>
-                </select>
-              </div>
-
-              <div className="mt-6 flex gap-3 pt-2">
-                <button type="submit" className="btn-cine btn-cine--solid flex-1 justify-center">
-                  ASSIGN & ENROL VOLUNTEER
-                </button>
-                <button type="button" onClick={() => setVolModalOpen(false)} className="btn-cine">
-                  CANCEL
-                </button>
-              </div>
-            </form>
           </div>
         </div>
       )}

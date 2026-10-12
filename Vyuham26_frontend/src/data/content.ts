@@ -8,7 +8,6 @@ import type {
   Sponsor,
   Stream,
   TeamMember,
-  UserAccount,
   Registration,
   StreamId,
 } from "./types";
@@ -396,32 +395,6 @@ export const announcements: Announcement[] = [
     date: "28 AUG 2026",
     title: "PRE-FEST ONLINE QUALIFIERS LIVE",
     body: "BGMI and E-Football online qualifiers begin 5 days prior to the festival kickoff.",
-  },
-];
-
-/* ------------------------------------------------------------------ */
-/*  SEED ACCOUNTS (demo auth layer)                                    */
-/* ------------------------------------------------------------------ */
-
-export const seedUsers: UserAccount[] = [
-  {
-    id: "u-volunteer",
-    name: "DIVYA MENON",
-    email: "volunteer@vyuham26.in",
-    password: "volunteer26",
-    role: "volunteer",
-    college: "Digital University Kerala",
-    station: "Gate 1 - Main Entrance",
-    joined: "2026-09-01",
-  },
-  {
-    id: "u-demo",
-    name: "ARJUN IYER",
-    email: "arjun@student.in",
-    password: "vyuham26",
-    role: "user",
-    college: "National Institute of Engineering",
-    joined: "2026-08-19",
   },
 ];
 

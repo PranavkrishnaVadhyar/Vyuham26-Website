@@ -24,6 +24,7 @@ function LoginContent() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
+  const [notice, setNotice] = useState("");
 
   const [status, setStatus] = useState<
     "idle" | "verifying" | "success"
@@ -32,25 +33,30 @@ function LoginContent() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg("");
+    setNotice("");
     setStatus("verifying");
-
-    const res = await login(email, password);
-    if (res && res.success === false) {
-      setStatus("idle");
-      setErrorMsg(res.error || "Authentication failed. Check your access code.");
-      return;
-    }
-
-    setStatus("success");
-
-    setTimeout(() => {
-      if (redirectUrl) {
-        const dest = eventSlug ? `${redirectUrl}?registered=true` : redirectUrl;
-        router.push(dest);
-      } else {
-        router.push("/dashboard");
+    try {
+      const res = await login(email, password);
+      if (!res.success) {
+        setStatus("idle");
+        setErrorMsg(res.error || "Could not sign in. Check your email and password.");
+        return;
       }
-    }, 1000);
+
+      if (res.warning) setNotice(res.warning);
+      setStatus("success");
+      setTimeout(() => {
+        if (redirectUrl) {
+          const dest = eventSlug ? `${redirectUrl}?registered=true` : redirectUrl;
+          router.push(dest);
+        } else {
+          router.push("/dashboard");
+        }
+      }, 1000);
+    } catch {
+      setStatus("idle");
+      setErrorMsg("Could not sign in right now. Check your connection and try again.");
+    }
   };
 
   const inputClasses =
@@ -305,6 +311,7 @@ function LoginContent() {
                           Secure handshake complete. Your connection to the
                           VYUHAM&apos;26 command network has been established.
                         </p>
+                        {notice && <p role="status" aria-live="polite" className="mx-auto mt-4 max-w-md border border-amber-300/20 bg-amber-300/[0.04] p-3 text-left font-mono text-[9px] leading-relaxed tracking-[0.08em] text-amber-200">{notice}</p>}
 
                         {/* Verification data */}
                         <div className="mx-auto mt-7 max-w-sm border border-green/10 bg-green/2 p-4 font-mono text-[8px] uppercase tracking-[0.2em]">
@@ -411,6 +418,7 @@ function LoginContent() {
                             required
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
+                            disabled={status === "verifying"}
                             placeholder="operator@duk.ac.in"
                             className={inputClasses}
                           />
@@ -442,6 +450,7 @@ function LoginContent() {
                             onChange={(e) =>
                               setPassword(e.target.value)
                             }
+                            disabled={status === "verifying"}
                             placeholder="••••••••••••"
                             className={inputClasses}
                           />
@@ -449,7 +458,7 @@ function LoginContent() {
 
                         {/* ERROR */}
                         {errorMsg && (
-                          <div className="border border-red-500/30 bg-red-500/10 p-3 font-mono text-[9px] uppercase tracking-wider text-red-400">
+                          <div role="alert" aria-live="assertive" className="border border-red-500/30 bg-red-500/10 p-3 font-mono text-[9px] uppercase tracking-wider text-red-400">
                             {errorMsg}
                           </div>
                         )}
@@ -495,9 +504,10 @@ function LoginContent() {
                           variant="primary"
                           className="w-full justify-center"
                           disabled={status === "verifying"}
+                          ariaBusy={status === "verifying"}
                         >
                           {status === "verifying"
-                            ? "VERIFYING..."
+                            ? <><span aria-hidden="true" className="mr-2 inline-block h-3 w-3 animate-spin rounded-full border border-black/25 border-t-black align-middle" />VERIFYING...</>
                             : "AUTHENTICATE"}
                         </Button>
 
@@ -512,6 +522,7 @@ function LoginContent() {
                               : "/dashboard"
                           }
                           onError={setErrorMsg}
+                          disabled={status === "verifying"}
                         />
 
                         {/* SECURITY STATUS */}

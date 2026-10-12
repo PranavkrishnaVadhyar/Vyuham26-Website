@@ -97,7 +97,6 @@ export interface UserAccount {
   id: string;
   name: string;
   email: string;
-  password: string;
   role: "user" | "admin" | "volunteer" | "event_head";
   college?: string;
   station?: string;

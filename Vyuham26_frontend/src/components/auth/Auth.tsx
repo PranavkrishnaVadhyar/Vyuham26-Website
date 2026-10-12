@@ -20,19 +20,22 @@ export function AuthModal() {
   const [password, setPassword] = useState("");
   const [college, setCollege] = useState("");
   const [err, setErr] = useState("");
+  const [notice, setNotice] = useState("");
+  const [pending, setPending] = useState(false);
 
   useEffect(() => {
     if (!mode) {
       setErr("");
+      setNotice("");
       setAuthReturnPath(null);
     }
   }, [mode]);
 
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && ui.setAuthOpen(false);
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && !pending && ui.setAuthOpen(false);
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [ui]);
+  }, [ui, pending]);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,16 +45,31 @@ export function AuthModal() {
     //   setErr("Registration & login are currently closed. Coming soon!");
     //   return;
     // }
-    const res =
-      mode === "login"
-        ? await login(email, password)
-        : await signup({ name: name || "PARTICIPANT", email, password, college });
-    if (res.success) {
+    setPending(true);
+    setErr("");
+    setNotice("");
+    try {
+      const res =
+        mode === "login"
+          ? await login(email, password)
+          : await signup({ name: name || "PARTICIPANT", email, password, college });
+      if (!res.success) {
+        setErr(res.error || "Authentication failed. Please try again.");
+        return;
+      }
+      if (res.confirmationRequired) {
+        setPassword("");
+        setNotice("Check your inbox to confirm your email address. You can sign in after confirming it.");
+        return;
+      }
       ui.setAuthOpen(false);
       toast(mode === "login" ? "Signed in successfully." : "Account created successfully.");
+      if (res.warning) toast(res.warning, "warn");
       setPassword("");
-    } else {
-      setErr(res.error || "Authentication failed.");
+    } catch {
+      setErr("Authentication could not be completed. Please try again.");
+    } finally {
+      setPending(false);
     }
   };
 
@@ -62,7 +80,7 @@ export function AuthModal() {
         mode ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0",
       )}
     >
-      <div className="absolute inset-0 bg-[rgba(2,4,3,0.88)] backdrop-blur-xl" onClick={() => ui.setAuthOpen(false)} />
+      <div className="absolute inset-0 bg-[rgba(2,4,3,0.88)] backdrop-blur-xl" onClick={() => !pending && ui.setAuthOpen(false)} />
 
       <div
         className="relative grid w-full max-w-[880px] overflow-hidden border border-[rgba(120,160,145,0.18)] bg-[#050908] md:grid-cols-[1fr_1fr]"
@@ -101,7 +119,9 @@ export function AuthModal() {
         {/* form side */}
         <div className="relative p-7 md:p-9">
           <button
-            onClick={() => ui.setAuthOpen(false)}
+            onClick={() => !pending && ui.setAuthOpen(false)}
+            disabled={pending}
+            aria-label="Close authentication"
             className="absolute right-5 top-5 font-mono text-[10px] tracking-[0.26em] text-[#5b7b6e] hover:text-white"
           >
             ✕
@@ -111,7 +131,8 @@ export function AuthModal() {
             {(["login", "signup"] as const).map((m) => (
               <button
                 key={m}
-                onClick={() => ui.setAuthOpen(m)}
+                onClick={() => { setErr(""); setNotice(""); ui.setAuthOpen(m); }}
+                disabled={pending}
                 className={cn(
                   "link-trail font-mono text-[10px] tracking-[0.28em] transition-colors duration-500",
                   mode === m ? "text-[#d7f6e8]" : "text-[#5b7b6e] hover:text-[#bfe6d6]",
@@ -135,6 +156,7 @@ export function AuthModal() {
                   placeholder="Full name"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
+                  disabled={pending}
                   required
                 />
                 <input
@@ -142,6 +164,7 @@ export function AuthModal() {
                   placeholder="College / Institution"
                   value={college}
                   onChange={(e) => setCollege(e.target.value)}
+                  disabled={pending}
                 />
               </>
             )}
@@ -151,6 +174,7 @@ export function AuthModal() {
               placeholder="Email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              disabled={pending}
               required
             />
             <input
@@ -159,14 +183,17 @@ export function AuthModal() {
               placeholder="Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              disabled={pending}
               required
               minLength={4}
             />
 
-            {err && <p className="font-mono text-[10px] tracking-[0.16em] text-[#f2a98a]">{err}</p>}
+            {notice && <p role="status" aria-live="polite" className="border border-[rgba(24,196,124,0.24)] bg-[rgba(24,196,124,0.06)] px-3 py-2 font-mono text-[10px] leading-relaxed tracking-[0.08em] text-[#7fe6b8]">{notice}</p>}
+            {err && <p role="alert" aria-live="assertive" className="border border-[rgba(242,169,138,0.2)] bg-[rgba(242,169,138,0.05)] px-3 py-2 font-mono text-[10px] leading-relaxed tracking-[0.08em] text-[#f2a98a]">{err}</p>}
 
-            <button type="submit" className="btn-cine btn-cine--solid mt-2 w-full justify-center">
-              {mode === "login" ? "ENTER" : "CREATE ACCESS"}
+            <button type="submit" disabled={pending} aria-busy={pending} className="btn-cine btn-cine--solid mt-2 w-full justify-center disabled:cursor-wait disabled:opacity-60">
+              {pending && <span aria-hidden="true" className="h-3 w-3 animate-spin rounded-full border border-black/25 border-t-black" />}
+              {pending ? "AUTHENTICATING..." : mode === "login" ? "ENTER" : "CREATE ACCESS"}
             </button>
           </form>
 
@@ -176,6 +203,7 @@ export function AuthModal() {
               label={mode === "login" ? "CONTINUE WITH GOOGLE" : "SIGN UP WITH GOOGLE"}
               redirectPath={getAppPath()}
               onError={setErr}
+              disabled={pending}
             />
           </div>
         </div>

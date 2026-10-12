@@ -9,6 +9,7 @@ interface ButtonProps {
   className?: string;
   type?: "button" | "submit";
   disabled?: boolean;
+  ariaBusy?: boolean;
   onClick?: () => void;
 }
 
@@ -19,6 +20,7 @@ export function Button({
   className = "",
   type = "button",
   disabled = false,
+  ariaBusy = false,
   onClick,
 }: ButtonProps) {
   const base =
@@ -45,7 +47,7 @@ export function Button({
   }
 
   return (
-    <button type={type} onClick={onClick} disabled={disabled} className={classes}>
+    <button type={type} onClick={onClick} disabled={disabled} aria-busy={ariaBusy} className={classes}>
       {children}
     </button>
   );

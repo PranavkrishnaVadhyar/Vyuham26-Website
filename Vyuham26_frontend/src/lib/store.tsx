@@ -9,7 +9,6 @@ import {
   streams as seedStreams,
   team as seedTeam,
   seedRegistrations,
-  seedUsers,
 } from "@/data/content";
 import type {
   Announcement,
@@ -85,8 +84,6 @@ interface Ctx {
   registrations: Registration[];
   user: UserAccount | null;
   saved: string[];
-  login: (email: string, password: string) => { ok: boolean; message: string };
-  signup: (name: string, email: string, password: string, college: string) => { ok: boolean; message: string };
   logout: () => void;
   removeUser: (id: string) => void;
   register: (eventId: string) => { ok: boolean; message: string };
@@ -97,14 +94,6 @@ interface Ctx {
   checkins: CheckInRecord[];
   addCheckin: (record: CheckInRecord) => void;
   clearCheckins: () => void;
-  updateUserRole: (id: string, role: "user" | "admin" | "volunteer" | "event_head", station?: string) => void;
-  addVolunteer: (v: {
-    name: string;
-    email: string;
-    password: string;
-    college?: string;
-    station?: string;
-  }) => { ok: boolean; message: string };
 
   regOpen: boolean;
   setRegOpen: (open: boolean) => void;
@@ -258,7 +247,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  const [users, setUsers] = useLocalState<UserAccount[]>("vyuham26:users:v1", seedUsers);
+  const [users, setUsers] = useLocalState<UserAccount[]>("vyuham26:users:v2", []);
   const [registrations, setRegistrations] = useLocalState<Registration[]>(
     "vyuham26:regs:v1",
     seedRegistrations,
@@ -281,6 +270,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   // Drop the retired local-only administrator demo account from existing browsers.
   useEffect(() => {
+    try {
+      // Older versions stored demo and user-entered passwords in this cache.
+      localStorage.removeItem("vyuham26:users:v1");
+    } catch {}
     setUsers((current) => current.filter((account) => account.id !== "u-admin"));
     setUserId((current) => (current === "u-admin" ? null : current));
   }, [setUsers, setUserId]);
@@ -322,7 +315,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
           id: auth.user.id,
           name: auth.user.name,
           email: auth.user.email,
-          password: "password",
           college: auth.user.college || "Digital University Kerala",
           role: (auth.user.role as any) || "user",
           joined: new Date().toISOString().slice(0, 10),
@@ -481,50 +473,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
     user,
     saved,
 
-    login: (email, password) => {
-      const cleanEmail = email.trim().toLowerCase();
-
-      const found = users.find(
-        (u) => u.email.toLowerCase() === cleanEmail && u.password === password,
-      );
-      if (!found) {
-        // Delegate entirely to AuthContext (Supabase + backend)
-        auth.login(cleanEmail, password).catch(() => {});
-        return { ok: true, message: "Authentication initiated." };
-      }
-      setUserId(found.id);
-      auth.login(found.email, password, found.name).catch(() => {});
-      if (found.college || found.role) {
-        auth.updateUser({ college: found.college, role: found.role }).catch(() => {});
-      }
-      return { ok: true, message: `Welcome back, ${found.name.split(" ")[0]}.` };
-    },
-    signup: (name, email, password, college) => {
-      const cleanEmail = email.trim().toLowerCase();
-      auth
-        .signup({
-          name,
-          email: cleanEmail,
-          password,
-          college,
-        })
-        .catch(() => {});
-
-      if (users.some((u) => u.email.toLowerCase() === cleanEmail))
-        return { ok: false, message: "That email is already in the system." };
-      const account: UserAccount = {
-        id: uid("u"),
-        name: name.toUpperCase(),
-        email: cleanEmail,
-        password,
-        college,
-        role: "user",
-        joined: new Date().toISOString().slice(0, 10),
-      };
-      setUsers((u) => [...u, account]);
-      setUserId(account.id);
-      return { ok: true, message: "Access granted." };
-    },
     logout: () => {
       setUserId(null);
       auth.logout();
@@ -579,30 +527,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
     checkins,
     addCheckin: (record) => setCheckins((prev) => [record, ...prev]),
     clearCheckins: () => setCheckins([]),
-    updateUserRole: (id, role, station) => {
-      setUsers((prev) =>
-        prev.map((u) => (u.id === id ? { ...u, role, station: station ?? u.station } : u))
-      );
-    },
-    addVolunteer: ({ name, email, password, college, station }) => {
-      const cleanEmail = email.trim().toLowerCase();
-      if (users.some((u) => u.email.toLowerCase() === cleanEmail)) {
-        return { ok: false, message: "A user with this email already exists." };
-      }
-      const newVol: UserAccount = {
-        id: uid("u-vol"),
-        name: name.trim().toUpperCase(),
-        email: cleanEmail,
-        password,
-        role: "volunteer",
-        college: college?.trim() || "Digital University Kerala",
-        station: station || "Gate 1 - Main Entrance",
-        joined: new Date().toISOString().slice(0, 10),
-      };
-      setUsers((prev) => [...prev, newVol]);
-      return { ok: true, message: `Volunteer ${newVol.name} enrolled successfully.` };
-    },
-
     regOpen,
     setRegOpen,
     showCoreTeam,

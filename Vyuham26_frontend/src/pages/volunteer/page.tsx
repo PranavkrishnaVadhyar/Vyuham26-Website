@@ -74,13 +74,15 @@ function playScanSound(type: "approved" | "duplicate" | "invalid") {
 }
 
 export default function VolunteerScannerPage() {
-  const { user, users, checkins, addCheckin, clearCheckins, registrations, content, login } = useApp();
+  const { checkins, addCheckin, clearCheckins, registrations, content } = useApp();
   const auth = useAuth();
 
   // Authentication & Session
-  const [station, setStation] = useState<string>(() => user?.station || STATIONS[0]);
-  const [authEmail, setAuthEmail] = useState("volunteer@vyuham26.in");
-  const [authPw, setAuthPw] = useState("volunteer26");
+  const [station, setStation] = useState<string>(STATIONS[0]);
+  const [authEmail, setAuthEmail] = useState("");
+  const [authPw, setAuthPw] = useState("");
+  const [authPending, setAuthPending] = useState(false);
+  const [authError, setAuthError] = useState("");
 
   // Camera & Scanner State
   const [cameraActive, setCameraActive] = useState(false);
@@ -107,11 +109,19 @@ export default function VolunteerScannerPage() {
   const [filterQuery, setFilterQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState<"all" | "approved" | "duplicate" | "invalid">("all");
 
-  const effectiveRole = auth.user?.role || user?.role;
+  const effectiveRole = auth.user?.role;
   const isVolunteerOrAdmin =
     effectiveRole === "volunteer" ||
     effectiveRole === "event_head" ||
     effectiveRole === "admin";
+
+  useEffect(() => {
+    if (auth.user && !isVolunteerOrAdmin) {
+      setAuthError("This account does not have scanner access. Ask an administrator to assign a volunteer role.");
+    } else if (isVolunteerOrAdmin) {
+      setAuthError("");
+    }
+  }, [auth.user, isVolunteerOrAdmin]);
 
   const [liveHistory, setLiveHistory] = useState<CheckInHistoryItem[]>([]);
 
@@ -160,7 +170,7 @@ export default function VolunteerScannerPage() {
         const res = await checkinApi.scanPass({
           ticket_code: clean,
           station,
-          volunteer_name: auth.user?.name || user?.name || "DIVYA MENON",
+          volunteer_name: auth.user?.name || auth.user?.email || "VOLUNTEER",
         });
 
         playScanSound(res.status);
@@ -172,7 +182,7 @@ export default function VolunteerScannerPage() {
           college: res.college || "Digital University Kerala",
           eventName: res.event_name || "VYUHAM'26 PASS",
           station,
-          scannedBy: auth.user?.name || user?.name || "VOLUNTEER",
+          scannedBy: auth.user?.name || auth.user?.email || "VOLUNTEER",
           scannedAt: timeStr,
           status: res.status,
           notes: res.notes,
@@ -357,31 +367,24 @@ export default function VolunteerScannerPage() {
                   </p>
                 </div>
 
-                {/* Quick 1-Click Volunteer Login for Instant Testing */}
-                <div className="mt-6 border border-cyan-500/30 bg-cyan-950/20 p-4">
-                  <p className="font-mono text-[9px] font-bold tracking-[0.2em] text-cyan-400">
-                    QUICK ONE-CLICK DEMO AUTHENTICATION:
-                  </p>
-                  <div className="mt-3 flex flex-col gap-2 sm:flex-row">
-                    <button
-                      onClick={() => {
-                        const r = login("volunteer@vyuham26.in", "volunteer26");
-                        toast(r.message, r.ok ? "info" : "warn");
-                      }}
-                      className="flex-1 border border-cyan-500/60 bg-cyan-900/40 px-3 py-2 text-left font-mono text-[10px] tracking-[0.14em] text-cyan-300 transition-colors hover:bg-cyan-800/60"
-                    >
-                      <span className="block font-bold">▶ DIVYA MENON</span>
-                      <span className="text-[8px] text-cyan-400/80">Role: Gate Volunteer</span>
-                    </button>
-                  </div>
-                </div>
-
-                {/* Manual Volunteer Credentials Form */}
                 <form
-                  onSubmit={(e) => {
+                  onSubmit={async (e) => {
                     e.preventDefault();
-                    const r = login(authEmail, authPw);
-                    toast(r.message, r.ok ? "info" : "warn");
+                    setAuthError("");
+                    setAuthPending(true);
+                    try {
+                      const result = await auth.login(authEmail, authPw);
+                      if (!result.success) {
+                        setAuthError(result.error);
+                      } else {
+                        setAuthPw("");
+                        toast(result.warning || "Signed in. Checking scanner access…", result.warning ? "warn" : "info");
+                      }
+                    } catch {
+                      setAuthError("Sign-in could not be completed. Check your connection and try again.");
+                    } finally {
+                      setAuthPending(false);
+                    }
                   }}
                   className="mt-6 space-y-3"
                 >
@@ -394,6 +397,7 @@ export default function VolunteerScannerPage() {
                       value={authEmail}
                       onChange={(e) => setAuthEmail(e.target.value)}
                       required
+                      disabled={authPending}
                       className="mt-1 w-full border border-white/10 bg-[#07100c]/80 px-3 py-2.5 font-mono text-xs text-white outline-none focus:border-cyan-400"
                     />
                   </div>
@@ -406,14 +410,19 @@ export default function VolunteerScannerPage() {
                       value={authPw}
                       onChange={(e) => setAuthPw(e.target.value)}
                       required
+                      disabled={authPending}
                       className="mt-1 w-full border border-white/10 bg-[#07100c]/80 px-3 py-2.5 font-mono text-xs text-white outline-none focus:border-cyan-400"
                     />
                   </div>
+                  {authError && <p role="alert" aria-live="assertive" className="border border-red-400/25 bg-red-400/[0.04] px-3 py-2 font-mono text-[9px] leading-relaxed tracking-[0.08em] text-red-300">{authError}</p>}
                   <button
                     type="submit"
-                    className="w-full border border-cyan-500/60 bg-cyan-950/80 py-2.5 font-mono text-xs font-bold tracking-[0.24em] text-cyan-300 transition-all hover:bg-cyan-900"
+                    disabled={authPending || !auth.isReady}
+                    aria-busy={authPending}
+                    className="flex w-full items-center justify-center gap-2 border border-cyan-500/60 bg-cyan-950/80 py-2.5 font-mono text-xs font-bold tracking-[0.24em] text-cyan-300 transition-all hover:bg-cyan-900 disabled:cursor-wait disabled:opacity-60"
                   >
-                    ACTIVATE VOLUNTEER SCANNER
+                    {authPending && <span aria-hidden="true" className="h-3 w-3 animate-spin rounded-full border border-cyan-300/30 border-t-cyan-300" />}
+                    {!auth.isReady ? "RESTORING SESSION..." : authPending ? "AUTHENTICATING..." : "ACTIVATE VOLUNTEER SCANNER"}
                   </button>
                 </form>
 
@@ -448,12 +457,12 @@ export default function VolunteerScannerPage() {
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="font-mono text-xs font-bold text-[#eef8f3]">{user.name}</span>
+                    <span className="font-mono text-xs font-bold text-[#eef8f3]">{auth.user?.name || auth.user?.email}</span>
                     <span className="rounded bg-cyan-500/20 px-1.5 py-0.5 font-mono text-[8px] font-semibold text-cyan-300 border border-cyan-500/30">
-                      {user.role.toUpperCase()}
+                      {auth.user?.role.toUpperCase()}
                     </span>
                   </div>
-                  <p className="font-mono text-[9px] text-[#6b9181]">{user.email}</p>
+                  <p className="font-mono text-[9px] text-[#6b9181]">{auth.user?.email}</p>
                 </div>
               </div>
 

@@ -32,12 +32,13 @@ function SignupContent() {
   });
 
   const [status, setStatus] = useState<
-    "idle" | "registering" | "success"
+    "idle" | "registering" | "success" | "confirmation"
   >("idle");
 
   const [authTransition, setAuthTransition] = useState(false);
   const [loginTransition, setLoginTransition] = useState(false);
   const [error, setError] = useState("");
+  const [successNotice, setSuccessNotice] = useState("");
 
   /* =============================================================
      REGISTER
@@ -67,29 +68,32 @@ function SignupContent() {
 
     setStatus("registering");
 
-    const res = await signup({
-      name: formData.name,
-      email: formData.email,
-      password: formData.password,
-      college: formData.college,
-      phone: formData.phone,
-    });
+    try {
+      const res = await signup({
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+        college: formData.college,
+        phone: formData.phone,
+      });
 
-    if (res && res.success === false) {
+      if (!res.success) {
+        setStatus("idle");
+        setError(res.error || "Account creation failed. Please try again.");
+        return;
+      }
+      if (res.confirmationRequired) {
+        setStatus("confirmation");
+        return;
+      }
+
+      setSuccessNotice(res.warning || "");
+      setStatus("success");
+      setTimeout(() => setAuthTransition(true), 700);
+    } catch {
       setStatus("idle");
-      setError(res.error || "REGISTRATION REJECTED BY CENTRAL COMMAND.");
-      return;
+      setError("Account creation could not be completed. Check your connection and try again.");
     }
-
-    setStatus("success");
-
-    /*
-     * Let the success screen appear briefly,
-     * then launch the cinematic transition.
-     */
-    setTimeout(() => {
-      setAuthTransition(true);
-    }, 700);
   };
 
   /* =============================================================
@@ -385,9 +389,9 @@ function SignupContent() {
                         </h2>
 
                         <p className="mx-auto mt-4 max-w-md text-xs leading-7 text-muted">
-                          Your VYUHAM ID has been provisioned successfully.
-                          The identity network is ready for the next stage.
+                          Your account is ready. You can continue to your profile and the participant portal.
                         </p>
+                        {successNotice && <p role="status" aria-live="polite" className="mx-auto mt-4 max-w-md border border-amber-300/20 bg-amber-300/[0.04] p-3 text-left font-mono text-[9px] leading-relaxed tracking-[0.08em] text-amber-200">{successNotice}</p>}
 
                         {/* provision data */}
                         <div className="mx-auto mt-7 max-w-sm border border-green/10 bg-green/[0.02] p-4 font-mono text-[8px] uppercase tracking-[0.2em]">
@@ -398,7 +402,7 @@ function SignupContent() {
                             </span>
 
                             <span className="text-green">
-                              PROVISIONED
+                              CREATED
                             </span>
                           </div>
 
@@ -408,7 +412,7 @@ function SignupContent() {
                             </span>
 
                             <span className="text-green">
-                              VERIFIED
+                              ACCOUNT READY
                             </span>
                           </div>
 
@@ -418,7 +422,7 @@ function SignupContent() {
                             </span>
 
                             <span className="text-green">
-                              ACTIVE
+                              SIGNED IN
                             </span>
                           </div>
                         </div>
@@ -437,6 +441,30 @@ function SignupContent() {
                           >
                             Event Registration →
                           </Button>
+                        </div>
+                      </motion.div>
+                    ) : status === "confirmation" ? (
+                      <motion.div
+                        key="confirmation"
+                        initial={reduceMotion ? false : { opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="py-10 text-center"
+                      >
+                        <div className="relative mx-auto mb-8 grid h-28 w-28 place-items-center">
+                          <div className="relative grid h-20 w-20 place-items-center rounded-full border border-green/40 bg-green/10 shadow-[0_0_35px_rgba(80,255,150,.12)]">
+                            <span className="text-3xl text-green">✉</span>
+                          </div>
+                        </div>
+                        <div className="font-mono text-[9px] uppercase tracking-[0.35em] text-green">EMAIL CONFIRMATION REQUIRED</div>
+                        <h2 className="mt-4 font-display text-2xl font-semibold md:text-3xl">CHECK YOUR<br /><span className="text-green">INBOX.</span></h2>
+                        <p role="status" aria-live="polite" className="mx-auto mt-4 max-w-md text-xs leading-7 text-muted">
+                          We sent a confirmation link to <span className="text-paper">{formData.email}</span>. Confirm your address, then sign in to continue.
+                        </p>
+                        <div className="mx-auto mt-7 max-w-sm border border-green/10 bg-green/[0.02] p-4 font-mono text-[8px] uppercase tracking-[0.2em] text-green">
+                          ACCOUNT STATUS: AWAITING EMAIL CONFIRMATION
+                        </div>
+                        <div className="mt-8 flex justify-center">
+                          <Button type="button" variant="primary" onClick={() => setLoginTransition(true)}>GO TO SIGN IN</Button>
                         </div>
                       </motion.div>
                     ) : (
@@ -499,6 +527,7 @@ function SignupContent() {
                               type="text"
                               required
                               value={formData.name}
+                              disabled={status === "registering"}
                               onChange={(e) =>
                                 setFormData({
                                   ...formData,
@@ -523,6 +552,7 @@ function SignupContent() {
                               type="tel"
                               required
                               value={formData.phone}
+                              disabled={status === "registering"}
                               onChange={(e) =>
                                 setFormData({
                                   ...formData,
@@ -551,6 +581,7 @@ function SignupContent() {
                             type="email"
                             required
                             value={formData.email}
+                            disabled={status === "registering"}
                             onChange={(e) =>
                               setFormData({
                                 ...formData,
@@ -577,6 +608,7 @@ function SignupContent() {
                             type="text"
                             required
                             value={formData.college}
+                            disabled={status === "registering"}
                             onChange={(e) =>
                               setFormData({
                                 ...formData,
@@ -617,6 +649,7 @@ function SignupContent() {
                                 type="password"
                                 required
                                 value={formData.password}
+                                disabled={status === "registering"}
                                 onChange={(e) =>
                                   setFormData({
                                     ...formData,
@@ -641,6 +674,7 @@ function SignupContent() {
                                 type="password"
                                 required
                                 value={formData.confirmPassword}
+                                disabled={status === "registering"}
                                 onChange={(e) =>
                                   setFormData({
                                     ...formData,
@@ -674,7 +708,7 @@ function SignupContent() {
                               }}
                               className="overflow-hidden"
                             >
-                              <div className="border border-red-400/20 bg-red-400/[0.03] px-4 py-3 text-center font-mono text-[8px] uppercase tracking-[0.12em] text-red-300">
+                              <div role="alert" aria-live="assertive" className="border border-red-400/20 bg-red-400/[0.03] px-4 py-3 text-center font-mono text-[8px] uppercase tracking-[0.12em] text-red-300">
                                 {error}
                               </div>
                             </motion.div>
@@ -734,9 +768,10 @@ function SignupContent() {
                           variant="primary"
                           className="mt-3 w-full justify-center"
                           disabled={status === "registering"}
+                          ariaBusy={status === "registering"}
                         >
                           {status === "registering"
-                            ? "PROVISIONING..."
+                            ? <><span aria-hidden="true" className="mr-2 inline-block h-3 w-3 animate-spin rounded-full border border-black/25 border-t-black align-middle" />CREATING ACCOUNT...</>
                             : "CREATE IDENTITY"}
                         </Button>
 
@@ -752,6 +787,7 @@ function SignupContent() {
                               : "/profile"
                           }
                           onError={setError}
+                          disabled={status === "registering"}
                         />
 
                         {/* SECURITY */}

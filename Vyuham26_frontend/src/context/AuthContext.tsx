@@ -29,10 +29,9 @@ export interface AuthUser {
   vyuhamId?: string;
 }
 
-export interface AuthResult {
-  success: boolean;
-  error?: string;
-}
+export type AuthResult =
+  | { success: true; confirmationRequired?: boolean; warning?: string }
+  | { success: false; error: string };
 
 interface AuthContextType {
   user: AuthUser | null;
@@ -78,6 +77,33 @@ function saveUserToStorage(user: AuthUser | null) {
   } catch (err) {
     console.error("Storage error:", err);
   }
+}
+
+function authErrorMessage(error: unknown, action: "login" | "signup" | "google"): string {
+  const raw = error instanceof Error ? error.message : String(error || "");
+  const message = raw.toLowerCase();
+
+  if (message.includes("invalid login credentials")) return "Email or password is incorrect.";
+  if (message.includes("email not confirmed") || message.includes("email_not_confirmed")) {
+    return "Confirm your email address before signing in.";
+  }
+  if (message.includes("already registered") || message.includes("user_already_exists")) {
+    return "An account already exists for this email. Try signing in instead.";
+  }
+  if (message.includes("password should be at least") || message.includes("password is too short")) {
+    return "Your password does not meet the minimum length requirement.";
+  }
+  if (message.includes("invalid email") || message.includes("email_address_invalid")) {
+    return "Enter a valid email address.";
+  }
+  if (message.includes("failed to fetch") || message.includes("network") || message.includes("load failed")) {
+    return "Could not reach the authentication service. Check your connection and try again.";
+  }
+
+  if (raw.trim()) return raw;
+  if (action === "signup") return "Could not create your account. Please try again.";
+  if (action === "google") return "Google sign-in could not be started. Please try again.";
+  return "Could not sign in. Please try again.";
 }
 
 /** Normalise the backend role string to frontend union type */
@@ -163,7 +189,7 @@ function mergeSessionUser(
     phone: backendProfile.phone || prev?.phone || "",
     degree: backendProfile.degree || prev?.degree || "",
     year: backendProfile.year || prev?.year || "",
-    role: backendProfile.role || prev?.role || "user",
+    role: backendProfile.role || "user",
     registeredEvents: backendProfile.registeredEvents?.length
       ? backendProfile.registeredEvents
       : prev?.registeredEvents || [],
@@ -215,27 +241,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [isReady, setIsReady] = useState(false);
 
-  // Initialize from localStorage safely on client mount & sync with Supabase session
+  // A cached profile is display data only. A Supabase session is required to
+  // restore an authenticated user or a privileged role.
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (parsed && typeof parsed === "object" && parsed.email) {
-          if (parsed.id === "u-admin" || parsed.role === "admin") {
-            // Remove the retired local-only demo administrator session.
-            saveUserToStorage(null);
-          } else {
-            setUser(parsed);
-          }
-        }
-      }
-    } catch (err) {
-      console.warn("Failed to load auth user from storage:", err);
-    } finally {
-      setIsReady(true);
-    }
-
     // Pull the backend profile for a Supabase session and cache it locally.
     // If this session came back from a Google redirect, finish that sign-in too.
     const syncSession = async (session: Session) => {
@@ -244,13 +252,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (oauthDestination && backendProfile) {
         await seedProfileFromProvider(session, backendProfile);
       }
-      if (backendProfile) {
-        setUser((prev) => {
-          const merged = mergeSessionUser(session, backendProfile, prev);
-          saveUserToStorage(merged);
-          return merged;
-        });
-      }
+      setUser((prev) => {
+        const merged = mergeSessionUser(session, backendProfile || {}, prev);
+        saveUserToStorage(merged);
+        return merged;
+      });
       if (oauthDestination) {
         const needsProfile = !!backendProfile && !isProfileComplete(backendProfile);
         const target =
@@ -261,15 +267,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     };
 
-    // Check existing Supabase session and synchronize with FastAPI backend
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      if (session) {
-        await syncSession(session);
-      } else {
-        // Google sign-in was cancelled or failed; drop the pending redirect.
-        takeOAuthRedirect();
-      }
-    });
+    // Check existing Supabase session and synchronize with FastAPI backend.
+    // Clear old local-only identities when there is no valid session.
+    void supabase.auth.getSession()
+      .then(async ({ data: { session } }) => {
+        if (session) await syncSession(session);
+        else {
+          takeOAuthRedirect();
+          setUser(null);
+          saveUserToStorage(null);
+        }
+      })
+      .catch((error) => {
+        console.warn("Could not restore Supabase session:", error);
+        setUser(null);
+        saveUserToStorage(null);
+      })
+      .finally(() => setIsReady(true));
 
     // Listen to real-time Supabase auth state changes
     const {
@@ -296,116 +310,38 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       //   return { success: false, error: "Registration and login are coming soon." };
       // }
       const cleanEmail = email.trim().toLowerCase();
+      if (!cleanEmail || !password) return { success: false, error: "Enter your email and password." };
 
-      // 1. Try Supabase Auth if password is provided
-      if (password) {
-        try {
-          const { data, error } = await supabase.auth.signInWithPassword({
-            email: cleanEmail,
-            password,
-          });
-
-          if (!error && data.session) {
-            const backendProfile = await fetchBackendProfile();
-            const newUser: AuthUser = {
-              id: backendProfile?.id || data.user.id,
-              name:
-                backendProfile?.name ||
-                data.user.user_metadata?.name ||
-                name ||
-                cleanEmail.split("@")[0].toUpperCase(),
-              email: cleanEmail,
-              college: backendProfile?.college || data.user.user_metadata?.college || "",
-              phone: backendProfile?.phone || data.user.user_metadata?.phone || "",
-              degree: backendProfile?.degree || data.user.user_metadata?.degree || "",
-              year: backendProfile?.year || data.user.user_metadata?.year || "",
-              role: (backendProfile?.role as any) || "user",
-              registeredEvents: backendProfile?.registeredEvents || [],
-              vyuham_id: backendProfile?.vyuham_id,
-              vyuhamId: backendProfile?.vyuhamId,
-            };
-
-            setUser(newUser);
-            saveUserToStorage(newUser);
-            return { success: true };
-          }
-
-          // If Supabase returned an error and it's not a seed demo account, return error
-          if (error && cleanEmail !== "volunteer@vyuham26.in") {
-            return { success: false, error: error.message };
-          }
-        } catch (err: any) {
-          console.warn("Supabase signIn exception:", err);
-        }
-      }
-
-      // 2. Demo & Local Mock accounts fallback
-      const existingRaw = localStorage.getItem(STORAGE_KEY);
-      let existingEvents: string[] = [];
-      let existingId: string | null = null;
-      let existingCollege = "Digital University Kerala";
-      let existingPhone: string | undefined = undefined;
-      let existingDegree: string | undefined = "B.Tech Computer Science";
-      let existingYear: string | undefined = "2024–2028";
-      let existingRole: AuthUser["role"] = "user";
-
-      if (existingRaw) {
-        try {
-          const parsed = JSON.parse(existingRaw);
-          if (parsed?.email?.toLowerCase() === cleanEmail) {
-            if (parsed.registeredEvents) existingEvents = parsed.registeredEvents;
-            if (parsed.id) existingId = parsed.id;
-            if (parsed.college) existingCollege = parsed.college;
-            if (parsed.phone) existingPhone = parsed.phone;
-            if (parsed.degree) existingDegree = parsed.degree;
-            if (parsed.year) existingYear = parsed.year;
-            if (parsed.role) existingRole = parsed.role;
-          }
-        } catch {}
-      }
-
-      // Check store users in localStorage for seed accounts
       try {
-        const storeUsersRaw = localStorage.getItem("vyuham26:users:v1");
-        if (storeUsersRaw) {
-          const storeUsers = JSON.parse(storeUsersRaw);
-          if (Array.isArray(storeUsers)) {
-            const matched = storeUsers.find(
-              (u: any) => u.email?.toLowerCase() === cleanEmail
-            );
-            if (matched) {
-              if (matched.id) existingId = matched.id;
-              if (matched.name && !name) name = matched.name;
-              if (matched.college) existingCollege = matched.college;
-              if (matched.role) existingRole = matched.role;
-            }
-          }
+        const { data, error } = await supabase.auth.signInWithPassword({ email: cleanEmail, password });
+        if (error) return { success: false, error: authErrorMessage(error, "login") };
+        if (!data.session || !data.user) {
+          return { success: false, error: "Sign-in did not create a valid session. Please try again." };
         }
-      } catch {}
 
-      if (cleanEmail === "volunteer@vyuham26.in") {
-        existingRole = "volunteer";
-        if (!name) name = "DIVYA MENON";
+        const backendProfile = await fetchBackendProfile();
+        const newUser: AuthUser = {
+          id: backendProfile?.id || data.user.id,
+          name: backendProfile?.name || data.user.user_metadata?.name || name || cleanEmail.split("@")[0].toUpperCase(),
+          email: cleanEmail,
+          college: backendProfile?.college || data.user.user_metadata?.college || "",
+          phone: backendProfile?.phone || data.user.user_metadata?.phone || "",
+          degree: backendProfile?.degree || data.user.user_metadata?.degree || "",
+          year: backendProfile?.year || data.user.user_metadata?.year || "",
+          role: backendProfile?.role || "user",
+          registeredEvents: backendProfile?.registeredEvents || [],
+          vyuham_id: backendProfile?.vyuham_id,
+          vyuhamId: backendProfile?.vyuhamId,
+        };
+        setUser(newUser);
+        saveUserToStorage(newUser);
+        return {
+          success: true,
+          warning: backendProfile ? undefined : "Signed in, but your profile could not be loaded. Some account features may be unavailable.",
+        };
+      } catch (error) {
+        return { success: false, error: authErrorMessage(error, "login") };
       }
-
-      const cleanSub = existingId || `VYU26-USR-${Math.floor(1000 + Math.random() * 9000)}`;
-      const newUser: AuthUser = {
-        id: cleanSub,
-        name: name || cleanEmail.split("@")[0].toUpperCase(),
-        email: cleanEmail,
-        college: existingCollege,
-        phone: existingPhone || "+91 98470 12345",
-        degree: existingDegree,
-        year: existingYear,
-        role: existingRole,
-        registeredEvents: existingEvents,
-        vyuham_id: `VYU26-OPER-${cleanSub.slice(-4).toUpperCase()}`,
-        vyuhamId: `VYU26-OPER-${cleanSub.slice(-4).toUpperCase()}`,
-      };
-
-      setUser(newUser);
-      saveUserToStorage(newUser);
-      return { success: true };
     },
     []
   );
@@ -419,7 +355,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       phone?: string;
       degree?: string;
       year?: string;
-      role?: "user" | "volunteer" | "event_head" | "admin";
     }): Promise<AuthResult> => {
       // Account creation remains available while event registration is closed.
       // Previous shared-gate behavior retained for reference:
@@ -427,82 +362,68 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       //   return { success: false, error: "Registration is coming soon." };
       // }
       const cleanEmail = details.email.trim().toLowerCase();
+      if (!cleanEmail || !details.password) {
+        return { success: false, error: "Enter your email and password." };
+      }
 
-      // 1. Try Supabase signUp if password is provided
-      if (details.password) {
-        try {
-          const { data, error } = await supabase.auth.signUp({
-            email: cleanEmail,
-            password: details.password,
-            options: {
-              data: {
-                name: details.name,
-                college: details.college || "",
-                phone: details.phone || "",
-                degree: details.degree || "",
-                year: details.year || "",
-              },
-            },
-          });
-
-          if (error) {
-            return { success: false, error: error.message };
-          }
-
-          if (data.session) {
-            try {
-              await authApi.updateProfile({
-                name: details.name,
-                phone: details.phone,
-                college: details.college,
-                degree: details.degree,
-                year: details.year,
-              });
-            } catch {}
-
-            const backendProfile = await fetchBackendProfile();
-            const newUser: AuthUser = {
-              id: backendProfile?.id || data.user?.id || `VYU26-USR-${Math.floor(1000 + Math.random() * 9000)}`,
+      try {
+        const { data, error } = await supabase.auth.signUp({
+          email: cleanEmail,
+          password: details.password,
+          options: {
+            data: {
               name: details.name,
-              email: cleanEmail,
               college: details.college || "",
               phone: details.phone || "",
               degree: details.degree || "",
               year: details.year || "",
-              role: details.role || (backendProfile?.role as any) || "user",
-              registeredEvents: [],
-              vyuham_id: backendProfile?.vyuham_id,
-              vyuhamId: backendProfile?.vyuhamId,
-            };
+            },
+          },
+        });
+        if (error) return { success: false, error: authErrorMessage(error, "signup") };
+        if (!data.user) return { success: false, error: "Supabase did not return a new account. Please try again." };
 
-            setUser(newUser);
-            saveUserToStorage(newUser);
-            return { success: true };
-          }
-        } catch (err: any) {
-          console.warn("Supabase signUp exception:", err);
+        // Supabase returns a user without a session when email confirmation is
+        // enabled. Keep the person signed out and ask them to confirm first.
+        if (!data.session) return { success: true, confirmationRequired: true };
+
+        let profileWarning: string | undefined;
+        try {
+          await authApi.updateProfile({
+            name: details.name,
+            phone: details.phone,
+            college: details.college,
+            degree: details.degree,
+            year: details.year,
+          });
+        } catch (error) {
+          console.warn("Account created, but profile details could not be synced:", error);
+          profileWarning = "Your account was created, but some profile details could not be saved. You can update them from your profile.";
         }
+
+        const backendProfile = await fetchBackendProfile();
+        const newUser: AuthUser = {
+          id: backendProfile?.id || data.user.id,
+          name: backendProfile?.name || details.name,
+          email: cleanEmail,
+          college: backendProfile?.college || details.college || "",
+          phone: backendProfile?.phone || details.phone || "",
+          degree: backendProfile?.degree || details.degree || "",
+          year: backendProfile?.year || details.year || "",
+          role: backendProfile?.role || "user",
+          registeredEvents: backendProfile?.registeredEvents || [],
+          vyuham_id: backendProfile?.vyuham_id,
+          vyuhamId: backendProfile?.vyuhamId,
+        };
+        setUser(newUser);
+        saveUserToStorage(newUser);
+        return {
+          success: true,
+          warning: profileWarning || (!backendProfile ? "Your account was created, but the backend profile is not available yet." : undefined),
+        };
+      } catch (error) {
+        return { success: false, error: authErrorMessage(error, "signup") };
       }
-
-      // 2. Local fallback registration
-      const randomSub = Math.floor(1000 + Math.random() * 9000);
-      const newUser: AuthUser = {
-        id: `VYU26-USR-${randomSub}`,
-        name: details.name,
-        email: cleanEmail,
-        college: details.college || "Digital University Kerala",
-        phone: details.phone || "",
-        degree: details.degree || "B.Tech Computer Science",
-        year: details.year || "2024–2028",
-        role: details.role || "user",
-        registeredEvents: [],
-        vyuham_id: `VYU26-OPER-${randomSub}`,
-        vyuhamId: `VYU26-OPER-${randomSub}`,
-      };
-
-      setUser(newUser);
-      saveUserToStorage(newUser);
-      return { success: true };
     },
     []
   );
@@ -519,19 +440,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       } catch {}
 
       // Return to the site root; syncSession routes to redirectPath (or /profile) afterwards.
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: {
-          redirectTo: `${window.location.origin}/`,
-          queryParams: { prompt: "select_account" },
-        },
-      });
+      try {
+        const { error } = await supabase.auth.signInWithOAuth({
+          provider: "google",
+          options: {
+            redirectTo: `${window.location.origin}/`,
+            queryParams: { prompt: "select_account" },
+          },
+        });
 
-      if (error) {
+        if (error) {
+          takeOAuthRedirect();
+          return { success: false, error: authErrorMessage(error, "google") };
+        }
+        return { success: true };
+      } catch (error) {
         takeOAuthRedirect();
-        return { success: false, error: error.message };
+        return { success: false, error: authErrorMessage(error, "google") };
       }
-      return { success: true };
     },
     []
   );

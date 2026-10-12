@@ -18,6 +18,7 @@ interface GoogleSignInButtonProps {
   onError?: (message: string) => void;
   label?: string;
   className?: string;
+  disabled?: boolean;
 }
 
 export default function GoogleSignInButton({
@@ -25,17 +26,23 @@ export default function GoogleSignInButton({
   onError,
   label = "CONTINUE WITH GOOGLE",
   className,
+  disabled = false,
 }: GoogleSignInButtonProps) {
   const { loginWithGoogle } = useAuth();
   const [pending, setPending] = useState(false);
 
   const handleClick = async () => {
     setPending(true);
-    const res = await loginWithGoogle(returnPathOverride ?? redirectPath);
-    // On success the browser is already navigating to Google.
-    if (!res.success) {
+    try {
+      const res = await loginWithGoogle(returnPathOverride ?? redirectPath);
+      // On success the browser is already navigating to Google.
+      if (!res.success) {
+        setPending(false);
+        onError?.(res.error || "Google sign-in failed.");
+      }
+    } catch {
       setPending(false);
-      onError?.(res.error || "Google sign-in failed.");
+      onError?.("Google sign-in could not be started. Please try again.");
     }
   };
 
@@ -43,7 +50,8 @@ export default function GoogleSignInButton({
     <button
       type="button"
       onClick={handleClick}
-      disabled={pending}
+      disabled={pending || disabled}
+      aria-busy={pending}
       className={cn(
         "flex w-full items-center justify-center gap-3 border border-white/15 bg-black/30 px-4 py-3 font-mono text-[10px] uppercase tracking-[0.18em] text-paper transition-all duration-300 hover:border-green/50 hover:bg-green/[0.035] disabled:cursor-wait disabled:opacity-60",
         className,
@@ -55,7 +63,12 @@ export default function GoogleSignInButton({
         <path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z" />
         <path fill="#1976D2" d="M43.6 20.1H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.7-.4-3.9z" />
       </svg>
-      {pending ? "REDIRECTING..." : label}
+      {pending ? (
+        <>
+          <span aria-hidden="true" className="h-3 w-3 animate-spin rounded-full border border-[#18c47c]/30 border-t-[#18c47c]" />
+          REDIRECTING...
+        </>
+      ) : label}
     </button>
   );
 }
