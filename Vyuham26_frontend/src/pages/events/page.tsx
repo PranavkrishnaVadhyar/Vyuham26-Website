@@ -5,7 +5,9 @@ import Link from "next/link";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { useApp } from "@/lib/store";
-import { events } from "@/data/events";
+import { events as staticEvents, type Event } from "@/data/events";
+import { eventsApi } from "@/lib/api";
+import { mapEventRecordToPageEvent } from "@/lib/eventMapping";
 import { useStarredEvents } from "@/config/site";
 
 /* ==========================================================================
@@ -105,7 +107,7 @@ const normalizeOffset = (offset: number, count: number) => {
   return value;
 };
 
-function getStream(event: (typeof events)[number]) {
+function getStream(event: Event) {
   if (event.stream === "technology") return "tech";
   if (event.stream === "culture") return "cultural";
   if (event.stream === "gaming") return "esports";
@@ -125,7 +127,7 @@ function EventCard({
   registerCard,
   isStarred = false,
 }: {
-  event: (typeof events)[number];
+  event: Event;
   index: number;
   total: number;
   registerCard: (index: number, element: HTMLDivElement | null) => void;
@@ -349,6 +351,7 @@ function EventCard({
 export default function EventsPage() {
   const { saved, toggleSave } = useApp();
   const { starredSlugs, isStarred } = useStarredEvents();
+  const [eventCatalog, setEventCatalog] = useState<Event[]>(staticEvents);
 
   const [activeStream, setActiveStream] = useState<string>("all");
   const [activeDay, setActiveDay] = useState<string>("all");
@@ -359,6 +362,24 @@ export default function EventsPage() {
 
   const [metrics, setMetrics] = useState({ cardW: 340, cardH: 215 });
   const [isMobile, setIsMobile] = useState(false);
+
+  // Prefer the backend catalog, retaining the bundled event data if the API
+  // is unavailable or returns no records.
+  useEffect(() => {
+    let active = true;
+    eventsApi
+      .list()
+      .then((records) => {
+        if (!active || !Array.isArray(records) || records.length === 0) return;
+        setEventCatalog(records.map((record) => mapEventRecordToPageEvent(record, staticEvents)));
+      })
+      .catch(() => {
+        // Keep the static catalog as the offline fallback.
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const cardsRef = useRef<(HTMLDivElement | null)[]>([]);
   const frameRef = useRef<number | null>(null);
@@ -411,14 +432,14 @@ export default function EventsPage() {
   }, []);
 
   const starredCount = useMemo(() => {
-    return events.filter((e) => isStarred(e.slug)).length;
-  }, [isStarred, starredSlugs]);
+    return eventCatalog.filter((e) => isStarred(e.slug)).length;
+  }, [eventCatalog, isStarred, starredSlugs]);
 
   /* Filter events - displays all events by default, with optional filters */
   const filtered = useMemo(() => {
     const query = search.trim().toLowerCase();
 
-    return events.filter((event) => {
+    return eventCatalog.filter((event) => {
       const stream = getStream(event);
       const streamMatch = activeStream === "all" || stream === activeStream;
       const dayMatch = activeDay === "all" || event.day === Number(activeDay);
@@ -434,7 +455,7 @@ export default function EventsPage() {
 
       return streamMatch && dayMatch && searchMatch && savedMatch && starredMatch;
     });
-  }, [activeStream, activeDay, search, savedOnly, saved, starredOnly, isStarred]);
+  }, [eventCatalog, activeStream, activeDay, search, savedOnly, saved, starredOnly, isStarred]);
 
   /* Carousel shows up to 12 featured events */
   const carouselEvents = useMemo(() => {

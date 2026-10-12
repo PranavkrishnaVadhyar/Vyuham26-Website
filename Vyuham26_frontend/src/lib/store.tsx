@@ -26,6 +26,7 @@ import type {
 import { useLocalState } from "./hooks";
 import { useAuth } from "@/context/AuthContext";
 import { eventsApi } from "@/lib/api";
+import { mapEventRecordToFestEvent } from "@/lib/eventMapping";
 
 import {
   isRegistrationOpen,
@@ -232,7 +233,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return () => window.removeEventListener("vyuham:starred_events_toggle", handleStarredSync);
   }, []);
 
-  // Synchronize MakeMyPass registration URLs dynamically from the backend events API
+  // Use the backend event catalog when available. The bundled catalog remains
+  // the offline fallback and supplies visual fields the backend does not own.
 
   useEffect(() => {
     let active = true;
@@ -241,24 +243,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
       .then((remoteList) => {
         if (!active || !Array.isArray(remoteList) || remoteList.length === 0) return;
         setContent((prev) => {
-          const updated = prev.events.map((ev) => {
-            const slug = ev.id.replace(/^ev-/, "").toLowerCase();
-            const remote = remoteList.find(
-              (r) => r.slug?.toLowerCase() === slug || r.id === ev.id
-            );
-            if (!remote) return ev;
-            const regUrl =
-              remote.registration_url ||
-              remote.makemypass_url ||
-              ev.registration_url ||
-              ev.makemypass_url;
-            return {
-              ...ev,
-              registration_url: regUrl || undefined,
-              makemypass_url: regUrl || undefined,
-            };
-          });
-          return { ...prev, events: updated };
+          const staticFallbacks = prev.events.length ? prev.events : seedEvents;
+          return {
+            ...prev,
+            events: remoteList.map((record) =>
+              mapEventRecordToFestEvent(record, staticFallbacks),
+            ),
+          };
         });
       })
       .catch(() => {});

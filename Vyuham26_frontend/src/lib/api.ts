@@ -10,6 +10,13 @@ export const API_BASE_URL =
   (import.meta.env as any).API_URL ||
   "";
 
+// Events are the only API currently given a deployed-origin fallback. Other
+// API clients continue to use API_BASE_URL so this does not silently redirect
+// auth, registration, or admin traffic.
+const EVENTS_API_BASE_URL = (
+  API_BASE_URL || "https://vyuham26-backend.vercel.app"
+).replace(/\/+$/, "");
+
 export class ApiError extends Error {
   status: number;
   data: any;
@@ -201,9 +208,11 @@ export const authApi = {
 };
 
 export const eventsApi = {
-  list: () => apiFetch<EventRecord[]>("/events"),
-  getBySlug: (slug: string) => apiFetch<EventRecord>(`/events/by-slug/${slug}`),
-  getById: (id: string) => apiFetch<EventRecord>(`/events/${id}`),
+  list: () => apiFetch<EventRecord[]>(`${EVENTS_API_BASE_URL}/events`),
+  getBySlug: (slug: string) =>
+    apiFetch<EventRecord>(`${EVENTS_API_BASE_URL}/events/by-slug/${encodeURIComponent(slug)}`),
+  getById: (id: string) =>
+    apiFetch<EventRecord>(`${EVENTS_API_BASE_URL}/events/${encodeURIComponent(id)}`),
 };
 
 export const registrationsApi = {

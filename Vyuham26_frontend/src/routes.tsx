@@ -1,6 +1,8 @@
-import React, { lazy } from "react";
+import React, { lazy, useEffect, useState } from "react";
 import { matchPath, normalizePath, navigate, isAdminUnlocked } from "@/lib/router";
-import { events, getEventBySlug } from "@/data/events";
+import { events, getEventBySlug, type Event } from "@/data/events";
+import { eventsApi } from "@/lib/api";
+import { mapEventRecordToPageEvent } from "@/lib/eventMapping";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import AnimatedSection from "@/components/motion/AnimatedSection";
@@ -99,7 +101,35 @@ export const NotFoundPage = lazy(() => import("@/pages/not-found"));
 /* ------------------------------------------------------------------ */
 export function EventDetailRoute({ params }: { params?: { slug?: string } }) {
   const slug = params?.slug || "";
-  const event = getEventBySlug(slug) || events.find((e) => e.slug === slug) || events[0];
+  const staticEvent = getEventBySlug(slug) || events.find((e) => e.slug === slug) || null;
+  const [event, setEvent] = useState<Event | null>(staticEvent);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let active = true;
+    setEvent(staticEvent);
+    setLoading(true);
+    eventsApi
+      .getBySlug(slug)
+      .then((record) => {
+        if (active) setEvent(mapEventRecordToPageEvent(record, events));
+      })
+      .catch(() => {
+        // Existing static event data remains available if the API is offline.
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [slug]);
+
+  if (!event && loading) {
+    return <div className="min-h-screen bg-[#020504] pt-32 text-center font-mono text-xs uppercase tracking-[0.2em] text-white/50">Loading event details…</div>;
+  }
+  if (!event) return <NotFoundPage />;
   return <EventDetailClient event={event} />;
 }
 
