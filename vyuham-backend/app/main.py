@@ -45,6 +45,11 @@ async def lifespan(_: FastAPI):
                 "ALTER TABLE events ADD COLUMN IF NOT EXISTS makemypass_url VARCHAR(500);"
             )
         )
+        await conn.execute(
+            text(
+                "ALTER TABLE profiles ADD COLUMN IF NOT EXISTS is_active BOOLEAN NOT NULL DEFAULT TRUE;"
+            )
+        )
 
     yield
 

@@ -13,7 +13,7 @@ import logging
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession
 
-from app.core.config import is_registration_open, set_runtime_registration_open
+from app.core.config import is_registration_open, set_runtime_registration_open, settings
 
 logger = logging.getLogger(__name__)
 
@@ -47,6 +47,10 @@ async def get_registration_open(db: AsyncSession) -> bool:
     Order: database row (admin override) -> runtime cache -> env/site config
     -> default open. Falls back gracefully if the table does not exist yet.
     """
+    if not settings.registration_enabled:
+        set_runtime_registration_open(False)
+        return False
+
     try:
         result = await db.execute(
             text("select value from site_settings where key = :key"),

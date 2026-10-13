@@ -1,7 +1,7 @@
 from datetime import datetime
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 from app.modules.auth.models import UserRole
 from app.modules.registrations.models import RegistrationStatus
@@ -14,12 +14,20 @@ class AdminStatsCategory(BaseModel):
     active_events: int
 
 
+class AdminEventStats(BaseModel):
+    event_id: UUID
+    event_slug: str
+    event_name: str
+    total_registrations: int
+
+
 class AdminStatsResponse(BaseModel):
     all: AdminStatsCategory
     tech: AdminStatsCategory
     management: AdminStatsCategory
     cultural: AdminStatsCategory
     esports: AdminStatsCategory
+    events: list[AdminEventStats] = Field(default_factory=list)
 
 
 class AdminUserOut(BaseModel):
@@ -34,7 +42,12 @@ class AdminUserOut(BaseModel):
     year: str | None
     station: str | None
     role: UserRole
+    is_active: bool
     created_at: datetime
+
+
+class AdminUserStatusUpdate(BaseModel):
+    is_active: bool
 
 
 class AdminUserListOut(BaseModel):

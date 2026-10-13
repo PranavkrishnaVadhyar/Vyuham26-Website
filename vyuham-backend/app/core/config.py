@@ -10,6 +10,8 @@ class Settings(BaseSettings):
     supabase_jwt_secret: str
     supabase_service_role_key: str
     frontend_origins: str = "http://localhost:5173,http://127.0.0.1:5173,http://localhost:5174,http://127.0.0.1:5174,http://localhost:5500,http://127.0.0.1:5500"
+    # Hard kill switch for participant registrations and team entry endpoints.
+    registration_enabled: bool = True
     reg_open: Optional[bool] = None
     # Async connection pool ceilings (kept low so this process can never blow
     # Supabase's shared per-project client cap — bursts queue locally via

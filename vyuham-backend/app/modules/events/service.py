@@ -1,10 +1,11 @@
 from uuid import UUID
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.exceptions import ResourceNotFoundError
 from app.modules.events.models import Event, RegistrationType
+from app.modules.registrations.models import Registration
 from app.modules.events.schemas import EventCreate, EventUpdate
 
 
@@ -56,5 +57,10 @@ async def update_event(db: AsyncSession, event_id: UUID, data: EventUpdate) -> E
 
 async def delete_event(db: AsyncSession, event_id: UUID) -> None:
     event = await get_event(db, event_id)
+    registrations = await db.scalar(
+        select(func.count(Registration.id)).where(Registration.event_id == event_id)
+    )
+    if registrations:
+        raise ValueError("This event has registrations and cannot be removed. Set its status to cancelled to preserve its history.")
     await db.delete(event)
     await db.commit()

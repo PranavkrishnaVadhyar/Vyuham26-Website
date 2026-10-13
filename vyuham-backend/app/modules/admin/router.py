@@ -1,19 +1,27 @@
+import json
 from decimal import Decimal
 from typing import Annotated
+from uuid import UUID
+from urllib.error import HTTPError, URLError
+from urllib.request import Request, urlopen
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import desc, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
+from starlette.concurrency import run_in_threadpool
 
+from app.core.config import settings
 from app.core.db import get_db
 from app.core.deps import require_role
 from app.modules.admin.schemas import (
+    AdminEventStats,
     AdminRegistrationListOut,
     AdminStatsCategory,
     AdminStatsResponse,
     AdminUserListOut,
+    AdminUserStatusUpdate,
 )
-from app.modules.auth.models import Profile
+from app.modules.auth.models import Profile, UserRole
 from app.modules.checkin.models import CheckIn
 from app.modules.events.models import Event, EventStream
 from app.modules.payments.models import Order
@@ -39,6 +47,59 @@ async def list_admin_users(
         )
     ).all()
     return {"items": records, "total": total, "limit": limit, "offset": offset}
+
+
+def _set_supabase_ban(user_id: UUID, is_active: bool) -> None:
+    service_key = settings.supabase_service_role_key
+    if not service_key:
+        raise HTTPException(status_code=503, detail="Supabase service role key is not configured")
+    url = f"{settings.supabase_url.rstrip('/')}/auth/v1/admin/users/{user_id}"
+    request = Request(
+        url,
+        data=json.dumps({"ban_duration": "none" if is_active else "876000h"}).encode(),
+        headers={"apikey": service_key, "Authorization": f"Bearer {service_key}", "Content-Type": "application/json"},
+        method="PUT",
+    )
+    try:
+        with urlopen(request, timeout=12) as response:
+            if response.status != 200:
+                raise HTTPException(status_code=502, detail="Supabase account update failed")
+    except HTTPError as exc:
+        detail = exc.read().decode("utf-8", errors="replace")
+        raise HTTPException(status_code=502, detail=f"Supabase account update failed ({exc.code}): {detail[:300]}") from exc
+    except (URLError, TimeoutError) as exc:
+        raise HTTPException(status_code=502, detail="Could not reach Supabase Auth") from exc
+
+
+@router.patch("/users/{user_id}/status")
+async def update_admin_user_status(
+    user_id: UUID,
+    data: AdminUserStatusUpdate,
+    current_admin: Annotated[Profile, Depends(require_role("admin"))],
+    db: Annotated[AsyncSession, Depends(get_db)],
+) -> dict:
+    profile = await db.get(Profile, user_id)
+    if profile is None:
+        raise HTTPException(status_code=404, detail="Participant account not found")
+    if profile.id == current_admin.id:
+        raise HTTPException(status_code=409, detail="You cannot deactivate your own administrator account")
+    if profile.role == UserRole.admin:
+        raise HTTPException(status_code=409, detail="Administrator accounts cannot be removed from this panel")
+    if profile.is_active == data.is_active:
+        return {"id": str(profile.id), "is_active": profile.is_active}
+
+    await run_in_threadpool(_set_supabase_ban, profile.id, data.is_active)
+    profile.is_active = data.is_active
+    try:
+        await db.commit()
+    except Exception as exc:
+        await db.rollback()
+        try:
+            await run_in_threadpool(_set_supabase_ban, profile.id, not data.is_active)
+        except Exception:
+            pass
+        raise HTTPException(status_code=500, detail="Could not save participant account status") from exc
+    return {"id": str(profile.id), "is_active": profile.is_active}
 
 
 @router.get("/registrations", response_model=AdminRegistrationListOut)
@@ -161,10 +222,23 @@ async def get_admin_stats(
             active_events=s_events,
         )
 
+    event_rows = (
+        await db.execute(
+            select(Event.id, Event.slug, Event.name, func.count(Registration.id))
+            .outerjoin(Registration, Registration.event_id == Event.id)
+            .group_by(Event.id, Event.slug, Event.name)
+            .order_by(Event.name)
+        )
+    ).all()
+
     return AdminStatsResponse(
         all=all_cat,
         tech=categories["tech"],
         management=categories["management"],
         cultural=categories["cultural"],
         esports=categories["esports"],
+        events=[
+            AdminEventStats(event_id=event_id, event_slug=event_slug, event_name=event_name, total_registrations=count)
+            for event_id, event_slug, event_name, count in event_rows
+        ],
     )

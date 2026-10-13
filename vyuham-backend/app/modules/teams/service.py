@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.exceptions import ResourceNotFoundError
 from app.modules.auth.models import Profile
+from app.modules.registrations.models import Registration
 from app.modules.teams.models import Team, TeamMember
 
 _INVITE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
@@ -57,7 +58,8 @@ async def create_team(db: AsyncSession, name: str, creator: Profile) -> dict:
 
 
 async def join_team(db: AsyncSession, invite_code: str, user: Profile) -> Team:
-    team = await db.scalar(select(Team).where(Team.invite_code == invite_code.upper()))
+    normalized_code = invite_code.strip().replace(" ", "").upper()
+    team = await db.scalar(select(Team).where(Team.invite_code == normalized_code))
     if team is None:
         raise ResourceNotFoundError("Team invite code")
     member = await db.scalar(
@@ -65,6 +67,11 @@ async def join_team(db: AsyncSession, invite_code: str, user: Profile) -> Team:
     )
     if member is not None:
         raise ValueError("You are already a member of this team")
+    registered = await db.scalar(
+        select(Registration.id).where(Registration.team_id == team.id).limit(1)
+    )
+    if registered is not None:
+        raise ValueError("This team already has an event registration; its membership is locked")
     db.add(TeamMember(team_id=team.id, user_id=user.id))
     try:
         await db.commit()

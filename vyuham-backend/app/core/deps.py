@@ -86,6 +86,8 @@ async def get_current_user(
     profile_id = UUID(claims["sub"])
     profile = await db.get(Profile, profile_id)
     if profile is not None:
+        if not profile.is_active:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="This participant account has been deactivated")
         # Keep the locally cached email aligned with Supabase's verified claim.
         if profile.email != claims["email"]:
             profile.email = claims["email"]

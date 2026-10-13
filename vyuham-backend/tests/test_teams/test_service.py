@@ -49,7 +49,7 @@ class TeamServiceTests(unittest.IsolatedAsyncioTestCase):
     async def test_join_team_by_invite_code(self):
         team = SimpleNamespace(id=uuid4(), invite_code="AB234567")
         user_id = uuid4()
-        db = FakeSession(scalar_values=[team, None])
+        db = FakeSession(scalar_values=[team, None, None])
 
         joined = await join_team(db, "ab234567", SimpleNamespace(id=user_id))
 

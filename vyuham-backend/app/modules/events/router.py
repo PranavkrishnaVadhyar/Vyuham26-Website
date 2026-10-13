@@ -67,5 +67,8 @@ async def remove_event(
     _: Annotated[Profile, Depends(require_role("admin"))],
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> Response:
-    await delete_event(db, event_id)
+    try:
+        await delete_event(db, event_id)
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
     return Response(status_code=status.HTTP_204_NO_CONTENT)

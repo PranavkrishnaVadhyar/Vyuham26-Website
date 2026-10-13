@@ -9,6 +9,7 @@ from pydantic import BaseModel
 from app.core.db import get_db
 from app.core.deps import get_current_user, require_role
 from app.core.site_settings import get_registration_open, set_registration_open
+from app.core.config import settings
 from app.modules.auth.models import Profile
 from app.modules.registrations.schemas import RegistrationCreate, RegistrationOut, RegistrationStatusUpdate
 from app.modules.registrations.service import (
@@ -43,6 +44,11 @@ async def set_registration_gateway_status(
     _: Annotated[Profile, Depends(require_role("admin"))],
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> dict[str, bool]:
+    if not settings.registration_enabled and data.reg_open:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Registration is hard-disabled by the backend REGISTRATION_ENABLED setting.",
+        )
     await set_registration_open(db, data.reg_open)
     return {"reg_open": data.reg_open}
 
