@@ -1,0 +1,30 @@
+ Vyuham26_static/README.md                          |  31 [32m+[m
+ Vyuham26_static/VYUHAM26_AFTERDARK_redesign.zip    | Bin [31m0[m -> [32m3146582[m bytes
+ Vyuham26_static/VYUHAM26_CYBER_REDESIGN.zip        | Bin [31m0[m -> [32m3147723[m bytes
+ Vyuham26_static/assets/afterdark-monolith.png      | Bin [31m0[m -> [32m2368684[m bytes
+ Vyuham26_static/assets/favicon.ico                 | Bin [31m0[m -> [32m25931[m bytes
+ Vyuham26_static/assets/favicon.png                 | Bin [31m0[m -> [32m246121[m bytes
+ Vyuham26_static/assets/manifest.json               |  22 [32m+[m
+ Vyuham26_static/assets/og-image.png                | Bin [31m0[m -> [32m109329[m bytes
+ Vyuham26_static/assets/venue-campus-enhanced.png   | Bin [31m0[m -> [32m3312147[m bytes
+ Vyuham26_static/assets/vyuham_logo_optimized.png   | Bin [31m0[m -> [32m246121[m bytes
+ Vyuham26_static/assets/vyuham_logo_sm.png          | Bin [31m0[m -> [32m246121[m bytes
+ Vyuham26_static/css/styles.css                     | 146 [32m++++[m
+ Vyuham26_static/index.html                         |  56 [32m++[m
+ Vyuham26_static/js/app.js                          | 451 [32m++++++++++++[m
+ Vyuham26_static/js/backend.js                      |  69 [32m++[m
+ Vyuham26_static/js/events-data.js                  | 801 [32m+++++++++++++++++++++[m
+ vyuham-backend/.env.example                        |   9 [32m+[m[31m-[m
+ vyuham-backend/app/core/config.py                  |   2 [32m+[m
+ vyuham-backend/app/core/deps.py                    |   2 [32m+[m
+ vyuham-backend/app/core/site_settings.py           |   6 [32m+[m[31m-[m
+ vyuham-backend/app/main.py                         |   7 [32m+[m[31m-[m
+ vyuham-backend/app/modules/admin/router.py         |  78 [32m+[m[31m-[m
+ vyuham-backend/app/modules/admin/schemas.py        |  15 [32m+[m[31m-[m
+ vyuham-backend/app/modules/auth/models.py          |   3 [32m+[m[31m-[m
+ vyuham-backend/app/modules/events/router.py        |   5 [32m+[m[31m-[m
+ vyuham-backend/app/modules/events/service.py       |   8 [32m+[m[31m-[m
+ vyuham-backend/app/modules/registrations/router.py |   6 [32m+[m
+ vyuham-backend/app/modules/teams/service.py        |   9 [32m+[m[31m-[m
+ vyuham-backend/tests/test_teams/test_service.py    |   2 [32m+[m[31m-[m
+ 29 files changed, 1716 insertions(+), 12 deletions(-)
