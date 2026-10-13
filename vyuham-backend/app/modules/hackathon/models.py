@@ -33,3 +33,17 @@ class Mentor(Base):
     expertise: Mapped[str] = mapped_column(String(250), nullable=False)
     slot_time: Mapped[str] = mapped_column(String(120), nullable=False)
     contact: Mapped[str | None] = mapped_column(String(250), nullable=True)
+
+
+class HackathonMentorRequest(Base):
+    __tablename__ = "hackathon_mentor_requests"
+
+    id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), primary_key=True, default=uuid4)
+    event_id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), ForeignKey("events.id", ondelete="CASCADE"), nullable=False, index=True)
+    requester_id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), ForeignKey("profiles.id", ondelete="CASCADE"), nullable=False, index=True)
+    team_id: Mapped[UUID | None] = mapped_column(PGUUID(as_uuid=True), ForeignKey("teams.id", ondelete="SET NULL"), nullable=True, index=True)
+    mentor_id: Mapped[UUID | None] = mapped_column(PGUUID(as_uuid=True), ForeignKey("mentors.id", ondelete="SET NULL"), nullable=True)
+    message: Mapped[str | None] = mapped_column(Text, nullable=True)
+    status: Mapped[str] = mapped_column(String(20), nullable=False, default="pending", server_default="pending", index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now())

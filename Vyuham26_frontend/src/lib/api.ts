@@ -11,6 +11,7 @@ export const API_BASE_URL =
 // The production build should set VITE_API_URL.
 const eventsApiBasePath = API_BASE_URL || "/api";
 const eventsApiPath = (path = "") => `${eventsApiBasePath}/events${path}`;
+const hackathonApiPath = (path: string) => `${API_BASE_URL || "/api"}/hackathon${path}`;
 
 export class ApiError extends Error {
   status: number;
@@ -332,6 +333,117 @@ export const teamsApi = {
       body: JSON.stringify({ invite_code: invite_code.trim().toUpperCase() }),
     });
   },
+};
+
+export interface HackathonSubmissionRecord {
+  id: string;
+  event_id: string;
+  team_id: string;
+  team_name: string;
+  repo_url: string;
+  demo_url: string | null;
+  description: string | null;
+  score: number | string | null;
+  submitted_at: string;
+  updated_at: string;
+}
+
+export interface HackathonMentorRecord {
+  id: string;
+  event_id: string;
+  name: string;
+  expertise: string;
+  slot_time: string;
+  contact: string | null;
+}
+
+export interface HackathonMentorRequestRecord {
+  id: string;
+  event_id: string;
+  requester_id: string;
+  team_id: string | null;
+  mentor_id: string | null;
+  message: string | null;
+  status: "pending" | "accepted" | "completed" | "cancelled";
+  created_at: string;
+  updated_at: string;
+  requester_name?: string | null;
+  requester_email?: string | null;
+  team_name?: string | null;
+}
+
+export interface HackathonLeaderboardEntry {
+  team_name: string;
+  score: number | string;
+}
+
+export interface HackathonMilestoneRecord {
+  id: string;
+  title: string;
+  time: string;
+  status: "COMPLETE" | "ACTIVE" | "PENDING";
+  description: string | null;
+  venue: string | null;
+}
+
+export const hackathonApi = {
+  getMySubmission: (eventId: string) =>
+    apiFetch<HackathonSubmissionRecord | null>(hackathonApiPath(`/${eventId}/submissions/me`)),
+  submit: (eventId: string, payload: {
+    team_id: string;
+    repo_url: string;
+    demo_url?: string | null;
+    description?: string | null;
+  }) =>
+    apiFetch<HackathonSubmissionRecord>(hackathonApiPath(`/${eventId}/submissions`), {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
+  mentors: (eventId: string) =>
+    apiFetch<HackathonMentorRecord[]>(hackathonApiPath(`/${eventId}/mentors`)),
+  createMentor: (eventId: string, payload: {
+    name: string;
+    expertise: string;
+    slot_time: string;
+    contact?: string | null;
+  }) =>
+    apiFetch<HackathonMentorRecord>(hackathonApiPath(`/${eventId}/mentors`), {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
+  requestMentor: (eventId: string, payload: {
+    team_id?: string;
+    mentor_id?: string;
+    message?: string;
+  }) =>
+    apiFetch<HackathonMentorRequestRecord>(hackathonApiPath(`/${eventId}/mentor-requests`), {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
+  myMentorRequests: (eventId: string) =>
+    apiFetch<HackathonMentorRequestRecord[]>(hackathonApiPath(`/${eventId}/mentor-requests/me`)),
+  leaderboard: (eventId: string) =>
+    apiFetch<HackathonLeaderboardEntry[]>(hackathonApiPath(`/${eventId}/leaderboard`)),
+  milestones: (eventId: string) =>
+    apiFetch<HackathonMilestoneRecord[]>(hackathonApiPath(`/${eventId}/milestones`)),
+  adminListSubmissions: (eventId: string) =>
+    apiFetch<HackathonSubmissionRecord[]>(hackathonApiPath(`/${eventId}/submissions`)),
+  scoreSubmission: (eventId: string, submissionId: string, score: string) =>
+    apiFetch<HackathonSubmissionRecord>(hackathonApiPath(`/${eventId}/submissions/${submissionId}/score`), {
+      method: "PATCH",
+      body: JSON.stringify({ score }),
+    }),
+  adminListMentorRequests: (eventId: string) =>
+    apiFetch<HackathonMentorRequestRecord[]>(hackathonApiPath(`/${eventId}/mentor-requests`)),
+  updateMentorRequest: (
+    eventId: string,
+    requestId: string,
+    status: HackathonMentorRequestRecord["status"],
+  ) =>
+    apiFetch<HackathonMentorRequestRecord>(hackathonApiPath(`/${eventId}/mentor-requests/${requestId}`), {
+      method: "PATCH",
+      body: JSON.stringify({ status }),
+    }),
 };
 
 /* ================================================================== */

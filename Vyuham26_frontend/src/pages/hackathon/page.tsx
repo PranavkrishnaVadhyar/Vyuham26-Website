@@ -7,21 +7,9 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import AnimatedSection from "@/components/motion/AnimatedSection";
 import SignalRing from "@/components/motion/SignalRing";
-import { Kicker, Button } from "@/components/ui/Elements";
-
-const milestones = [
-  { id: "01", title: "Problem Statement Flag-Off", time: "30 OCT • 09:00 AM", status: "COMPLETE", description: "Agentic AI / Autonomous Systems brief revealed." },
-  { id: "02", title: "Midnight Mentoring Round", time: "30 OCT • OVERNIGHT", status: "ACTIVE", description: "Midnight mentoring session & refreshments in Main Hall." },
-  { id: "03", title: "Hackathon Demos & Judging", time: "31 OCT • 09:00 AM", status: "PENDING", description: "Prototype demonstrations and jury evaluation in Main Hall." },
-  { id: "04", title: "Winners & Prize Distribution", time: "01 NOV • 01:00 PM", status: "LOCKED", description: "₹30,000 prize distribution at Main Hall." },
-];
-
-const telemetry = [
-  ["BUILD CORE", "ONLINE", "green"],
-  ["REPOSITORY", "LINKED", "green"],
-  ["DEPLOYMENT", "STANDBY", "amber"],
-  ["MENTOR NODE", "AVAILABLE", "cyan"],
-];
+import { Button } from "@/components/ui/Elements";
+import { useAuth } from "@/context/AuthContext";
+import { eventsApi, hackathonApi, registrationsApi, teamsApi, type HackathonLeaderboardEntry, type HackathonMentorRequestRecord, type HackathonMentorRecord, type HackathonMilestoneRecord, type HackathonSubmissionRecord, type TeamRecord } from "@/lib/api";
 
 function Corner({ position }: { position: "tl" | "tr" | "bl" | "br" }) {
   const classes = {
@@ -83,10 +71,27 @@ function Reactor({ reduceMotion }: { reduceMotion: boolean }) {
 
 export default function HackathonHubPage() {
   const reduceMotion = usePrefersReducedMotion();
+  const { isAuthenticated, isReady } = useAuth();
   const [repoUrl, setRepoUrl] = useState("");
   const [demoUrl, setDemoUrl] = useState("");
+  const [description, setDescription] = useState("");
+  const [eventId, setEventId] = useState<string | null>(null);
+  const [teams, setTeams] = useState<TeamRecord[]>([]);
+  const [teamId, setTeamId] = useState("");
+  const [submission, setSubmission] = useState<HackathonSubmissionRecord | null>(null);
+  const [mentors, setMentors] = useState<HackathonMentorRecord[]>([]);
+  const [leaderboard, setLeaderboard] = useState<HackathonLeaderboardEntry[]>([]);
+  const [milestones, setMilestones] = useState<HackathonMilestoneRecord[]>([]);
+  const [mentorRequests, setMentorRequests] = useState<HackathonMentorRequestRecord[]>([]);
+  const [mentorMessage, setMentorMessage] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [mentorRequested, setMentorRequested] = useState(false);
+  const [loadingData, setLoadingData] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [requestingMentor, setRequestingMentor] = useState(false);
+  const [pageError, setPageError] = useState("");
+  const [submissionError, setSubmissionError] = useState("");
+  const [mentorError, setMentorError] = useState("");
   const [booted, setBooted] = useState(false);
   const [bootProgress, setBootProgress] = useState(0);
 
@@ -128,11 +133,136 @@ export default function HackathonHubPage() {
     return () => window.removeEventListener("mousemove", move);
   }, [cursorX, cursorY, reduceMotion]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    if (!isReady) return;
+    let active = true;
+
+    const loadHackathonData = async () => {
+      setLoadingData(true);
+      setPageError("");
+      try {
+        const event = await eventsApi.getBySlug("hackathon");
+        if (!active) return;
+        setEventId(event.id);
+
+        const publicResults = await Promise.allSettled([
+          hackathonApi.mentors(event.id),
+          hackathonApi.leaderboard(event.id),
+          hackathonApi.milestones(event.id),
+        ]);
+        if (!active) return;
+        if (publicResults[0].status === "fulfilled") setMentors(publicResults[0].value);
+        if (publicResults[1].status === "fulfilled") setLeaderboard(publicResults[1].value);
+        if (publicResults[2].status === "fulfilled") setMilestones(publicResults[2].value);
+
+        if (!isAuthenticated) {
+          setTeams([]);
+          setSubmission(null);
+          setMentorRequests([]);
+          return;
+        }
+
+        const [myTeams, myRegistrations, mySubmission, myRequests] = await Promise.allSettled([
+          teamsApi.listMine(),
+          registrationsApi.listMine(),
+          hackathonApi.getMySubmission(event.id),
+          hackathonApi.myMentorRequests(event.id),
+        ]);
+        if (!active) return;
+
+        if (myTeams.status === "fulfilled" && myRegistrations.status === "fulfilled") {
+          const registeredTeamIds = new Set(
+            myRegistrations.value
+              .filter((registration) => registration.event_id === event.id && registration.team_id && registration.status !== "cancelled")
+              .map((registration) => registration.team_id as string),
+          );
+          const eligibleTeams = myTeams.value.filter((team) => registeredTeamIds.has(team.id));
+          setTeams(eligibleTeams);
+          setTeamId((current) => {
+            const savedTeam = mySubmission.status === "fulfilled" ? mySubmission.value?.team_id : undefined;
+            return eligibleTeams.some((team) => team.id === savedTeam)
+              ? savedTeam!
+              : eligibleTeams.some((team) => team.id === current) ? current : eligibleTeams[0]?.id ?? "";
+          });
+        } else {
+          setTeams([]);
+        }
+
+        if (mySubmission.status === "fulfilled" && mySubmission.value) {
+          setSubmission(mySubmission.value);
+          setRepoUrl(mySubmission.value.repo_url);
+          setDemoUrl(mySubmission.value.demo_url ?? "");
+          setDescription(mySubmission.value.description ?? "");
+          setSubmitted(true);
+        } else {
+          setSubmission(null);
+          setSubmitted(false);
+        }
+        if (myRequests.status === "fulfilled") {
+          setMentorRequests(myRequests.value);
+          setMentorRequested(myRequests.value.some((request) => request.status === "pending" || request.status === "accepted"));
+        }
+      } catch (error) {
+        if (active) setPageError(error instanceof Error ? error.message : "Could not load hackathon data.");
+      } finally {
+        if (active) setLoadingData(false);
+      }
+    };
+
+    void loadHackathonData();
+    return () => { active = false; };
+  }, [isReady, isAuthenticated]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!repoUrl.trim()) return;
-    setSubmitted(true);
+    if (!eventId || !isAuthenticated || !teamId || !repoUrl.trim()) return;
+    setSubmitting(true);
+    setSubmissionError("");
+    try {
+      const saved = await hackathonApi.submit(eventId, {
+        team_id: teamId,
+        repo_url: repoUrl.trim(),
+        demo_url: demoUrl.trim() || null,
+        description: description.trim() || null,
+      });
+      setSubmission(saved);
+      setSubmitted(true);
+    } catch (error) {
+      setSubmissionError(error instanceof Error ? error.message : "Submission failed. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
   };
+
+  const handleMentorRequest = async () => {
+    if (!eventId || !isAuthenticated) return;
+    setRequestingMentor(true);
+    setMentorError("");
+    try {
+      const request = await hackathonApi.requestMentor(eventId, {
+        ...(teamId ? { team_id: teamId } : {}),
+        message: mentorMessage.trim() || undefined,
+      });
+      setMentorRequests((current) => [request, ...current]);
+      setMentorRequested(true);
+      setMentorMessage("");
+    } catch (error) {
+      setMentorError(error instanceof Error ? error.message : "Mentor request failed. Please try again.");
+    } finally {
+      setRequestingMentor(false);
+    }
+  };
+
+  const milestoneProgress = milestones.length
+    ? Math.round((milestones.filter((milestone) => milestone.status === "COMPLETE").length / milestones.length) * 100)
+    : 0;
+  const completedMilestones = milestones.filter((milestone) => milestone.status === "COMPLETE").length;
+  const telemetry = [
+    ["BUILD CORE", eventId ? "ONLINE" : loadingData ? "SYNCING" : "OFFLINE", "green"],
+    ["REPOSITORY", submission ? "SUBMITTED" : "AWAITING", "green"],
+    ["DEPLOYMENT", submission?.demo_url ? "LINKED" : "OPTIONAL", "amber"],
+    ["MENTOR NODE", mentors.length ? `${mentors.length} LISTED` : "REQUESTABLE", "cyan"],
+  ];
 
   return (
     <>
@@ -269,15 +399,17 @@ export default function HackathonHubPage() {
               </div>
             </AnimatedSection>
 
+            {pageError && <p role="alert" className="mt-4 border border-red-400/30 bg-red-950/20 px-4 py-3 text-xs text-red-200">Hackathon data could not be loaded: {pageError}</p>}
+
             {/* COMMAND STRIP */}
             <AnimatedSection delay={.05}>
               <div className="mt-4 grid grid-cols-2 gap-px border-y border-white/15 bg-white/10 md:grid-cols-5">
                 {[
-                  ["COMMAND LINK", "ACTIVE"],
-                  ["PHASE", "03 / 04"],
-                  ["NODE", "CYB-14"],
-                  ["SUBMISSION", "31 OCT"],
-                  ["STATE", "BUILDING"],
+                  ["COMMAND LINK", eventId ? "ACTIVE" : "SYNCING"],
+                  ["PHASE", `${String(Math.min(completedMilestones + 1, Math.max(milestones.length, 1))).padStart(2, "0")} / ${String(Math.max(milestones.length, 1)).padStart(2, "0")}`],
+                  ["NODE", teams.find((team) => team.id === teamId)?.name ?? (isAuthenticated ? "NO REGISTERED TEAM" : "SIGN IN")],
+                  ["SUBMISSION", submission ? "RECEIVED" : "OPEN"],
+                  ["STATE", submission ? "SUBMITTED" : teams.length ? "BUILDING" : "AWAITING TEAM"],
                 ].map(([label, value], index) => (
                   <div key={label} className="bg-[#030706] px-4 py-3 font-mono">
                     <div className="text-[7px] tracking-[.2em] text-muted">{label}</div>
@@ -298,14 +430,14 @@ export default function HackathonHubPage() {
                     <div className="font-mono text-[8px] uppercase tracking-[.3em] text-green">Mission Progress // Squad Path</div>
                     <h2 className="mt-2 font-display text-2xl font-bold tracking-tight md:text-3xl">MILESTONE CONTROL</h2>
                   </div>
-                  <div className="font-mono text-[9px] text-muted"><span className="text-green">75%</span> SYSTEM COMPLETION</div>
+                  <div className="font-mono text-[9px] text-muted"><span className="text-green">{milestoneProgress}%</span> SYSTEM COMPLETION</div>
                 </div>
 
                 <div className="mt-6 h-[3px] overflow-hidden bg-white/10">
                   <motion.div
                     className="h-full bg-linear-to-r from-green via-green to-cyan-300 shadow-[0_0_15px_rgba(46,229,157,.8)]"
-                    initial={{ width: reduceMotion ? "75%" : "0%" }}
-                    animate={{ width: "75%" }}
+                    initial={{ width: reduceMotion ? `${milestoneProgress}%` : "0%" }}
+                    animate={{ width: `${milestoneProgress}%` }}
                     transition={{ duration: 1.5, ease: "easeOut" }}
                   />
                 </div>
@@ -337,7 +469,7 @@ export default function HackathonHubPage() {
                           active ? "border-green bg-green text-black shadow-[0_0_20px_rgba(46,229,157,.5)]" :
                           complete ? "border-green/60 bg-green/10 text-green" : "border-white/15 bg-black text-muted"
                         }`}>
-                          {complete ? "✓" : m.id}
+                          {complete ? "✓" : String(index + 1).padStart(2, "0")}
                         </div>
 
                         {active && <SignalRing className="left-[-6px] top-[-6px]" size={60} count={2} duration={2.4} />}
@@ -346,8 +478,9 @@ export default function HackathonHubPage() {
                           {m.status}
                         </div>
                         <h3 className="mt-1 font-display text-base font-semibold">{m.title}</h3>
-                        <p className="mt-2 text-[11px] leading-5 text-muted">{m.description}</p>
+                        <p className="mt-2 text-[11px] leading-5 text-muted">{m.description || "Details will be announced soon."}</p>
                         <div className="mt-4 border-t border-white/10 pt-3 font-mono text-[8px] text-muted">{m.time}</div>
+                        {m.venue && <div className="mt-2 font-mono text-[8px] text-cyan-300/70">{m.venue}</div>}
 
                         {active && !reduceMotion && (
                           <motion.div
@@ -359,6 +492,7 @@ export default function HackathonHubPage() {
                       </motion.div>
                     );
                   })}
+                  {!milestones.length && <p className="col-span-full py-8 text-center font-mono text-[9px] text-muted">No milestone schedule has been published yet.</p>}
                 </div>
 
                 {!reduceMotion && (
@@ -367,6 +501,27 @@ export default function HackathonHubPage() {
                     animate={{ x: ["0%", "1050%"], opacity: [0, 1, 0] }}
                     transition={{ duration: 4.2, repeat: Infinity, ease: "linear" }}
                   />
+                )}
+              </div>
+            </AnimatedSection>
+
+            <AnimatedSection delay={.13}>
+              <div className="mt-5 border border-white/15 bg-black/45 p-5 md:flex md:items-center md:justify-between md:gap-8">
+                <div>
+                  <div className="font-mono text-[8px] uppercase tracking-[.3em] text-cyan-300">Live standings</div>
+                  <h2 className="mt-2 font-display text-xl font-bold">LEADERBOARD</h2>
+                </div>
+                {leaderboard.length ? (
+                  <ol className="mt-4 grid flex-1 gap-2 sm:grid-cols-2 md:mt-0">
+                    {leaderboard.slice(0, 4).map((entry, index) => (
+                      <li key={`${entry.team_name}-${index}`} className="flex items-center justify-between border border-white/10 bg-black/40 px-3 py-2 font-mono text-[9px]">
+                        <span className="text-muted">{String(index + 1).padStart(2, "0")} / <span className="text-paper">{entry.team_name}</span></span>
+                        <span className="text-green">{entry.score}</span>
+                      </li>
+                    ))}
+                  </ol>
+                ) : (
+                  <p className="mt-3 font-mono text-[9px] text-muted md:mt-0">Scores will appear here after judging.</p>
                 )}
               </div>
             </AnimatedSection>
@@ -389,54 +544,55 @@ export default function HackathonHubPage() {
                   {submitted ? (
                     <motion.div initial={{ opacity: 0, scale: .96 }} animate={{ opacity: 1, scale: 1 }} className="py-14 text-center">
                       <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full border border-green/60 bg-green/10 text-3xl text-green shadow-[0_0_35px_rgba(46,229,157,.18)]">✓</div>
-                      <div className="mt-5 font-display text-xl font-bold">UPLINK ACCEPTED</div>
-                      <p className="mt-2 font-mono text-[10px] text-muted">Repository received. Mentor review queue updated.</p>
+                      <div className="mt-5 font-display text-xl font-bold">SUBMISSION SAVED</div>
+                      <p className="mt-2 font-mono text-[10px] text-muted">Prototype saved for {submission?.team_name ?? teams.find((team) => team.id === teamId)?.name ?? "your team"}.</p>
                       <button type="button" onClick={() => setSubmitted(false)} className="mt-6 font-mono text-[9px] uppercase tracking-widest text-green hover:underline">
-                        Submit another revision
+                        Edit submission
                       </button>
                     </motion.div>
                   ) : (
                     <form onSubmit={handleSubmit} className="mt-6 space-y-5">
-                      <div>
-                        <label className="font-mono text-[8px] uppercase tracking-[.2em] text-muted">Primary Repository</label>
-                        <div className="relative mt-2">
-                          <span className="absolute left-4 top-1/2 -translate-y-1/2 font-mono text-xs text-green">//</span>
-                          <input
-                            type="url"
-                            required
-                            value={repoUrl}
-                            onChange={(e) => setRepoUrl(e.target.value)}
-                            placeholder="https://github.com/cybervipers/vyuham-hackathon"
-                            className="w-full border border-white/10 bg-black/50 py-4 pl-11 pr-4 font-mono text-xs text-paper outline-none transition placeholder:text-white/20 focus:border-green/60 focus:shadow-[0_0_20px_rgba(46,229,157,.06)]"
-                          />
+                      {!isAuthenticated ? (
+                        <div className="border border-white/10 bg-black/40 p-4 text-sm text-muted">
+                          Sign in with your participant account to submit a prototype. <a className="ml-1 text-green underline" href="/login">Sign in</a>
                         </div>
-                      </div>
-
-                      <div>
-                        <label className="font-mono text-[8px] uppercase tracking-[.2em] text-muted">
-                          Live Deployment <span className="ml-2 text-white/20">OPTIONAL</span>
-                        </label>
-                        <div className="relative mt-2">
-                          <span className="absolute left-4 top-1/2 -translate-y-1/2 font-mono text-xs text-cyan-300">→</span>
-                          <input
-                            type="url"
-                            value={demoUrl}
-                            onChange={(e) => setDemoUrl(e.target.value)}
-                            placeholder="https://cybervipers.vercel.app"
-                            className="w-full border border-white/10 bg-black/50 py-4 pl-11 pr-4 font-mono text-xs text-paper outline-none transition placeholder:text-white/20 focus:border-cyan-300/50"
-                          />
-                        </div>
-                      </div>
-
-                      <div className="flex flex-col gap-4 border-t border-white/10 pt-5 sm:flex-row sm:items-center sm:justify-between">
-                        <div>
-                          <div className="font-mono text-[8px] uppercase tracking-widest text-muted">Current State</div>
-                          <div className="mt-1 flex items-center gap-2 font-mono text-xs text-amber-300">
-                            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-amber-300" /> DRAFTING
+                      ) : (
+                        <>
+                          <div>
+                            <label htmlFor="hackathon-team" className="font-mono text-[8px] uppercase tracking-[.2em] text-muted">Registered team</label>
+                            <select id="hackathon-team" required value={teamId} onChange={(e) => setTeamId(e.target.value)} disabled={loadingData || teams.length === 0} className="mt-2 w-full border border-white/10 bg-[#030706] px-4 py-4 font-mono text-xs text-paper outline-none focus:border-green/60 disabled:opacity-50">
+                              {teams.length === 0 ? <option value="">No registered hackathon team found</option> : teams.map((team) => <option key={team.id} value={team.id}>{team.name}</option>)}
+                            </select>
+                            {teams.length === 0 && !loadingData && <p className="mt-2 text-[10px] text-muted">Create or join a team and register it for Hackathon — 24HR before submitting.</p>}
                           </div>
-                        </div>
-                        <Button type="submit" variant="primary">TRANSMIT MILESTONE 03 →</Button>
-                      </div>
+                          <div>
+                            <label htmlFor="hackathon-repo" className="font-mono text-[8px] uppercase tracking-[.2em] text-muted">Primary Repository</label>
+                            <div className="relative mt-2">
+                              <span className="absolute left-4 top-1/2 -translate-y-1/2 font-mono text-xs text-green">//</span>
+                              <input id="hackathon-repo" type="url" required value={repoUrl} onChange={(e) => setRepoUrl(e.target.value)} placeholder="https://github.com/your-team/project" className="w-full border border-white/10 bg-black/50 py-4 pl-11 pr-4 font-mono text-xs text-paper outline-none transition placeholder:text-white/20 focus:border-green/60 focus:shadow-[0_0_20px_rgba(46,229,157,.06)]" />
+                            </div>
+                          </div>
+                          <div>
+                            <label htmlFor="hackathon-demo" className="font-mono text-[8px] uppercase tracking-[.2em] text-muted">Live Deployment <span className="ml-2 text-white/20">OPTIONAL</span></label>
+                            <div className="relative mt-2">
+                              <span className="absolute left-4 top-1/2 -translate-y-1/2 font-mono text-xs text-cyan-300">→</span>
+                              <input id="hackathon-demo" type="url" value={demoUrl} onChange={(e) => setDemoUrl(e.target.value)} placeholder="https://your-project.example" className="w-full border border-white/10 bg-black/50 py-4 pl-11 pr-4 font-mono text-xs text-paper outline-none transition placeholder:text-white/20 focus:border-cyan-300/50" />
+                            </div>
+                          </div>
+                          <div>
+                            <label htmlFor="hackathon-description" className="font-mono text-[8px] uppercase tracking-[.2em] text-muted">Project summary <span className="ml-2 text-white/20">OPTIONAL</span></label>
+                            <textarea id="hackathon-description" value={description} onChange={(e) => setDescription(e.target.value)} maxLength={4000} rows={3} placeholder="What does your prototype do?" className="mt-2 w-full resize-y border border-white/10 bg-black/50 px-4 py-3 font-mono text-xs text-paper outline-none placeholder:text-white/20 focus:border-green/60" />
+                          </div>
+                          {submissionError && <p role="alert" className="border border-red-400/30 bg-red-950/20 px-4 py-3 text-xs text-red-200">{submissionError}</p>}
+                          <div className="flex flex-col gap-4 border-t border-white/10 pt-5 sm:flex-row sm:items-center sm:justify-between">
+                            <div>
+                              <div className="font-mono text-[8px] uppercase tracking-widest text-muted">Current State</div>
+                              <div className="mt-1 flex items-center gap-2 font-mono text-xs text-amber-300"><span className="h-1.5 w-1.5 animate-pulse rounded-full bg-amber-300" />{submission ? "REVISION READY" : "DRAFTING"}</div>
+                            </div>
+                            <Button type="submit" variant="primary" disabled={loadingData || submitting || teams.length === 0 || !isAuthenticated}>{submitting ? "SAVING…" : "TRANSMIT MILESTONE 03 →"}</Button>
+                          </div>
+                        </>
+                      )}
                     </form>
                   )}
                 </div>
@@ -448,7 +604,7 @@ export default function HackathonHubPage() {
                   <Corner position="bl" />
 
                   <div className="absolute right-5 top-5 flex items-center gap-2 font-mono text-[8px] text-green">
-                    <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-green" /> ONLINE
+                    <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-green" /> {mentors.length ? `${mentors.length} MENTOR${mentors.length === 1 ? "" : "S"} AVAILABLE` : "REQUEST SUPPORT"}
                   </div>
 
                   <div className="font-mono text-[8px] uppercase tracking-[.3em] text-cyan-300">Support Network</div>
@@ -479,14 +635,23 @@ export default function HackathonHubPage() {
                   </div>
 
                   <div className="space-y-3 border-t border-white/10 pt-5 font-mono text-[9px]">
-                    <div className="flex justify-between"><span className="text-muted">RESPONSE</span><span>&lt; 05 MIN</span></div>
-                    <div className="flex justify-between"><span className="text-muted">BAY</span><span className="text-green">14</span></div>
-                    <div className="flex justify-between"><span className="text-muted">CHANNEL</span><span>MENTOR-03</span></div>
+                    <div className="flex justify-between"><span className="text-muted">NETWORK</span><span>{mentors.length ? "AVAILABLE" : "REQUEST QUEUED"}</span></div>
+                    {mentors.slice(0, 2).map((mentor) => <div key={mentor.id} className="border-t border-white/10 pt-3"><div className="text-paper">{mentor.name}</div><div className="mt-1 text-muted">{mentor.expertise} · {mentor.slot_time}</div></div>)}
                   </div>
 
-                  <Button onClick={() => setMentorRequested(true)} variant="outline" className="mt-6 w-full justify-center">
-                    {mentorRequested ? "MENTOR REQUESTED ✓" : "REQUEST MENTOR ⚡"}
-                  </Button>
+                  {mentorRequests[0]?.status && <p className="mt-4 font-mono text-[9px] text-muted">LATEST REQUEST: <span className="text-cyan-300">{mentorRequests[0].status.toUpperCase()}</span></p>}
+                  {isAuthenticated ? (
+                    <>
+                      <label htmlFor="mentor-message" className="mt-5 block font-mono text-[8px] uppercase tracking-[.2em] text-muted">What do you need help with? <span className="text-white/20">OPTIONAL</span></label>
+                      <textarea id="mentor-message" value={mentorMessage} onChange={(e) => setMentorMessage(e.target.value)} maxLength={2000} rows={2} placeholder="Share a short description for the mentor." className="mt-2 w-full resize-y border border-white/10 bg-black/50 px-3 py-3 font-mono text-[10px] text-paper outline-none placeholder:text-white/20 focus:border-cyan-300/50" />
+                      {mentorError && <p role="alert" className="mt-3 text-xs text-red-200">{mentorError}</p>}
+                      <Button onClick={handleMentorRequest} disabled={!eventId || requestingMentor || mentorRequested} variant="outline" className="mt-4 w-full justify-center">
+                        {requestingMentor ? "SENDING REQUEST…" : mentorRequested ? "MENTOR REQUESTED ✓" : "REQUEST MENTOR ⚡"}
+                      </Button>
+                    </>
+                  ) : (
+                    <a href="/login" className="mt-6 block border border-white/20 px-4 py-3 text-center font-mono text-[9px] uppercase tracking-widest text-green hover:border-green/60">Sign in to request a mentor</a>
+                  )}
                 </div>
               </AnimatedSection>
             </div>

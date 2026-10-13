@@ -35,8 +35,8 @@ export function clearNavFlag(): void {
 }
 
 /**
- * Determines if a path is a "home" route that should always be allowed.
- * Home routes: "/", "", "/about", "/gallery", "/streams"
+ * Determines if a public route should be accessible from a direct URL.
+ * These routes are intentionally exempt from the internal-navigation guard.
  */
 export function isHomeRoute(path: string): boolean {
   const normalized = normalizePath(path);
@@ -45,7 +45,8 @@ export function isHomeRoute(path: string): boolean {
     normalized === "" ||
     normalized === "/about" ||
     normalized === "/gallery" ||
-    normalized === "/streams"
+    normalized === "/streams" ||
+    normalized === "/hackathon"
   );
 }
 

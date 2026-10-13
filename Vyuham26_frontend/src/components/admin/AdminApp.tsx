@@ -19,6 +19,7 @@ import {
 import { mapEventRecordToFestEvent } from "@/lib/eventMapping";
 import ConsoleManager from "./ConsoleManager";
 import AnnouncementManager from "./AnnouncementManager";
+import HackathonManager from "./HackathonManager";
 import { useConsoleConfig } from "@/config/consoleConfig";
 import { setRegistrationOpen } from "@/config/site";
 
@@ -29,6 +30,7 @@ const SECTIONS = [
   "Overview",
   "Console",
   "Events",
+  "Hackathon",
   "Registrations",
   "Users",
   "Streams",
@@ -330,12 +332,13 @@ function CoreTeamGatePanel() {
 /* ------------------------------------------------------------------ */
 /*  admin app                                                          */
 /* ------------------------------------------------------------------ */
-export default function AdminApp() {
+export default function AdminApp({ initialSection = "Overview" }: { initialSection?: string }) {
   const app = useApp();
   const auth = useAuth();
   const { content } = app;
   const { user } = auth;
-  const [section, setSection] = useState<Section>("Overview");
+  const initialAdminSection = SECTIONS.includes(initialSection as Section) ? initialSection as Section : "Overview";
+  const [section, setSection] = useState<Section>(initialAdminSection);
   const [consoleConfig] = useConsoleConfig();
   const [editing, setEditing] = useState<FestEvent | null>(null);
   const [editingBackendId, setEditingBackendId] = useState<string | null>(null);
@@ -933,6 +936,9 @@ export default function AdminApp() {
 
             {/* ---------------- CONSOLE ---------------- */}
             {section === "Console" && <ConsoleManager />}
+
+            {/* ---------------- HACKATHON ---------------- */}
+            {section === "Hackathon" && <HackathonManager />}
 
             {/* ---------------- EVENTS ---------------- */}
             {section === "Events" && (

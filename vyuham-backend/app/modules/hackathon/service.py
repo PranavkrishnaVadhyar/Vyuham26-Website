@@ -1,14 +1,14 @@
 from datetime import datetime, timezone
 from uuid import UUID
 
-from sqlalchemy import select
+from sqlalchemy import case, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.exceptions import ResourceNotFoundError
 from app.modules.auth.models import Profile
 from app.modules.events.models import Event
-from app.modules.hackathon.models import HackathonSubmission, Mentor
-from app.modules.hackathon.schemas import SubmissionCreate
+from app.modules.hackathon.models import HackathonMentorRequest, HackathonSubmission, Mentor
+from app.modules.hackathon.schemas import MentorRequestCreate, SubmissionCreate
 from app.modules.registrations.models import Registration
 from app.modules.teams.models import Team, TeamMember
 
@@ -83,6 +83,51 @@ async def get_leaderboard(db: AsyncSession, event_id: UUID) -> list[dict]:
     return [{"team_name": name, "score": score} for name, score in result.all()]
 
 
+async def list_milestones(db: AsyncSession, event_id: UUID) -> list[dict]:
+    hackathon = await db.get(Event, event_id)
+    if hackathon is None or hackathon.slug != "hackathon":
+        raise ResourceNotFoundError("Event")
+
+    milestone_order = ["hackathon", "hackathon-continues", "hackathon-demos", "hackathon-winners"]
+    order_expression = case(
+        {slug: index for index, slug in enumerate(milestone_order)},
+        value=Event.slug,
+        else_=len(milestone_order),
+    )
+    events = list(
+        await db.scalars(
+            select(Event)
+            .where(Event.slug.in_(milestone_order))
+            .order_by(order_expression)
+        )
+    )
+    milestones = []
+    for event in events:
+        event_state = (event.status or "").strip().lower()
+        status = (
+            "COMPLETE" if event_state in {"complete", "completed", "finished", "ended"}
+            else "ACTIVE" if event_state in {"active", "live", "ongoing", "in_progress"}
+            else "PENDING"
+        )
+        if event.start_time is not None:
+            event_time = event.start_time.strftime("%d %b • %I:%M %p")
+        elif event.day is not None:
+            event_time = f"OCT {29 + event.day} • {event.time or 'TIME TBD'}"
+        else:
+            event_time = event.time or "SCHEDULE TBD"
+        milestones.append(
+            {
+                "id": event.id,
+                "title": event.name,
+                "time": event_time,
+                "status": status,
+                "description": event.description or event.blurb,
+                "venue": event.venue,
+            }
+        )
+    return milestones
+
+
 async def list_mentors(db: AsyncSession, event_id: UUID) -> list[Mentor]:
     return list(await db.scalars(select(Mentor).where(Mentor.event_id == event_id).order_by(Mentor.slot_time, Mentor.name)))
 
@@ -95,3 +140,111 @@ async def create_mentor(db: AsyncSession, event_id: UUID, data) -> Mentor:
     await db.commit()
     await db.refresh(mentor)
     return mentor
+
+
+async def create_mentor_request(
+    db: AsyncSession, event_id: UUID, current_user: Profile, data: MentorRequestCreate
+) -> HackathonMentorRequest:
+    if await db.get(Event, event_id) is None:
+        raise ResourceNotFoundError("Event")
+
+    pending_request = await db.scalar(
+        select(HackathonMentorRequest.id).where(
+            HackathonMentorRequest.event_id == event_id,
+            HackathonMentorRequest.requester_id == current_user.id,
+            HackathonMentorRequest.status.in_(["pending", "accepted"]),
+        )
+    )
+    if pending_request is not None:
+        raise ValueError("You already have an active mentor request for this hackathon")
+
+    if data.team_id is not None:
+        team = await db.get(Team, data.team_id)
+        if team is None:
+            raise ResourceNotFoundError("Team")
+        membership = await db.scalar(
+            select(TeamMember.id).where(
+                TeamMember.team_id == data.team_id,
+                TeamMember.user_id == current_user.id,
+            )
+        )
+        if membership is None:
+            raise PermissionError("You must be a member of this team to request its mentor support")
+
+    if data.mentor_id is not None:
+        mentor = await db.get(Mentor, data.mentor_id)
+        if mentor is None or mentor.event_id != event_id:
+            raise ResourceNotFoundError("Mentor")
+
+    request = HackathonMentorRequest(
+        event_id=event_id,
+        requester_id=current_user.id,
+        **data.model_dump(),
+    )
+    db.add(request)
+    await db.commit()
+    await db.refresh(request)
+    return request
+
+
+async def list_my_mentor_requests(
+    db: AsyncSession, event_id: UUID, user_id: UUID
+) -> list[HackathonMentorRequest]:
+    result = await db.scalars(
+        select(HackathonMentorRequest)
+        .where(
+            HackathonMentorRequest.event_id == event_id,
+            HackathonMentorRequest.requester_id == user_id,
+        )
+        .order_by(HackathonMentorRequest.created_at.desc())
+    )
+    return list(result)
+
+
+async def list_mentor_requests(
+    db: AsyncSession, event_id: UUID
+) -> list[dict]:
+    result = await db.execute(
+        select(
+            HackathonMentorRequest,
+            Profile.name,
+            Profile.email,
+            Team.name,
+        )
+        .join(Profile, Profile.id == HackathonMentorRequest.requester_id)
+        .outerjoin(Team, Team.id == HackathonMentorRequest.team_id)
+        .where(HackathonMentorRequest.event_id == event_id)
+        .order_by(HackathonMentorRequest.created_at.desc())
+    )
+    rows = []
+    for request, requester_name, requester_email, team_name in result.all():
+        rows.append(
+            {
+                "id": request.id,
+                "event_id": request.event_id,
+                "requester_id": request.requester_id,
+                "team_id": request.team_id,
+                "mentor_id": request.mentor_id,
+                "message": request.message,
+                "status": request.status,
+                "created_at": request.created_at,
+                "updated_at": request.updated_at,
+                "requester_name": requester_name,
+                "requester_email": requester_email,
+                "team_name": team_name,
+            }
+        )
+    return rows
+
+
+async def update_mentor_request_status(
+    db: AsyncSession, event_id: UUID, request_id: UUID, status: str
+) -> HackathonMentorRequest:
+    request = await db.get(HackathonMentorRequest, request_id)
+    if request is None or request.event_id != event_id:
+        raise ResourceNotFoundError("Hackathon mentor request")
+    request.status = status
+    request.updated_at = datetime.now(timezone.utc)
+    await db.commit()
+    await db.refresh(request)
+    return request
