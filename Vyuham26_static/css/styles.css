@@ -597,11 +597,15 @@ h1,h2,h3,.brand b,.stream-card strong,.home-event strong,.day-card h3,.stage-bra
 @media(max-width:700px){.venue-info-card{min-height:0}.venue-duk-logo-frame{width:min(100%,330px);height:92px}.venue-info-card:not(.venue-campus-card) h3{margin-top:45px}}
 
 /* Use each stream's own artwork while keeping titles and links legible. */
-.stream-page-grid .stream-feature,.stream-page-grid .stream-feature:nth-child(n){position:relative;isolation:isolate;overflow:hidden;background-color:#120909!important;background-image:linear-gradient(90deg,#100909dc 0%,#1009098c 45%,#10090928 100%),linear-gradient(0deg,#100909d4 0%,#10090912 72%),var(--stream-feature-image);background-size:cover;background-position:center;background-repeat:no-repeat;transition:background-size .55s ease}
+.stream-page-grid .stream-feature{position:relative;isolation:isolate;overflow:hidden;background-color:#120909!important;background-size:cover;background-position:center;background-repeat:no-repeat;transition:background-size .55s ease}
+.stream-page-grid .stream-feature.stream-feature-1{background-image:linear-gradient(90deg,#100909c8 0%,#10090975 45%,#10090928 100%),linear-gradient(0deg,#100909bb 0%,transparent 72%),url("../assets/streams/technology.jpg")!important}
+.stream-page-grid .stream-feature.stream-feature-2{background-image:linear-gradient(90deg,#100909c8 0%,#10090975 45%,#10090928 100%),linear-gradient(0deg,#100909bb 0%,transparent 72%),url("../assets/streams/culture.jpg")!important}
+.stream-page-grid .stream-feature.stream-feature-3{background-image:linear-gradient(90deg,#100909c8 0%,#10090975 45%,#10090928 100%),linear-gradient(0deg,#100909bb 0%,transparent 72%),url("../assets/streams/gaming.jpg")!important}
+.stream-page-grid .stream-feature.stream-feature-4{background-image:linear-gradient(90deg,#100909c8 0%,#10090975 45%,#10090928 100%),linear-gradient(0deg,#100909bb 0%,transparent 72%),url("../assets/streams/management.jpg")!important}
 .stream-feature>*{position:relative;z-index:1}
 .stream-feature:hover,.stream-feature:focus-within{background-size:cover,cover,106% auto}
 .stream-feature-index{color:#f07a5d}
-@media(max-width:700px){.stream-page-grid .stream-feature,.stream-page-grid .stream-feature:nth-child(n){background-image:linear-gradient(90deg,#100909df 0%,#100909a0 55%,#10090946 100%),linear-gradient(0deg,#100909e0 0%,#10090910 74%),var(--stream-feature-image);background-position:center,center,58% center}}
+@media(max-width:700px){.stream-page-grid .stream-feature{background-position:center,center,58% center}}
 
 /* Keep the terminal welcome clean and place the VYUHAM mark behind its output. */
 .terminal-window{position:relative;isolation:isolate}
