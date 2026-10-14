@@ -669,3 +669,62 @@ h1,h2,h3,.brand b,.stream-card strong,.home-event strong,.day-card h3,.stage-bra
 .terminal-header,.terminal-history,.terminal-prompt{position:relative;z-index:1}
 .terminal-line.ascii{display:none}
 @media(max-width:700px){.terminal-watermark{width:min(54%,260px);opacity:.055}}
+
+/* Keep the shell separate from the metric grid. This avoids the shell's
+   max-width and legacy viewport padding constraining the actual grid. */
+.info-strip.cyber-strip{display:grid;width:min(calc(100% - 40px),var(--max));padding:0;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);box-sizing:border-box}
+.info-strip-spacer{min-width:0;padding:0!important;border:0!important}
+.info-strip-grid{display:grid;width:auto;grid-template-columns:repeat(4,136px);padding:0}
+.info-strip-grid>span{min-width:0;padding:18px 20px;border-left:1px solid #55453c66}
+.info-strip-grid>span:last-child{border-right:1px solid #55453c66}
+.info-strip-grid>span b{font-size:clamp(14px,1vw,16px);white-space:nowrap}
+.info-strip-grid>span small{font-size:8px;line-height:1.45;letter-spacing:.09em}
+.info-strip-grid>span:nth-child(1) b,.info-strip-grid>span:nth-child(4) b{color:#d3a184}
+.info-strip-grid>span:nth-child(2) b{color:#de312a}
+.info-strip-grid>span:nth-child(3) b{color:#cc63b2}
+
+/* Give the opening countdown the same visual weight as the hero actions. */
+.hero-count.cyber-count{width:min(100%,480px);gap:11px;margin-top:25px;padding:15px 16px;border:1px solid #57463f;border-radius:10px;background:linear-gradient(135deg,#201e1d,#171719 72%);box-shadow:0 12px 30px #0005,inset 0 1px #ffffff0b}
+.hero-count.cyber-count>small{font-size:10px;letter-spacing:.14em}
+.hero-count.cyber-count>strong{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}
+.hero-count.cyber-count>strong>span{min-width:0;min-height:66px;align-content:center;justify-items:center;gap:5px;padding:8px 5px;border:1px solid #57463f;border-radius:7px;background:linear-gradient(145deg,#282526,#1a191a);box-shadow:inset 0 1px #ffffff0a}
+.hero-count.cyber-count>strong b{font-size:clamp(22px,2vw,30px);line-height:1;color:#de312a}
+.hero-count.cyber-count>strong i{font-size:9px;letter-spacing:.08em}
+@media(max-width:700px){
+ .info-strip.cyber-strip{width:100%;grid-template-columns:minmax(0,1fr)}
+ .info-strip-spacer{display:none}
+ .info-strip-grid{width:100%;grid-template-columns:repeat(2,minmax(0,1fr));padding:0 8px}
+ .info-strip-grid>span{padding:14px 12px}
+ .info-strip-grid>span:nth-child(2){border-right:1px solid #55453c66}
+ .info-strip-grid>span b{font-size:15px}
+ .info-strip-grid>span small{font-size:8px}
+ .hero-count.cyber-count{width:100%;margin-top:20px;padding:13px}
+ .hero-count.cyber-count>strong>span{min-height:62px}
+ .hero-count.cyber-count>strong b{font-size:23px}
+}
+
+/* Rebuild the footer as a compact festival directory with a clear brand column. */
+.site-footer{padding:52px max(28px,calc((100vw - var(--max))/2)) 22px;background:radial-gradient(ellipse at 12% 0%,#bd806916,transparent 40%),linear-gradient(180deg,#191819 0%,#111214 72%);border-top-color:#4f4039}
+.footer-main{grid-template-columns:minmax(250px,1.15fr) minmax(150px,.75fr) minmax(205px,.95fr);gap:clamp(32px,6vw,88px);padding-bottom:42px}
+.footer-signature{max-width:360px}
+.footer-brand{margin-bottom:25px}
+.footer-brand img{filter:drop-shadow(0 0 12px #bd806920)}
+.footer-signature>p{margin:0 0 25px;color:#f0e5e5;font-size:16px;line-height:1.65}
+.footer-signature>p span{font-size:12px;color:#a5979f}
+.footer-edition{display:grid;gap:7px;padding-top:15px;border-top:1px solid #3d3936;font:9px var(--mono);letter-spacing:.08em}
+.footer-edition span{color:#d3a184}
+.footer-edition i{color:#a5979f;font-style:normal}
+.footer-column h2{margin:3px 0 19px;color:#d3a184;font:10px var(--mono);letter-spacing:.14em}
+.footer-column .footer-links{display:grid;grid-template-columns:1fr;gap:0}
+.footer-column .footer-links a{width:fit-content;padding:5px 0;color:#a5979f;font-size:12px;line-height:1.55}
+.footer-column .footer-links a:hover{color:#d3a184}
+.terminal-footer-btn{margin-top:18px;padding:11px 13px;border:1px solid #bd806955;background:#1a1918;color:#d3a184;font:9px var(--mono);letter-spacing:.07em;cursor:pointer}
+.terminal-footer-btn span{margin-left:8px;color:#a5979f}
+.terminal-footer-btn:hover{border-color:#d3a184;background:#242120;color:#fefefe}
+.footer-bottom{padding-top:18px;border-color:#3d3936}
+@media(max-width:760px){
+ .site-footer{padding:40px 20px 18px}
+ .footer-main{grid-template-columns:repeat(2,minmax(0,1fr));gap:34px 24px}
+ .footer-signature{grid-column:1/-1;max-width:440px}
+}
+@media(max-width:420px){.footer-main{grid-template-columns:1fr}.footer-signature{grid-column:auto}.footer-bottom{gap:9px}}
