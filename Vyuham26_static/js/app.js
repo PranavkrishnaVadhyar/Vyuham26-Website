@@ -103,8 +103,8 @@
   const home = () => {
     const showIntro = playLandingIntro();
     return `
-    ${showIntro?`<div class="intro-cinema" id="landingIntro" tabindex="-1" role="dialog" aria-modal="true" aria-label="VYUHAM 2026 introduction"><button type="button" class="intro-skip" id="introSkipBtn" aria-label="Skip introduction sequence">SKIP SEQUENCE [ESC] <span>↗</span></button><div class="intro-scene intro-scene-campus"><img src="assets/venue-campus-enhanced.png" alt=""><span>CAMPUS / TECHNOCITY</span></div><div class="intro-scene intro-scene-festival"><img src="assets/afterdark-monolith.png" alt=""><span>THREE DAYS / ONE CONVERGENCE</span></div><div class="intro-cinema-vignette"></div><div class="intro-cinema-grid"></div><div class="intro-cinema-orbit intro-cinema-orbit-a"></div><div class="intro-cinema-orbit intro-cinema-orbit-b"></div><div class="intro-cinema-core"><span class="intro-cinema-kicker"><i></i> DIGITAL UNIVERSITY KERALA · 2026</span><img src="assets/vyuham_logo_optimized.png" alt=""><h1><span>VYUHAM</span><b>’26</b></h1><i class="intro-cinema-rule"></i><div class="intro-cinema-chapters"><span>TECHNOLOGY</span><span>STRATEGY</span><span>CULTURE</span><span>ESPORTS</span></div><p>WHERE DISCIPLINES CONVERGE</p></div><span class="intro-cinema-coordinate intro-cinema-left">30 OCT — 01 NOV / 2026</span><span class="intro-cinema-coordinate intro-cinema-right">THIRUVANANTHAPURAM / INDIA</span><div class="intro-cinema-flash"></div></div>`:''}
-    <section class="cyber-hero${showIntro?' intro-handoff':''}" id="home"><div class="cyber-hero-grid"><div class="cyber-copy"><div class="cyber-kicker"><span class="live-dot"></span> DIGITAL UNIVERSITY KERALA <i>·</i> 2026</div><div class="cyber-wordmark"><img src="assets/vyuham_logo_optimized.png" alt="VYUHAM red emblem"><h1>VYUHAM<span>’26</span></h1></div><p class="cyber-slogan">THE FUTURE<br><em>AWAITS.</em></p><p class="cyber-intro">Three days of technology, strategy, culture and competition. Step into the convergence.</p><div class="cyber-actions">${registrationCta(MAKEMYPASS_HOME,'REGISTER & GET TICKETS <span>↗</span>')}<a class="text-link" href="#/events">EXPLORE ALL EVENTS <span>↓</span></a></div><div class="cyber-data"><span>30 OCT — 01 NOV, 2026</span><span>TECHNOCITY, KERALA</span></div><div class="hero-count cyber-count" aria-label="Countdown to festival opening"><small>COUNTDOWN TO OPENING</small><strong data-countdown>—</strong></div></div><div class="cyber-stage"><figure class="stage-screen stage-main"><img src="assets/afterdark-monolith.png" alt="Basalt monolith lit by a red line against a dark sky"><div class="stage-shade"></div><div class="stage-brand">AFTER<br><b>DARK</b><sup>’26</sup></div><figcaption><span>VYUHAM / 01</span><span>THIRUVANANTHAPURAM, INDIA</span></figcaption></figure><a class="stage-screen stage-float" href="#/event/${encodeURIComponent(events.find(e=>e.featured)?.slug||'events')}"><span class="stage-float-label">FEATURED TRANSMISSION</span><b>${esc(events.find(e=>e.featured)?.title||'VYUHAM’26')}</b><span class="stage-float-foot">OPEN EVENT DOSSIER ↗</span></a><span class="stage-orbit stage-orbit-one"></span><span class="stage-orbit stage-orbit-two"></span><div class="stage-index">FESTIVAL SIGNAL <b>01—03</b></div></div></div><div class="cyber-hero-foot"><span>THE NATIONAL TECHNO-CULTURAL FESTIVAL</span><a href="#festival">SCROLL TO EXPLORE ↓</a></div></section>
+    ${showIntro?`<div class="intro-cinema" id="landingIntro" tabindex="-1" role="dialog" aria-modal="true" aria-label="VYUHAM 2026 introduction"><div class="intro-scene intro-scene-campus"><img src="assets/venue-campus-enhanced.png" alt=""><span>CAMPUS / TECHNOCITY</span></div><div class="intro-scene intro-scene-festival"><img src="assets/afterdark-monolith.png" alt=""><span>THREE DAYS / ONE CONVERGENCE</span></div><div class="intro-cinema-vignette"></div><div class="intro-cinema-grid"></div><div class="intro-cinema-orbit intro-cinema-orbit-a"></div><div class="intro-cinema-orbit intro-cinema-orbit-b"></div><div class="intro-cinema-core"><span class="intro-cinema-kicker"><i></i> DIGITAL UNIVERSITY KERALA · 2026</span><img src="assets/vyuham_logo_optimized.png" alt=""><h1><span>VYUHAM</span><b>’26</b></h1><i class="intro-cinema-rule"></i><div class="intro-cinema-chapters"><span>TECHNOLOGY</span><span>STRATEGY</span><span>CULTURE</span><span>ESPORTS</span></div><p>WHERE DISCIPLINES CONVERGE</p></div><span class="intro-cinema-coordinate intro-cinema-left">30 OCT — 01 NOV / 2026</span><span class="intro-cinema-coordinate intro-cinema-right">THIRUVANANTHAPURAM / INDIA</span><div class="intro-cinema-flash"></div></div>`:''}
+    <section class="cyber-hero${showIntro?' intro-handoff':''}" id="home"><div class="cyber-hero-grid"><div class="cyber-copy"><div class="cyber-kicker"><span class="live-dot"></span> DIGITAL UNIVERSITY KERALA <i>·</i> 2026</div><div class="cyber-wordmark"><img src="assets/vyuham_logo_optimized.png" alt="VYUHAM red emblem"><h1>VYUHAM<span>’26</span></h1></div><p class="cyber-slogan">THE FUTURE<br><em>AWAITS.</em></p><p class="cyber-intro">Three days of technology, strategy, culture and competition. Step into the convergence.</p><div class="cyber-actions">${registrationCta(MAKEMYPASS_HOME,'REGISTER & GET TICKETS <span>↗</span>')}<a class="text-link" href="#/events">EXPLORE ALL EVENTS <span>↓</span></a></div><div class="cyber-data"><span>30 OCT — 01 NOV, 2026</span><span>TECHNOCITY, KERALA</span></div><div class="hero-count cyber-count" aria-label="Countdown to festival opening"><small>COUNTDOWN TO OPENING</small><strong data-countdown>—</strong></div></div><div class="cyber-stage"><figure class="stage-screen stage-main"><img src="assets/vyuham-hero-enhanced.png" alt="VYUHAM’s red emblem above a dark volcanic landscape illuminated by a red beam"><div class="stage-shade"></div><div class="stage-brand">VYUHAM<sup>’26</sup></div><figcaption><span>VYUHAM / 01</span><span>THIRUVANANTHAPURAM, INDIA</span></figcaption></figure><a class="stage-screen stage-float" href="#/event/${encodeURIComponent(events.find(e=>e.featured)?.slug||'events')}"><span class="stage-float-label">FEATURED TRANSMISSION</span><b>${esc(events.find(e=>e.featured)?.title||'VYUHAM’26')}</b><span class="stage-float-foot">OPEN EVENT DOSSIER ↗</span></a><span class="stage-orbit stage-orbit-one"></span><span class="stage-orbit stage-orbit-two"></span><div class="stage-index">FESTIVAL SIGNAL <b>01—03</b></div></div></div><div class="cyber-hero-foot"><span>THE NATIONAL TECHNO-CULTURAL FESTIVAL</span><a href="#festival">SCROLL TO EXPLORE ↓</a></div></section>
     <div class="info-strip cyber-strip"><span><b>30.10—01.11</b><small>THREE FESTIVAL DAYS</small></span><span><b>TECHNOCITY</b><small>DIGITAL UNIVERSITY KERALA</small></span><span><b>${events.length}</b><small>EVENT RECORDS</small></span><span><b>01 / 03</b><small>IGNITION → AFTERSHOCK</small></span></div>
     <section class="section festival-intro" id="festival"><div class="container intro-composition"><div class="intro-mark"><span>VYUHAM / DUK</span><img src="assets/vyuham_logo_sm.png" alt="VYUHAM emblem"><b>ONE<br>FESTIVAL<br><i>FOUR WORLDS.</i></b></div><div class="intro-copy reveal"><div class="eyebrow">01 / ABOUT THE FESTIVAL</div><h2>WHERE<br>DISCIPLINES<br><span class="green">COLLIDE.</span></h2><p>VYUHAM is Digital University Kerala’s flagship national-level management, technology and cultural fest. Across three days, students gather to build, debate, perform and compete.</p><p>From autonomous systems and strategy arenas to live culture and esports, one campus becomes a meeting point for different ways of thinking.</p><a class="text-link" href="#/about">DISCOVER VYUHAM <span>↗</span></a></div></div></section>
     <section class="section stream-section" id="streams"><div class="container"><div class="section-head"><div><div class="eyebrow">02 / FOUR SIGNALS</div><h2>FIND YOUR<br><span class="green">FREQUENCY.</span></h2></div><p>Four distinct streams. One shared festival ground.</p></div><div class="stream-grid">${streams.map((s,i)=>`<a class="stream-card stream-card-${i+1} reveal" data-index="${s.index}" href="#/events?stream=${s.id}"><span class="stream-icon">${s.symbol} / STREAM</span><strong>${s.name}</strong><p>${s.desc}</p><span class="stream-go">EXPLORE ↗</span><i class="stream-watermark">${s.index}</i></a>`).join('')}</div></div></section>
@@ -388,16 +388,25 @@
       const previousFocus=document.activeElement;
       const inertTargets=[$('#siteHeader'),$('#siteFooter')].filter(Boolean);
       let introFinished=false;
-      // Lock scroll behind the intro overlay
+      let sequenceStarted=false;
+      let completionTimer;
+      let assetFallbackTimer;
+      let finalFallbackTimer;
+      // Lock scroll and pause the sequence until its visual assets are ready.
       document.documentElement.classList.add('intro-locked');
       document.body.classList.add('intro-locked');
+      document.documentElement.classList.add('intro-sequence-pending');
       inertTargets.forEach(el=>{el.inert=true});
       homeHero?.setAttribute('inert','');
       const finish=()=>{
         if(introFinished)return;
         introFinished=true;
+        clearTimeout(completionTimer);
+        clearTimeout(assetFallbackTimer);
+        clearTimeout(finalFallbackTimer);
         document.documentElement.classList.remove('intro-locked');
         document.body.classList.remove('intro-locked');
+        document.documentElement.classList.remove('intro-sequence-pending');
         intro.remove();
         homeHero?.classList.remove('intro-handoff');
         homeHero?.classList.add('intro-completed');
@@ -407,17 +416,22 @@
         if(previousFocus?.isConnected)previousFocus.focus({preventScroll:true});
       };
       const onKeyDown=event=>{
-        if(event.key==='Escape'||event.key==='Enter'){event.preventDefault();finish();return}
         if(event.key==='Tab'){event.preventDefault();intro.focus({preventScroll:true})}
       };
       document.addEventListener('keydown',onKeyDown);
-      const skipBtn=$('#introSkipBtn');
-      if(skipBtn)skipBtn.addEventListener('click',finish);
-      intro.addEventListener('click',finish);
       intro.focus({preventScroll:true});
-      // The CSS introCinemaOut animation runs at 5s delay + 0.9s duration.
-      // Auto-remove the overlay after the CSS fade-out completes.
-      setTimeout(finish,6200);
+      const startSequence=()=>{
+        if(sequenceStarted||introFinished)return;
+        sequenceStarted=true;
+        document.documentElement.classList.remove('intro-sequence-pending');
+        // CSS introCinemaOut holds for 5s and fades for 0.9s.
+        completionTimer=setTimeout(finish,6200);
+      };
+      const images=[...new Set([...intro.querySelectorAll('img'),...homeHero.querySelectorAll('.stage-main img')])];
+      const imagesReady=Promise.all(images.map(image=>Promise.resolve().then(()=>image.decode?.()).catch(()=>undefined)));
+      assetFallbackTimer=setTimeout(startSequence,4000);
+      imagesReady.then(startSequence);
+      finalFallbackTimer=setTimeout(finish,12500);
     }
     updateHeaderRegistration();
     updateCountdown();
