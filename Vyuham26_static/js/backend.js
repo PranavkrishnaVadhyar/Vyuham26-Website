@@ -3,7 +3,7 @@
   const savedApi = localStorage.getItem('vyuham26:api-url');
   const isLoopbackApi = value => { try { return ['localhost','127.0.0.1','::1'].includes(new URL(value).hostname); } catch { return false; } };
   if (!window.VYUHAM_API_URL && isLoopbackApi(savedApi)) localStorage.removeItem('vyuham26:api-url');
-  const configured = window.VYUHAM_API_URL || (isLoopbackApi(savedApi) ? '' : savedApi) || '';
+  const configured = window.VYUHAM_API_URL || (isLoopbackApi(savedApi) ? '' : savedApi) || 'https://vyuham26-backend.vercel.app';
   const base = String(configured).replace(/\/+$/, '');
   const supabaseUrl = String(window.VYUHAM_SUPABASE_URL || 'https://cnbnhfwvldgskpzfmifj.supabase.co').replace(/\/+$/, '');
   const supabaseKey = window.VYUHAM_SUPABASE_ANON_KEY || 'sb_publishable_S5LSbaNgwMQDbfhS5P7r5w_BXA_dMx3';
