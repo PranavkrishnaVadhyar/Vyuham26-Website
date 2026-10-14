@@ -9,7 +9,7 @@ class Settings(BaseSettings):
     supabase_url: str
     supabase_jwt_secret: str
     supabase_service_role_key: str
-    frontend_origins: str = "http://localhost:5173,http://127.0.0.1:5173,http://localhost:5174,http://127.0.0.1:5174,http://localhost:5500,http://127.0.0.1:5500"
+    frontend_origins: str = "http://localhost:5173,http://127.0.0.1:5173,http://localhost:5174,http://127.0.0.1:5174,http://localhost:5500,http://127.0.0.1:5500,https://vyuham26-website-staged.vercel.app,https://vyuham26-website-static.vercel.app"
     # Hard kill switch for participant registrations and team entry endpoints.
     registration_enabled: bool = True
     reg_open: Optional[bool] = None
