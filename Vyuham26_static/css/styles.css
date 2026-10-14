@@ -81,7 +81,7 @@ html.intro-locked,body.intro-locked{overflow:hidden!important;height:100%!import
 @keyframes introTextIn{to{opacity:1;transform:none}}
 @keyframes introRuleIn{to{transform:scaleX(1)}}
 @keyframes introScan{to{transform:scaleX(1);opacity:0}}
-@keyframes introFlash{20%{opacity:.9}to{opacity:0}}
+@keyframes introFlash{20%{opacity:.36}to{opacity:0}}
 @keyframes introPulse{to{opacity:.55;box-shadow:0 0 4px var(--cyan)}}
 @keyframes introChapterIn{to{opacity:1;transform:none}}
 @keyframes introHeroIn{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
@@ -493,26 +493,27 @@ h1,h2,h3,.brand b,.stream-card strong,.home-event strong,.day-card h3,.stage-bra
 .intro-cinema-chapters span{border-color:#A4221D48;background:#0802029c;color:#A5979F}
 .intro-cinema-flash{background:radial-gradient(circle at center,#FEFEFE 0%,#DE312A 7%,#5C0C0A9c 23%,transparent 62%)}
 
-/* Warm adaptive tones sampled from the cinematic imagery, with restrained copper light. */
-.intro-cinema{background:radial-gradient(ellipse at 50% 44%,#382722 0%,#261b1b 44%,#151214 82%)}
-.intro-cinema-vignette{background:radial-gradient(ellipse at center,transparent 6%,#17101138 40%,#151214ed 100%),linear-gradient(90deg,#15121466,transparent 22%,transparent 78%,#15121466)}
-.intro-scene img{filter:sepia(.18) saturate(.58) contrast(1.04) brightness(.36)}
-.intro-scene::after{background:linear-gradient(90deg,#171011d9 0%,#17101168 52%,#171011c2 100%),linear-gradient(0deg,#151214 0%,transparent 45%,#151214a6 100%),linear-gradient(135deg,#b28a6418,transparent 55%,#d4b48b0a)}
-.intro-scene span{color:#f3ece2}
-.intro-cinema-grid{background:linear-gradient(90deg,transparent 49.9%,#c1a78912 50%,transparent 50.1%),linear-gradient(0deg,transparent 49.9%,#c1a7890a 50%,transparent 50.1%)}
-.intro-cinema::before{background:radial-gradient(circle at center,#b28a6414,transparent 37%),radial-gradient(circle at center,#d4b48b0a,transparent 62%)}
-.intro-cinema::after,.intro-cinema-rule{background:linear-gradient(90deg,transparent,#b28a64,transparent);box-shadow:0 0 8px #b28a6435}
-.intro-cinema-orbit{border-color:#c09b7630}
-.intro-cinema-orbit::before,.intro-cinema-orbit::after{border-color:#d4b48b20}
-.intro-cinema-core img{filter:saturate(.52) brightness(.82) drop-shadow(0 0 10px #b28a6425)}
-.intro-cinema-kicker,.intro-cinema-core p,.intro-cinema-coordinate{color:#c2ae98}
-.intro-cinema-kicker i{background:#b28a64;box-shadow:0 0 6px #b28a6440}
-.intro-cinema-core h1{color:#f3ece2}
-.intro-cinema-core h1 b{color:#d4b48b}
-.intro-cinema-chapters span{border-color:#b28a6440;background:#171011b8;color:#c2ae98}
-.intro-cinema-flash{background:radial-gradient(circle at center,#f3ece2 0%,#d4b48b 6%,#b28a6435 22%,transparent 60%)}
-@keyframes introPulse{to{opacity:.6;box-shadow:0 0 3px #b28a6440}}
-@keyframes introFlash{20%{opacity:.24}to{opacity:0}}
+/* Dark charcoal intro with restrained blue accents. */
+.intro-cinema{background:radial-gradient(ellipse at 50% 45%,#172027 0%,#0c1117 43%,#07090c 78%)}
+.intro-cinema-vignette{background:radial-gradient(ellipse at center,transparent 6%,#07090c50 40%,#07090cf2 100%),linear-gradient(90deg,#07090c8c,transparent 22%,transparent 78%,#07090c8c)}
+.intro-scene img{filter:saturate(.55) contrast(1.08) brightness(.36)}
+.intro-scene::after{background:linear-gradient(90deg,#080c11d9 0%,#080c1162 52%,#080c11bb 100%),linear-gradient(0deg,#080c11 0%,transparent 45%,#080c11a6 100%),linear-gradient(135deg,#203b5040,transparent 55%,#7cb4d818)}
+.intro-scene span{color:#d6d3e0}
+.intro-cinema-grid{background:linear-gradient(90deg,transparent 49.9%,#9fb5c40a 50%,transparent 50.1%),linear-gradient(0deg,transparent 49.9%,#9fb5c407 50%,transparent 50.1%)}
+.intro-cinema::before{background:radial-gradient(circle at center,#203b5018,transparent 37%),radial-gradient(circle at center,#7cb4d809,transparent 62%)}
+.intro-cinema::after,.intro-cinema-rule{background:linear-gradient(90deg,transparent,#52758a,transparent);box-shadow:0 0 8px #52758a28}
+.intro-cinema-orbit{border-color:#7cb4d81c}
+.intro-cinema-orbit::before,.intro-cinema-orbit::after{border-color:#4f7f9b1b}
+.intro-cinema-core img{filter:drop-shadow(0 0 12px #52758a28)}
+.intro-cinema-kicker,.intro-cinema-core p,.intro-cinema-coordinate{color:#aaa8b8}
+.intro-cinema-kicker i{background:#66869a;box-shadow:0 0 7px #66869a38}
+.intro-cinema-core h1{color:#f1eff8}
+.intro-cinema-core h1{font-family:'Barlow Condensed','Arial Narrow',sans-serif!important;font-weight:600;letter-spacing:-.035em}
+.intro-cinema-core h1 b{color:#DE312A}
+.intro-cinema-chapters span{border-color:#7cb4d844;background:#080c119c;color:#c3d0da}
+.intro-cinema-flash{background:radial-gradient(circle at center,#f1eff8 0%,#66869a 7%,#1720278c 23%,transparent 62%)}
+@keyframes introPulse{to{opacity:.6;box-shadow:0 0 4px #7CB4D870}}
+@keyframes introFlash{20%{opacity:.36}to{opacity:0}}
 
 /* Stream cards use individual art with a quiet branded emblem badge. */
 .stream-card,.stream-card:nth-child(n){background:transparent}
@@ -523,3 +524,38 @@ h1,h2,h3,.brand b,.stream-card strong,.home-event strong,.day-card h3,.stage-bra
 .stream-emblem{position:absolute;z-index:2;top:16px;right:16px;width:35px;height:35px;padding:7px;object-fit:contain;border:1px solid #ffffff24;border-radius:50%;background:#111214b8;box-shadow:0 4px 16px #0006;opacity:.86;transition:opacity .25s,transform .25s,border-color .25s}
 .stream-card:hover .stream-emblem{opacity:1;transform:scale(1.06);border-color:#DE312A80}
 @media(max-width:700px){.stream-emblem{top:12px;right:12px;width:31px;height:31px;padding:6px}.stream-art{opacity:.68}}
+
+/* Individual cinematic artwork for the three festival days. */
+.day-card{isolation:isolate;background:#111216;}
+.day-card::before,.day-card::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:-1}
+.day-card::before{background-position:center 40%;background-size:cover;opacity:.88;transition:transform .5s,opacity .35s}
+.day-card::after{background:linear-gradient(90deg,#101114b8 0%,#1011148c 52%,#10111442 100%),linear-gradient(0deg,#101114d9 0%,#10111475 38%,#10111412 100%)}
+.day-card-1::before{background-image:url("../assets/schedule/ignition.jpg")}
+.day-card-2::before{background-image:url("../assets/schedule/convergence.jpg")}
+.day-card-3::before{background-image:url("../assets/schedule/aftershock.jpg")}
+.day-card:hover::before{opacity:1;transform:scale(1.04)}
+.day-card>*{position:relative;z-index:1}
+.day-card .day-ghost{z-index:0}
+
+/* Convergence artwork adds depth to the festival identity card without competing with its copy. */
+.intro-mark{background-image:linear-gradient(90deg,#171719d9 0%,#171719a8 48%,#17171955 100%),linear-gradient(0deg,#171719c9 0%,transparent 76%),url("../assets/about/festival-convergence.jpg");background-position:center;background-size:cover}
+.intro-mark img{opacity:0;transform:translateY(10px) scale(.96);transition:opacity .65s .16s var(--ease),transform .65s .16s var(--ease)}
+.intro-mark.visible img{opacity:1;transform:none}
+.stream-grid .reveal:nth-child(2),.home-event-grid .reveal:nth-child(2),.schedule-preview .reveal:nth-child(2){transition-delay:.1s}
+.stream-grid .reveal:nth-child(3),.home-event-grid .reveal:nth-child(3),.schedule-preview .reveal:nth-child(3){transition-delay:.2s}
+.stream-grid .reveal:nth-child(4),.home-event-grid .reveal:nth-child(4){transition-delay:.3s}
+
+/* Clearer event-card typography and prize/fee hierarchy. */
+.events-grid .event-content h3{font-family:'Barlow Condensed','Arial Narrow',sans-serif!important;font-size:23px;line-height:1.12;font-weight:600;letter-spacing:-.015em;margin:14px 0 8px}
+.events-grid .event-card .event-art b{font-family:'Barlow Condensed','Arial Narrow',sans-serif!important;font-size:19px;font-weight:600;letter-spacing:0}
+.events-grid .event-content>p{font-size:12px;line-height:1.6;min-height:54px}
+.events-grid .event-meta{gap:10px;border-color:#c58b7338;padding-top:13px;font-size:9px;letter-spacing:.04em}
+.events-grid .event-meta span{gap:5px;min-width:110px;padding:9px 11px;border:1px solid #c58b7326;border-radius:7px;background:#c58b730b}
+.events-grid .event-meta span{color:#d3a184;font-size:8px;font-weight:700;letter-spacing:.1em}
+.events-grid .event-meta strong{color:#f1eee9;font-size:13px;line-height:1.3;font-weight:700;letter-spacing:-.015em}
+@media(max-width:380px){.events-grid .event-meta span{min-width:0;flex:1}.events-grid .event-meta strong{font-size:12px}}
+
+/* Event dossier hero uses the same event image as its listing card, cropped responsively. */
+.event-page-hero{display:flex;align-items:flex-end;min-height:clamp(340px,38vw,560px);padding-top:96px;padding-bottom:clamp(48px,7vw,90px);background-color:#111214;background-image:linear-gradient(90deg,#111214e8 0%,#111214a8 44%,#11121430 100%),linear-gradient(0deg,#111214e0 0%,#11121455 42%,#11121410 100%),var(--event-hero-image);background-position:center 45%;background-size:cover;background-repeat:no-repeat}
+.event-page-hero .container{width:100%}
+@media(max-width:700px){.event-page-hero{min-height:360px;padding-top:68px;padding-bottom:48px;background-position:center}}

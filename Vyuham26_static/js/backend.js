@@ -1,8 +1,9 @@
 (() => {
   'use strict';
   const savedApi = localStorage.getItem('vyuham26:api-url');
-  const legacyLocalApi = savedApi === 'http://127.0.0.1:8000' || savedApi === 'http://localhost:8000';
-  const configured = window.VYUHAM_API_URL || (legacyLocalApi ? null : savedApi) || 'http://127.0.0.1:8001';
+  const isLoopbackApi = value => { try { return ['localhost','127.0.0.1','::1'].includes(new URL(value).hostname); } catch { return false; } };
+  if (!window.VYUHAM_API_URL && isLoopbackApi(savedApi)) localStorage.removeItem('vyuham26:api-url');
+  const configured = window.VYUHAM_API_URL || (isLoopbackApi(savedApi) ? '' : savedApi) || '';
   const base = String(configured).replace(/\/+$/, '');
   const supabaseUrl = String(window.VYUHAM_SUPABASE_URL || 'https://cnbnhfwvldgskpzfmifj.supabase.co').replace(/\/+$/, '');
   const supabaseKey = window.VYUHAM_SUPABASE_ANON_KEY || 'sb_publishable_S5LSbaNgwMQDbfhS5P7r5w_BXA_dMx3';
@@ -22,6 +23,7 @@
     saveSession(renewed); return renewed;
   };
   const request = async (path, options = {}, retry = true) => {
+    if (!base) throw new Error('This static site is using bundled data; live services are not configured.');
     const session = getSession();
     const headers = { ...(options.body ? { 'Content-Type': 'application/json' } : {}), ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}), ...(options.headers || {}) };
     const response = await fetch(`${base}${path}`, {
@@ -49,6 +51,7 @@
     async signUp(details) { const session = await supabaseRequest('signup', { email: details.email.trim().toLowerCase(), password: details.password, data: { name: details.name, college: details.college || '', phone: details.phone || '' } }); if (session.access_token) saveSession(session); return session; },
     async signOut() { const session = getSession(); try { if (session?.access_token) await fetch(`${supabaseUrl}/auth/v1/logout`, { method: 'POST', headers: { apikey: supabaseKey, Authorization: `Bearer ${session.access_token}` } }); } catch {} finally { saveSession(null); } },
     async status() {
+      if (!base) return { online: false, configured: false, error: new Error('Static mode: showing bundled public data; live services are not configured.') };
       try {
         await request('/health');
         const [gateResult, eventsResult, announcementsResult] = await Promise.allSettled([
