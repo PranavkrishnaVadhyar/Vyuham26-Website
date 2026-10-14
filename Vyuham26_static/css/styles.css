@@ -607,6 +607,62 @@ h1,h2,h3,.brand b,.stream-card strong,.home-event strong,.day-card h3,.stage-bra
 .stream-feature-index{color:#f07a5d}
 @media(max-width:700px){.stream-page-grid .stream-feature{background-position:center,center,58% center}}
 
+/* Festival schedule: image-led day navigation and clearer event hierarchy. */
+.schedule-days{gap:10px;grid-template-columns:repeat(3,minmax(0,1fr));border:0;margin:0 0 42px}
+.schedule-days .schedule-day{position:relative;isolation:isolate;display:flex;min-height:158px;flex-direction:column;align-items:flex-start;justify-content:flex-end;gap:7px;overflow:hidden;padding:20px 22px;border:1px solid #ffffff20;border-radius:5px;background-color:#120909;color:var(--text);background-size:cover;background-position:center 43%;text-align:left;transition:transform .25s ease,border-color .25s ease,box-shadow .25s ease}
+.schedule-days .schedule-day::before{content:"";position:absolute;z-index:-1;inset:0;background:linear-gradient(0deg,#090606f2 0%,#090606a8 48%,#09060635 100%);transition:background .25s ease}
+.schedule-days .schedule-day::after{content:"";position:absolute;z-index:-1;inset:auto 0 0;height:3px;background:#de312a;transform:scaleX(0);transform-origin:left;transition:transform .25s ease}
+.schedule-days .schedule-day-1{background-image:url("../assets/schedule/ignition.jpg")!important}
+.schedule-days .schedule-day-2{background-image:url("../assets/schedule/convergence.jpg")!important}
+.schedule-days .schedule-day-3{background-image:url("../assets/schedule/aftershock.jpg")!important}
+.schedule-days .schedule-day:hover,.schedule-days .schedule-day.active{transform:translateY(-2px);border-color:#de312a88;box-shadow:0 12px 30px #0005}
+.schedule-days .schedule-day.active::before{background:linear-gradient(0deg,#090606f5 0%,#0906069c 52%,#09060625 100%)}
+.schedule-days .schedule-day.active::after{transform:scaleX(1)}
+.schedule-days .schedule-day b{font:12px var(--mono);letter-spacing:.08em;color:#ff584c}
+.schedule-days .schedule-day b i{font-style:normal;color:#e2d4d1}
+.schedule-days .schedule-day span{margin:0;font:clamp(24px,2.5vw,34px)/1.05 var(--display);letter-spacing:-.025em}
+.schedule-days .schedule-day small{max-width:48ch;color:#ded0cf;font:14px/1.5 var(--sans)}
+.schedule-days .schedule-day em{position:absolute;top:18px;right:19px;color:#f0786f;font:11px var(--mono);font-style:normal;letter-spacing:.06em;opacity:0;transform:translateY(4px);transition:opacity .2s ease,transform .2s ease}
+.schedule-days .schedule-day em strong{font-size:14px}
+.schedule-days .schedule-day:hover em,.schedule-days .schedule-day.active em{opacity:1;transform:none}
+.schedule-heading{display:flex;align-items:flex-end;justify-content:space-between;gap:30px;margin:0 0 21px;padding-bottom:20px;border-bottom:1px solid var(--line)}
+.schedule-heading .eyebrow{margin-bottom:8px}
+.schedule-heading h2{margin:0;font:clamp(30px,4vw,43px)/1 var(--display);letter-spacing:-.035em}
+.schedule-heading>p{max-width:520px;margin:0;color:var(--muted);font-size:17px;line-height:1.65}
+.schedule-list{border-top:1px solid var(--line)}
+.schedule-row{grid-template-columns:170px minmax(0,1fr) minmax(195px,260px);gap:30px;min-height:128px;padding:25px 20px;transition:background .2s ease}
+.schedule-row:hover{background:linear-gradient(90deg,#de312a0a,transparent 70%)}
+.schedule-time{display:flex;flex-direction:column;gap:7px}
+.schedule-time>span{color:#b3a5a7;font:12px var(--mono);letter-spacing:.08em}
+.schedule-row time{font:16px/1.55 var(--mono);color:#ff8178}
+.schedule-stream,.schedule-row .venue>span{display:block;margin-bottom:7px;color:#f0786f;font:12px var(--mono);letter-spacing:.08em;text-transform:uppercase}
+.schedule-row h3{margin:0 0 8px;font:27px/1.2 var(--display);letter-spacing:-.015em}
+.schedule-row .schedule-event h3 a{text-decoration:none}
+.schedule-row .schedule-event h3 a:hover{color:#ff7268}
+.schedule-row .schedule-event p{max-width:75ch;font-size:16px;line-height:1.65}
+.schedule-row .venue{align-self:center;text-align:left}
+.schedule-row .venue b{display:block;color:#e0d7d8;font-size:15px;font-weight:500;line-height:1.6}
+@media(max-width:700px){
+ .schedule-days{grid-template-columns:repeat(3,minmax(235px,78vw));gap:9px;margin:0 -18px 32px;padding:0 18px 5px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:thin;scrollbar-color:#69302d transparent}
+ .schedule-days .schedule-day{min-height:138px;padding:17px 16px;scroll-snap-align:start}
+ .schedule-days .schedule-day span{font-size:26px}
+ .schedule-days .schedule-day small{font-size:13px}
+ .schedule-days .schedule-day b{font-size:11px}
+ .schedule-days .schedule-day em{top:15px;right:15px;opacity:1;transform:none;font-size:9px}
+ .schedule-heading{align-items:flex-start;flex-direction:column;gap:10px;margin-bottom:9px;padding-bottom:15px}
+ .schedule-heading h2{font-size:32px}
+ .schedule-heading>p{font-size:15px}
+ .schedule-row{grid-template-columns:1fr 1fr;gap:11px 14px;padding:18px 8px}
+ .schedule-time{grid-column:1;grid-row:1;gap:3px}
+ .schedule-row time{font-size:13px}
+ .schedule-event{grid-column:1/-1;grid-row:2}
+ .schedule-row h3{font-size:22px}
+ .schedule-row .schedule-event p{font-size:14px}
+ .schedule-row .venue{grid-column:2;grid-row:1;align-self:center;text-align:right}
+ .schedule-row .venue>span{font-size:10px}
+ .schedule-row .venue b{font-size:12px}
+}
+
 /* Keep the terminal welcome clean and place the VYUHAM mark behind its output. */
 .terminal-window{position:relative;isolation:isolate}
 .terminal-watermark{position:absolute;z-index:0;top:52%;left:50%;width:min(38%,340px);height:auto;max-height:48%;object-fit:contain;transform:translate(-50%,-50%);opacity:.065;filter:drop-shadow(0 0 22px #ff40551a);pointer-events:none;user-select:none}
