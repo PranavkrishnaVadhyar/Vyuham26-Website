@@ -559,3 +559,53 @@ h1,h2,h3,.brand b,.stream-card strong,.home-event strong,.day-card h3,.stage-bra
 .event-page-hero{display:flex;align-items:flex-end;min-height:clamp(340px,38vw,560px);padding-top:96px;padding-bottom:clamp(48px,7vw,90px);background-color:#111214;background-image:linear-gradient(90deg,#111214e8 0%,#111214a8 44%,#11121430 100%),linear-gradient(0deg,#111214e0 0%,#11121455 42%,#11121410 100%),var(--event-hero-image);background-position:center 45%;background-size:cover;background-repeat:no-repeat}
 .event-page-hero .container{width:100%}
 @media(max-width:700px){.event-page-hero{min-height:360px;padding-top:68px;padding-bottom:48px;background-position:center}}
+
+/* Three-day schedule hero artwork with a protected title area and emblem. */
+.schedule-page-hero{position:relative;isolation:isolate;overflow:hidden;min-height:clamp(430px,42vw,640px);display:flex;align-items:center;background-color:#111214;background-image:linear-gradient(90deg,#111214ed 0%,#111214c9 40%,#11121466 76%,#11121462 100%),linear-gradient(0deg,#111214d9 0%,#11121435 52%,transparent 100%),url("../assets/schedule/schedule-hero.jpg");background-size:cover;background-position:center;background-repeat:no-repeat}
+.schedule-page-hero .container{position:relative;z-index:1;width:100%;padding-right:110px}
+.schedule-hero-logo{position:absolute;z-index:2;top:clamp(22px,4vw,54px);left:max(24px,calc((100vw - var(--max))/2));width:clamp(54px,6vw,76px);height:clamp(54px,6vw,76px);padding:0;object-fit:contain;border:0;border-radius:0;background:transparent;box-shadow:none;backdrop-filter:none}
+@media(max-width:700px){.schedule-page-hero{min-height:480px;background-position:58% center}.schedule-page-hero .container{padding-right:0}.schedule-hero-logo{top:18px;left:18px;width:54px;height:54px;padding:0}.schedule-page-hero .breadcrumb{padding-left:65px}.schedule-page-hero h1{max-width:calc(100% - 20px)}}
+
+/* Campus-led location hero that crops the venue photo responsively. */
+.venue-page-hero{position:relative;isolation:isolate;overflow:hidden;min-height:clamp(430px,42vw,640px);display:flex;align-items:center;background-color:#111214;background-image:linear-gradient(90deg,#111214ed 0%,#111214c9 40%,#11121466 76%,#11121462 100%),linear-gradient(0deg,#111214d9 0%,#11121435 52%,transparent 100%),url("../assets/venue-campus-enhanced.jpg");background-size:cover;background-position:center 52%;background-repeat:no-repeat}
+.venue-page-hero .container{position:relative;z-index:1;width:100%;padding-right:110px}
+.venue-hero-logo{position:absolute;z-index:2;top:clamp(22px,4vw,54px);left:max(24px,calc((100vw - var(--max))/2));width:clamp(54px,6vw,76px);height:clamp(54px,6vw,76px);padding:0;object-fit:contain}
+@media(max-width:700px){.venue-page-hero{min-height:480px;background-position:59% center}.venue-page-hero .container{padding-right:0}.venue-hero-logo{top:18px;left:18px;width:54px;height:54px}.venue-page-hero .breadcrumb{padding-left:65px}.venue-page-hero h1{max-width:calc(100% - 20px)}}
+
+/* Page-specific hero artwork for archive, participation, competitions and streams. */
+.page-hero.events-page-hero,.page-hero.participation-page-hero,.page-hero.competitions-page-hero,.page-hero.streams-page-hero{position:relative;isolation:isolate;overflow:hidden;min-height:clamp(430px,42vw,600px);display:flex;align-items:center;padding-top:95px;padding-bottom:76px;background-color:#100909;background-size:cover;background-repeat:no-repeat;border-bottom-color:#b86b5238}
+.page-hero.events-page-hero{background-image:linear-gradient(90deg,#100909f5 0%,#100909e8 35%,#1009099c 66%,#10090960 100%),linear-gradient(0deg,#100909dc 0%,#10090926 64%,#10090940 100%),url("../assets/events-archive-hero.jpg");background-position:center,center,66% 54%}
+.page-hero.participation-page-hero{background-image:linear-gradient(90deg,#100909f5 0%,#100909e8 36%,#100909a0 68%,#10090962 100%),linear-gradient(0deg,#100909e0 0%,#10090925 64%,#10090940 100%),url("../assets/participation-hero.jpg");background-position:center,center,64% 55%}
+.page-hero.competitions-page-hero{background-image:linear-gradient(90deg,#100909f5 0%,#100909e8 36%,#10090998 66%,#1009095e 100%),linear-gradient(0deg,#100909e0 0%,#10090925 64%,#10090940 100%),url("../assets/competition-hero.jpg");background-position:center,center,67% 55%}
+.page-hero.streams-page-hero{background-image:linear-gradient(90deg,#100909f5 0%,#100909e8 38%,#100909a0 68%,#10090966 100%),linear-gradient(0deg,#100909e0 0%,#10090925 64%,#10090940 100%),url("../assets/streams-hero.jpg");background-position:center,center,68% 54%}
+.page-hero.events-page-hero .container,.page-hero.participation-page-hero .container,.page-hero.competitions-page-hero .container,.page-hero.streams-page-hero .container{position:relative;z-index:1;width:100%}
+@media(max-width:700px){.page-hero.events-page-hero,.page-hero.participation-page-hero,.page-hero.competitions-page-hero,.page-hero.streams-page-hero{min-height:460px;padding-top:65px;padding-bottom:52px}.page-hero.events-page-hero{background-position:center,center,70% center}.page-hero.participation-page-hero{background-position:center,center,65% center}.page-hero.competitions-page-hero{background-position:center,center,67% center}.page-hero.streams-page-hero{background-position:center,center,70% center}}
+
+/* Venue cards pair the university's official mark with practical wayfinding symbols. */
+.venue-info-card{position:relative;overflow:hidden;min-height:258px;padding:25px 24px;background:linear-gradient(145deg,#201412,#120e0e);border-color:#70402f66}
+.venue-info-card::after{content:"";position:absolute;inset:auto -35px -70px auto;width:180px;height:180px;border-radius:50%;background:radial-gradient(circle,#b46a3a17,transparent 70%);pointer-events:none}
+.venue-info-card>.num{position:relative;z-index:1;display:block}
+.venue-card-mark{position:absolute;top:19px;right:20px;width:58px;height:58px;display:grid;place-items:center;border:1px solid #c58b7340;border-radius:16px;background:linear-gradient(145deg,#c58b7318,#241412);color:#d9a27f;font:700 12px var(--mono);letter-spacing:.08em}
+.venue-card-mark svg{width:34px;height:34px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.venue-help-mark{color:#d9a27f;background:linear-gradient(145deg,#9d55401c,#211313)}
+.venue-duk-logo-frame{width:min(100%,330px);height:100px;margin:22px 0 16px;padding:10px 16px;display:flex;align-items:center;justify-content:center;border:1px solid #e7e1d64a;border-radius:9px;background:#f1efe8;box-shadow:0 8px 24px #0003}
+.venue-duk-logo{display:block;width:100%;height:100%;object-fit:contain}
+.venue-campus-card h3{margin:0 0 10px;padding-right:55px}
+.venue-info-card:not(.venue-campus-card) h3{margin:48px 0 12px;padding-right:55px}
+.venue-info-card p{position:relative;z-index:1;line-height:1.75}
+.venue-info-card>.text-link{position:relative;z-index:1;display:inline-block;margin-top:8px}
+@media(max-width:700px){.venue-info-card{min-height:0}.venue-duk-logo-frame{width:min(100%,330px);height:92px}.venue-info-card:not(.venue-campus-card) h3{margin-top:45px}}
+
+/* Use each stream's own artwork while keeping titles and links legible. */
+.stream-page-grid .stream-feature,.stream-page-grid .stream-feature:nth-child(n){position:relative;isolation:isolate;overflow:hidden;background-color:#120909!important;background-image:linear-gradient(90deg,#100909dc 0%,#1009098c 45%,#10090928 100%),linear-gradient(0deg,#100909d4 0%,#10090912 72%),var(--stream-feature-image);background-size:cover;background-position:center;background-repeat:no-repeat;transition:background-size .55s ease}
+.stream-feature>*{position:relative;z-index:1}
+.stream-feature:hover,.stream-feature:focus-within{background-size:cover,cover,106% auto}
+.stream-feature-index{color:#f07a5d}
+@media(max-width:700px){.stream-page-grid .stream-feature,.stream-page-grid .stream-feature:nth-child(n){background-image:linear-gradient(90deg,#100909df 0%,#100909a0 55%,#10090946 100%),linear-gradient(0deg,#100909e0 0%,#10090910 74%),var(--stream-feature-image);background-position:center,center,58% center}}
+
+/* Keep the terminal welcome clean and place the VYUHAM mark behind its output. */
+.terminal-window{position:relative;isolation:isolate}
+.terminal-watermark{position:absolute;z-index:0;top:52%;left:50%;width:min(38%,340px);height:auto;max-height:48%;object-fit:contain;transform:translate(-50%,-50%);opacity:.065;filter:drop-shadow(0 0 22px #ff40551a);pointer-events:none;user-select:none}
+.terminal-header,.terminal-history,.terminal-prompt{position:relative;z-index:1}
+.terminal-line.ascii{display:none}
+@media(max-width:700px){.terminal-watermark{width:min(54%,260px);opacity:.055}}
