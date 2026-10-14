@@ -216,3 +216,16 @@ h1,h2,h3{letter-spacing:-.02em}
 .stage-shade{background:linear-gradient(90deg,#080711a8 0%,#08071142 44%,transparent 78%),linear-gradient(0deg,#090811a8,transparent 52%),linear-gradient(145deg,#60266226,transparent 55%,#e5092018);mix-blend-mode:normal}
 .stage-brand{left:6%;top:10%;font-size:clamp(30px,4.2vw,64px);color:#fff;text-shadow:0 3px 26px #000,0 0 18px #090711}
 .stage-brand sup{font-size:.24em;color:var(--brand-red);vertical-align:top;margin-left:.08em}
+
+/* Hero artwork and responsive title treatment */
+.stage-main img{filter:saturate(.94) contrast(1.06) brightness(.9)}
+.stage-shade{background:linear-gradient(90deg,#080711a8 0%,#08071165 37%,#08071110 72%),linear-gradient(0deg,#090811a8,transparent 50%),linear-gradient(145deg,#60266220,transparent 55%,#e5092010);mix-blend-mode:normal}
+.stage-brand{left:6%;top:11%;max-width:48%;font-size:clamp(25px,4.1vw,62px);letter-spacing:-.055em;line-height:.9;color:#fff;text-shadow:0 3px 26px #000,0 0 18px #090711;white-space:nowrap}
+.stage-brand sup{font-size:.28em;color:var(--brand-red,var(--red));letter-spacing:.01em;vertical-align:top;margin-left:.08em;text-shadow:0 0 14px #e5092070}
+@media(max-width:700px){.stage-brand{left:5%;top:9%;max-width:72%;font-size:clamp(21px,7vw,40px)}}
+
+.stage-brand{display:flex;align-items:center;gap:.16em}
+.stage-brand img{width:.48em;height:.48em;object-fit:contain;filter:none;flex:none}
+.stage-brand span{font:inherit}
+.stage-brand sup{font-size:.28em}
+@media(max-width:700px){.stage-brand img{width:.52em;height:.52em}}
