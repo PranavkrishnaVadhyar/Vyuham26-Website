@@ -1,6 +1,8 @@
 (() => {
   'use strict';
-  const configured = window.VYUHAM_API_URL || localStorage.getItem('vyuham26:api-url') || 'http://127.0.0.1:8000';
+  const savedApi = localStorage.getItem('vyuham26:api-url');
+  const legacyLocalApi = savedApi === 'http://127.0.0.1:8000' || savedApi === 'http://localhost:8000';
+  const configured = window.VYUHAM_API_URL || (legacyLocalApi ? null : savedApi) || 'http://127.0.0.1:8001';
   const base = String(configured).replace(/\/+$/, '');
   const supabaseUrl = String(window.VYUHAM_SUPABASE_URL || 'https://cnbnhfwvldgskpzfmifj.supabase.co').replace(/\/+$/, '');
   const supabaseKey = window.VYUHAM_SUPABASE_ANON_KEY || 'sb_publishable_S5LSbaNgwMQDbfhS5P7r5w_BXA_dMx3';
