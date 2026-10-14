@@ -32,10 +32,10 @@
     {day:3,name:'AFTERSHOCK',date:'01 NOV 2026',dateLong:'Sunday · November 1, 2026',desc:'The final wave. Grand finales, showcases, celebrations and the closing moments of VYUHAM’26.'}
   ];
   const streams = [
-    {id:'tech',name:'Technology',symbol:'01',desc:'Hackathons, cybersecurity, AI and hands-on invention. Build what comes next.',index:'01',image:'assets/streams/technology.webp'},
-    {id:'cultural',name:'Culture',symbol:'02',desc:'Performance, art, film and live experiences made to be shared.',index:'02',image:'assets/streams/culture.webp'},
-    {id:'esports',name:'Gaming / Esports',symbol:'03',desc:'Step into competitive arenas across Valorant, BGMI and E-Football.',index:'03',image:'assets/streams/gaming.webp'},
-    {id:'management',name:'Impact / Management',symbol:'04',desc:'Leadership, enterprise and strategy shaped by real-world challenges.',index:'04',image:'assets/streams/management.webp'}
+    {id:'tech',name:'Technology',symbol:'01',desc:'Hackathons, cybersecurity, AI and hands-on invention. Build what comes next.',index:'01',image:'assets/streams/technology.jpg'},
+    {id:'cultural',name:'Culture',symbol:'02',desc:'Performance, art, film and live experiences made to be shared.',index:'02',image:'assets/streams/culture.jpg'},
+    {id:'esports',name:'Gaming / Esports',symbol:'03',desc:'Step into competitive arenas across Valorant, BGMI and E-Football.',index:'03',image:'assets/streams/gaming.jpg'},
+    {id:'management',name:'Impact / Management',symbol:'04',desc:'Leadership, enterprise and strategy shaped by real-world challenges.',index:'04',image:'assets/streams/management.jpg'}
   ];
   const esc = (v='') => String(v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const safeExternalUrl = value => { try { const url = new URL(value); return ['https:', 'http:'].includes(url.protocol) ? url.href : ''; } catch { return ''; } };
