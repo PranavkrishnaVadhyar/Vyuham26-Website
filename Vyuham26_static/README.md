@@ -10,7 +10,7 @@ The HTML client is connected to the FastAPI routes for `/auth`, `/events`, `/eve
 
 ## Included
 
-- Responsive redesigned homepage, event archive and detail dossiers, four festival streams, three-day schedule, about, venue, sponsors, contact, FAQ, and participant account shells.
+- Responsive redesigned homepage, event archive and detail dossiers, four festival streams, three-day schedule, about, venue, contact, FAQ, and participant account shells.
 - Bundled event records as an offline fallback, live event loading, search, category filters, working detail routes, backend registration status, schedule selectors, mobile navigation, FAQ controls, and countdown.
 - Live organizer announcements, contact inquiry submission, and festival feedback submission through the FastAPI backend.
 - Supabase participant sign-up/sign-in, bearer-token API requests, profile sync, account dashboard, and sign-out.
