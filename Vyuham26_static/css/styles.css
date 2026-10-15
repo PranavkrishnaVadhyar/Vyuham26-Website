@@ -609,18 +609,23 @@ h1,h2,h3,.brand b,.stream-card strong,.home-event strong,.day-card h3,.stage-bra
 .venue-team-section .section-head{margin-bottom:24px}
 .venue-team-section .section-head>p{max-width:340px;color:#b7a6a8;font-size:14px}
 .team-carousel{position:relative;width:100%;max-width:1120px;margin:0 auto}
-.team-carousel-stage{position:relative;height:560px;overflow:hidden;perspective:1300px;perspective-origin:50% 44%;touch-action:pan-y;user-select:none;outline:none}
+.team-carousel-stage{position:relative;height:580px;overflow:hidden;perspective:1450px;perspective-origin:50% 44%;touch-action:pan-y;user-select:none;outline:none}
 .team-carousel-stage:focus-visible{outline:1px solid #ff30387a;outline-offset:3px}
-.team-slide{position:absolute;top:22px;left:50%;width:clamp(250px,27vw,340px);height:490px;padding:12px;display:flex;flex-direction:column;align-items:stretch;text-align:left;color:#f5f5f7;border:1px solid #ff303830;border-radius:10px;background:linear-gradient(155deg,#241316,#1a1012 58%,#130d0f);box-shadow:0 20px 54px #0008;transform:translate3d(calc(-50% + var(--slide-x,0px)),0,var(--slide-z,0px)) rotateY(var(--slide-rotate,0deg)) scale(var(--slide-scale,1));transform-style:preserve-3d;transform-origin:center center;transition:transform .72s cubic-bezier(.2,.78,.2,1),opacity .55s ease,filter .55s ease,box-shadow .55s ease,border-color .55s ease;cursor:pointer;opacity:.48;filter:brightness(.67) saturate(.8)}
+.team-slide{position:absolute;top:18px;left:50%;width:clamp(260px,29vw,350px);height:510px;padding:14px;display:flex;flex-direction:column;align-items:stretch;text-align:center;color:#f5f5f7;border:1px solid #ff303833;border-radius:14px;background:linear-gradient(155deg,#241316eF,#1a1012f7 58%,#130d0ff5);box-shadow:0 20px 54px #0008;transform:translate3d(calc(-50% + var(--slide-x,0px)),0,var(--slide-z,0px)) rotateY(var(--slide-rotate,0deg)) scale(var(--slide-scale,1));transform-style:preserve-3d;transform-origin:center center;transition:transform .72s cubic-bezier(.2,.78,.2,1),opacity .55s ease,filter .55s ease,box-shadow .55s ease,border-color .55s ease;cursor:pointer;opacity:.6;filter:brightness(.72) saturate(.82)}
 .team-slide[data-position="active"]{opacity:1;filter:none;border-color:#ff3038a6;box-shadow:0 0 0 1px #ff30381c,0 22px 72px #000a,0 0 34px #ff30381c;cursor:default}
 .team-slide[data-position="hidden"]{opacity:0;filter:brightness(.5);pointer-events:none}
-.team-slide-index{display:block;margin:0 0 10px;color:#b7a6a8;font:9px var(--mono);letter-spacing:.14em}
-.team-photo-frame{display:block;width:100%;height:374px;overflow:hidden;border-radius:6px;background:#261a1c}
-.team-photo-frame img{display:block;width:100%;height:100%;object-fit:cover;object-position:center 22%;transition:transform .8s ease,filter .6s ease;filter:brightness(.9)}
-.team-slide[data-position="active"] .team-photo-frame img{filter:brightness(1.04);transform:scale(1.015)}
-.team-slide-caption{display:flex;min-height:76px;padding:15px 4px 6px;flex-direction:column;justify-content:center;gap:5px}
-.team-slide-caption strong{display:block;color:#f5f5f7;font:700 clamp(19px,2vw,24px)/1.12 'Manrope',sans-serif;letter-spacing:-.035em}
-.team-slide-caption small{color:#ff454d;font:10px var(--mono);letter-spacing:.14em;text-transform:uppercase}
+.team-slide-index{display:block;margin:0 0 8px;color:#b7a6a8;font:10px var(--mono);letter-spacing:.14em}
+.team-photo-frame{position:relative;isolation:isolate;display:grid;width:100%;height:350px;overflow:hidden;place-items:center;border-radius:9px;background:radial-gradient(ellipse at 50% 78%,#a8152029,transparent 59%),linear-gradient(180deg,#ffffff04,#00000012)}
+.team-photo-frame img{position:relative;z-index:1;display:block;width:100%;height:100%;object-fit:contain;object-position:center bottom;transition:transform .55s ease,filter .45s ease;filter:brightness(.88) drop-shadow(0 12px 18px #0007)}
+.team-photo-frame.is-photo-full{background:#f2f1ef}
+.team-photo-frame.is-photo-full img{object-fit:cover;object-position:center 24%;filter:brightness(.92)}
+.team-slide[data-position="active"] .team-photo-frame img{filter:brightness(1.04) drop-shadow(0 14px 22px #0008);transform:scale(1.025)}
+.team-slide[data-position="active"] .team-photo-frame.is-photo-full img{filter:brightness(1.02);transform:scale(1.015)}
+.team-slide-caption{display:flex;min-height:100px;padding:11px 5px 2px;flex-direction:column;justify-content:center;align-items:center;gap:5px}
+.team-slide-caption strong{display:block;max-width:100%;color:#f5f5f7;font:700 clamp(19px,2vw,24px)/1.15 'Manrope',sans-serif;letter-spacing:-.035em;text-wrap:balance}
+.team-slide-caption small{font:10px var(--mono);letter-spacing:.12em;text-transform:uppercase}
+.team-slide-caption .team-slide-role{color:#ff5960;font-size:11px;letter-spacing:.14em}
+.team-slide-caption .team-slide-course{color:#b7a6a8;letter-spacing:.1em}
 .team-carousel-controls{position:relative;z-index:12;display:flex;align-items:center;justify-content:center;gap:24px;padding:4px 0 0}
 .team-arrow{display:grid;width:42px;height:42px;place-items:center;border:1px solid #ff30384d;border-radius:50%;background:#1a1012;color:#f5f5f7;font-size:20px;line-height:1;cursor:pointer;transition:background .2s,border-color .2s,transform .2s}
 .team-arrow:hover{transform:scale(1.06);border-color:#ff3038;background:#321116}
@@ -628,9 +633,9 @@ h1,h2,h3,.brand b,.stream-card strong,.home-event strong,.day-card h3,.stage-bra
 .team-dot{width:8px;height:8px;padding:0;border:1px solid #b7a6a8;border-radius:50%;background:transparent;cursor:pointer;transition:width .25s,background .25s,border-color .25s}
 .team-dot.is-active{width:24px;border-color:#ff3038;border-radius:6px;background:#ff3038}
 .team-carousel-stage.is-dragging .team-slide{transition:none;cursor:grabbing}
-@media(max-width:900px){.team-carousel{max-width:800px}.team-carousel-stage{height:520px}.team-slide{width:clamp(245px,35vw,310px);height:460px}.team-photo-frame{height:344px}}
-@media(max-width:700px){.venue-page-hero h1{font-size:clamp(23px,6.2vw,30px);line-height:1.22}.venue-location-section .section-head{align-items:flex-start}.venue-location-description{font-size:13px!important}.venue-team-section{padding-right:12px;padding-left:12px}.venue-team-section .section-head{align-items:flex-start;flex-direction:column;gap:14px;margin-bottom:18px}.venue-team-section .section-head>p{margin:0;font-size:13px}.team-carousel-stage{height:490px;perspective:900px;perspective-origin:50% 42%}.team-slide{top:10px;width:clamp(230px,70vw,290px);height:440px;padding:10px}.team-photo-frame{height:330px}.team-slide-caption{min-height:72px;padding:13px 3px 4px}.team-slide-caption strong{font-size:clamp(18px,5vw,22px)}.team-slide-caption small{font-size:9px}.team-carousel-controls{gap:20px}.team-arrow{width:40px;height:40px}}
-@media(max-width:360px){.team-carousel-stage{height:450px}.team-slide{width:230px;height:410px}.team-photo-frame{height:300px}.team-slide-caption strong{font-size:17px}}
+@media(max-width:900px){.team-carousel{max-width:800px}.team-carousel-stage{height:550px}.team-slide{width:clamp(245px,35vw,310px);height:480px;padding:12px}.team-photo-frame{height:325px}}
+@media(max-width:700px){.venue-page-hero h1{font-size:clamp(23px,6.2vw,30px);line-height:1.22}.venue-location-section .section-head{align-items:flex-start}.venue-location-description{font-size:13px!important}.venue-team-section{padding-right:12px;padding-left:12px}.venue-team-section .section-head{align-items:flex-start;flex-direction:column;gap:14px;margin-bottom:18px}.venue-team-section .section-head>p{margin:0;font-size:13px}.team-carousel-stage{height:490px;perspective:1000px;perspective-origin:50% 42%}.team-slide{top:10px;width:clamp(230px,72vw,290px);height:440px;padding:10px}.team-slide-index{margin-bottom:6px;font-size:9px}.team-photo-frame{height:300px}.team-slide-caption{min-height:98px;padding:9px 3px 3px;gap:4px}.team-slide-caption strong{font-size:clamp(18px,5vw,22px)}.team-slide-caption small{font-size:9px}.team-slide-caption .team-slide-role{font-size:10px}.team-carousel-controls{gap:20px}.team-arrow{width:40px;height:40px}}
+@media(max-width:360px){.team-carousel-stage{height:455px}.team-slide{width:230px;height:415px}.team-photo-frame{height:280px}.team-slide-caption{min-height:95px}.team-slide-caption strong{font-size:17px}}
 @media(prefers-reduced-motion:reduce){.team-slide,.team-photo-frame img,.team-arrow,.team-dot{transition:none!important}}
 
 /* Use each stream's own artwork while keeping titles and links legible. */
