@@ -596,6 +596,20 @@ h1,h2,h3,.brand b,.stream-card strong,.home-event strong,.day-card h3,.stage-bra
 .venue-info-card>.text-link{position:relative;z-index:1;display:inline-block;margin-top:8px}
 @media(max-width:700px){.venue-info-card{min-height:0}.venue-duk-logo-frame{width:min(100%,330px);height:92px}.venue-info-card:not(.venue-campus-card) h3{margin-top:45px}}
 
+.venue-page-hero h1{max-width:1020px;font-size:clamp(42px,7vw,78px);line-height:1.08;letter-spacing:-.035em}
+.venue-page-hero .venue-fest-description{max-width:850px;margin:0 0 12px;color:var(--text);font-size:clamp(16px,1.8vw,21px);line-height:1.5}
+.venue-team-section{background:linear-gradient(180deg,#100909,#160b0b)}
+.venue-team-section .section-head{margin-bottom:36px}
+.venue-team-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:34px 24px}
+.venue-team-card{min-width:0;text-align:center;padding:24px 18px 22px;border:1px solid #70402f66;border-radius:12px;background:linear-gradient(145deg,#201412,#120e0e)}
+.venue-team-photo-frame{width:174px;height:174px;margin:0 auto 20px;padding:8px;display:grid;place-items:center;overflow:hidden;border:3px solid #de312a;border-radius:50%;background:#fff;box-shadow:0 0 0 5px #de312a20,0 12px 32px #0005}
+.venue-team-photo{display:block;width:100%;height:100%;border-radius:50%;background:#fff;object-fit:cover}
+.venue-team-photo-1{object-fit:cover;object-position:center top;transform:none}
+.venue-team-card h3{margin:0 0 8px;color:var(--text);font-size:18px;letter-spacing:.01em}
+.venue-team-card p{margin:0;color:var(--cyan);font:10px var(--mono);letter-spacing:.12em;text-transform:uppercase}
+@media(max-width:700px){.venue-page-hero h1{font-size:clamp(38px,11vw,60px);line-height:1.08}.venue-page-hero .venue-fest-description{font-size:16px;line-height:1.5}.venue-team-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:18px 12px}.venue-team-card{padding:18px 10px}.venue-team-photo-frame{width:min(34vw,150px);height:min(34vw,150px);padding:6px}.venue-team-card h3{font-size:15px}.venue-team-card p{font-size:8px;letter-spacing:.08em}}
+@media(max-width:390px){.venue-team-grid{grid-template-columns:1fr}.venue-team-photo-frame{width:160px;height:160px}}
+
 /* Use each stream's own artwork while keeping titles and links legible. */
 .stream-page-grid .stream-feature{position:relative;isolation:isolate;overflow:hidden;background-color:#120909!important;background-size:cover;background-position:center;background-repeat:no-repeat;transition:background-size .55s ease}
 .stream-page-grid .stream-feature.stream-feature-1{background-image:linear-gradient(90deg,#100909c8 0%,#10090975 45%,#10090928 100%),linear-gradient(0deg,#100909bb 0%,transparent 72%),url("../assets/streams/technology.jpg")!important}
@@ -728,3 +742,11 @@ h1,h2,h3,.brand b,.stream-card strong,.home-event strong,.day-card h3,.stage-bra
  .footer-signature{grid-column:1/-1;max-width:440px}
 }
 @media(max-width:420px){.footer-main{grid-template-columns:1fr}.footer-signature{grid-column:auto}.footer-bottom{gap:9px}}
+
+/* Enlarge the brand lockup and give the home hero an Anthropic Serif-style display face. */
+.site-header .brand b{font-size:18px;letter-spacing:.035em}
+.site-header .brand small{font-size:9px;letter-spacing:.11em}
+.cyber-wordmark h1,.cyber-slogan,.stage-brand{font-family:"Anthropic Serif","Instrument Serif",Georgia,serif!important}
+.cyber-wordmark h1{letter-spacing:-.035em}
+.cyber-slogan{letter-spacing:-.025em}
+.stage-brand{letter-spacing:-.04em}

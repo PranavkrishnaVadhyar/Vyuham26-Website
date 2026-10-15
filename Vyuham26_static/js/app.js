@@ -73,7 +73,12 @@
     const parts = path.split('/').filter(Boolean);
     return {page:parts[0] || 'home',slug:parts.slice(1).join('/'),query:new URLSearchParams(raw.includes('?') ? raw.split('?').slice(1).join('?') : '')};
   };
-  const go = path => { location.hash = '#/' + path.replace(/^\//,''); };
+  const redirectToMakeMyPass = () => window.location.assign(MAKEMYPASS_HOME);
+  const go = path => {
+    const target = path.replace(/^\//,'');
+    if (target === 'login' || target === 'register') { redirectToMakeMyPass(); return; }
+    location.hash = '#/' + target;
+  };
   const openParticipantDashboard = async () => {
     const session = window.VYUHAM_API.session();
     if (!session?.access_token) { go('login'); return; }
@@ -133,7 +138,13 @@
     <section class="section"><div class="container"><div class="schedule-days" id="scheduleDays">${days.map(d=>`<button class="schedule-day schedule-day-${d.day}" type="button" aria-pressed="${d.day===1}" data-day="${d.day}"><b>DAY 0${d.day} <i>· ${d.date}</i></b><span>${d.name}</span><small>${d.desc}</small><em>VIEW DAY <strong>↘</strong></em></button>`).join('')}</div><div id="scheduleContent"></div><div class="notice">This static conversion uses event data available in the supplied React source. Verify any final timings and venue changes against the latest official schedule document.</div></div></section>`;
   const aboutPage = () => `${pageHero('About the festival','WHERE DISCIPLINES<br><span class="green">CONVERGE.</span>','A national-level techno-cultural gathering hosted by Digital University Kerala.')}
     <section class="section"><div class="container about-grid"><div class="about-visual"><div class="visual-cross"></div><div class="visual-core"><img src="assets/vyuham_logo_sm.png" alt="VYUHAM logo"></div></div><div class="about-copy"><div class="eyebrow">THE VYUHAM IDEA</div><h2>BUILT FOR<br><span class="green">WHAT’S NEXT.</span></h2><p>VYUHAM brings technology, management, culture and esports into one shared arena. It is designed for curious minds, ambitious teams, performers and problem-solvers from across India.</p><p>Across three days, participants can compete, collaborate, learn from one another and experience a festival shaped by innovation and expression.</p><div class="about-points"><div class="about-point"><i>01</i><span>Technology — create, test and build.</span></div><div class="about-point"><i>02</i><span>Management — lead, plan and adapt.</span></div><div class="about-point"><i>03</i><span>Culture — perform, express and connect.</span></div><div class="about-point"><i>04</i><span>Esports — compete with focus and teamwork.</span></div></div></div></div></section><section class="section"><div class="container"><div class="cta-band"><div><div class="eyebrow">OCTOBER 30 – NOVEMBER 1, 2026</div><h2>SEE YOU IN<br><span class="green">THE ARENA.</span></h2></div><a class="button button-primary" href="#/events">EXPLORE EVENTS ↗</a></div></div></section>`;
-  const venuePage = () => `<section class="page-hero venue-page-hero"><div class="container"><div class="breadcrumb"><a href="#/home">VYUHAM’26</a> / LOCATION</div><div class="eyebrow">Location</div><h1>MEET US AT<br><span class="green">TECHNOCITY.</span></h1><p>VYUHAM’26 takes place at Digital University Kerala, Technocity Campus, Thiruvananthapuram.</p></div><img class="venue-hero-logo" src="assets/vyuham_logo_sm.png" alt="VYUHAM emblem" width="72" height="72"></section>
+  const venueTeam = [
+    { name: 'Pranavkrishna', course: 'MTech AI', image: 'assets/team-pranavkrishna.png' },
+    { name: 'Hizan Rehman', course: 'MSc Cyber', image: 'assets/team-hizan-rehman.png' },
+    { name: 'Noyal Mathew Thankachan', course: 'MSc Cyber', image: 'assets/team-new-member.png' },
+  ];
+  const venuePage = () => `<section class="page-hero venue-page-hero"><div class="container"><div class="breadcrumb"><a href="#/home">VYUHAM’26</a> / LOCATION</div><div class="eyebrow">About</div><h1>Location</h1><p class="venue-fest-description">VYUHAM is Digital University Kerala’s flagship national-level management, technology and cultural fest.</p><p>VYUHAM’26 takes place at Digital University Kerala, Technocity Campus, Thiruvananthapuram.</p></div><img class="venue-hero-logo" src="assets/vyuham_logo_sm.png" alt="VYUHAM emblem" width="72" height="72"></section>
+    <section class="section venue-team-section"><div class="container"><div class="section-head"><div><div class="eyebrow">THE PEOPLE BEHIND VYUHAM</div><h2>MEET THE<br><span class="green">TEAM.</span></h2></div></div><div class="venue-team-grid">${Array.from({ length: 6 }, (_, index) => { const member = venueTeam[index % venueTeam.length]; return `<article class="venue-team-card"><div class="venue-team-photo-frame"><img class="venue-team-photo venue-team-photo-${index % venueTeam.length + 1}" src="${member.image}" alt="${member.name}" loading="lazy"></div><h3>${member.name}</h3><p>${member.course}</p></article>`; }).join('')}</div></div></section>
     <section class="section"><div class="container info-grid"><article class="info-card venue-info-card venue-campus-card"><span class="num">01 / CAMPUS</span><span class="venue-card-mark venue-campus-mark" aria-hidden="true">DUK</span><div class="venue-duk-logo-frame"><img class="venue-duk-logo" src="assets/duk-logo.png" alt="Digital University Kerala — Curating a responsible digital world" loading="lazy"></div><h3>Digital University Kerala</h3><p>Technocity Campus, Mangalapuram, Thiruvananthapuram, Kerala – 695317.</p></article><article class="info-card venue-info-card"><span class="num">02 / ARRIVAL</span><span class="venue-card-mark" aria-hidden="true"><svg viewBox="0 0 48 48"><path d="M9 36c7-1 8-9 14-10s7 6 13 3 2-10 5-16"/><circle cx="9" cy="36" r="3"/><circle cx="41" cy="13" r="3"/><path d="m33 13 8 0 0 8"/></svg></span><h3>Plan your visit</h3><p>Check your event’s assigned venue and arrival instructions before travelling. Detailed transport information should be confirmed through official festival communications.</p></article><article class="info-card venue-info-card"><span class="num">03 / HELP</span><span class="venue-card-mark venue-help-mark" aria-hidden="true"><svg viewBox="0 0 48 48"><path d="M24 42s14-13 14-25a14 14 0 1 0-28 0c0 12 14 25 14 25Z"/><circle cx="24" cy="17" r="5"/><path d="M34 35h8M38 31v8"/></svg></span><h3>Need directions?</h3><p>Contact the organizing team for venue access, accessibility needs and event-specific location details.</p><a class="text-link" href="#/contact">CONTACT TEAM ↗</a></article></div><div style="margin-top:22px;border:1px solid var(--line);border-radius:12px;overflow:hidden"><iframe title="Digital University Kerala location" src="https://www.google.com/maps?q=Digital%20University%20Kerala%20Technocity&output=embed" width="100%" height="350" style="border:0;display:block" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></div></div></section>`;
   const sponsorsPage = () => `${pageHero('Partners','POWERED BY<br><span class="green">POSSIBILITY.</span>','Partners and sponsors help make the VYUHAM’26 experience possible.')}
     <section class="section"><div class="container"><div class="empty-state"><div class="eyebrow" style="justify-content:center">PARTNER DIRECTORY</div><h2 style="font-size:32px;margin:20px 0 10px">PARTNER ANNOUNCEMENTS<br><span class="green">COMING SOON.</span></h2><p>Official sponsor names and logos should be added here once approved for publication.</p><a class="button button-outline" href="#/contact">PARTNER WITH VYUHAM ↗</a></div></div></section>`;
@@ -378,6 +389,7 @@
   }
   function render(){
     const r=route();
+    if(r.page==='login'||r.page==='register'){window.location.replace(MAKEMYPASS_HOME);return}
     if(r.page==='dashboard'&&!window.VYUHAM_API.session()?.access_token){go('login');return}
     $('#mainNav').classList.remove('open');$('#menuToggle').setAttribute('aria-expanded','false');$('#menuToggle').setAttribute('aria-label','Open navigation');
     $$('#mainNav [data-route]').forEach(a=>a.classList.toggle('active',a.dataset.route===r.page));
@@ -475,6 +487,7 @@
     const [verb,...args]=text.split(/\s+/),cmd=verb.toLowerCase(),arg=args.join(' ').trim(),aliases={schedule:'schedule',events:'events',streams:'streams',about:'about',venue:'venue',participate:'participate',competitions:'competitions',teams:'teams',dashboard:'dashboard',profile:'profile',login:'login',signup:'register'};
     const navigateCommands=new Set(Object.keys(aliases));
     if(navigateCommands.has(cmd)){terminalNavigate(aliases[cmd],`ROUTE // ${aliases[cmd].toUpperCase()}`);return}
+    if(cmd==='help')terminalPrint('system','LOGIN / SIGNUP // Opens the official MakeMyPass VYUHAM portal.');
     if(cmd==='event'){
       const event=events.find(item=>item.slug.toLowerCase()===arg.toLowerCase()||slugify(item.title)===slugify(arg));
       if(event)terminalNavigate(`event/${encodeURIComponent(event.slug)}`,`EVENT // ${event.title}`);else terminalPrint('error',arg?`No event found for “${arg}”. Try: events`:'Usage: event <event-name-or-slug>');return;
@@ -507,6 +520,8 @@
   terminalInput.addEventListener('keydown',event=>{if(event.key==='ArrowUp'){event.preventDefault();commandHistoryIndex=Math.max(0,commandHistoryIndex-1);terminalInput.value=commandHistory[commandHistoryIndex]||''}else if(event.key==='ArrowDown'){event.preventDefault();commandHistoryIndex=Math.min(commandHistory.length,commandHistoryIndex+1);terminalInput.value=commandHistory[commandHistoryIndex]||''}});
   $('#consoleLauncher').addEventListener('click',openTerminal);$('#consoleFooter').addEventListener('click',openTerminal);$('#terminalClose').addEventListener('click',closeTerminal);
   document.addEventListener('click',event=>{
+    const authLink=event.target.closest('a[href="#/login"],a[href="#/register"]');
+    if(authLink){event.preventDefault();redirectToMakeMyPass();return}
     const link=event.target.closest('a[href="#/dashboard"]');
     if(!link)return;
     event.preventDefault();
