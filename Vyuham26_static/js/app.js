@@ -80,7 +80,7 @@
     <div class="event-meta"><span>PRIZE <strong>${esc(e.prizes)}</strong></span><span>FEE <strong>${esc(e.fee)}</strong></span></div>
     <div class="event-actions"><a class="text-link" href="#/event/${encodeURIComponent(e.slug)}">VIEW DOSSIER <span>↗</span></a><a class="button button-outline" href="#/event/${encodeURIComponent(e.slug)}">DETAILS</a>${registrationCta(registrationUrl(e),'REGISTER ↗','button button-primary',e)}</div></div>
   </article>`;
-  const pageHero = (kicker,title,desc,heroClass='') => `<section class="page-hero ${heroClass}"><div class="container"><div class="breadcrumb"><a href="#/home">VYUHAM’26</a> / ${esc(kicker.toUpperCase())}</div><div class="eyebrow">${esc(kicker)}</div><h1>${title}</h1><p>${desc}</p></div></section>`;
+  const pageHero = (kicker,title,desc,heroClass='') => {const showCornerLogo=['events-page-hero','participation-page-hero','competitions-page-hero','streams-page-hero'].includes(heroClass);return `<section class="page-hero ${heroClass}"><div class="container"><div class="breadcrumb"><a href="#/home">VYUHAM’26</a> / ${esc(kicker.toUpperCase())}</div><div class="eyebrow">${esc(kicker)}</div><h1>${title}</h1><p>${desc}</p></div>${showCornerLogo?'<img class="page-hero-corner-logo" src="assets/vyuham_logo_sm.png" alt="VYUHAM emblem" width="72" height="72">':''}</section>`};
   const playLandingIntro = () => {
     if (landingIntroSeen) return false;
     landingIntroSeen = true;
@@ -285,14 +285,14 @@
         if(sequenceStarted||introFinished)return;
         sequenceStarted=true;
         document.documentElement.classList.remove('intro-sequence-pending');
-        // CSS introCinemaOut holds for 5s and fades for 0.9s.
-        completionTimer=setTimeout(finish,6200);
+        // Hold the completed VYUHAM identity for 3s, then allow the 1.5s fade to finish.
+        completionTimer=setTimeout(finish,9750);
       };
       const images=[...new Set([...intro.querySelectorAll('img'),...homeHero.querySelectorAll('.stage-main img')])];
       const imagesReady=Promise.all(images.map(image=>Promise.resolve().then(()=>image.decode?.()).catch(()=>undefined)));
       assetFallbackTimer=setTimeout(startSequence,4000);
       imagesReady.then(startSequence);
-      finalFallbackTimer=setTimeout(finish,12500);
+      finalFallbackTimer=setTimeout(finish,16000);
     }
     updateHeaderRegistration();
     updateCountdown();
