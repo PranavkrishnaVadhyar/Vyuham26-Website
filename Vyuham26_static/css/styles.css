@@ -698,6 +698,14 @@ h1,h2,h3,.brand b,.stream-card strong,.home-event strong,.day-card h3,.stage-bra
 .terminal-help-row span{color:#b9c6bf;font-family:var(--sans);font-size:12px;line-height:1.5}
 @media(max-width:560px){.terminal-help-row{grid-template-columns:minmax(0,1fr);gap:0;padding:5px 8px}.terminal-help-row span{font-size:11px}.terminal-help-group{margin-bottom:13px}}
 
+/* Cinematic gold PRESENTS treatment from the intro reference. */
+.intro-cinema-kicker{position:relative;isolation:isolate}
+.intro-cinema-kicker b{display:flex;align-items:center;justify-content:center;gap:clamp(14px,2.5vw,30px);color:#e9a47f;font-size:clamp(17px,2.2vw,25px);letter-spacing:.2em;text-transform:uppercase;text-shadow:0 0 14px #f49a4d45}
+.intro-cinema-kicker b::before,.intro-cinema-kicker b::after{content:"";display:block;width:clamp(40px,11vw,130px);height:2px;background:linear-gradient(90deg,transparent,#f6a658 75%,#ffd18f);box-shadow:0 0 8px #f6a65880}
+.intro-cinema-kicker b::after{transform:scaleX(-1)}
+.intro-cinema-kicker::after{content:"";position:absolute;z-index:-1;left:50%;bottom:-20px;width:min(420px,86vw);height:26px;transform:translateX(-50%);background:radial-gradient(ellipse at center,#ffc36b78 0, #f68a3c30 12%,transparent 70%);filter:blur(4px);pointer-events:none}
+@media(max-width:700px){.intro-cinema-kicker b{gap:11px;letter-spacing:.16em;font-size:clamp(16px,4.5vw,21px)}.intro-cinema-kicker b::before,.intro-cinema-kicker b::after{width:clamp(25px,9vw,52px)}}
+
 /* Keep the shell separate from the metric grid. This avoids the shell's
    max-width and legacy viewport padding constraining the actual grid. */
 .info-strip.cyber-strip{display:grid;width:min(calc(100% - 40px),var(--max));padding:0;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);box-sizing:border-box}
@@ -779,4 +787,34 @@ h1,h2,h3,.brand b,.stream-card strong,.home-event strong,.day-card h3,.stage-bra
  .intro-cinema-kicker b{font-size:18px}
  .intro-cinema-core>img{width:clamp(76px,20vw,108px)}
  .intro-cinema-core h1{font-size:clamp(54px,12vw,82px)}
+}
+
+/* Final desktop-scale intro composition, tuned to the reference proportions. */
+.intro-cinema-core{width:min(94vw,900px)}
+.intro-cinema-kicker{gap:clamp(16px,2.2vh,28px);margin:0 auto clamp(38px,5.4vh,56px)}
+.intro-cinema-kicker img{width:clamp(300px,30vw,440px);filter:drop-shadow(0 1px 1px #9ba3ab55)}
+.intro-cinema-kicker b{gap:clamp(18px,2vw,30px);color:#F4A261;font:400 clamp(23px,2.36vw,34px)/1.15 'Montserrat','Manrope',sans-serif;letter-spacing:.45em;text-shadow:0 0 12px #f4a26135}
+.intro-cinema-kicker b::before,.intro-cinema-kicker b::after{width:clamp(72px,10.5vw,154px);height:2px;background:linear-gradient(90deg,transparent 0%,#F4A261 74%,#FFD078 100%);box-shadow:0 0 9px #f4a26155}
+.intro-cinema-kicker::after{bottom:-24px;width:min(470px,86vw);height:30px;background:radial-gradient(ellipse at center,#FFD078a0 0%,#F4A26155 5%,#F4A2611c 20%,transparent 70%);filter:blur(4px)}
+.intro-cinema-core>img{width:clamp(150px,14vw,205px);max-height:24vh;filter:drop-shadow(0 0 24px #de312a58)}
+.intro-cinema-core h1{margin-top:clamp(26px,4vh,42px);font-size:clamp(100px,11.5vw,166px);line-height:.86}
+.intro-cinema-core h1 b{font-size:.46em}
+.intro-cinema-core p{margin-top:clamp(16px,2.4vh,26px);font-size:clamp(9px,.8vw,12px)}
+@media(max-width:700px){
+ .intro-cinema-core{width:min(94vw,540px)}
+ .intro-cinema-kicker{gap:18px;margin-bottom:clamp(28px,5vh,42px)}
+ .intro-cinema-kicker img{width:min(76vw,330px)}
+ .intro-cinema-kicker b{gap:12px;font-size:clamp(18px,5vw,26px);letter-spacing:.28em}
+ .intro-cinema-kicker b::before,.intro-cinema-kicker b::after{width:clamp(28px,8vw,55px)}
+ .intro-cinema-kicker::after{width:min(360px,90vw);height:24px;bottom:-19px}
+ .intro-cinema-core>img{width:clamp(112px,28vw,156px);max-height:21vh}
+ .intro-cinema-core h1{margin-top:clamp(22px,4vh,32px);font-size:clamp(64px,14vw,100px)}
+ .intro-cinema-core p{margin-top:14px}
+}
+@media(max-height:760px) and (min-width:701px){
+ .intro-cinema-kicker{gap:14px;margin-bottom:28px}
+ .intro-cinema-kicker img{width:min(27vw,38vh)}
+ .intro-cinema-core>img{width:min(13vw,22vh)}
+ .intro-cinema-core h1{margin-top:22px;font-size:min(11vw,15vh)}
+ .intro-cinema-core p{margin-top:12px}
 }
