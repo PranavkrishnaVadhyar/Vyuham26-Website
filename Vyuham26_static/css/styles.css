@@ -840,3 +840,8 @@ h1,h2,h3,.brand b,.stream-card strong,.home-event strong,.day-card h3,.stage-bra
 .intro-cinema-core h1{
  font-family:"Anthropic Serif","Instrument Serif",Georgia,serif!important;
 }
+
+@media(max-width:700px){
+ .intro-cinema-kicker img{width:min(58vw,220px)}
+ .intro-cinema-core>img{width:clamp(84px,20vw,120px);max-height:18vh}
+}
