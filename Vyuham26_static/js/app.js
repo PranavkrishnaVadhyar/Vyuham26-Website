@@ -6,7 +6,6 @@
   let events = Array.isArray(window.VYUHAM_EVENTS) ? window.VYUHAM_EVENTS : [];
   let registrationOpen = true;
   let landingIntroSeen = false;
-  let cleanupVenueTeamCarousel = null;
   const registrationFeatureEnabled = window.VYUHAM_REGISTRATION_ENABLED === true;
   const MAKEMYPASS_HOME = 'https://org.makemypass.com/web/vyuham-26';
   const MAKEMYPASS_EVENT_PATHS = {
@@ -121,74 +120,18 @@
   const aboutPage = () => `${pageHero('About the festival', 'WHERE DISCIPLINES<br><span class="green">CONVERGE.</span>', 'A national-level techno-cultural gathering hosted by Digital University Kerala.')}
     <section class="section"><div class="container about-grid"><div class="about-visual"><div class="visual-cross"></div><div class="visual-core"><img src="assets/vyuham_logo_sm.png" alt="VYUHAM logo"></div></div><div class="about-copy"><div class="eyebrow">THE VYUHAM IDEA</div><h2>BUILT FOR<br><span class="green">WHAT’S NEXT.</span></h2><p>VYUHAM brings technology, management, culture and esports into one shared arena. It is designed for curious minds, ambitious teams, performers and problem-solvers from across India.</p><p>Across three days, participants can compete, collaborate, learn from one another and experience a festival shaped by innovation and expression.</p><div class="about-points"><div class="about-point"><i>01</i><span>Technology — create, test and build.</span></div><div class="about-point"><i>02</i><span>Management — lead, plan and adapt.</span></div><div class="about-point"><i>03</i><span>Culture — perform, express and connect.</span></div><div class="about-point"><i>04</i><span>Esports — compete with focus and teamwork.</span></div></div></div></div></section><section class="section"><div class="container"><div class="cta-band"><div><div class="eyebrow">OCTOBER 30 – NOVEMBER 1, 2026</div><h2>SEE YOU IN<br><span class="green">THE ARENA.</span></h2></div><a class="button button-primary" href="#/events">EXPLORE EVENTS ↗</a></div></div></section>`;
   const venueTeam = [
-    { name: 'Hizan Rehman', course: '2nd Yr MSc Computer Science', role: 'Coordinator', image: 'assets/team-hizan-rehman.png' },
-    { name: 'Noyal Mathew Thankachan', course: '2nd Yr MSc Computer Science', role: 'Coordinator', image: 'assets/team-new-member.png' },
     { name: 'Nived B', role: 'Developer', course: '1st Yr MTech CyberSecurity', image: 'assets/team-nived.png' },
     { name: 'Pranavkrishna', role: 'Developer', course: '1st Yr MTech AI', image: 'assets/team-pranavkrishna.png' },
     { name: 'Adhwaith Krishnan J R', role: 'Developer', course: '1st Yr MTech CyberSecurity', image: 'assets/team-adhwaith.png' },
-    { name: 'Aswanth M C', role: 'Developer', course: '1st Yr MSc Data Analytics', image: 'assets/team-aswanth.png' }
+    { name: 'Aswanth M C', role: 'Developer', course: '1st Yr MSc Data Analytics', image: 'assets/team-aswanth.png' },
+    { name: 'Hizan Rehman', course: '2nd Yr MSc Computer Science', role: 'Coordinator', image: 'assets/team-hizan-rehman.png' },
+    { name: 'Noyal Mathew Thankachan', course: '2nd Yr MSc Computer Science', role: 'Coordinator', image: 'assets/team-new-member.png' }
   ];
-  const initTeamCarousel = () => {
-    cleanupVenueTeamCarousel?.();
-    const root = $('[data-team-carousel]'), stage = root?.querySelector('.team-carousel-stage');
-    if (!root || !stage) return;
-    const slides = [...stage.querySelectorAll('[data-slide]')], dots = [...root.querySelectorAll('[data-go]')];
-    if (!slides.length) return;
-    let active = 0, startX = 0, dragging = false, suppressClick = false;
-    const positionSlides = () => {
-      const mobile = matchMedia('(max-width:700px)').matches;
-      const spacing = mobile ? Math.min(stage.clientWidth * .46, 165) : Math.min(stage.clientWidth * .32, 360);
-      slides.forEach((slide, index) => {
-        const raw = (index - active + slides.length) % slides.length;
-        const offset = raw > Math.floor(slides.length / 2) ? raw - slides.length : raw;
-        const isVisible = Math.abs(offset) <= 1;
-        const x = offset * spacing;
-        slide.dataset.position = offset === 0 ? 'active' : offset === -1 ? 'previous' : offset === 1 ? 'next' : 'hidden';
-        slide.style.setProperty('--slide-x', `${x}px`);
-        slide.style.setProperty('--slide-z', offset === 0 ? '80px' : '-100px');
-        slide.style.setProperty('--slide-rotate', offset < 0 ? (mobile ? '10deg' : '15deg') : offset > 0 ? (mobile ? '-10deg' : '-15deg') : '0deg');
-        slide.style.setProperty('--slide-scale', offset === 0 ? '1' : mobile ? '.8' : '.84');
-        slide.style.zIndex = String(10 - Math.abs(offset));
-        slide.style.pointerEvents = isVisible ? 'auto' : 'none';
-        slide.setAttribute('aria-pressed', String(offset === 0));
-        slide.tabIndex = isVisible ? 0 : -1;
-        slide.setAttribute('aria-hidden', String(!isVisible));
-      });
-      dots.forEach((dot, index) => {
-        const selected = index === active;
-        dot.classList.toggle('is-active', selected);
-        dot.setAttribute('aria-current', selected ? 'true' : 'false');
-      });
-    };
-    const goTo = index => { active = (index + slides.length) % slides.length; positionSlides() };
-    root.querySelector('.team-prev')?.addEventListener('click', () => goTo(active - 1));
-    root.querySelector('.team-next')?.addEventListener('click', () => goTo(active + 1));
-    dots.forEach(dot => dot.addEventListener('click', () => goTo(Number(dot.dataset.go))));
-    slides.forEach(slide => slide.addEventListener('click', event => {
-      if (suppressClick) { event.preventDefault(); suppressClick = false; return }
-      goTo(Number(slide.dataset.slide));
-    }));
-    stage.addEventListener('keydown', event => {
-      if (event.key === 'ArrowLeft') { event.preventDefault(); goTo(active - 1) }
-      else if (event.key === 'ArrowRight') { event.preventDefault(); goTo(active + 1) }
-    });
-    stage.addEventListener('pointerdown', event => {
-      if (event.pointerType === 'mouse' && event.button !== 0) return;
-      startX = event.clientX; dragging = true; stage.classList.add('is-dragging'); stage.setPointerCapture?.(event.pointerId);
-    });
-    const endDrag = event => {
-      if (!dragging) return;
-      const delta = event.clientX - startX; dragging = false; stage.classList.remove('is-dragging');
-      if (Math.abs(delta) > 45) { goTo(active + (delta < 0 ? 1 : -1)); suppressClick = true; setTimeout(() => { suppressClick = false }, 0) }
-    };
-    stage.addEventListener('pointerup', endDrag);
-    stage.addEventListener('pointercancel', () => { dragging = false; stage.classList.remove('is-dragging') });
-    window.addEventListener('resize', positionSlides, { passive: true });
-    cleanupVenueTeamCarousel = () => window.removeEventListener('resize', positionSlides);
-    positionSlides();
-  };
+  const renderTeamMember = member => `<article class="dev-team-card"><div class="dev-team-portrait"><img src="${member.image}" alt="${esc(member.name)}" loading="lazy" decoding="async"></div><div class="dev-team-caption"><h3>${esc(member.name)}</h3><p class="dev-team-role">${esc(member.role)}</p><p class="dev-team-course">${esc(member.course)}</p></div></article>`;
+  const developerTeam = venueTeam.filter(member => member.role === 'Developer');
+  const coordinatorTeam = venueTeam.filter(member => member.role === 'Coordinator');
   const venuePage = () => `<section class="page-hero venue-page-hero"><div class="container"><div class="breadcrumb"><a href="#/home">VYUHAM’26</a> / ABOUT</div><div class="eyebrow">About</div><h1 class="venue-about-typewriter" aria-label="VYUHAM is Digital University Kerala’s flagship national-level management, technology and cultural fest."><span aria-hidden="true" data-typewriter="VYUHAM is Digital University Kerala’s flagship national-level management, technology and cultural fest."></span></h1></div><img class="venue-hero-logo" src="assets/vyuham_logo_sm.png" alt="VYUHAM emblem" width="72" height="72"></section>
-    <section class="section venue-team-section"><div class="container"><div class="section-head"><div><div class="eyebrow">THE PEOPLE BEHIND VYUHAM</div><h2>MEET THE<br><span class="green">TEAM.</span></h2></div><p>Meet the people building the VYUHAM’26 experience.</p></div><div class="team-carousel" data-team-carousel role="region" aria-roledescription="carousel" aria-label="VYUHAM team members"><div class="team-carousel-stage" tabindex="0" aria-label="Team member carousel. Use left and right arrow keys to browse.">${venueTeam.map((member, index) => `<button class="team-slide" type="button" data-slide="${index}" aria-label="View profile: ${member.name}"><span class="team-slide-index">VYUHAM’26 / ${String(index + 1).padStart(2, '0')}</span><span class="team-photo-frame${member.image.includes('team-hizan-rehman') ? ' is-photo-full' : ''}"><img src="${member.image}" alt="${member.name}" loading="lazy" decoding="async"></span><span class="team-slide-caption"><strong>${member.name}</strong><small class="team-slide-role">${member.role}</small><small class="team-slide-course">${member.course}</small></span></button>`).join('')}</div><div class="team-carousel-controls"><button class="team-arrow team-prev" type="button" aria-label="Previous team member">←</button><div class="team-pagination" role="group" aria-label="Choose team member">${venueTeam.map((member, index) => `<button type="button" class="team-dot" data-go="${index}" aria-label="Show ${member.name}"></button>`).join('')}</div><button class="team-arrow team-next" type="button" aria-label="Next team member">→</button></div></div></div></section>
+    <section class="section venue-team-section"><div class="container"><div class="section-head"><div><div class="eyebrow">THE PEOPLE BEHIND VYUHAM</div><h2>MEET THE<br><span class="green">DEV TEAM.</span></h2></div><p>Meet the people building the VYUHAM’26 experience.</p></div><div class="dev-team-grid" aria-label="VYUHAM development team"><div class="dev-team-row dev-team-row-primary">${developerTeam.map(renderTeamMember).join('')}</div><div class="dev-team-row dev-team-row-secondary">${coordinatorTeam.map(renderTeamMember).join('')}</div></div></div></section>
     <section class="section venue-location-section"><div class="container"><div class="section-head"><div><div class="eyebrow">VYUHAM / THE VENUE</div><h2>LOCATION</h2></div><p class="venue-location-description">VYUHAM’26 takes place at Digital University Kerala, Technocity Campus, Thiruvananthapuram.</p></div><div class="info-grid"><article class="info-card venue-info-card venue-campus-card"><span class="num">01 / CAMPUS</span><span class="venue-card-mark venue-campus-mark" aria-hidden="true">DUK</span><div class="venue-duk-logo-frame"><img class="venue-duk-logo" src="assets/duk-logo.png" alt="Digital University Kerala — Curating a responsible digital world" loading="lazy"></div><h3>Digital University Kerala</h3><p>Technocity Campus, Mangalapuram, Thiruvananthapuram, Kerala – 695317.</p></article><article class="info-card venue-info-card"><span class="num">02 / ARRIVAL</span><span class="venue-card-mark" aria-hidden="true"><svg viewBox="0 0 48 48"><path d="M9 36c7-1 8-9 14-10s7 6 13 3 2-10 5-16"/><circle cx="9" cy="36" r="3"/><circle cx="41" cy="13" r="3"/><path d="m33 13 8 0 0 8"/></svg></span><h3>Plan your visit</h3><p>Check your event’s assigned venue and arrival instructions before travelling. Detailed transport information should be confirmed through official festival communications.</p></article><article class="info-card venue-info-card"><span class="num">03 / HELP</span><span class="venue-card-mark venue-help-mark" aria-hidden="true"><svg viewBox="0 0 48 48"><path d="M24 42s14-13 14-25a14 14 0 1 0-28 0c0 12 14 25 14 25Z"/><circle cx="24" cy="17" r="5"/><path d="M34 35h8M38 31v8"/></svg></span><h3>Need directions?</h3><p>Contact the organizing team for venue access, accessibility needs and event-specific location details.</p><a class="text-link" href="#/contact">CONTACT TEAM ↗</a></article></div><div style="margin-top:22px;border:1px solid var(--line);border-radius:12px;overflow:hidden"><iframe title="Digital University Kerala location" src="https://www.google.com/maps?q=Digital%20University%20Kerala%20Technocity&output=embed" width="100%" height="350" style="border:0;display:block" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></div></div></section>`;
   const sponsorsPage = () => `${pageHero('Partners', 'POWERED BY<br><span class="green">POSSIBILITY.</span>', 'Partners and sponsors help make the VYUHAM’26 experience possible.')}
     <section class="section"><div class="container"><div class="empty-state"><div class="eyebrow" style="justify-content:center">PARTNER DIRECTORY</div><h2 style="font-size:32px;margin:20px 0 10px">PARTNER ANNOUNCEMENTS<br><span class="green">COMING SOON.</span></h2><p>Official sponsor names and logos should be added here once approved for publication.</p><a class="button button-outline" href="#/contact">PARTNER WITH VYUHAM ↗</a></div></div></section>`;
@@ -282,7 +225,6 @@
   async function loadMyCertificates() { const root = $('#myCertificates'); if (!root) return; if (!window.VYUHAM_API.session()?.access_token) { root.innerHTML = '<article class="notice" style="grid-column:1/-1">Personal certificate lookup requires an organizer-provided certificate link or code.</article>'; return } try { const rows = await window.VYUHAM_API.get('/certificates/me'); root.innerHTML = rows.length ? rows.map(cert => `<article class="info-card"><span class="num">${esc(cert.stream)} / ${esc(cert.role)}</span><h3>${esc(cert.event)}</h3><p>${esc(cert.certificate_code)} · ${esc(cert.status)}</p><small class="muted">ISSUED ${esc(cert.issue_date)}</small>${safeExternalUrl(cert.pdf_url) ? `<p><a class="text-link" href="${esc(safeExternalUrl(cert.pdf_url))}" target="_blank" rel="noopener">DOWNLOAD CERTIFICATE ↗</a></p>` : ''}</article>`).join('') : '<article class="empty-state" style="grid-column:1/-1">No certificates have been issued to this account yet.</article>' } catch (error) { root.textContent = `Could not load your certificates: ${error.message}` } }
   async function loadCheckin() { const access = $('#checkinAccess'); if (!access) return; if (!window.VYUHAM_API.session()?.access_token) { access.innerHTML = 'Scanner access is restricted to authorized volunteers and organizers. Sign-in is not available on this static site.'; $('#checkinForm').querySelectorAll('input,select,button').forEach(el => el.disabled = true); return } try { const profile = await window.VYUHAM_API.get('/auth/me'); if (!['volunteer', 'event_head', 'admin'].includes(profile.role)) { access.textContent = 'Scanner access denied. This profile does not have an operations role.'; $('#checkinForm').querySelectorAll('input,select,button').forEach(el => el.disabled = true); return } access.textContent = `SCANNER AUTHORIZED / ${profile.role.toUpperCase()} / ${profile.name || profile.email}`; const history = await window.VYUHAM_API.get(`/checkin/history?station=${encodeURIComponent($('#scanStation').value)}&limit=20`); $('#checkinHistory').innerHTML = history.length ? history.map(r => `<div class="schedule-row"><time>${esc(new Date(r.scanned_at).toLocaleTimeString())}</time><div><h3>${esc(r.ticket_code)} · ${esc(r.status)}</h3><p>${esc(r.attendee_name)} · ${esc(r.event_name)}</p></div><div class="venue">${esc(r.station)}</div></div>`).join('') : 'No scans recorded at this station.' } catch (error) { access.textContent = `Could not verify scanner access: ${error.message}` } }
   function render() {
-    cleanupVenueTeamCarousel?.(); cleanupVenueTeamCarousel = null;
     const r = route();
     $('#mainNav').classList.remove('open'); $('#menuToggle').setAttribute('aria-expanded', 'false'); $('#menuToggle').setAttribute('aria-label', 'Open navigation');
     $$('#mainNav [data-route]').forEach(a => a.classList.toggle('active', a.dataset.route === r.page));
@@ -291,7 +233,6 @@
     if (removedRoutes.has(r.page)) { location.replace(`${location.pathname}${location.search}#/home`); return }
     const views = { home, events: () => eventsPage(location.hash.includes('?') ? location.hash.split('?').slice(1).join('?') : ''), streams: streamsPage, event: () => eventDetail(r.slug), schedule: schedulePage, about: aboutPage, venue: venuePage, sponsors: sponsorsPage, contact: contactPage, faq: faqPage, participate: participationPage, competitions: competitionsPage, ...Object.fromEntries(shells.map(p => [p, () => featurePage(p)])) };
     app.innerHTML = (views[r.page] || notFound)();
-    if (r.page === 'venue') initTeamCarousel();
     const typewriterHeading = $('.venue-about-typewriter');
     const typewriterText = typewriterHeading?.querySelector('[data-typewriter]');
     if (typewriterHeading && typewriterText) {
