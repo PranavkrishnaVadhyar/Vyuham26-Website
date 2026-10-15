@@ -831,3 +831,12 @@ h1,h2,h3,.brand b,.stream-card strong,.home-event strong,.day-card h3,.stage-bra
  .intro-cinema-core h1{margin-top:22px;font-size:min(11vw,15vh)}
  .intro-cinema-core p{margin-top:12px}
 }
+
+/* Keep the primary hero display text consistent on every static page. */
+.page-hero h1,
+.cyber-wordmark h1,
+.cyber-slogan,
+.stage-brand,
+.intro-cinema-core h1{
+ font-family:"Anthropic Serif","Instrument Serif",Georgia,serif!important;
+}
