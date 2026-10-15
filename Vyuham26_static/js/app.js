@@ -124,7 +124,7 @@
     { name: 'Pranavkrishna', role: 'Developer', course: '1st Yr MTech AI', image: 'assets/team-pranavkrishna.png' },
     { name: 'Adhwaith Krishnan J R', role: 'Developer', course: '1st Yr MTech CyberSecurity', image: 'assets/team-adhwaith.png' },
     { name: 'Aswanth M C', role: 'Developer', course: '1st Yr MSc Data Analytics', image: 'assets/team-aswanth.png' },
-    { name: 'Hizan Rehman', course: '2nd Yr MSc Computer Science', role: 'Coordinator', image: 'assets/team-hizan-rehman.png' },
+    { name: 'Hizan Rahman', course: '2nd Yr MSc Computer Science', role: 'Coordinator', image: 'assets/team-hizan-rehman.png' },
     { name: 'Noyal Mathew Thankachan', course: '2nd Yr MSc Computer Science', role: 'Coordinator', image: 'assets/team-new-member.png' }
   ];
   const renderTeamMember = member => `<article class="dev-team-card"><div class="dev-team-portrait"><img src="${member.image}" alt="${esc(member.name)}" loading="lazy" decoding="async"></div><div class="dev-team-caption"><h3>${esc(member.name)}</h3><p class="dev-team-role">${esc(member.role)}</p><p class="dev-team-course">${esc(member.course)}</p></div></article>`;
