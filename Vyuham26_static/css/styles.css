@@ -670,6 +670,17 @@ h1,h2,h3,.brand b,.stream-card strong,.home-event strong,.day-card h3,.stage-bra
 .terminal-line.ascii{display:none}
 @media(max-width:700px){.terminal-watermark{width:min(54%,260px);opacity:.055}}
 
+/* Render terminal help as aligned command/description rows instead of padded text. */
+.terminal-help{max-width:760px;color:#d5e1da}
+.terminal-help h2{margin:0 0 16px;color:#f4f7f5;font-size:14px;font-weight:600;letter-spacing:.04em}
+.terminal-help-group{margin:0 0 16px}
+.terminal-help-group h3{margin:0 0 6px;color:#ff5366;font-size:10px;font-weight:600;letter-spacing:.14em}
+.terminal-help-commands{display:grid;gap:2px}
+.terminal-help-row{display:grid;grid-template-columns:minmax(150px,210px) minmax(0,1fr);gap:18px;align-items:baseline;padding:3px 8px;border-left:1px solid #ff405522}
+.terminal-help-row code{color:#ff7180;font:inherit;font-size:11px;white-space:nowrap}
+.terminal-help-row span{color:#b9c6bf;font-family:var(--sans);font-size:12px;line-height:1.5}
+@media(max-width:560px){.terminal-help-row{grid-template-columns:minmax(0,1fr);gap:0;padding:5px 8px}.terminal-help-row span{font-size:11px}.terminal-help-group{margin-bottom:13px}}
+
 /* Keep the shell separate from the metric grid. This avoids the shell's
    max-width and legacy viewport padding constraining the actual grid. */
 .info-strip.cyber-strip{display:grid;width:min(calc(100% - 40px),var(--max));padding:0;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);box-sizing:border-box}
@@ -728,3 +739,24 @@ h1,h2,h3,.brand b,.stream-card strong,.home-event strong,.day-card h3,.stage-bra
  .footer-signature{grid-column:1/-1;max-width:440px}
 }
 @media(max-width:420px){.footer-main{grid-template-columns:1fr}.footer-signature{grid-column:auto}.footer-bottom{gap:9px}}
+
+/* Keep the university logo transparent and crisp over the intro background. */
+.intro-cinema-kicker{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;width:auto;margin:0 auto 22px}
+.intro-cinema-kicker img{display:block;width:min(205px,58vw);height:auto;padding:0;border:0;border-radius:0;background:transparent;box-shadow:none;filter:none;opacity:1;transform:none;animation:none;image-rendering:auto}
+.intro-cinema-kicker b{color:#d3a184;font:600 17px/1.2 'Manrope',sans-serif;letter-spacing:.1em}
+@media(max-width:700px){.intro-cinema-kicker{gap:7px;margin-bottom:18px}.intro-cinema-kicker img{width:min(180px,58vw)}.intro-cinema-kicker b{font-size:15px}}
+
+/* Scale up the full intro identity while preserving its centered stack. */
+.intro-cinema-kicker{gap:11px;margin-bottom:30px}
+.intro-cinema-kicker img{width:min(265px,68vw)}
+.intro-cinema-kicker b{font-size:21px;letter-spacing:.12em}
+.intro-cinema-core>img{width:clamp(82px,12vw,126px)}
+.intro-cinema-core h1{font-size:clamp(58px,10vw,112px)}
+.intro-cinema-core p{font-size:10px;letter-spacing:.22em}
+@media(max-width:700px){
+ .intro-cinema-kicker{gap:9px;margin-bottom:23px}
+ .intro-cinema-kicker img{width:min(225px,70vw)}
+ .intro-cinema-kicker b{font-size:18px}
+ .intro-cinema-core>img{width:clamp(76px,20vw,108px)}
+ .intro-cinema-core h1{font-size:clamp(54px,12vw,82px)}
+}
