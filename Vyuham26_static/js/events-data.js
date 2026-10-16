@@ -157,7 +157,7 @@ window.VYUHAM_EVENTS = [
     "teamSize": "Open",
     "status": "upcoming",
     "featured": false,
-    "registrationUrl": "",
+    "registrationUrl": "https://makemypass.com/event/beyond-accuracy-ai-panel-discussion",
     "rules": []
   },
   {

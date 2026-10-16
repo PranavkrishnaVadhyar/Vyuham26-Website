@@ -62,7 +62,10 @@
       : days[Number(event.day) - 1]?.date || 'TBA';
   const registrationUrl = event => {
     const supplied = safeExternalUrl(event.registration_url || event.registrationUrl || event.makemypass_url);
-    if (supplied) { const url = new URL(supplied); if (url.hostname === 'org.makemypass.com' && url.pathname.startsWith('/web/vyuham-26/events/')) return url.href; }
+    if (supplied) {
+      const url = new URL(supplied);
+      if ((url.hostname === 'org.makemypass.com' && url.pathname.startsWith('/web/vyuham-26/events/')) || (url.hostname === 'makemypass.com' && url.pathname.startsWith('/event/'))) return url.href;
+    }
     const mapped = MAKEMYPASS_EVENT_PATHS[event.slug];
     if (mapped) return `${MAKEMYPASS_HOME}/events/${mapped}`;
     return MAKEMYPASS_HOME;
