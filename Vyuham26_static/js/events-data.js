@@ -299,7 +299,7 @@ window.VYUHAM_EVENTS = [
     "registrationUrl": "",
     "rules": [
       "Jeopardy-style security challenge matrix",
-      "Categories: Cryptography, Web Exploitation, Reverse Engineering, and Forensics",
+      "Categories: Cryptography, Web Exploitation, Reverse Engineering, ML Security, Web3.0and Forensics",
       "Strict anti-sharing and infrastructure protection rules"
     ]
   },
