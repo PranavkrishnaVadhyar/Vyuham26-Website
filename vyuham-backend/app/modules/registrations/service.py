@@ -22,6 +22,10 @@ async def register_for_event(
     event = await db.get(Event, event_id)
     if event is None:
         raise ResourceNotFoundError("Event")
+    if getattr(event, "status", None) == "cancelled":
+        raise ValueError("This event is not open for registration.")
+    if event.slug == "hackathon-continues":
+        raise ValueError("The overnight continuation is part of the 24HR Hackathon; register through the main Hackathon event.")
 
     ticket_code = f"VYU26-TKT-{secrets.token_hex(4).upper()}"
 

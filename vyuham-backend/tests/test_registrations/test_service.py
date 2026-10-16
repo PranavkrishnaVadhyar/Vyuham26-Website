@@ -40,6 +40,20 @@ class FakeSession:
 
 
 class RegistrationServiceTests(unittest.IsolatedAsyncioTestCase):
+    async def test_hackathon_continuation_is_not_a_separate_registration(self):
+        event = SimpleNamespace(
+            slug="hackathon-continues",
+            registration_type=RegistrationType.team,
+            team_size_min=3,
+            team_size_max=5,
+        )
+        db = FakeSession(gets=[event])
+
+        with self.assertRaisesRegex(ValueError, "register through the main Hackathon event"):
+            await register_for_event(db, uuid4(), SimpleNamespace(id=uuid4()), uuid4())
+
+        self.assertEqual(db.commits, 0)
+
     async def test_register_solo_event(self):
         event = SimpleNamespace(registration_type=RegistrationType.solo, team_size_min=None, team_size_max=None, slug="solo-event")
         user = SimpleNamespace(id=uuid4())

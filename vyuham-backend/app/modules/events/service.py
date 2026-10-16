@@ -10,7 +10,11 @@ from app.modules.events.schemas import EventCreate, EventUpdate
 
 
 async def list_events(db: AsyncSession) -> list[Event]:
-    result = await db.scalars(select(Event).order_by(Event.created_at, Event.name))
+    result = await db.scalars(
+        select(Event)
+        .where(Event.status != "cancelled")
+        .order_by(Event.created_at, Event.name)
+    )
     return list(result)
 
 

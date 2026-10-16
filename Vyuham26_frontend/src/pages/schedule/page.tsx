@@ -13,6 +13,14 @@ import { Kicker, StreamBadge } from "@/components/ui/Elements";
 import { useApp } from "@/lib/store";
 import { events } from "@/data/events";
 
+function scheduleStartMinutes(label: string): number {
+  const match = label.match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i);
+  if (!match) return Number.POSITIVE_INFINITY;
+  let hour = Number(match[1]) % 12;
+  if (match[3].toUpperCase() === "PM") hour += 12;
+  return hour * 60 + Number(match[2]);
+}
+
 const dayShortTitles = ["DAY ONE", "DAY TWO", "DAY THREE"];
 
 const dayDates = [
@@ -406,7 +414,7 @@ function ScheduleContent() {
           event.time.toLowerCase().includes(query)
         );
       })
-      .sort((a, b) => a.time.localeCompare(b.time));
+      .sort((a, b) => scheduleStartMinutes(a.time) - scheduleStartMinutes(b.time));
   }, [activeDay, selectedStream, searchQuery]);
 
   const totalDayEvents = events.filter(
@@ -915,7 +923,7 @@ function ScheduleContent() {
                             </span>
 
                             <span className="mt-1 block font-mono text-[9px] text-paper">
-                              {event.venue}
+                              {event.venue || "Not listed in official schedule"}
                             </span>
                           </div>
 

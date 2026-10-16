@@ -13,7 +13,7 @@ import type {
 } from "./types";
 
 /* ------------------------------------------------------------------ */
-/*  HOMEPAGE / GLOBAL COPY (Source: VYUHAM26_v8.pdf)                   */
+/*  HOMEPAGE / GLOBAL COPY (Source: DOC-20261013-WA0014.pdf)                   */
 /* ------------------------------------------------------------------ */
 
 export const homepage = {
@@ -83,7 +83,7 @@ export const introChapters = [
 ];
 
 /* ------------------------------------------------------------------ */
-/*  STREAMS (Source: VYUHAM26_v8.pdf)                                  */
+/*  STREAMS (Source: DOC-20261013-WA0014.pdf)                                  */
 /* ------------------------------------------------------------------ */
 
 export const streams: Stream[] = [
@@ -154,7 +154,7 @@ export const streams: Stream[] = [
 ];
 
 /* ------------------------------------------------------------------ */
-/*  SCHEDULE / JOURNEY (Source: VYUHAM26_v8.pdf)                       */
+/*  SCHEDULE / JOURNEY (Source: DOC-20261013-WA0014.pdf)                       */
 /* ------------------------------------------------------------------ */
 
 export const schedule: ScheduleDay[] = [
@@ -171,9 +171,10 @@ export const schedule: ScheduleDay[] = [
     beats: [
       { time: "09:00 AM", label: "HACKATHON — 24HR BEGINS (MAIN HALL + LAB)" },
       { time: "10:00 AM", label: "MANAGEMENT GAMES (BEST MANAGER, TEAM, HR, FINANCE, MKTG, QUIZ)" },
-      { time: "10:00 AM", label: "PANEL: RESPONSIBLE AI — A HUMANITIES LENS" },
-      { time: "12:00 PM", label: "TALK: QUANTUM COMPUTING MEETS AI: REAL VS. HYPE" },
-      { time: "02:00 PM", label: "WORKSHOP: PROMPT ENGINEERING & BUILDING WITH LLMS" },
+      { time: "10:00 AM", label: "PANEL: BEYOND ACCURACY — CAN WE TRUST THE DATA BEHIND AI?" },
+      { time: "12:00 PM", label: "TALK: RESPONSIBLE AI — A HUMANITIES LENS" },
+      { time: "02:00 PM", label: "CALLIGRAPHY WORKSHOP (COMPUTER LAB)" },
+      { time: "03:30 PM", label: "LUMINAR TECHNOLAB: PROMPT ENGINEERING & BUILDING WITH LLMS" },
       { time: "05:00 PM", label: "INAUGURATION CEREMONY (OPEN AIR STAGE)" },
       { time: "OVERNIGHT", label: "HACKATHON CONTINUES — MIDNIGHT MENTORING ROUND & SNACKS" },
     ],
@@ -190,11 +191,13 @@ export const schedule: ScheduleDay[] = [
     image: MEDIA.crowd,
     beats: [
       { time: "09:00 AM", label: "HACKATHON DEMOS & JUDGING (MAIN HALL)" },
-      { time: "10:00 AM", label: "CAPTURE THE FLAG & PROMPT WAR (COMPUTER LAB)" },
+      { time: "10:00 AM", label: "CAPTURE THE FLAG (COMPUTER LAB, 10 AM–10 PM) · PROMPT WAR" },
       { time: "10:00 AM", label: "STARTUP SHOWCASE & TECH QUIZ (GALLERY HALL)" },
-      { time: "02:00 PM", label: "TALK: STATE OF AGENTIC AI & CAREERS IN APPLIED AI" },
-      { time: "04:00 PM", label: "PANEL: CYBERSECURITY CAREERS — LIVE CTF DEBRIEF" },
-      { time: "04:00 PM", label: "CULTURAL NIGHT BY DUK STUDENTS (OPEN AIR STAGE)" },
+      { time: "10:00 AM", label: "C-DAC BUILD LAB" },
+      { time: "11:00 AM", label: "PROJECT EXPO BY IEEE (GALLERY HALL)" },
+      { time: "02:00 PM", label: "TALK: FROM AGENTS TO OUTCOMES — APPLIED AI & ENGINEERING" },
+      { time: "04:00 PM", label: "TALK: INSIDE THE MODERN SOC — DETECT, INVESTIGATE, RESPOND" },
+      { time: "04:00 PM", label: "CULTURAL NIGHT BY DUK STUDENTS (OPEN AIR STAGE, UNTIL 7:30 PM)" },
       { time: "08:00 PM", label: "DJ NIGHT (OPEN AIR STAGE)" },
     ],
   },
@@ -209,7 +212,8 @@ export const schedule: ScheduleDay[] = [
       "AI Short Film screenings, Ethical Hacking workshop, Valorant Tournament decider, Hackathon prize distribution, Movie Quiz, Fashion Show, and the Grand Closing Concert.",
     image: MEDIA.laser,
     beats: [
-      { time: "09:00 AM", label: "AI SHORT FILM SCREENINGS & KSUM TALK SESSION" },
+      { time: "09:00 AM", label: "AI SHORT FILM" },
+      { time: "09:00 AM", label: "KERALA STARTUP MISSION: FROM CLASSROOM TO STARTUP — WHERE DO STUDENT IDEAS GO? (UNTIL 11 AM)" },
       { time: "10:00 AM", label: "WORKSHOP: ETHICAL HACKING & OSINT RECONNAISSANCE" },
       { time: "10:00 AM", label: "VALORANT TOURNAMENT CHAMPIONSHIP DECIDER" },
       { time: "01:00 PM", label: "HACKATHON WINNERS & PRIZE DISTRIBUTION" },
@@ -221,7 +225,7 @@ export const schedule: ScheduleDay[] = [
 ];
 
 /* ------------------------------------------------------------------ */
-/*  EVENTS (Unified directly from rawEvents — Source: VYUHAM26_v8.pdf) */
+/*  EVENTS (Unified directly from rawEvents — Source: DOC-20261013-WA0014.pdf) */
 /* ------------------------------------------------------------------ */
 
 export const events: FestEvent[] = rawEvents.map((e) => {
