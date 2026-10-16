@@ -4,8 +4,8 @@
   const $$ = (s, root = document) => [...root.querySelectorAll(s)];
   const app = $('#app');
   let events = Array.isArray(window.VYUHAM_EVENTS) ? window.VYUHAM_EVENTS : [];
-  const hiddenEventSlugs = new Set(['hackathon-continues', 'hackathon-demos', 'hackathon-winners', 'inauguration-ceremony', 'cultural-night', 'dj-night', 'concert', 'fashion-show', 'food-court']);
-  const hiddenEventTitles = new Set(['hackathon continues', 'hackathon demos & judging', 'hackathon winners & prize distribution', 'inauguration ceremony', 'cultural night', 'dj night', 'concert night', 'fashion show', 'food court, markets & stalls']);
+  const hiddenEventSlugs = new Set(['hackathon-continues', 'hackathon-demos', 'hackathon-winners', 'inauguration-ceremony', 'talk-agentic-ai', 'talk-quantum-ai', 'cultural-night', 'dj-night', 'concert', 'fashion-show', 'food-court']);
+  const hiddenEventTitles = new Set(['hackathon continues', 'hackathon demos & judging', 'hackathon winners & prize distribution', 'inauguration ceremony', 'talk: from agents to outcomes: building ai that works in the real world (applied ai and engineering)', 'talk: responsible ai — a humanities lens', 'cultural night', 'dj night', 'concert night', 'fashion show', 'food court, markets & stalls']);
   const isVisibleEvent = event => !hiddenEventSlugs.has(event.slug) && !hiddenEventTitles.has(String(event.title || event.name || '').trim().toLowerCase());
   events = events.filter(isVisibleEvent);
   let registrationOpen = true;
