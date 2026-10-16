@@ -4,18 +4,22 @@
   const $$ = (s, root = document) => [...root.querySelectorAll(s)];
   const app = $('#app');
   let events = Array.isArray(window.VYUHAM_EVENTS) ? window.VYUHAM_EVENTS : [];
+  const hiddenEventSlugs = new Set(['hackathon-continues', 'hackathon-demos', 'cultural-night', 'dj-night', 'concert', 'fashion-show', 'food-court']);
+  const hiddenEventTitles = new Set(['hackathon continues', 'hackathon demos & judging', 'cultural night', 'dj night', 'concert night', 'fashion show', 'food court, markets & stalls']);
+  const isVisibleEvent = event => !hiddenEventSlugs.has(event.slug) && !hiddenEventTitles.has(String(event.title || event.name || '').trim().toLowerCase());
+  events = events.filter(isVisibleEvent);
   let registrationOpen = true;
   let landingIntroSeen = false;
   const registrationFeatureEnabled = window.VYUHAM_REGISTRATION_ENABLED === true;
   const MAKEMYPASS_HOME = 'https://org.makemypass.com/web/vyuham-26';
   const MAKEMYPASS_EVENT_PATHS = {
-    hackathon: 'hackathon-24hr', 'hackathon-continues': 'hackathon-24hr', 'workshop-ethical-hacking': 'workshop-ethical-hacking-osint',
+    hackathon: 'hackathon-24hr', 'workshop-ethical-hacking': 'workshop-ethical-hacking-osint',
     'best-manager': 'best-manager-4', 'marketing-game': 'marketing-game-3',
     'best-management-team': 'best-management-team', 'ctf': 'capture-the-flag-3',
     'tech-quiz': 'tech-quiz', 'startup-showcase': 'startup-showcase', 'prompt-war': 'prompt-war',
-    'panel-cybersecurity': 'cybersecurity-panel-live-demo', 'cultural-night': 'cultural-night-1',
+    'panel-cybersecurity': 'cybersecurity-panel-live-demo',
     'talk-ksum': 'talk-session-kerala-startup-mission', 'ai-short-film': 'ai-short-film',
-    'valorant': 'valorant-tournament-2', 'movie-quiz': 'movie-quiz', 'fashion-show': 'fashion-show-1',
+    'valorant': 'valorant-tournament-2', 'movie-quiz': 'movie-quiz',
     'play-fest': 'play-fest', 'fitness-competition': 'fitness-competition',
     'efootball': 'e-football-tournament-2', 'bgmi': 'bgmi-tournament-3',
     'photography': 'photography-videography', 'business-quiz': 'business-quiz-2',
@@ -85,7 +89,8 @@
   const slugify = v => String(v || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
   const streamLabel = s => ({ tech: 'Technology', technology: 'Technology', management: 'Management', cultural: 'Culture', culture: 'Culture', esports: 'Esports', gaming: 'Esports', impact: 'Impact', general: 'General', session: 'Session' }[s] || 'General');
   const route = () => {
-    const raw = location.hash.replace(/^#\/?/, '') || 'home';
+    // Hash routes use `#/...`; a plain `#section` is a native in-page anchor.
+    const raw = location.hash.startsWith('#/') ? location.hash.slice(2) || 'home' : 'home';
     const path = raw.split('?')[0] || 'home';
     const parts = path.split('/').filter(Boolean);
     return { page: parts[0] || 'home', slug: parts.slice(1).join('/'), query: new URLSearchParams(raw.includes('?') ? raw.split('?').slice(1).join('?') : '') };
@@ -126,7 +131,7 @@
       <section class="section"><div class="container"><div class="notice">Registration and ticket payments are completed on MakeMyPass. Select an event to view its official registration page.</div><div class="filter-bar"><label class="search-box"><input id="eventSearch" type="search" placeholder="Search events, keywords…" aria-label="Search events"></label><label class="event-filter"><span>DAY</span><select id="eventDay"><option value="all">All events</option><option value="1">Day 1 · Oct 30</option><option value="2">Day 2 · Oct 31</option><option value="3">Day 3 · Nov 1</option></select></label><label class="event-filter"><span>SORT</span><select id="eventSort"><option value="day">Festival order</option><option value="name">Name A–Z</option><option value="fee">Fee · low to high</option></select></label></div><div class="filter-pills" id="streamFilters">${[['all', 'ALL EVENTS'], ['tech', 'TECHNOLOGY'], ['management', 'MANAGEMENT'], ['cultural', 'CULTURE'], ['esports', 'ESPORTS']].map(([id, label]) => `<button class="filter-pill ${selected === id ? 'active' : ''}" data-stream="${id}">${label}</button>`).join('')}</div><p class="muted mono" style="font-size:10px;margin:22px 0" id="eventCount"></p><div class="events-grid" id="eventsGrid"></div><p style="text-align:center;margin-top:34px">${registrationCta(MAKEMYPASS_HOME, 'VIEW ALL EVENTS ON MAKEMYPASS ↗', 'button button-outline')}</p></div></section>`;
   };
   const eventDetail = slug => {
-    const e = events.find(x => x.slug === decodeURIComponent(slug));
+    const e = events.find(x => x.slug === decodeURIComponent(slug) && isVisibleEvent(x));
     if (!e) return notFound();
     const image = safeExternalUrl(e.image);
     const hero = image ? `<section class="page-hero event-page-hero" style="--event-hero-image:url('${esc(image)}')"><div class="container"><div class="breadcrumb"><a href="#/home">VYUHAM’26</a> / EVENT DOSSIER</div><div class="eyebrow">EVENT DOSSIER</div><h1>${esc(e.title)}</h1><p>Event details, schedule information and participation overview for VYUHAM’26.</p></div></section>` : pageHero('Event dossier', esc(e.title), 'Event details, schedule information and participation overview for VYUHAM’26.');
@@ -164,7 +169,7 @@
   const participationPage = () => `${pageHero('Participation guide', 'CHOOSE YOUR<br><span class="green">ARENA.</span>', 'Find an event, check its requirements and finish registration and payment on the official MakeMyPass page.', 'participation-page-hero')}
     <section class="section"><div class="container"><div class="notice">MakeMyPass is the registration and ticketing provider. Your registration and payment status are confirmed there; this site does not process payments.</div><div class="participation-steps"><article class="info-card"><span class="num">STEP / 01</span><h3>Choose an event</h3><p>Browse by stream, festival day, or entry fee. Open an event dossier to review eligibility, team size and schedule.</p><a class="button button-small button-primary" href="#/events">Browse events</a></article><article class="info-card"><span class="num">STEP / 02</span><h3>Register on MakeMyPass</h3><p>Use the event-specific registration link to enter participant details and complete any ticket or event payment.</p>${registrationCta(MAKEMYPASS_HOME, 'Register now', 'button button-small button-primary')}</article><article class="info-card"><span class="num">STEP / 03</span><h3>Prepare to participate</h3><p>Follow the event instructions from the organizer. Follow the event confirmation and organizer instructions after registering on MakeMyPass.</p>${registrationCta(MAKEMYPASS_HOME, 'Register now', 'button button-small button-primary')}</article></div><div class="cta-band participation-cta"><div><div class="eyebrow">READY TO JOIN?</div><h2>YOUR NEXT<br><span class="green">MOVE.</span></h2></div><a class="button button-primary" href="#/events">FIND AN EVENT ↗</a></div></div></section>`;
   const competitionsPage = () => {
-    const list = events.filter(e => ['tech', 'technology', 'management', 'esports', 'gaming'].includes(e.stream)); return `${pageHero('Competition hub', 'ENTER THE<br><span class="green">ARENA.</span>', 'Explore VYUHAM’26 competitions, then open the relevant event dossier for requirements and MakeMyPass registration.', 'competitions-page-hero')}
+    const list = events.filter(e => isVisibleEvent(e) && ['tech', 'technology', 'management', 'esports', 'gaming'].includes(e.stream)); return `${pageHero('Competition hub', 'ENTER THE<br><span class="green">ARENA.</span>', 'Explore VYUHAM’26 competitions, then open the relevant event dossier for requirements and MakeMyPass registration.', 'competitions-page-hero')}
     <section class="section"><div class="container"><div class="notice">Competition entry and payment are handled by MakeMyPass. Open an event dossier for requirements and official registration details.</div><div class="events-grid">${list.map(eventCard).join('')}</div></div></section>`
   };
   const featurePage = (page) => {
@@ -404,20 +409,29 @@
   $('#mainNav').addEventListener('click', e => { if (e.target.closest('a')) closeMenu() });
   document.addEventListener('keydown', e => { if (e.key === 'Escape') { if (!terminalOverlay.hidden) closeTerminal(); closeMenu(); return } const isEditable = ['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName) || document.activeElement?.isContentEditable; const backtick = e.key === '`' || e.key === '~' || e.code === 'Backquote'; if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); terminalOverlay.hidden ? openTerminal() : closeTerminal() } else if (backtick && !isEditable) { e.preventDefault(); terminalOverlay.hidden ? openTerminal() : closeTerminal() } else if (e.key === '?' && !isEditable) { e.preventDefault(); openTerminal() } });
   document.addEventListener('click', e => { if (!e.target.closest('#siteHeader')) closeMenu() });
-  window.addEventListener('hashchange', render);
+  const isRouteHash = () => location.hash.startsWith('#/');
+  const scrollToHashTarget = () => {
+    const id = decodeURIComponent(location.hash.slice(1));
+    if (!id) return;
+    requestAnimationFrame(() => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
+  };
+  window.addEventListener('hashchange', () => {
+    if (isRouteHash()) render();
+    else scrollToHashTarget();
+  });
   window.addEventListener('scroll', () => { const max = document.documentElement.scrollHeight - innerHeight; $('#topProgress').style.transform = `scaleX(${max > 0 ? scrollY / max : 0})` }, { passive: true });
   // Accurate IST countdown, with no negative values after the target time.
   const festivalStart = '2026-10-30T09:00:00+05:30';
   function updateCountdown() { const remaining = Math.max(0, new Date(festivalStart).getTime() - Date.now()); const values = [Math.floor(remaining / 86400000), Math.floor(remaining % 86400000 / 3600000), Math.floor(remaining % 3600000 / 60000), Math.floor(remaining % 60000 / 1000)]; $$('[data-countdown]').forEach(el => { el.innerHTML = values.map((value, i) => `<span><b>${String(value).padStart(2, '0')}</b><i>${['DAYS', 'HRS', 'MIN', 'SEC'][i]}</i></span>`).join('') }) }
   updateCountdown(); setInterval(updateCountdown, 1000);
   render();
+  if (!isRouteHash() && location.hash.length > 1) scrollToHashTarget();
   window.VYUHAM_API.status().then(state => {
     if (!state.online) { console.info('VYUHAM API unavailable; using bundled public event data.', state.error); return; }
     const scheduleOverrides = {
       efootball: { day: null, scheduleDays: [], scheduleGroup: 'pre-fest' },
       bgmi: { day: null, scheduleDays: [], scheduleGroup: 'pre-fest' },
       photography: { day: 1, scheduleDays: [1, 2, 3], scheduleGroup: 'multi-day' },
-      'food-court': { day: 1, scheduleDays: [1, 2, 3], scheduleGroup: 'multi-day' },
     };
     const brochureOverrides = {
       'best-manager': { prizes: '₹15,000' },
@@ -445,7 +459,7 @@
     if (typeof state.gate?.reg_open === 'boolean') registrationOpen = state.gate.reg_open; else console.warn('Registration gate endpoint unavailable; retaining the current frontend state.', state.endpointErrors?.gate);
     if (state.endpointErrors?.events) console.warn('Could not load live events; retaining bundled event data.', state.endpointErrors.events);
     if (state.endpointErrors?.announcements) console.warn('Could not load live announcements.', state.endpointErrors.announcements);
-    if (Array.isArray(state.events) && state.events.length) events = state.events.map(normalize);
+    if (Array.isArray(state.events) && state.events.length) events = state.events.map(normalize).filter(isVisibleEvent);
     const current = route();
     if (['home', 'events', 'event', 'schedule', 'streams', 'announcements', 'participate', 'competitions', 'admin'].includes(current.page)) render();
     document.documentElement.dataset.api = 'online';

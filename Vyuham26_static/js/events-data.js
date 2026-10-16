@@ -22,25 +22,6 @@ window.VYUHAM_EVENTS = [
     ]
   },
   {
-    "slug": "hackathon-continues",
-    "title": "Hackathon Continues",
-    "stream": "tech",
-    "day": 1,
-    "time": "Overnight",
-    "venue": "Main Hall",
-    "description": "The 24HR Hackathon continues overnight, including the midnight mentoring round and snacks.",
-    "prizes": "",
-    "fee": "",
-    "eligibility": "Registered 24HR Hackathon participants",
-    "teamSize": "Hackathon teams",
-    "status": "upcoming",
-    "featured": false,
-    "registrationUrl": "",
-    "rules": [
-      "This is part of the main 24-hour Hackathon; no separate registration."
-    ]
-  },
-  {
     "slug": "best-manager",
     "title": "Best Manager",
     "stream": "management",
@@ -274,26 +255,6 @@ window.VYUHAM_EVENTS = [
     ]
   },
   {
-    "slug": "hackathon-demos",
-    "title": "Hackathon Demos & Judging",
-    "stream": "tech",
-    "day": 2,
-    "time": "9:00 AM – 11:00 AM",
-    "venue": "Main Hall",
-    "description": "Open floor demonstrations to the jury.",
-    "prizes": "Finalist Review",
-    "fee": "Hackathon Teams",
-    "eligibility": "24HR Hackathon teams",
-    "teamSize": "Teams",
-    "status": "upcoming",
-    "featured": false,
-    "registrationUrl": "",
-    "rules": [
-      "Open floor demonstration of working prototypes built during 24HR Hackathon",
-      "Jury evaluation based on innovation, technical execution, and impact"
-    ]
-  },
-  {
     "slug": "ctf",
     "title": "Capture the Flag",
     "stream": "tech",
@@ -407,46 +368,6 @@ window.VYUHAM_EVENTS = [
     "featured": false,
     "registrationUrl": "",
     "rules": []
-  },
-  {
-    "slug": "cultural-night",
-    "title": "Cultural Night",
-    "stream": "cultural",
-    "day": 2,
-    "time": "4:00 PM – 7:30 PM",
-    "venue": "Open Air Stage",
-    "description": "By DUK students on the Open Air Stage.",
-    "prizes": "Main Stage Showcase",
-    "fee": "Open to All",
-    "eligibility": "All delegates and visitors",
-    "teamSize": "Open",
-    "status": "upcoming",
-    "featured": true,
-    "registrationUrl": "",
-    "rules": [
-      "Showcase by students of Digital University Kerala",
-      "Acoustic sets, choreographed dance productions, and dramatic performances"
-    ]
-  },
-  {
-    "slug": "dj-night",
-    "title": "DJ Night",
-    "stream": "cultural",
-    "day": 2,
-    "time": "8:00 PM – 10:00 PM",
-    "venue": "Open Air Stage",
-    "description": "Open-air electronic dance music showcase.",
-    "prizes": "Live DJ Showcase",
-    "fee": "Open to All",
-    "eligibility": "All delegates and visitors",
-    "teamSize": "Open",
-    "status": "upcoming",
-    "featured": false,
-    "registrationUrl": "",
-    "rules": [
-      "Live DJ electronic set on the main stage",
-      "Open festival admission with valid fest ID or wristband"
-    ]
   },
   {
     "slug": "workshop-ethical-hacking",
@@ -568,48 +489,6 @@ window.VYUHAM_EVENTS = [
     ]
   },
   {
-    "slug": "fashion-show",
-    "title": "Fashion Show",
-    "stream": "cultural",
-    "day": 3,
-    "time": "6:00 PM – 7:00 PM",
-    "venue": "Open Air Stage",
-    "description": "Student designers and models on the runway. OPEN CALL — NO REG FEE.",
-    "prizes": "Runway Titles",
-    "fee": "OPEN CALL — NO REG FEE",
-    "eligibility": "Student designers and models",
-    "teamSize": "Individual / Teams",
-    "status": "upcoming",
-    "featured": true,
-    "registrationUrl": "",
-    "rules": [
-      "Open call for student designers and models",
-      "Original collections and themed runway showcases",
-      "No registration fee required"
-    ]
-  },
-  {
-    "slug": "concert",
-    "title": "Concert Night",
-    "stream": "cultural",
-    "day": 3,
-    "time": "7:00 PM – 10:00 PM",
-    "venue": "Open Air Stage",
-    "description": "Closing night, Main Stage.",
-    "prizes": "Closing Concert",
-    "fee": "Free Entry",
-    "eligibility": "All festival attendees",
-    "teamSize": "Open",
-    "status": "upcoming",
-    "featured": true,
-    "registrationUrl": "",
-    "rules": [
-      "Three days end on the Open Air Stage",
-      "Headline live musical performance",
-      "Open access with festival pass"
-    ]
-  },
-  {
     "slug": "efootball",
     "title": "E-Football Tournament",
     "stream": "esports",
@@ -683,32 +562,6 @@ window.VYUHAM_EVENTS = [
     "scheduleGroup": "multi-day"
   },
   {
-    "slug": "food-court",
-    "title": "Food Court, Markets & Stalls",
-    "stream": "general",
-    "day": 1,
-    "time": "All Day · 3 Days",
-    "venue": "Campus Grounds",
-    "description": "Open all three days · Campus grounds food court, stalls & merchandise.",
-    "prizes": "Campus Life",
-    "fee": "Open Access",
-    "eligibility": "All attendees",
-    "teamSize": "Open",
-    "status": "upcoming",
-    "featured": false,
-    "registrationUrl": "",
-    "rules": [
-      "Curated food stalls, merchandise, and student pop-ups",
-      "Active throughout all 3 days across Technocity grounds"
-    ],
-    "scheduleDays": [
-      1,
-      2,
-      3
-    ],
-    "scheduleGroup": "multi-day"
-  },
-  {
     "slug": "cdac-workshop",
     "title": "C-DAC Build Lab",
     "stream": "session",
@@ -744,6 +597,7 @@ window.VYUHAM_EVENTS = [
   },
   {
     "slug": "workshop-luminar-technolab",
+    "registrationUrl": "https://org.makemypass.com/web/vyuham-26/events/workshop-on-prompt-engineering",
     "title": "Workshop by Luminar Technolab: Prompt Engineering and Building with LLMs",
     "stream": "session",
     "day": 1,
@@ -751,7 +605,7 @@ window.VYUHAM_EVENTS = [
     "venue": "",
     "description": "",
     "prizes": "",
-    "fee": "",
+    "fee": "₹100",
     "eligibility": "",
     "teamSize": "",
     "status": "upcoming",
