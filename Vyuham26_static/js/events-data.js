@@ -449,26 +449,6 @@ window.VYUHAM_EVENTS = [
     ]
   },
   {
-    "slug": "hackathon-winners",
-    "title": "Hackathon Winners & Prize Distribution",
-    "stream": "tech",
-    "day": 3,
-    "time": "1:00 PM",
-    "venue": "Main Hall",
-    "description": "Closing of the 24HR Hackathon.",
-    "prizes": "₹30,000 Award Distribution",
-    "fee": "Hackathon Teams",
-    "eligibility": "Hackathon participants",
-    "teamSize": "Teams",
-    "status": "upcoming",
-    "featured": false,
-    "registrationUrl": "",
-    "rules": [
-      "Official winner announcement and cash prize distribution ceremony",
-      "All hackathon participants assemble at Main Hall"
-    ]
-  },
-  {
     "slug": "movie-quiz",
     "title": "Movie Quiz",
     "stream": "cultural",
