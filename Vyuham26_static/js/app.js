@@ -9,7 +9,7 @@
   const registrationFeatureEnabled = window.VYUHAM_REGISTRATION_ENABLED === true;
   const MAKEMYPASS_HOME = 'https://org.makemypass.com/web/vyuham-26';
   const MAKEMYPASS_EVENT_PATHS = {
-    hackathon: 'hackathon-24hr', 'workshop-ethical-hacking': 'workshop-ethical-hacking-osint',
+    hackathon: 'hackathon-24hr', 'hackathon-continues': 'hackathon-24hr', 'workshop-ethical-hacking': 'workshop-ethical-hacking-osint',
     'best-manager': 'best-manager-4', 'marketing-game': 'marketing-game-3',
     'best-management-team': 'best-management-team', 'ctf': 'capture-the-flag-3',
     'tech-quiz': 'tech-quiz', 'startup-showcase': 'startup-showcase', 'prompt-war': 'prompt-war',
@@ -44,6 +44,18 @@
     return hour * 60 + Number(match[2]);
   };
   const officialVenue = value => value || 'Not listed in official schedule';
+  const eventDayLabel = event => event.scheduleGroup === 'pre-fest'
+    ? 'PRE-FEST'
+    : event.scheduleDays?.length > 1
+      ? 'ALL 3 DAYS'
+      : Number.isFinite(Number(event.day))
+        ? `DAY 0${event.day}`
+        : 'FESTIVAL';
+  const eventDateLabel = event => event.scheduleGroup === 'pre-fest'
+    ? 'PRE-FESTIVAL'
+    : event.scheduleDays?.length > 1
+      ? '30 OCT – 01 NOV 2026'
+      : days[Number(event.day) - 1]?.date || 'TBA';
   const registrationUrl = event => {
     const supplied = safeExternalUrl(event.registration_url || event.registrationUrl || event.makemypass_url);
     if (supplied) { const url = new URL(supplied); if (url.hostname === 'org.makemypass.com' && url.pathname.startsWith('/web/vyuham-26/events/')) return url.href; }
@@ -80,10 +92,10 @@
   };
   const go = path => { location.hash = '#/' + path.replace(/^\//, ''); };
   const eventCard = e => `<article class="event-card reveal" data-stream="${esc(e.stream)}">
-    <div class="event-art" aria-hidden="true"${safeExternalUrl(e.image) ? ` style="--event-image:url('${esc(safeExternalUrl(e.image))}')"` : ''}><span>VYUHAM / 0${e.day}</span><b>${esc(streamLabel(e.stream))}</b><i>${String(e.day).padStart(2, '0')}</i></div>
-    <div class="event-content"><div class="event-top"><span class="tag">${esc(streamLabel(e.stream))}</span><span class="tag day">DAY 0${e.day}</span></div>
+    <div class="event-art" aria-hidden="true"${safeExternalUrl(e.image) ? ` style="--event-image:url('${esc(safeExternalUrl(e.image))}')"` : ''}><span>VYUHAM / ${esc(eventDayLabel(e))}</span><b>${esc(streamLabel(e.stream))}</b><i>${esc(e.scheduleGroup === 'pre-fest' ? 'PF' : e.scheduleDays?.length > 1 ? '03' : String(e.day ?? '--').padStart(2, '0'))}</i></div>
+    <div class="event-content"><div class="event-top"><span class="tag">${esc(streamLabel(e.stream))}</span><span class="tag day">${esc(eventDayLabel(e))}</span></div>
     <h3><a href="#/event/${encodeURIComponent(e.slug)}">${esc(e.title)}</a></h3><p>${esc(e.description)}</p>
-    <div class="event-meta"><span>PRIZE <strong>${esc(e.prizes)}</strong></span><span>FEE <strong>${esc(e.fee)}</strong></span></div>
+    <div class="event-meta"><span>PRIZE <strong>${esc(e.prizes || 'Not listed')}</strong></span><span>FEE <strong>${esc(e.fee || 'Not listed')}</strong></span></div>
     <div class="event-actions"><a class="text-link" href="#/event/${encodeURIComponent(e.slug)}">VIEW DOSSIER <span>↗</span></a><a class="button button-outline" href="#/event/${encodeURIComponent(e.slug)}">DETAILS</a>${registrationCta(registrationUrl(e), 'REGISTER ↗', 'button button-primary', e)}</div></div>
   </article>`;
   const pageHero = (kicker, title, desc, heroClass = '') => { const showCornerLogo = ['events-page-hero', 'participation-page-hero', 'competitions-page-hero', 'streams-page-hero'].includes(heroClass); return `<section class="page-hero ${heroClass}"><div class="container"><div class="breadcrumb"><a href="#/home">VYUHAM’26</a> / ${esc(kicker.toUpperCase())}</div><div class="eyebrow">${esc(kicker)}</div><h1>${title}</h1><p>${desc}</p></div>${showCornerLogo ? '<img class="page-hero-corner-logo" src="assets/vyuham_logo_sm.png" alt="VYUHAM emblem" width="72" height="72">' : ''}</section>` };
@@ -111,7 +123,7 @@
   const eventsPage = (query = '') => {
     const params = new URLSearchParams(query), selected = params.get('stream') || 'all';
     return `${pageHero('Event archive', 'FIND YOUR<br><span class="green">ARENA.</span>', 'Explore competitions, challenges and experiences across VYUHAM’26. Filter by stream or search for an event.', 'events-page-hero')}
-      <section class="section"><div class="container"><div class="notice">Registration and ticket payments are completed on MakeMyPass. Select an event to view its official registration page.</div><div class="filter-bar"><label class="search-box"><input id="eventSearch" type="search" placeholder="Search events, keywords…" aria-label="Search events"></label><label class="event-filter"><span>DAY</span><select id="eventDay"><option value="all">All days</option><option value="1">Day 1 · Oct 30</option><option value="2">Day 2 · Oct 31</option><option value="3">Day 3 · Nov 1</option></select></label><label class="event-filter"><span>SORT</span><select id="eventSort"><option value="day">Festival order</option><option value="name">Name A–Z</option><option value="fee">Fee · low to high</option></select></label></div><div class="filter-pills" id="streamFilters">${[['all', 'ALL EVENTS'], ['tech', 'TECHNOLOGY'], ['management', 'MANAGEMENT'], ['cultural', 'CULTURE'], ['esports', 'ESPORTS']].map(([id, label]) => `<button class="filter-pill ${selected === id ? 'active' : ''}" data-stream="${id}">${label}</button>`).join('')}</div><p class="muted mono" style="font-size:10px;margin:22px 0" id="eventCount"></p><div class="events-grid" id="eventsGrid"></div><p style="text-align:center;margin-top:34px">${registrationCta(MAKEMYPASS_HOME, 'VIEW ALL EVENTS ON MAKEMYPASS ↗', 'button button-outline')}</p></div></section>`;
+      <section class="section"><div class="container"><div class="notice">Registration and ticket payments are completed on MakeMyPass. Select an event to view its official registration page.</div><div class="filter-bar"><label class="search-box"><input id="eventSearch" type="search" placeholder="Search events, keywords…" aria-label="Search events"></label><label class="event-filter"><span>DAY</span><select id="eventDay"><option value="all">All events</option><option value="1">Day 1 · Oct 30</option><option value="2">Day 2 · Oct 31</option><option value="3">Day 3 · Nov 1</option></select></label><label class="event-filter"><span>SORT</span><select id="eventSort"><option value="day">Festival order</option><option value="name">Name A–Z</option><option value="fee">Fee · low to high</option></select></label></div><div class="filter-pills" id="streamFilters">${[['all', 'ALL EVENTS'], ['tech', 'TECHNOLOGY'], ['management', 'MANAGEMENT'], ['cultural', 'CULTURE'], ['esports', 'ESPORTS']].map(([id, label]) => `<button class="filter-pill ${selected === id ? 'active' : ''}" data-stream="${id}">${label}</button>`).join('')}</div><p class="muted mono" style="font-size:10px;margin:22px 0" id="eventCount"></p><div class="events-grid" id="eventsGrid"></div><p style="text-align:center;margin-top:34px">${registrationCta(MAKEMYPASS_HOME, 'VIEW ALL EVENTS ON MAKEMYPASS ↗', 'button button-outline')}</p></div></section>`;
   };
   const eventDetail = slug => {
     const e = events.find(x => x.slug === decodeURIComponent(slug));
@@ -119,7 +131,7 @@
     const image = safeExternalUrl(e.image);
     const hero = image ? `<section class="page-hero event-page-hero" style="--event-hero-image:url('${esc(image)}')"><div class="container"><div class="breadcrumb"><a href="#/home">VYUHAM’26</a> / EVENT DOSSIER</div><div class="eyebrow">EVENT DOSSIER</div><h1>${esc(e.title)}</h1><p>Event details, schedule information and participation overview for VYUHAM’26.</p></div></section>` : pageHero('Event dossier', esc(e.title), 'Event details, schedule information and participation overview for VYUHAM’26.');
     return `${hero}
-    <section class="section"><div class="container"><a class="back-link" href="#/events">← BACK TO EVENT ARCHIVE</a><div class="event-detail"><div><div class="eyebrow">${esc(streamLabel(e.stream))} / DAY 0${e.day}</div><h2>${esc(e.title)}</h2><p class="muted" style="line-height:1.9">${esc(e.description)}</p><h3 style="margin-top:35px">Participation notes</h3>${e.rules && e.rules.length ? `<ul class="rule-list">${e.rules.map(r => `<li>${esc(r)}</li>`).join('')}</ul>` : '<p class="muted">Detailed rules will be published by the event organizers.</p>'}<div class="notice">MakeMyPass is the official registration and payment provider. Review final event details and complete your registration on the event’s MakeMyPass page.</div></div><aside class="detail-panel"><div class="eyebrow">EVENT INTEL</div><dl><div><dt>DATE</dt><dd>${esc(days[e.day - 1]?.date || 'TBA')}</dd></div><div><dt>TIME</dt><dd>${esc(e.time)}</dd></div><div><dt>VENUE</dt><dd>${esc(officialVenue(e.venue))}</dd></div><div><dt>PRIZE</dt><dd class="green">${esc(e.prizes)}</dd></div><div><dt>ENTRY FEE</dt><dd>${esc(e.fee)}</dd></div><div><dt>TEAM SIZE</dt><dd>${esc(e.teamSize)}</dd></div><div><dt>ELIGIBILITY</dt><dd>${esc(e.eligibility)}</dd></div></dl>${registrationCta(registrationUrl(e), 'REGISTER & PAY ON MAKEMYPASS ↗', 'button button-primary event-register-cta', e)}<p class="muted" style="font-size:10px;margin:12px 0 0">Opens the official listing for this event. If its link is not mapped yet, MakeMyPass opens the VYUHAM event directory.</p></aside></div></div></section>`;
+      <section class="section"><div class="container"><a class="back-link" href="#/events">← BACK TO EVENT ARCHIVE</a><div class="event-detail"><div><div class="eyebrow">${esc(streamLabel(e.stream))} / ${esc(eventDayLabel(e))}</div><h2>${esc(e.title)}</h2><p class="muted" style="line-height:1.9">${esc(e.description)}</p><h3 style="margin-top:35px">Participation notes</h3>${e.rules && e.rules.length ? `<ul class="rule-list">${e.rules.map(r => `<li>${esc(r)}</li>`).join('')}</ul>` : '<p class="muted">Detailed rules will be published by the event organizers.</p>'}<div class="notice">MakeMyPass is the official registration and payment provider. Review final event details and complete your registration on the event’s MakeMyPass page.</div></div><aside class="detail-panel"><div class="eyebrow">EVENT INTEL</div><dl><div><dt>DATE</dt><dd>${esc(eventDateLabel(e))}</dd></div><div><dt>TIME</dt><dd>${esc(e.time)}</dd></div><div><dt>VENUE</dt><dd>${esc(officialVenue(e.venue))}</dd></div><div><dt>PRIZE</dt><dd class="green">${esc(e.prizes || 'Not listed')}</dd></div><div><dt>ENTRY FEE</dt><dd>${esc(e.fee || 'Not listed')}</dd></div><div><dt>TEAM SIZE</dt><dd>${esc(e.teamSize)}</dd></div><div><dt>ELIGIBILITY</dt><dd>${esc(e.eligibility)}</dd></div></dl>${registrationCta(registrationUrl(e), 'REGISTER & PAY ON MAKEMYPASS ↗', 'button button-primary event-register-cta', e)}<p class="muted" style="font-size:10px;margin:12px 0 0">Opens the official listing for this event. If its link is not mapped yet, MakeMyPass opens the VYUHAM event directory.</p></aside></div></div></section>`;
   };
   const schedulePage = () => `<section class="page-hero schedule-page-hero"><div class="container"><div class="breadcrumb"><a href="#/home">VYUHAM’26</a> / FESTIVAL TIMELINE</div><div class="eyebrow">Festival timeline</div><h1>THREE DAYS.<br><span class="green">NO PAUSE.</span></h1><p>Plan your VYUHAM’26 experience. Event-specific timings and venues should be confirmed with the official schedule.</p></div><img class="schedule-hero-logo" src="assets/vyuham_logo_sm.png" alt="VYUHAM emblem" width="72" height="72"></section>
     <section class="section"><div class="container"><div class="schedule-days" id="scheduleDays">${days.map(d => `<button class="schedule-day schedule-day-${d.day}" type="button" aria-pressed="${d.day === 1}" data-day="${d.day}"><b>DAY 0${d.day} <i>· ${d.date}</i></b><span>${d.name}</span><small>${d.desc}</small><em>VIEW DAY <strong>↘</strong></em></button>`).join('')}</div><div id="scheduleContent"></div><div class="notice">Event times and listed venues follow the official schedule. A venue marked “Not listed in official schedule” was not specified in that document.</div></div></section>`;
@@ -196,12 +208,16 @@
       const filtered = events.filter(e => {
         if (e.status === 'cancelled') return false;
         const streamOk = selected === 'all' || e.stream === selected || (selected === 'tech' && e.stream === 'technology') || (selected === 'cultural' && e.stream === 'culture') || (selected === 'esports' && e.stream === 'gaming');
-        const dayOk = day === 'all' || Number(e.day) === Number(day);
+        const eventDays = Array.isArray(e.scheduleDays) ? e.scheduleDays : (e.day == null ? [] : [Number(e.day)]);
+        const dayOk = day === 'all' || eventDays.includes(Number(day));
         const hay = [e.title, e.description, e.stream, e.venue].join(' ').toLowerCase(); return streamOk && dayOk && hay.includes(search.toLowerCase());
       });
       if (sort === 'name') filtered.sort((a, b) => a.title.localeCompare(b.title));
       if (sort === 'fee') filtered.sort((a, b) => { const cost = e => { const m = String(e.fee || '').match(/[\d,]+/); return m ? Number(m[0].replaceAll(',', '')) : Infinity }; return cost(a) - cost(b) });
-      if (sort === 'day') filtered.sort((a, b) => (Number(a.day) || 9) - (Number(b.day) || 9) || a.title.localeCompare(b.title));
+      if (sort === 'day') filtered.sort((a, b) => {
+        const order = e => e.scheduleGroup === 'pre-fest' ? 0 : (e.scheduleDays?.length ? Math.min(...e.scheduleDays) : Number(e.day) || 9);
+        return order(a) - order(b) || a.title.localeCompare(b.title);
+      });
       count.textContent = `${String(filtered.length).padStart(2, '0')} EVENTS FOUND / ${events.length} ${document.documentElement.dataset.api === 'online' ? 'LIVE API' : 'CATALOG'} RECORDS`;
       grid.innerHTML = filtered.length ? filtered.map(eventCard).join('') : '<div class="empty-state" style="grid-column:1/-1">No events match these filters. Clear a filter or try another search.</div>';
       $$('#streamFilters .filter-pill').forEach(b => b.classList.toggle('active', b.dataset.stream === selected)); observeReveals();
@@ -215,7 +231,10 @@
   function renderSchedule(day = 1) {
     const selected = Number(day) || 1; const d = days.find(x => x.day === selected) || days[0];
     $$('#scheduleDays button').forEach(b => { const active = Number(b.dataset.day) === selected; b.classList.toggle('active', active); b.setAttribute('aria-pressed', String(active)) });
-    const dayEvents = events.filter(e => e.day === selected && e.status !== 'cancelled').sort((a, b) => scheduleMinutes(a.time) - scheduleMinutes(b.time));
+    const dayEvents = events.filter(e => {
+      const eventDays = Array.isArray(e.scheduleDays) ? e.scheduleDays : (e.day == null ? [] : [Number(e.day)]);
+      return eventDays.includes(selected) && e.status !== 'cancelled';
+    }).sort((a, b) => scheduleMinutes(a.time) - scheduleMinutes(b.time));
     $('#scheduleContent').innerHTML = `<div class="schedule-heading"><div><div class="eyebrow">DAY 0${d.day} / ${d.date}</div><h2>${d.name}</h2></div><p class="muted">${d.desc}</p></div><div class="schedule-list">${dayEvents.length ? dayEvents.map((e, index) => `<article class="schedule-row"><div class="schedule-time"><span>0${String(index + 1).padStart(2, '0')}</span><time>${esc(e.time)}</time></div><div class="schedule-event"><span class="schedule-stream">${esc(streamLabel(e.stream))}</span><h3><a href="#/event/${encodeURIComponent(e.slug)}">${esc(e.title)}</a></h3><p>${esc(e.description)}</p></div><div class="venue"><span>LOCATION</span><b>⌖ ${esc(officialVenue(e.venue))}</b></div></article>`).join('') : '<div class="empty-state">No event records are currently listed for this day.</div>'}</div>`;
   }
   function observeReveals() {
@@ -394,7 +413,35 @@
   render();
   window.VYUHAM_API.status().then(state => {
     if (!state.online) { console.info('VYUHAM API unavailable; using bundled public event data.', state.error); return; }
-    const normalize = e => ({ ...e, title: e.title || e.name, description: e.description || e.blurb || '', stream: ({ tech: 'technology', culture: 'cultural', gaming: 'esports', impact: 'management' })[e.stream] || e.stream, day: Number(e.day) || 1, time: e.time || 'TBA', venue: e.venue || 'TBA', prizes: e.prizes || (e.prize_amount ? `₹${Number(e.prize_amount).toLocaleString('en-IN')}` : 'TBA'), fee: e.fee || 'TBA', teamSize: e.teamSize || 'Solo', eligibility: e.eligibility || 'Open to students', registrationUrl: e.registration_url || e.makemypass_url || null });
+    const scheduleOverrides = {
+      efootball: { day: null, scheduleDays: [], scheduleGroup: 'pre-fest' },
+      bgmi: { day: null, scheduleDays: [], scheduleGroup: 'pre-fest' },
+      photography: { day: 1, scheduleDays: [1, 2, 3], scheduleGroup: 'multi-day' },
+      'food-court': { day: 1, scheduleDays: [1, 2, 3], scheduleGroup: 'multi-day' },
+    };
+    const brochureOverrides = {
+      'best-manager': { prizes: '₹15,000' },
+      'marketing-game': { fee: '₹400' },
+      'finance-game': { fee: '₹400' },
+      'hr-game': { fee: '₹400' },
+      'cdac-workshop': { stream: 'session' },
+      'project-expo-ieee': { stream: 'general', prizes: '₹10,000', fee: '' },
+    };
+    const normalize = e => {
+      const schedule = scheduleOverrides[e.slug] || {};
+      const brochure = brochureOverrides[e.slug] || {};
+      return {
+        ...e, ...schedule, ...brochure,
+        title: e.title || e.name,
+        description: e.description || e.blurb || '',
+        stream: brochure.stream || ({ tech: 'technology', culture: 'cultural', gaming: 'esports', impact: 'management' })[e.stream] || e.stream,
+        day: Object.hasOwn(schedule, 'day') ? schedule.day : Number(e.day) || null,
+        time: e.time || 'TBA', venue: e.venue || 'TBA',
+        prizes: Object.hasOwn(brochure, 'prizes') ? brochure.prizes : e.prizes || (e.prize_amount ? `₹${Number(e.prize_amount).toLocaleString('en-IN')}` : 'TBA'),
+        fee: Object.hasOwn(brochure, 'fee') ? brochure.fee : e.fee || 'TBA', teamSize: e.teamSize || 'Solo', eligibility: e.eligibility || 'Open to students',
+        registrationUrl: e.registration_url || e.makemypass_url || null,
+      };
+    };
     if (typeof state.gate?.reg_open === 'boolean') registrationOpen = state.gate.reg_open; else console.warn('Registration gate endpoint unavailable; retaining the current frontend state.', state.endpointErrors?.gate);
     if (state.endpointErrors?.events) console.warn('Could not load live events; retaining bundled event data.', state.endpointErrors.events);
     if (state.endpointErrors?.announcements) console.warn('Could not load live announcements.', state.endpointErrors.announcements);

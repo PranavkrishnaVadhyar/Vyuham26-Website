@@ -22,6 +22,25 @@ window.VYUHAM_EVENTS = [
     ]
   },
   {
+    "slug": "hackathon-continues",
+    "title": "Hackathon Continues",
+    "stream": "tech",
+    "day": 1,
+    "time": "Overnight",
+    "venue": "Main Hall",
+    "description": "The 24HR Hackathon continues overnight, including the midnight mentoring round and snacks.",
+    "prizes": "",
+    "fee": "",
+    "eligibility": "Registered 24HR Hackathon participants",
+    "teamSize": "Hackathon teams",
+    "status": "upcoming",
+    "featured": false,
+    "registrationUrl": "",
+    "rules": [
+      "This is part of the main 24-hour Hackathon; no separate registration."
+    ]
+  },
+  {
     "slug": "best-manager",
     "title": "Best Manager",
     "stream": "management",
@@ -29,7 +48,7 @@ window.VYUHAM_EVENTS = [
     "time": "10:00 AM – 5:00 PM",
     "venue": "Gallery Hall",
     "description": "Aptitude, crisis management & leadership interview.",
-    "prizes": "₹25,000",
+    "prizes": "₹15,000",
     "fee": "₹200",
     "eligibility": "UG/PG students across India",
     "teamSize": "Solo",
@@ -72,7 +91,7 @@ window.VYUHAM_EVENTS = [
     "venue": "Gallery Hall",
     "description": "Product & campaign strategy simulation.",
     "prizes": "₹15,000",
-    "fee": "₹300",
+    "fee": "₹400",
     "eligibility": "Open to all college students",
     "teamSize": "Teams of 2–3",
     "status": "upcoming",
@@ -92,7 +111,7 @@ window.VYUHAM_EVENTS = [
     "venue": "Gallery Hall",
     "description": "Simulated crisis — risk, budget & strategy.",
     "prizes": "₹15,000",
-    "fee": "₹300",
+    "fee": "₹400",
     "eligibility": "Open to all students",
     "teamSize": "Teams of 2–3",
     "status": "upcoming",
@@ -112,7 +131,7 @@ window.VYUHAM_EVENTS = [
     "venue": "Gallery Hall",
     "description": "Debates, HR crossword, minefield & case studies.",
     "prizes": "₹15,000",
-    "fee": "₹300",
+    "fee": "₹400",
     "eligibility": "Open to all students",
     "teamSize": "Teams of 2–3",
     "status": "upcoming",
@@ -594,7 +613,7 @@ window.VYUHAM_EVENTS = [
     "slug": "efootball",
     "title": "E-Football Tournament",
     "stream": "esports",
-    "day": 1,
+    "day": null,
     "time": "Online Qualifiers",
     "venue": "Online",
     "description": "Online qualifiers for E-Football championship.",
@@ -609,13 +628,15 @@ window.VYUHAM_EVENTS = [
       "Pre-Fest: 5 days before festival kickoff",
       "1v1 online knockout tournament",
       "Registered player fixtures and live result tracking"
-    ]
+    ],
+    "scheduleDays": [],
+    "scheduleGroup": "pre-fest"
   },
   {
     "slug": "bgmi",
     "title": "BGMI Tournament",
     "stream": "esports",
-    "day": 1,
+    "day": null,
     "time": "Online Qualifiers",
     "venue": "Online",
     "description": "Online qualifiers for BGMI battle royale tournament.",
@@ -630,7 +651,9 @@ window.VYUHAM_EVENTS = [
       "Pre-Fest: 5 days before festival kickoff",
       "Squad-based Battle Royale elimination brackets",
       "Aggregate points scoring across qualifier matches"
-    ]
+    ],
+    "scheduleDays": [],
+    "scheduleGroup": "pre-fest"
   },
   {
     "slug": "photography",
@@ -651,7 +674,13 @@ window.VYUHAM_EVENTS = [
       "Campus-wide photography and filmmaking competition",
       "Capture the spirit, architecture, and action of VYUHAM '26",
       "Submissions open across all 3 festival days"
-    ]
+    ],
+    "scheduleDays": [
+      1,
+      2,
+      3
+    ],
+    "scheduleGroup": "multi-day"
   },
   {
     "slug": "food-court",
@@ -671,12 +700,18 @@ window.VYUHAM_EVENTS = [
     "rules": [
       "Curated food stalls, merchandise, and student pop-ups",
       "Active throughout all 3 days across Technocity grounds"
-    ]
+    ],
+    "scheduleDays": [
+      1,
+      2,
+      3
+    ],
+    "scheduleGroup": "multi-day"
   },
   {
     "slug": "cdac-workshop",
     "title": "C-DAC Build Lab",
-    "stream": "tech",
+    "stream": "session",
     "day": 2,
     "time": "10:00 AM – 11:00 AM",
     "venue": "",
@@ -693,13 +728,13 @@ window.VYUHAM_EVENTS = [
   {
     "slug": "project-expo-ieee",
     "title": "Project Expo by IEEE",
-    "stream": "tech",
+    "stream": "general",
     "day": 2,
     "time": "11:00 AM – 1:00 PM",
     "venue": "Gallery Hall",
     "description": "Explore student innovation at the IEEE project expo.",
-    "prizes": "Project Showcase",
-    "fee": "₹100 onwards",
+    "prizes": "₹10,000",
+    "fee": "",
     "eligibility": "Open to attendees",
     "teamSize": "Teams",
     "status": "upcoming",
