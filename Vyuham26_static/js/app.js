@@ -4,8 +4,8 @@
   const $$ = (s, root = document) => [...root.querySelectorAll(s)];
   const app = $('#app');
   let events = Array.isArray(window.VYUHAM_EVENTS) ? window.VYUHAM_EVENTS : [];
-  const hiddenEventSlugs = new Set(['hackathon-continues', 'hackathon-demos', 'hackathon-winners', 'cultural-night', 'dj-night', 'concert', 'fashion-show', 'food-court']);
-  const hiddenEventTitles = new Set(['hackathon continues', 'hackathon demos & judging', 'hackathon winners & prize distribution', 'cultural night', 'dj night', 'concert night', 'fashion show', 'food court, markets & stalls']);
+  const hiddenEventSlugs = new Set(['hackathon-continues', 'hackathon-demos', 'hackathon-winners', 'inauguration-ceremony', 'cultural-night', 'dj-night', 'concert', 'fashion-show', 'food-court']);
+  const hiddenEventTitles = new Set(['hackathon continues', 'hackathon demos & judging', 'hackathon winners & prize distribution', 'inauguration ceremony', 'cultural night', 'dj night', 'concert night', 'fashion show', 'food court, markets & stalls']);
   const isVisibleEvent = event => !hiddenEventSlugs.has(event.slug) && !hiddenEventTitles.has(String(event.title || event.name || '').trim().toLowerCase());
   events = events.filter(isVisibleEvent);
   let registrationOpen = true;
@@ -437,7 +437,16 @@
       photography: { day: 1, scheduleDays: [1, 2, 3], scheduleGroup: 'multi-day' },
     };
     const brochureOverrides = {
-      'best-manager': { prizes: '₹15,000' },
+      hackathon: { registrationUrl: 'https://org.makemypass.com/web/vyuham-26/events/hackathon-24hr' },
+      'best-manager': { registrationUrl: 'https://org.makemypass.com/web/vyuham-26/events/best-manager-4', prizes: '₹15,000' },
+      'panel-responsible-ai': { registrationUrl: 'https://makemypass.com/event/beyond-accuracy-ai-panel-discussion' },
+      'talk-quantum-ai': { prizes: 'Not listed' },
+      'workshop-prompt-engineering': { registrationUrl: 'https://org.makemypass.com/web/vyuham-26/events/hands-on-workshop' },
+      'workshop-luminar-technolab': { registrationUrl: 'https://org.makemypass.com/web/vyuham-26/events/workshop-on-prompt-engineering' },
+      ctf: {
+        time: '10:00 AM – 5:00 PM', prizes: '₹35,000+', fee: '₹500 per team', teamSize: '2–3 members',
+        rules: ['Jeopardy-style security challenge matrix', 'Categories: Cryptography, Web Exploitation, Reverse Engineering, ML Security, OSINT, Blockchain and Forensics', 'Food and refreshments will be provided', 'Strict anti-sharing and infrastructure protection rules'],
+      },
       'marketing-game': { fee: '₹400' },
       'finance-game': { fee: '₹400' },
       'hr-game': { fee: '₹400' },
@@ -453,10 +462,10 @@
         description: e.description || e.blurb || '',
         stream: brochure.stream || ({ tech: 'technology', culture: 'cultural', gaming: 'esports', impact: 'management' })[e.stream] || e.stream,
         day: Object.hasOwn(schedule, 'day') ? schedule.day : Number(e.day) || null,
-        time: e.time || 'TBA', venue: e.venue || 'TBA',
+        time: brochure.time || e.time || 'TBA', venue: e.venue || 'TBA',
         prizes: Object.hasOwn(brochure, 'prizes') ? brochure.prizes : e.prizes || (e.prize_amount ? `₹${Number(e.prize_amount).toLocaleString('en-IN')}` : 'TBA'),
-        fee: Object.hasOwn(brochure, 'fee') ? brochure.fee : e.fee || 'TBA', teamSize: e.teamSize || 'Solo', eligibility: e.eligibility || 'Open to students',
-        registrationUrl: e.registration_url || e.makemypass_url || null,
+        fee: Object.hasOwn(brochure, 'fee') ? brochure.fee : e.fee || 'TBA', teamSize: brochure.teamSize || e.teamSize || 'Solo', eligibility: e.eligibility || 'Open to students',
+        registrationUrl: brochure.registrationUrl || e.registration_url || e.makemypass_url || e.registrationUrl || null,
       };
     };
     if (typeof state.gate?.reg_open === 'boolean') registrationOpen = state.gate.reg_open; else console.warn('Registration gate endpoint unavailable; retaining the current frontend state.', state.endpointErrors?.gate);

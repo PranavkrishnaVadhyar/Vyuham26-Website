@@ -13,7 +13,7 @@ window.VYUHAM_EVENTS = [
     "teamSize": "3–5 members",
     "status": "upcoming",
     "featured": true,
-    "registrationUrl": "https://makemypass.com/event/vyuham26-hackathon",
+    "registrationUrl": "https://org.makemypass.com/web/vyuham-26/events/hackathon-24hr",
     "rules": [
       "24 uninterrupted hours of collaborative building",
       "Theme: Agentic AI / Autonomous Systems",
@@ -35,7 +35,7 @@ window.VYUHAM_EVENTS = [
     "teamSize": "Solo",
     "status": "upcoming",
     "featured": true,
-    "registrationUrl": "https://makemypass.com/event/vyuham26-best-manager",
+    "registrationUrl": "https://org.makemypass.com/web/vyuham-26/events/best-manager-4",
     "rules": [
       "Individual participation",
       "Rounds: Aptitude test, Case study, Stress interview",
@@ -168,7 +168,7 @@ window.VYUHAM_EVENTS = [
     "time": "12:00 PM – 1:30 PM",
     "venue": "Seminar Hall",
     "description": "",
-    "prizes": "Keynote Talk",
+    "prizes": "Not listed",
     "fee": "Free Entry",
     "eligibility": "Open to all attendees",
     "teamSize": "Open",
@@ -191,28 +191,8 @@ window.VYUHAM_EVENTS = [
     "teamSize": "",
     "status": "upcoming",
     "featured": false,
-    "registrationUrl": "",
+    "registrationUrl": "https://org.makemypass.com/web/vyuham-26/events/hands-on-workshop",
     "rules": []
-  },
-  {
-    "slug": "inauguration-ceremony",
-    "title": "Inauguration Ceremony",
-    "stream": "general",
-    "day": 1,
-    "time": "5:00 PM",
-    "venue": "Open Air Stage",
-    "description": "Official opening of VYUHAM ’26 · Main Stage.",
-    "prizes": "Opening Milestone",
-    "fee": "Open to All",
-    "eligibility": "All participants and visitors",
-    "teamSize": "Open",
-    "status": "upcoming",
-    "featured": true,
-    "registrationUrl": "",
-    "rules": [
-      "Official festival opening ceremony, dignitary addresses, and lighting of the lamp",
-      "All festival delegates and guests assemble at the Open Air Stage"
-    ]
   },
   {
     "slug": "play-fest",
@@ -259,19 +239,20 @@ window.VYUHAM_EVENTS = [
     "title": "Capture the Flag",
     "stream": "tech",
     "day": 2,
-    "time": "10:00 AM – 10:00 PM",
+    "time": "10:00 AM – 5:00 PM",
     "venue": "Computer Lab",
     "description": "Cybersecurity puzzles and challenges.",
-    "prizes": "₹15,000",
-    "fee": "₹400",
+    "prizes": "₹35,000+",
+    "fee": "₹500 per team",
     "eligibility": "Open to all cybersecurity enthusiasts",
-    "teamSize": "1–2 members",
+    "teamSize": "2–3 members",
     "status": "upcoming",
     "featured": true,
     "registrationUrl": "",
     "rules": [
       "Jeopardy-style security challenge matrix",
-      "Categories: Cryptography, Web Exploitation, Reverse Engineering, ML Security, Web3.0and Forensics",
+      "Categories: Cryptography, Web Exploitation, Reverse Engineering, ML Security, OSINT, Blockchain and Forensics",
+      "Food and refreshments will be provided",
       "Strict anti-sharing and infrastructure protection rules"
     ]
   },
