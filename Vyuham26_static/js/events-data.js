@@ -524,20 +524,24 @@ window.VYUHAM_EVENTS = [
   },
   {
     "slug": "cdac-workshop",
-    "title": "C-DAC Build Lab",
+    "title": "VEGA Processors & Ecosystem by C-DAC",
     "stream": "session",
     "day": 2,
     "time": "10:00 AM – 11:00 AM",
     "venue": "",
-    "description": "",
+    "description": "The DIR-V VEGA workshop introduces the VEGA series of processors and its ecosystem, covering theoretical concepts and practical applications. Participants will explore VEGA processors, development boards, the Software Development Kit (SDK), and application development.",
+    "cardDescription": "Explore VEGA processors through practical sessions.",
     "prizes": "",
     "fee": "",
     "eligibility": "",
     "teamSize": "",
+    "speaker": "Mr. Arun A",
     "status": "upcoming",
     "featured": false,
     "registrationUrl": "",
-    "rules": []
+    "rules": [
+      "Hands-on sessions using the ARIES development board, which is Arduino-compatible."
+    ]
   },
   {
     "slug": "project-expo-ieee",
@@ -558,7 +562,6 @@ window.VYUHAM_EVENTS = [
   },
   {
     "slug": "workshop-luminar-technolab",
-    "registrationUrl": "https://org.makemypass.com/web/vyuham-26/events/workshop-on-prompt-engineering",
     "title": "Workshop by Luminar Technolab: Prompt Engineering and Building with LLMs",
     "stream": "session",
     "day": 1,
@@ -571,7 +574,7 @@ window.VYUHAM_EVENTS = [
     "teamSize": "",
     "status": "upcoming",
     "featured": false,
-    "registrationUrl": "",
+    "registrationUrl": "https://org.makemypass.com/web/vyuham-26/events/workshop-on-prompt-engineering",
     "rules": []
   }
 ];

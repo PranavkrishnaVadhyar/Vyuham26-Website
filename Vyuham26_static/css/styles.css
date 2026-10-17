@@ -548,7 +548,7 @@ h1,h2,h3,.brand b,.stream-card strong,.home-event strong,.day-card h3,.stage-bra
 /* Clearer event-card typography and prize/fee hierarchy. */
 .events-grid .event-content h3{font-family:'Barlow Condensed','Arial Narrow',sans-serif!important;font-size:23px;line-height:1.12;font-weight:600;letter-spacing:-.015em;margin:14px 0 8px}
 .events-grid .event-card .event-art b{font-family:'Barlow Condensed','Arial Narrow',sans-serif!important;font-size:19px;font-weight:600;letter-spacing:0}
-.events-grid .event-content>p{font-size:12px;line-height:1.6;min-height:54px}
+.events-grid .event-content>p{font-size:10px;line-height:1.55;min-height:48px}
 .events-grid .event-meta{gap:10px;border-color:#c58b7338;padding-top:13px;font-size:9px;letter-spacing:.04em}
 .events-grid .event-meta span{gap:5px;min-width:110px;padding:9px 11px;border:1px solid #c58b7326;border-radius:7px;background:#c58b730b}
 .events-grid .event-meta span{color:#d3a184;font-size:8px;font-weight:700;letter-spacing:.1em}
