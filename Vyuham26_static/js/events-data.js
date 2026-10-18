@@ -413,24 +413,30 @@ window.VYUHAM_EVENTS = [
     "rules": []
   },
   {
-    "slug": "valorant",
-    "title": "Valorant Tournament",
+    "slug": "fifa-27",
+    "title": "FIFA 27 Tournament",
     "stream": "esports",
     "day": 3,
     "time": "10:00 AM – 1:00 PM",
-    "venue": "Live / Online",
-    "description": "Championship decider — LIVE / ONLINE esports championship.",
+    "venue": "DUK Campus (PlayStation Arena)",
+    "description": "Championship decider on PlayStation consoles. 1v1 Single Elimination EA SPORTS FC / FIFA 27 tournament.",
+    "cardDescription": "1v1 Single Elimination PlayStation tournament for college students and Technopark employees.",
     "prizes": "₹10,000",
-    "fee": "₹500",
-    "eligibility": "Open to verified esports teams",
-    "teamSize": "5 members",
+    "fee": "₹50",
+    "eligibility": "College students and Technopark employees (Valid ID mandatory)",
+    "teamSize": "Individual (1v1)",
     "status": "upcoming",
     "featured": true,
     "registrationUrl": "",
     "rules": [
-      "5v5 competitive tactical shooter format",
-      "Live and online championship decider bracket",
-      "Official anti-cheat and referee validation"
+      "Conducted offline at Digital University Kerala campus on PlayStation consoles",
+      "Format: 1v1 Single Elimination (winner advances, loser is eliminated)",
+      "Matches follow a predefined schedule with strict reporting time",
+      "Open to college students and Technopark employees (valid college or employee ID mandatory)",
+      "All participants must be pre-registered (walk-ins and on-the-spot registrations strictly not allowed)",
+      "Consoles provided by organizers; players must use approved controllers",
+      "Prize Pool: ₹10,000 (1st Place: ₹5,000 | 2nd Place: ₹3,000 | 3rd Place: ₹2,000)",
+      "Tournament admins' decisions are final in all disputes"
     ]
   },
   {
@@ -463,15 +469,18 @@ window.VYUHAM_EVENTS = [
     "description": "Online qualifiers for E-Football championship.",
     "prizes": "₹5,000",
     "fee": "ONLINE REG: ₹50/HEAD",
-    "eligibility": "Open to all players",
-    "teamSize": "Individual",
+    "eligibility": "Open to college students (Valid college ID mandatory)",
+    "teamSize": "Individual (1v1)",
     "status": "upcoming",
     "featured": false,
     "registrationUrl": "",
     "rules": [
-      "Pre-Fest: 5 days before festival kickoff",
-      "1v1 online knockout tournament",
-      "Registered player fixtures and live result tracking"
+      "Online 1v1 Single Elimination format — winner advances, loser is eliminated",
+      "Match duration: 8 minutes per match",
+      "Pre-Fest: Online qualifiers with predefined match schedule",
+      "Open to college students (valid college ID mandatory)",
+      "Pre-registered participants only; no walk-ins or on-the-spot registrations",
+      "Prize Pool: ₹5,000 (1st Place: ₹3,000 | 2nd Place: ₹2,000)"
     ],
     "scheduleDays": [],
     "scheduleGroup": "pre-fest"
@@ -484,17 +493,21 @@ window.VYUHAM_EVENTS = [
     "time": "Online Qualifiers",
     "venue": "Online",
     "description": "Online qualifiers for BGMI battle royale tournament.",
-    "prizes": "₹6,000",
+    "prizes": "₹5,000",
     "fee": "ONLINE REG: ₹50/HEAD",
-    "eligibility": "Open to mobile esports squads",
+    "eligibility": "Open to college students (Valid college ID mandatory)",
     "teamSize": "Squad of 4",
     "status": "upcoming",
     "featured": false,
     "registrationUrl": "",
     "rules": [
-      "Pre-Fest: 5 days before festival kickoff",
-      "Squad-based Battle Royale elimination brackets",
-      "Aggregate points scoring across qualifier matches"
+      "Online Battle Royale — Squad mode (4 players per team)",
+      "Maps: Erangel, Miramar, and Sanhok",
+      "Scoring System: Combined Placement Points and Kill Points",
+      "Teams must join custom room within 10 minutes of scheduled match start",
+      "Open to college students (valid college ID mandatory); pre-registered only",
+      "Substitutes permitted only if pre-registered before match start",
+      "Prize Pool: ₹5,000 (1st Place: ₹3,000 | 2nd Place: ₹2,000)"
     ],
     "scheduleDays": [],
     "scheduleGroup": "pre-fest"
@@ -528,7 +541,7 @@ window.VYUHAM_EVENTS = [
   },
   {
     "slug": "cdac-workshop",
-    "title": "VEGA Processors & Ecosystem by C-DAC",
+    "title": "Workshop: VEGA Processors & Ecosystem by C-DAC",
     "stream": "session",
     "day": 2,
     "time": "10:00 AM – 11:00 AM",
@@ -549,20 +562,30 @@ window.VYUHAM_EVENTS = [
   },
   {
     "slug": "project-expo-ieee",
-    "title": "Project Expo by IEEE",
+    "title": "ProjectX Minerva: Project Expo 2026",
     "stream": "general",
     "day": 2,
     "time": "11:00 AM – 1:00 PM",
     "venue": "Gallery Hall",
-    "description": "Explore student innovation at the IEEE project expo.",
+    "description": "IEEE Student Branch, Digital University Kerala presents ProjectX Minerva: Project Expo 2026. Bring your capstones, mini-projects, and research prototypes to be evaluated by experts across 8 multidisciplinary tracks, culminating in the Grand Finale live prototype demo on 31 October at DUK.",
+    "cardDescription": "Showcase working prototypes, capstones, and research across 8 tracks at ProjectX Minerva.",
     "prizes": "₹10,000",
-    "fee": "",
-    "eligibility": "Open to attendees",
-    "teamSize": "Teams",
+    "fee": "₹100 (IEEE members) / ₹200 (others)",
+    "eligibility": "UG, PG & diploma students, and early-stage researchers (Register by 26 Oct)",
+    "teamSize": "1–5 members",
     "status": "upcoming",
     "featured": false,
-    "registrationUrl": "",
-    "rules": []
+    "registrationUrl": "https://makemypass.com/event/project-expo-by-ieee?utm_source=mmp_web",
+    "rules": [
+      "Eight project tracks: Embedded AI/ML, Robotics, Clean Energy, IoT, Biomedical, Aerospace, and Open Innovation",
+      "Round 1: Abstract and demo video submission (Online)",
+      "Round 2: Online presentation and defense to the evaluation panel",
+      "Round 3 (Grand Finale): Live prototype demo on 31 October 2026 at DUK (Gallery Hall)",
+      "Projects must be a working prototype, simulation, or proof-of-concept (slide-only ideas will not qualify for finale)",
+      "Registration Fee: ₹100 per team for IEEE members (min. 2 members), ₹200 for others",
+      "Registration deadline: 26 October 2026",
+      "Contact & Queries: Dakshin (+91 88481 82643) | Salma (+91 97465 20275) | ieee.sb@duk.ac.in"
+    ]
   },
   {
     "slug": "workshop-luminar-technolab",
