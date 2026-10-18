@@ -36,7 +36,7 @@
     { id: 'tech', name: 'Technology', symbol: '01', desc: 'Hackathons, cybersecurity, AI and hands-on invention. Build what comes next.', index: '01', image: 'assets/streams/technology.jpg' },
     { id: 'cultural', name: 'Culture', symbol: '02', desc: 'Performance, art, film and live experiences made to be shared.', index: '02', image: 'assets/streams/culture.jpg' },
     { id: 'esports', name: 'Gaming / Esports', symbol: '03', desc: 'Step into competitive arenas across FIFA 27, BGMI and E-Football.', index: '03', image: 'assets/streams/gaming.jpg' },
-    { id: 'management', name: 'Impact / Management', symbol: '04', desc: 'Leadership, enterprise and strategy shaped by real-world challenges.', index: '04', image: 'assets/streams/management.jpg' }
+    { id: 'management', name: 'Management', symbol: '04', desc: 'Leadership, enterprise and strategy shaped by real-world challenges.', index: '04', image: 'assets/streams/management.jpg' }
   ];
   const esc = (v = '') => String(v).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const safeExternalUrl = value => { try { const url = new URL(value); return ['https:', 'http:'].includes(url.protocol) ? url.href : ''; } catch { return ''; } };
@@ -265,10 +265,10 @@
     $('#mainNav').classList.remove('open'); $('#menuToggle').setAttribute('aria-expanded', 'false'); $('#menuToggle').setAttribute('aria-label', 'Open navigation');
     $$('#mainNav [data-route]').forEach(a => a.classList.toggle('active', a.dataset.route === r.page));
     const shells = ['certificates', 'checkin', 'checkout', 'confirmation', 'feedback', 'food', 'leaderboard', 'payment', 'photography', 'qualifiers', 'receipt', 'results'];
-    const removedRoutes = new Set(['login', 'signup', 'register', 'account', 'dashboard', 'profile', 'teams', 'hackathon', 'ctf', 'admin', 'sponsors']);
+    const removedRoutes = new Set(['login', 'signup', 'register', 'account', 'dashboard', 'profile', 'teams', 'hackathon', 'ctf', 'admin', 'sponsors', 'participate']);
     if (removedRoutes.has(r.page)) { location.replace(`${location.pathname}${location.search}#/home`); return }
     const disabledRoutes = new Set(['announcements', 'contact', 'feedback', 'results', 'leaderboard', 'certificates', 'receipt', 'checkin']);
-    const views = { home, events: () => eventsPage(location.hash.includes('?') ? location.hash.split('?').slice(1).join('?') : ''), streams: streamsPage, event: () => eventDetail(r.slug), schedule: schedulePage, about: aboutPage, venue: venuePage, contact: contactPage, faq: faqPage, participate: participationPage, competitions: competitionsPage, ...Object.fromEntries(shells.map(p => [p, () => featurePage(p)])) };
+    const views = { home, events: () => eventsPage(location.hash.includes('?') ? location.hash.split('?').slice(1).join('?') : ''), streams: streamsPage, event: () => eventDetail(r.slug), schedule: schedulePage, about: venuePage, venue: aboutPage, contact: contactPage, faq: faqPage, participate: participationPage, competitions: competitionsPage, ...Object.fromEntries(shells.map(p => [p, () => featurePage(p)])) };
     const routeDisabled = disabledRoutes.has(r.page);
     app.innerHTML = routeDisabled ? comingSoonPage() : (views[r.page] || notFound)();
     const typewriterHeading = $('.venue-about-typewriter');
@@ -369,7 +369,7 @@
     const line = document.createElement('section'); line.className = 'terminal-line terminal-help';
     const groups = [
       ['EXPLORE', [
-        ['events', 'Open the event directory'], ['event <name-or-slug>', 'Open an event dossier'], ['schedule', 'Open the festival schedule'], ['streams', 'Browse festival streams'], ['venue', 'View venue information'], ['about', 'About VYUHAM’26'], ['participate', 'Participation guide'], ['competitions', 'Competition hub']
+        ['events', 'Open the event directory'], ['schedule', 'Open the festival schedule'], ['streams', 'Browse festival streams'], ['about', 'Venue & about VYUHAM’26'], ['competitions', 'Competition hub']
       ]],
       ['REGISTRATION', [['register', 'Open MakeMyPass registration']]],
       ['SYSTEM', [['status / reg:status', 'Show registration status']]],
