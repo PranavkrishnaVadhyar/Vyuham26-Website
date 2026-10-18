@@ -19,7 +19,7 @@
     'tech-quiz': 'tech-quiz', 'startup-showcase': 'startup-showcase', 'prompt-war': 'prompt-war',
     'panel-cybersecurity': 'cybersecurity-panel-live-demo',
     'talk-ksum': 'talk-session-kerala-startup-mission', 'ai-short-film': 'ai-short-film',
-    'valorant': 'valorant-tournament-2', 'movie-quiz': 'movie-quiz',
+    'fifa-27': 'fifa-27', 'valorant': 'valorant-tournament-2', 'movie-quiz': 'movie-quiz',
     'play-fest': 'play-fest', 'fitness-competition': 'fitness-competition',
     'efootball': 'e-football-tournament-2', 'bgmi': 'bgmi-tournament-3',
     'photography': 'photography-videography', 'business-quiz': 'business-quiz-2',
@@ -35,7 +35,7 @@
   const streams = [
     { id: 'tech', name: 'Technology', symbol: '01', desc: 'Hackathons, cybersecurity, AI and hands-on invention. Build what comes next.', index: '01', image: 'assets/streams/technology.jpg' },
     { id: 'cultural', name: 'Culture', symbol: '02', desc: 'Performance, art, film and live experiences made to be shared.', index: '02', image: 'assets/streams/culture.jpg' },
-    { id: 'esports', name: 'Gaming / Esports', symbol: '03', desc: 'Step into competitive arenas across Valorant, BGMI and E-Football.', index: '03', image: 'assets/streams/gaming.jpg' },
+    { id: 'esports', name: 'Gaming / Esports', symbol: '03', desc: 'Step into competitive arenas across FIFA 27, BGMI and E-Football.', index: '03', image: 'assets/streams/gaming.jpg' },
     { id: 'management', name: 'Impact / Management', symbol: '04', desc: 'Leadership, enterprise and strategy shaped by real-world challenges.', index: '04', image: 'assets/streams/management.jpg' }
   ];
   const esc = (v = '') => String(v).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
