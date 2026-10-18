@@ -45,7 +45,7 @@ window.VYUHAM_EVENTS = [
       "Fair Play: Plagiarism, copying, or unfair practices are strictly prohibited.",
       "Disqualification: Violations of event rules may result in disqualification.",
       "Final Decision: Judges' and coordinators' decisions are final.",
-      "Coordinator: Anindita (9365477714)",
+      "Coordinators: Ananthu S (6282143212) | Anindita (9365477714)",
       "Volunteers: Surya (81370 80407) | Akshay Chandran (81570 14234) | Akshay B Krishna (80780 2683) | Sreekutty (77367 64902) | Parvathy (78932 14206)"
     ]
   },
@@ -70,7 +70,7 @@ window.VYUHAM_EVENTS = [
       "College ID: All participants must carry a valid college ID card for verification.",
       "Required Devices: Each team must bring one laptop and one smartphone with internet access.",
       "Disqualification: Any violation of the event rules may result in disqualification.",
-      "Coordinator: Anjana V S (94879 84537)",
+      "Coordinators: Ananthu S (6282143212) | Anjana V S (94879 84537)",
       "Volunteers: Heaven Jose (96331 88918) | Chandradev (95884 89710) | Ananthu S (62821 43212) | Gopika (73062 19065) | Karan Krishna (77366 33014)"
     ]
   },
@@ -99,7 +99,7 @@ window.VYUHAM_EVENTS = [
       "No pre-prepared marketing plans are allowed.",
       "Internet and research are permitted only during the designated preparation window, not during pitches.",
       "Time limits will be strictly enforced.",
-      "Coordinator: Ahammed (90748 21829)",
+      "Coordinators: Ananthu S (6282143212) | Ahammed (90748 21829)",
       "Volunteers: Akhila (90480 52438) | Vibitha (86068 29275) | Arbab khan (73009 46462) | Anagha S (8086962374) | Shajeena (7012537656)"
     ]
   },
@@ -128,7 +128,7 @@ window.VYUHAM_EVENTS = [
       "External trading apps and live market data are prohibited.",
       "Every trade must be recorded with a timestamp; unlogged trades will not count.",
       "Calculation discrepancies may result in corrections or disqualification if intentional.",
-      "Coordinator: Johan Rony (6238739660)",
+      "Coordinators: Ananthu S (6282143212) | Johan Rony (6238739660)",
       "Volunteers: Hadik Bin Siyad (8304915518) | Sree hari G (8590491685) | Suhail Khan (6282 673864) | Muhammed Suhail (80756 70806)"
     ]
   },
@@ -154,7 +154,7 @@ window.VYUHAM_EVENTS = [
       "Code of Conduct: Participants must follow the instructions of the event coordinators, maintain discipline, and treat fellow participants, judges, volunteers, and coordinators with respect.",
       "Event Rules: Mobile phones and other electronic devices are not permitted during the event unless authorized. Teams must complete each round within the allotted time, and any applicable negative marking will be announced before the round begins.",
       "Disqualification & Decisions: Any form of cheating, malpractice, or violation of the rules will result in immediate disqualification. The decisions of the judges and event coordinators shall be final and binding.",
-      "Coordinator: Fatima (87144 30630)",
+      "Coordinators: Ananthu S (6282143212) | Fatima (87144 30630)",
       "Volunteers: Diya Sabu (95262 86593) | Pretty Santhi Jose (90372 70590) | Mariyam Shamshira (96052 77787) | Nimra (79070 09237) | Panchami (97787 30260)"
     ]
   },
@@ -184,7 +184,7 @@ window.VYUHAM_EVENTS = [
       "Mobile phones and internet access are prohibited during preliminaries and finals.",
       "Early buzzing may result in forfeiting the question at the quizmaster's discretion.",
       "The quizmaster's decision on answer validity is final.",
-      "Coordinator: Alen joe (8921955159)",
+      "Coordinators: Ananthu S (6282143212) | Alen joe (8921955159)",
       "Volunteers: Linus (80895 81304) | Juhaina (89211 60205) | Sona (95675 08757) | Fathima (7034275591) | Pavithra (9400034736)"
     ]
   },
