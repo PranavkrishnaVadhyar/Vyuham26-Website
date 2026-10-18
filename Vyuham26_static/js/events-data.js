@@ -28,7 +28,7 @@ window.VYUHAM_EVENTS = [
     "day": 1,
     "time": "10:00 AM – 5:00 PM",
     "venue": "Gallery Hall",
-    "description": "Aptitude, crisis management & leadership interview.",
+    "description": "THINK SMART. LEAD BOLDLY. STAND OUT. — Aptitude, crisis management & leadership interview.",
     "prizes": "₹15,000",
     "fee": "₹200",
     "eligibility": "UG/PG students across India",
@@ -37,9 +37,16 @@ window.VYUHAM_EVENTS = [
     "featured": true,
     "registrationUrl": "https://org.makemypass.com/web/vyuham-26/events/best-manager-4",
     "rules": [
-      "Individual participation",
-      "Rounds: Aptitude test, Case study, Stress interview",
-      "Judged by corporate HR leaders"
+      "Participation: Individual.",
+      "College ID: Carry a valid college ID card for verification.",
+      "Reporting: Report to the venue at least 15 minutes before the event.",
+      "Event Format: Participants must follow the instructions announced before each round.",
+      "Time Management: Complete each round within the allotted time.",
+      "Fair Play: Plagiarism, copying, or unfair practices are strictly prohibited.",
+      "Disqualification: Violations of event rules may result in disqualification.",
+      "Final Decision: Judges' and coordinators' decisions are final.",
+      "Coordinator: Anindita (9365477714)",
+      "Volunteers: Surya (81370 80407) | Akshay Chandran (81570 14234) | Akshay B Krishna (80780 2683) | Sreekutty (77367 64902) | Parvathy (78932 14206)"
     ]
   },
   {
@@ -49,7 +56,7 @@ window.VYUHAM_EVENTS = [
     "day": 1,
     "time": "10:00 AM – 5:00 PM",
     "venue": "Gallery Hall",
-    "description": "Team-based business strategy evaluation.",
+    "description": "ONE TEAM. ONE VISION. ONE SYMPHONY. — Team-based business strategy evaluation.",
     "prizes": "₹20,000",
     "fee": "₹400",
     "eligibility": "College and university management teams",
@@ -58,9 +65,13 @@ window.VYUHAM_EVENTS = [
     "featured": false,
     "registrationUrl": "",
     "rules": [
-      "Cross-functional team strategy simulation",
-      "Case study resolution, resource optimization, and corporate pitch",
-      "Conducted at Gallery Hall"
+      "Team Composition: Each team must consist of 3–4 members from the same college.",
+      "Competition Format: The event consists of 3 rounds.",
+      "College ID: All participants must carry a valid college ID card for verification.",
+      "Required Devices: Each team must bring one laptop and one smartphone with internet access.",
+      "Disqualification: Any violation of the event rules may result in disqualification.",
+      "Coordinator: Anjana V S (94879 84537)",
+      "Volunteers: Heaven Jose (96331 88918) | Chandradev (95884 89710) | Ananthu S (62821 43212) | Gopika (73062 19065) | Karan Krishna (77366 33014)"
     ]
   },
   {
@@ -70,7 +81,7 @@ window.VYUHAM_EVENTS = [
     "day": 1,
     "time": "10:00 AM – 5:00 PM",
     "venue": "Gallery Hall",
-    "description": "Product & campaign strategy simulation.",
+    "description": "STRATEGIZE. PERSUADE. WIN. — Product & campaign strategy simulation.",
     "prizes": "₹15,000",
     "fee": "₹300",
     "eligibility": "Open to all college students",
@@ -79,8 +90,17 @@ window.VYUHAM_EVENTS = [
     "featured": false,
     "registrationUrl": "",
     "rules": [
-      "Product positioning, viral campaign strategy, and live pitch",
-      "Judged on market feasibility, positioning, and storytelling"
+      "Team Size: 3–4 members.",
+      "College ID: Carry valid college IDs for verification.",
+      "Follow the briefing and use the provided template to develop your marketing plan.",
+      "Preparation time for the initial marketing plan is 45 minutes.",
+      "Each team gets 5 minutes to pitch and 3 minutes for Q&A.",
+      "The top 6 teams advance to the final twist round.",
+      "No pre-prepared marketing plans are allowed.",
+      "Internet and research are permitted only during the designated preparation window, not during pitches.",
+      "Time limits will be strictly enforced.",
+      "Coordinator: Ahammed (90748 21829)",
+      "Volunteers: Akhila (90480 52438) | Vibitha (86068 29275) | Arbab khan (73009 46462) | Anagha S (8086962374) | Shajeena (7012537656)"
     ]
   },
   {
@@ -90,7 +110,7 @@ window.VYUHAM_EVENTS = [
     "day": 1,
     "time": "10:00 AM – 5:00 PM",
     "venue": "Gallery Hall",
-    "description": "Simulated crisis — risk, budget & strategy.",
+    "description": "ANALYZE. INVEST. OUTPERFORM. — Simulated crisis — risk, budget & strategy.",
     "prizes": "₹15,000",
     "fee": "₹300",
     "eligibility": "Open to all students",
@@ -99,8 +119,17 @@ window.VYUHAM_EVENTS = [
     "featured": false,
     "registrationUrl": "",
     "rules": [
-      "Capital budgeting, financial crisis simulation, and risk hedging",
-      "Real-time market volatility and portfolio defense rounds"
+      "Team Size: 3–4 members.",
+      "College ID: Carry valid college IDs for verification.",
+      "Teams will receive virtual capital and an organizer-provided asset price sheet.",
+      "The trading simulation runs for 60 minutes.",
+      "Respond to market news and adjust your portfolio accordingly.",
+      "Only organizer-provided prices are valid.",
+      "External trading apps and live market data are prohibited.",
+      "Every trade must be recorded with a timestamp; unlogged trades will not count.",
+      "Calculation discrepancies may result in corrections or disqualification if intentional.",
+      "Coordinator: Johan Rony (6238739660)",
+      "Volunteers: Hadik Bin Siyad (8304915518) | Sree hari G (8590491685) | Suhail Khan (6282 673864) | Muhammed Suhail (80756 70806)"
     ]
   },
   {
@@ -110,7 +139,7 @@ window.VYUHAM_EVENTS = [
     "day": 1,
     "time": "10:00 AM – 5:00 PM",
     "venue": "Gallery Hall",
-    "description": "Debates, HR crossword, minefield & case studies.",
+    "description": "PEOPLE. PURPOSE. PERFORMANCE. — Debates, HR crossword, minefield & case studies.",
     "prizes": "₹15,000",
     "fee": "₹300",
     "eligibility": "Open to all students",
@@ -119,8 +148,14 @@ window.VYUHAM_EVENTS = [
     "featured": false,
     "registrationUrl": "",
     "rules": [
-      "Includes HR crossword, organizational leadership debates, workplace minefield, and conflict case studies",
-      "Evaluated on negotiation, team cohesion, and crisis diplomacy"
+      "Team Size: 3–4 members.",
+      "The event consists of 3 rounds.",
+      "Reporting & Verification: All participants must report to the venue 30 minutes before the event begins and carry a valid college ID card for verification.",
+      "Code of Conduct: Participants must follow the instructions of the event coordinators, maintain discipline, and treat fellow participants, judges, volunteers, and coordinators with respect.",
+      "Event Rules: Mobile phones and other electronic devices are not permitted during the event unless authorized. Teams must complete each round within the allotted time, and any applicable negative marking will be announced before the round begins.",
+      "Disqualification & Decisions: Any form of cheating, malpractice, or violation of the rules will result in immediate disqualification. The decisions of the judges and event coordinators shall be final and binding.",
+      "Coordinator: Fatima (87144 30630)",
+      "Volunteers: Diya Sabu (95262 86593) | Pretty Santhi Jose (90372 70590) | Mariyam Shamshira (96052 77787) | Nimra (79070 09237) | Panchami (97787 30260)"
     ]
   },
   {
@@ -130,7 +165,7 @@ window.VYUHAM_EVENTS = [
     "day": 1,
     "time": "10:00 AM – 5:00 PM",
     "venue": "Gallery Hall",
-    "description": "Current affairs, sports & management rounds.",
+    "description": "THINK FAST. KNOW BUSINESS. WIN BIG. — Current affairs, sports & management rounds.",
     "prizes": "₹10,000",
     "fee": "₹200",
     "eligibility": "Open to all students",
@@ -139,18 +174,28 @@ window.VYUHAM_EVENTS = [
     "featured": false,
     "registrationUrl": "",
     "rules": [
-      "Written preliminary round followed by on-stage buzzer finals",
-      "Covers global markets, corporate history, sports business, and current affairs"
+      "Team Size: 2 members.",
+      "College ID: Carry valid college IDs for verification.",
+      "The preliminary round consists of 20 written MCQs over 20 minutes.",
+      "The top 5–8 teams advance to the finals.",
+      "Ties in the preliminaries will be resolved through a tiebreaker question.",
+      "The buzzer finals last approximately 45 minutes.",
+      "Rounds include General Business, Brand Identification, Rapid Fire, Connect-the-Dots, and Visual Round.",
+      "Mobile phones and internet access are prohibited during preliminaries and finals.",
+      "Early buzzing may result in forfeiting the question at the quizmaster's discretion.",
+      "The quizmaster's decision on answer validity is final.",
+      "Coordinator: Alen joe (8921955159)",
+      "Volunteers: Linus (80895 81304) | Juhaina (89211 60205) | Sona (95675 08757) | Fathima (7034275591) | Pavithra (9400034736)"
     ]
   },
   {
     "slug": "panel-responsible-ai",
-    "title": "Panel: Beyond Accuracy: Can We Trust the Data Behind AI?",
+    "title": "Panel Discussion: Beyond Accuracy: Can We Trust the Data Behind AI?",
     "stream": "session",
     "day": 1,
     "time": "10:00 AM – 11:30 AM",
     "venue": "Seminar Hall",
-    "description": "",
+    "description": "An expert panel discussion examining data integrity, ethics, and trust behind modern artificial intelligence systems.",
     "prizes": "Knowledge Session",
     "fee": "Free Entry",
     "eligibility": "Open to all fest delegates",
@@ -242,7 +287,7 @@ window.VYUHAM_EVENTS = [
     "time": "10:00 AM – 5:00 PM",
     "venue": "Computer Lab",
     "description": "Cybersecurity puzzles and challenges.",
-    "prizes": "₹35,000+",
+    "prizes": "Prize Pool: ₹35,000+",
     "fee": "₹500 per team",
     "eligibility": "Open to all cybersecurity enthusiasts",
     "teamSize": "2–3 members",
@@ -250,7 +295,7 @@ window.VYUHAM_EVENTS = [
     "featured": true,
     "registrationUrl": "",
     "rules": [
-      "Offline Jeopardy-style security challenge matrix",
+      "Offline, Jeopardy-style security challenge matrix",
       "Categories: Cryptography, Web Exploitation, Reverse Engineering, ML Security, OSINT, Blockchain and Forensics",
       "Food and refreshments will be provided",
       "Strict anti-sharing and infrastructure protection rules"
@@ -317,7 +362,7 @@ window.VYUHAM_EVENTS = [
       "Scoring is based on correct answers, with rankings determined by accuracy and completion time.",
       "The use of external resources, AI tools, or any form of assistance is strictly prohibited.",
       "Rule violations may result in disqualification. The organizers’ decisions regarding rankings and results shall be final.",
-      "Questions on computer science, AI, internet history, and cutting-edge engineering"
+      "Questions on General Tech, Computer Science, AI, Internet History, Cutting Edge Tech."
     ]
   },
   {
@@ -362,7 +407,7 @@ window.VYUHAM_EVENTS = [
     "time": "10:00 AM – 1:00 PM",
     "venue": "Gallery Hall",
     "description": "“Ethical Hacking & OSINT Reconnaissance: Think Like an Attacker”.",
-    "prizes": "Not listed",
+    "prizes": "Certificate Available",
     "fee": "₹99",
     "eligibility": "Open to all attendees",
     "teamSize": "Individual",
@@ -397,20 +442,23 @@ window.VYUHAM_EVENTS = [
   },
   {
     "slug": "talk-ksum",
-    "title": "From Classroom to Startup: Where Do Student Ideas Go?",
+    "title": "From Classroom to Startup: Where Do Students’ Ideas Go?",
     "stream": "session",
     "day": 3,
     "time": "9:00 AM – 11:00 AM",
     "venue": "",
-    "description": "Kerala Startup Mission talk.",
-    "prizes": "",
-    "fee": "",
-    "eligibility": "",
-    "teamSize": "",
+    "description": "Introduction to Kerala Startup Mission (KSUM) and IEDC, highlighting their role in fostering student innovation and entrepreneurship. Explore student benefits, startup support opportunities, and inspiring success stories of student entrepreneurs from Kerala.",
+    "prizes": "Interactive Session",
+    "fee": "Free Entry",
+    "eligibility": "Open to all attendees",
+    "teamSize": "Open",
     "status": "upcoming",
     "featured": false,
     "registrationUrl": "",
-    "rules": []
+    "rules": [
+      "Introduction to Kerala Startup Mission (KSUM) and IEDC, highlighting their role in fostering student innovation and entrepreneurship.",
+      "Explore student benefits, startup support opportunities, and inspiring success stories of student entrepreneurs from Kerala."
+    ]
   },
   {
     "slug": "fifa-27",
