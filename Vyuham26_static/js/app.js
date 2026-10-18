@@ -268,7 +268,7 @@
     const removedRoutes = new Set(['login', 'signup', 'register', 'account', 'dashboard', 'profile', 'teams', 'hackathon', 'ctf', 'admin', 'sponsors', 'participate']);
     if (removedRoutes.has(r.page)) { location.replace(`${location.pathname}${location.search}#/home`); return }
     const disabledRoutes = new Set(['announcements', 'contact', 'feedback', 'results', 'leaderboard', 'certificates', 'receipt', 'checkin']);
-    const views = { home, events: () => eventsPage(location.hash.includes('?') ? location.hash.split('?').slice(1).join('?') : ''), streams: streamsPage, event: () => eventDetail(r.slug), schedule: schedulePage, about: venuePage, venue: aboutPage, contact: contactPage, faq: faqPage, participate: participationPage, competitions: competitionsPage, ...Object.fromEntries(shells.map(p => [p, () => featurePage(p)])) };
+    const views = { home, events: () => eventsPage(location.hash.includes('?') ? location.hash.split('?').slice(1).join('?') : ''), streams: streamsPage, event: () => eventDetail(r.slug), schedule: schedulePage, about: venuePage, venue: aboutPage, contact: contactPage, faq: faqPage, competitions: competitionsPage, ...Object.fromEntries(shells.map(p => [p, () => featurePage(p)])) };
     const routeDisabled = disabledRoutes.has(r.page);
     app.innerHTML = routeDisabled ? comingSoonPage() : (views[r.page] || notFound)();
     const typewriterHeading = $('.venue-about-typewriter');
@@ -383,14 +383,10 @@
   const terminalNavigate = (path, message) => { terminalPrint('system', message); closeTerminal(); go(path) };
   const runTerminalCommand = async raw => {
     const text = raw.trim(); if (!text) return; terminalPrint('input', `$ ${text}`); commandHistory.push(text); commandHistoryIndex = commandHistory.length;
-    const [verb, ...args] = text.split(/\s+/), cmd = verb.toLowerCase(), arg = args.join(' ').trim(), aliases = { schedule: 'schedule', events: 'events', streams: 'streams', about: 'about', venue: 'venue', participate: 'participate', competitions: 'competitions' };
+    const [verb, ...args] = text.split(/\s+/), cmd = verb.toLowerCase(), arg = args.join(' ').trim(), aliases = { schedule: 'schedule', events: 'events', streams: 'streams', about: 'about', venue: 'venue', competitions: 'competitions' };
     const navigateCommands = new Set(Object.keys(aliases));
     if (navigateCommands.has(cmd)) { terminalNavigate(aliases[cmd], `ROUTE // ${aliases[cmd].toUpperCase()}`); return }
     if (cmd === 'help') terminalPrint('system', 'LOGIN / SIGNUP // Opens the official MakeMyPass VYUHAM portal.');
-    if (cmd === 'event') {
-      const event = events.find(item => item.slug.toLowerCase() === arg.toLowerCase() || slugify(item.title) === slugify(arg));
-      if (event) terminalNavigate(`event/${encodeURIComponent(event.slug)}`, `EVENT // ${event.title}`); else terminalPrint('error', arg ? `No event found for “${arg}”. Try: events` : 'Usage: event <event-name-or-slug>'); return;
-    }
     if (cmd === 'register' || cmd === 'registration') {
       if (!canRegister()) { terminalPrint('error', 'REGISTRATION CLOSED // The organizer has closed registration.'); return }
       terminalPrint('system', 'Redirecting to the official MakeMyPass registration page…'); location.assign(MAKEMYPASS_HOME); return;
