@@ -250,7 +250,7 @@ window.VYUHAM_EVENTS = [
     "featured": true,
     "registrationUrl": "",
     "rules": [
-      "Jeopardy-style security challenge matrix",
+      "Offline Jeopardy-style security challenge matrix",
       "Categories: Cryptography, Web Exploitation, Reverse Engineering, ML Security, OSINT, Blockchain and Forensics",
       "Food and refreshments will be provided",
       "Strict anti-sharing and infrastructure protection rules"
@@ -362,8 +362,8 @@ window.VYUHAM_EVENTS = [
     "time": "10:00 AM – 1:00 PM",
     "venue": "Gallery Hall",
     "description": "“Ethical Hacking & OSINT Reconnaissance: Think Like an Attacker”.",
-    "prizes": "Masterclass",
-    "fee": "Free Entry",
+    "prizes": "Not listed",
+    "fee": "₹99",
     "eligibility": "Open to all attendees",
     "teamSize": "Individual",
     "status": "upcoming",
