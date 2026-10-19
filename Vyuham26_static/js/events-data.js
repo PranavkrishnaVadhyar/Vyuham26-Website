@@ -2,6 +2,7 @@ window.VYUHAM_EVENTS = [
   {
     "slug": "hackathon",
     "title": "Hackathon — 24HR",
+    "officialTitle": "AGENT FORGE - Hackathon (24 Hours)",
     "stream": "tech",
     "day": 1,
     "time": "9:00 AM – 9:00 AM (DAY 2)",
@@ -24,6 +25,7 @@ window.VYUHAM_EVENTS = [
   {
     "slug": "best-manager",
     "title": "Best Manager",
+    "officialTitle": "THE DECISION ROOM - BEST MANAGER",
     "stream": "management",
     "day": 1,
     "time": "10:00 AM – 5:00 PM",
@@ -52,6 +54,7 @@ window.VYUHAM_EVENTS = [
   {
     "slug": "best-management-team",
     "title": "Best Management Team",
+    "officialTitle": "BOARDROOM BATTLE - BEST MANAGEMENT TEAM",
     "stream": "management",
     "day": 1,
     "time": "10:00 AM – 5:00 PM",
@@ -77,6 +80,7 @@ window.VYUHAM_EVENTS = [
   {
     "slug": "marketing-game",
     "title": "Marketing Game",
+    "officialTitle": "MARKET MAKERS - MARKETING GAMES",
     "stream": "management",
     "day": 1,
     "time": "10:00 AM – 5:00 PM",
@@ -106,6 +110,7 @@ window.VYUHAM_EVENTS = [
   {
     "slug": "finance-game",
     "title": "Finance Game",
+    "officialTitle": "CAPITAL UNDER PRESSURE - FINANCE GAMES",
     "stream": "management",
     "day": 1,
     "time": "10:00 AM – 5:00 PM",
@@ -135,6 +140,7 @@ window.VYUHAM_EVENTS = [
   {
     "slug": "hr-game",
     "title": "HR Game",
+    "officialTitle": "PEOPLE IN PLAY - HR GAMES",
     "stream": "management",
     "day": 1,
     "time": "10:00 AM – 5:00 PM",
@@ -161,6 +167,7 @@ window.VYUHAM_EVENTS = [
   {
     "slug": "business-quiz",
     "title": "Business Quiz",
+    "officialTitle": "THE BUSINESS CIRCUIT - BUSINESS QUIZ",
     "stream": "management",
     "day": 1,
     "time": "10:00 AM – 5:00 PM",
@@ -191,6 +198,7 @@ window.VYUHAM_EVENTS = [
   {
     "slug": "panel-responsible-ai",
     "title": "Panel Discussion: Beyond Accuracy: Can We Trust the Data Behind AI?",
+    "officialTitle": "Beyond Accuracy - Panel Discussion on AI Accuracy",
     "stream": "session",
     "day": 1,
     "time": "10:00 AM – 11:30 AM",
@@ -225,6 +233,7 @@ window.VYUHAM_EVENTS = [
   {
     "slug": "workshop-prompt-engineering",
     "title": "Hands-on Workshop: Calligraphy",
+    "officialTitle": "INK & LETTER - CALLIGRAPHY WORKSHOP",
     "stream": "session",
     "day": 1,
     "time": "2:00 PM – 3:30 PM",
@@ -242,6 +251,7 @@ window.VYUHAM_EVENTS = [
   {
     "slug": "play-fest",
     "title": "Play Fest",
+    "officialTitle": "PLAY DISTRICT",
     "stream": "general",
     "day": 1,
     "time": "Day One",
@@ -262,6 +272,7 @@ window.VYUHAM_EVENTS = [
   {
     "slug": "fitness-competition",
     "title": "Fitness Competition",
+    "officialTitle": "FIT ARENA - FITNESS COMPETITION",
     "stream": "general",
     "day": 1,
     "time": "Day One",
@@ -282,6 +293,7 @@ window.VYUHAM_EVENTS = [
   {
     "slug": "ctf",
     "title": "Capture the Flag",
+    "officialTitle": "THE CYBER GAUNTLET - CAPTURE THE FLAG",
     "stream": "tech",
     "day": 2,
     "time": "10:00 AM – 5:00 PM",
@@ -324,6 +336,7 @@ window.VYUHAM_EVENTS = [
   {
     "slug": "prompt-war",
     "title": "Prompt War",
+    "officialTitle": "PROMPTSMITH ARENA - PROMPT WAR",
     "stream": "tech",
     "day": 2,
     "time": "10:00 AM – 5:00 PM",
@@ -344,6 +357,7 @@ window.VYUHAM_EVENTS = [
   {
     "slug": "tech-quiz",
     "title": "Tech Quiz",
+    "officialTitle": "TECHSPRINT - TECH QUIZ",
     "stream": "tech",
     "day": 2,
     "time": "2:00 PM – 5:00 PM",
@@ -368,6 +382,7 @@ window.VYUHAM_EVENTS = [
   {
     "slug": "talk-agentic-ai",
     "title": "Talk: From Agents to Outcomes: Building AI That Works in the Real World (Applied AI and Engineering)",
+    "officialTitle": "FROM AGENTS TO OUTCOME : BUILDING AI THAT WORKS FOR THE WORLD",
     "stream": "general",
     "day": 2,
     "time": "2:00 PM – 3:30 PM",
@@ -398,6 +413,7 @@ window.VYUHAM_EVENTS = [
   {
     "slug": "panel-cybersecurity",
     "title": "Talk: Inside the Modern SOC: Detect, Investigate, Respond",
+    "officialTitle": "INSIDE THE MODERN SOC",
     "stream": "session",
     "day": 2,
     "time": "4:00 PM – 5:00 PM",
@@ -415,6 +431,7 @@ window.VYUHAM_EVENTS = [
   {
     "slug": "workshop-ethical-hacking",
     "title": "Workshop: Ethical Hacking & OSINT Reconnaissance",
+    "officialTitle": "THINK LIKE AN ATTACKER - ETHICAL HACKING WORKSHOP",
     "stream": "session",
     "day": 3,
     "time": "10:00 AM – 1:00 PM",
@@ -435,6 +452,7 @@ window.VYUHAM_EVENTS = [
   {
     "slug": "ai-short-film",
     "title": "AI Short Film",
+    "officialTitle": "SYNTHETIC FRAMES - AI SHORT FILM",
     "stream": "tech",
     "day": 3,
     "time": "9:00 AM – 5:00 PM",
@@ -456,6 +474,7 @@ window.VYUHAM_EVENTS = [
   {
     "slug": "talk-ksum",
     "title": "From Classroom to Startup: Where Do Students’ Ideas Go?",
+    "officialTitle": "IDEA TO IMPACT - TALK SESSION BY KERALA STARTUP MISSION",
     "stream": "session",
     "day": 3,
     "time": "9:00 AM – 11:00 AM",
@@ -476,6 +495,7 @@ window.VYUHAM_EVENTS = [
   {
     "slug": "fifa-27",
     "title": "FIFA 27 Tournament",
+    "officialTitle": "FIFA 27",
     "stream": "esports",
     "day": 3,
     "time": "10:00 AM – 1:00 PM",
@@ -503,6 +523,7 @@ window.VYUHAM_EVENTS = [
   {
     "slug": "movie-quiz",
     "title": "Movie Quiz",
+    "officialTitle": "REEL ROYALE - MOVIE QUIZ",
     "stream": "cultural",
     "day": 3,
     "time": "1:00 PM – 3:00 PM",
@@ -523,6 +544,7 @@ window.VYUHAM_EVENTS = [
   {
     "slug": "efootball",
     "title": "E-Football Tournament",
+    "officialTitle": "E-FOOTBALL QUALIFIERS",
     "stream": "esports",
     "day": null,
     "time": "Online Qualifiers",
@@ -549,6 +571,7 @@ window.VYUHAM_EVENTS = [
   {
     "slug": "bgmi",
     "title": "BGMI Tournament",
+    "officialTitle": "BGMI DROPZONE",
     "stream": "esports",
     "day": null,
     "time": "Online Qualifiers",
@@ -576,6 +599,7 @@ window.VYUHAM_EVENTS = [
   {
     "slug": "photography",
     "title": "Photography & Videography",
+    "officialTitle": "FRAME HUNT",
     "stream": "general",
     "day": 1,
     "time": "Running All 3 Days",
@@ -603,6 +627,7 @@ window.VYUHAM_EVENTS = [
   {
     "slug": "cdac-workshop",
     "title": "Workshop: VEGA Processors & Ecosystem by C-DAC",
+    "officialTitle": "VEGA PROCESSORS & ECOSYSTEM BY C-DAC",
     "stream": "session",
     "day": 2,
     "time": "10:00 AM – 11:00 AM",
@@ -624,6 +649,7 @@ window.VYUHAM_EVENTS = [
   {
     "slug": "project-expo-ieee",
     "title": "ProjectX Minerva: Project Expo 2026",
+    "officialTitle": "PROJECT X MINERVA - PROJECT EXPO BY IEEE",
     "stream": "general",
     "day": 2,
     "time": "11:00 AM – 1:00 PM",
@@ -651,6 +677,7 @@ window.VYUHAM_EVENTS = [
   {
     "slug": "workshop-luminar-technolab",
     "title": "Workshop by Luminar Technolab: Prompt Engineering and Building with LLMs",
+    "officialTitle": "Workshop On Prompt Engineering",
     "stream": "session",
     "day": 1,
     "time": "3:30 PM – 5:00 PM",

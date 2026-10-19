@@ -1252,3 +1252,16 @@ html{scroll-padding-top:calc(var(--site-header-top) + var(--site-header-height) 
 }
 @media(max-width:360px){.site-header>.brand{gap:6px}.site-header>.brand img{width:32px;height:32px;flex-basis:32px}.site-header>.brand b{font-size:12px}.site-header>.brand small{font-size:5px;letter-spacing:.04em}}
 @media(prefers-reduced-motion:reduce){.site-header .menu-toggle span{transition:none}}
+
+/* Official MakeMyPass titles lead; VYUHAM catalogue names remain explanatory subtitles. */
+.event-title-subtitle{display:block;margin:8px 0 12px;color:#c4bdc1;font-size:clamp(11px,1.2vw,15px);font-weight:500;line-height:1.5;letter-spacing:0;}
+.events-grid .event-content>.event-title-subtitle{min-height:0;margin:-2px 0 8px;color:#c4bdc1;font-size:10px;line-height:1.45;}
+.event-page-hero h1{max-width:18ch;overflow-wrap:anywhere;}
+.event-page-hero>.container>.event-title-subtitle{max-width:52ch;margin:12px 0 0;color:#d1c9ca;font-size:clamp(12px,1.35vw,16px);line-height:1.5;}
+.event-page-hero>.container>.event-title-subtitle+p{max-width:55ch;margin-top:10px;}
+.home-event-subtitle{display:block;max-width:28ch;margin:-5px 0 12px;color:#c4bdc1;font-size:10px;font-style:normal;line-height:1.45;}
+.stage-float-subtitle{display:block;max-width:28ch;margin-top:5px;color:#c4bdc1;font-size:10px;line-height:1.4;}
+.schedule-event-subtitle{display:block;margin:-5px 0 8px;color:#a5979f;font-size:10px;line-height:1.45;}
+.day-pass-main>.event-title-subtitle{margin:9px 0 17px;}
+.day-pass-main .day-pass-choice-heading{margin:0 0 12px;font-size:clamp(24px,3vw,34px);letter-spacing:-.025em;}
+@media(max-width:700px){.event-page-hero>.container>.event-title-subtitle{font-size:12px}.events-grid .event-content>.event-title-subtitle{font-size:10px}.schedule-event-subtitle{font-size:9px}}
