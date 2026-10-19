@@ -309,6 +309,8 @@
       }
     }
     const intro = $('#landingIntro');
+    const siteHeader = $('#siteHeader');
+    if (siteHeader) siteHeader.hidden = Boolean(intro);
     if (intro) {
       const homeHero = $('#home');
       const previousFocus = document.activeElement;
@@ -334,6 +336,7 @@
         document.body.classList.remove('intro-locked');
         document.documentElement.classList.remove('intro-sequence-pending');
         intro.remove();
+        if (siteHeader) siteHeader.hidden = false;
         homeHero?.classList.remove('intro-handoff');
         homeHero?.classList.add('intro-completed');
         homeHero?.removeAttribute('inert');
