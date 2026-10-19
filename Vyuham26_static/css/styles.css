@@ -751,8 +751,9 @@ h1,h2,h3,.brand b,.stream-card strong,.home-event strong,.day-card h3,.stage-bra
   padding: 24px;
   display: flex;
   flex-direction: column;
+  align-items: center;
   justify-content: center;
-  overflow: hidden;
+  text-align: center;
   border-left: 1px solid rgba(180, 150, 135, 0.18);
   border-right: 0;
   border-top: 0;
@@ -772,9 +773,9 @@ h1,h2,h3,.brand b,.stream-card strong,.home-event strong,.day-card h3,.stage-bra
   display: block;
   font: 16px var(--display);
   letter-spacing: .02em;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  line-height: 1.2;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 .stats-item small,
@@ -785,9 +786,9 @@ h1,h2,h3,.brand b,.stream-card strong,.home-event strong,.day-card h3,.stage-bra
   font: 8px var(--mono);
   letter-spacing: .1em;
   color: var(--muted);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  line-height: 1.4;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 .stats-bar > span:nth-child(1) b,
@@ -808,9 +809,6 @@ h1,h2,h3,.brand b,.stream-card strong,.home-event strong,.day-card h3,.stage-bra
 }
 
 .stats-bar > span:first-child b {
-  white-space: normal;
-  overflow: visible;
-  text-overflow: clip;
   line-height: 1.12;
 }
 
