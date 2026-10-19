@@ -952,6 +952,14 @@ h1,h2,h3,.brand b,.stream-card strong,.home-event strong,.day-card h3,.stage-bra
  .intro-cinema-core>img{width:clamp(84px,20vw,120px);max-height:18vh}
 }
 
+.registration-info-bar{display:flex;justify-content:flex-end;margin-bottom:12px}
+.registration-info{position:relative}
+.registration-info>summary{display:flex;align-items:center;justify-content:center;width:34px;height:34px;border:1px solid #e8564e80;border-radius:50%;background:#180c0d;color:#e8564e;cursor:pointer;list-style:none;font:italic 700 20px/1 Georgia,serif}
+.registration-info>summary::-webkit-details-marker{display:none}
+.registration-info>summary:hover,.registration-info[open]>summary{background:#351213;border-color:#e8564e;color:#fff}
+.registration-info>summary:focus-visible{outline:2px solid #e8564e;outline-offset:4px}
+.registration-info>p{position:absolute;z-index:20;top:calc(100% + 10px);right:0;width:min(360px,calc(100vw - 36px));box-sizing:border-box;margin:0;padding:16px 18px;background:#180e10;border:1px solid #e8564e60;border-radius:14px;box-shadow:0 12px 32px #0008;color:#ded6d8;font:12px/1.7 var(--sans)}
+
 /* Homepage hero actions: clear primary, secondary, and utility hierarchy. */
 .cyber-copy .cyber-actions{
  display:grid;
