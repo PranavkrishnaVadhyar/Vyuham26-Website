@@ -1351,3 +1351,8 @@ html{scroll-padding-top:calc(var(--site-header-top) + var(--site-header-height) 
 @media(max-width:1000px){.stage-float{width:min(340px,58%);right:0;padding:17px 18px}.cyber-stage{height:550px}}
 @media(max-width:700px){.cyber-hero::after{display:none}.cyber-stage{width:100%;height:360px;margin:4px 0 15px}.stage-float{width:min(340px,calc(100% - 18px));right:0;bottom:0;min-height:172px;padding:14px 16px;gap:6px;transform:rotateZ(1deg)}.stage-float:hover{transform:rotateZ(0deg) translateY(-3px)}.stage-float-title{font-size:17px}.stage-float-footer{gap:8px}.stage-dots{gap:2px}.stage-dot{width:23px;height:28px}.stage-float-foot{font-size:7px}.stage-main figcaption span:last-child{display:none}}
 @media(prefers-reduced-motion:reduce){.stage-float-poster,.stage-float-category,.stage-float-title,.stage-float-subtitle,.stage-dot::before{transition:none!important}}
+.event-participation-heading{margin:35px 0 16px}
+.detail-panel dd.hackathon-time-value{max-width:72%;line-height:1.5;overflow-wrap:anywhere}
+.rule-list .hackathon-theme-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:3px 22px;margin:8px 0 4px;padding-left:19px}
+.rule-list .hackathon-theme-list li{margin:3px 0;line-height:1.6}
+@media(max-width:520px){.rule-list .hackathon-theme-list{grid-template-columns:minmax(0,1fr);gap:0}}

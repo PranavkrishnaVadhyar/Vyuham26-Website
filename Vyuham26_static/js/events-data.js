@@ -5,9 +5,9 @@ window.VYUHAM_EVENTS = [
     "officialTitle": "AGENT FORGE - Hackathon (24 Hours)",
     "stream": "tech",
     "day": 1,
-    "time": "9:00 AM – 9:00 AM (DAY 2)",
+    "time": "30 October, 9:00 A.M. – 31 October, 9:00 A.M.",
     "venue": "Main Hall + Computer Lab",
-    "description": "Theme: Agentic AI / Autonomous Systems. 24-hour hackathon, overnight build.",
+    "description": "A 24-hour hackathon with overnight building across six possible theme tracks.",
     "prizes": "₹30,000",
     "fee": "₹999",
     "eligibility": "Open to students and developers across India",
@@ -17,9 +17,16 @@ window.VYUHAM_EVENTS = [
     "registrationUrl": "https://org.makemypass.com/web/vyuham-26/events/hackathon-24hr",
     "rules": [
       "24 uninterrupted hours of collaborative building",
-      "Theme: Agentic AI / Autonomous Systems",
       "Midnight mentoring round and refreshments in Main Hall",
       "Prototype demos and jury evaluation on Day 2 morning"
+    ],
+    "themes": [
+      "Agentic AI",
+      "Cybersecurity & Digital Trust",
+      "Smart Cities & Connected Communities",
+      "FinTech & Future of Commerce",
+      "ClimateTech & Sustainable Future",
+      "Open Innovation"
     ]
   },
   {
