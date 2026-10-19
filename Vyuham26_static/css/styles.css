@@ -276,6 +276,7 @@ h1,h2,h3{letter-spacing:-.02em}
 .terminal-footer-btn{border-color:#de312a55;background:#16080b;color:#ff5965;transition:background .2s,border-color .2s,box-shadow .2s,color .2s}
 .terminal-footer-btn:hover{border-color:#ff7180;background:#241014;color:#ffd0d4;box-shadow:0 0 18px #de312a25}
 @media(max-width:700px){.home-event-grid{gap:0}.home-event{min-height:210px}.site-footer{padding-top:38px}.footer-main{gap:24px}}
+@media(max-width:520px){.home-event-grid{grid-template-columns:minmax(0,1fr)}}
 
 /* VYUHAM visual system refresh, inspired by NexenAI's dark red editorial direction. */
 :root{--bg:#080202;--bg2:#100707;--surface:#171010;--surface2:#201311;--indigo:#2b0b0d;--slate:#3b292a;--purple:#5c0c0a;--magenta:#a4221d;--cyan:#de312a;--red:#de312a;--deep:#5c0c0a;--text:#fefefe;--muted:#a5979f;--line:#332021}
