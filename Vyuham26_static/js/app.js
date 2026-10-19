@@ -52,6 +52,15 @@
     const prize = String(value ?? '').trim();
     return prize && !['none', 'null', 'undefined'].includes(prize.toLowerCase()) ? prize : 'Not listed';
   };
+  const ordinalDate = dateStr => {
+    const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    const match = String(dateStr || '').match(/(\d{1,2})\s+(\w+)\s+(\d{4})/);
+    if (!match) return dateStr;
+    const day = Number(match[1]);
+    const suffix = [11,12,13].includes(day % 100) ? 'th' : {1:'st',2:'nd',3:'rd'}[day % 10] || 'th';
+    const monthIdx = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'].indexOf(match[2].toUpperCase());
+    return `${day}${suffix} ${months[monthIdx] || match[2]}`;
+  };
   const eventDayLabel = event => event.scheduleGroup === 'pre-fest'
     ? 'PRE-FEST'
     : event.scheduleDays?.length > 1
@@ -62,8 +71,18 @@
   const eventDateLabel = event => event.scheduleGroup === 'pre-fest'
     ? 'PRE-FESTIVAL'
     : event.scheduleDays?.length > 1
-      ? '30 OCT – 01 NOV 2026'
-      : days[Number(event.day) - 1]?.date || 'TBA';
+      ? '30th October – 1st November 2026'
+      : ordinalDate(days[Number(event.day) - 1]?.date) || 'TBA';
+  const eventPrizeValue = event => {
+    const match = String(event.prizes || '').match(/[\d,]+/);
+    return match ? Number(match[0].replaceAll(',', '')) : 0;
+  };
+  const eventStreamRank = event => ['tech', 'technology', 'management'].includes(String(event.stream || '').toLowerCase()) ? 0 : 1;
+  const eventPriority = (a, b) => {
+    const statusRank = event => event.status === 'live' ? 0 : event.status === 'upcoming' ? 1 : 2;
+    const dayRank = event => event.scheduleGroup === 'pre-fest' ? 0 : (event.scheduleDays?.length ? Math.min(...event.scheduleDays) : Number(event.day) || 9);
+    return statusRank(a) - statusRank(b) || eventStreamRank(a) - eventStreamRank(b) || eventPrizeValue(b) - eventPrizeValue(a) || dayRank(a) - dayRank(b) || a.title.localeCompare(b.title);
+  };
   const registrationUrl = event => {
     const eventIdentity = `${event.slug || ''} ${event.title || event.name || ''}`.toLowerCase();
     if (eventIdentity.includes('workshop-luminar-technolab') || (eventIdentity.includes('luminar') && eventIdentity.includes('prompt engineering'))) {
@@ -84,19 +103,7 @@
   const registrationCta = (url, label, className = 'button button-primary', event = null) => canRegister(event)
     ? `<a class="${className}" href="${esc(url)}">${label}</a>`
     : `<span class="${className} registration-disabled" role="status" aria-disabled="true">REGISTRATION CLOSED</span>`;
-  const updateHeaderRegistration = () => {
-    const current = $('#headerRegistration');
-    if (!current) return;
-    const shouldLink = canRegister();
-    if ((current.tagName === 'A') === shouldLink) return;
-    const control = document.createElement(shouldLink ? 'a' : 'span');
-    control.id = 'headerRegistration';
-    control.className = 'button button-small button-primary' + (shouldLink ? '' : ' registration-disabled');
-    control.innerHTML = shouldLink ? 'Register <span>↗</span>' : 'Registration closed';
-    if (shouldLink) control.href = MAKEMYPASS_HOME;
-    else { control.setAttribute('role', 'status'); control.setAttribute('aria-disabled', 'true'); }
-    current.replaceWith(control);
-  };
+
   const slugify = v => String(v || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
   const streamLabel = s => ({ tech: 'Technology', technology: 'Technology', management: 'Management', cultural: 'Culture', culture: 'Culture', esports: 'Esports', gaming: 'Esports', impact: 'Impact', general: 'General', session: 'Session' }[s] || 'General');
   const route = () => {
@@ -109,7 +116,7 @@
   const go = path => { location.hash = '#/' + path.replace(/^\//, ''); };
   const eventCard = e => `<article class="event-card reveal" data-stream="${esc(e.stream)}">
     <div class="event-art" aria-hidden="true"${safeExternalUrl(e.image) ? ` style="--event-image:url('${esc(safeExternalUrl(e.image))}')"` : ''}><span>VYUHAM / ${esc(eventDayLabel(e))}</span><b>${esc(streamLabel(e.stream))}</b><i>${esc(e.scheduleGroup === 'pre-fest' ? 'PF' : e.scheduleDays?.length > 1 ? '03' : String(e.day ?? '--').padStart(2, '0'))}</i></div>
-    <div class="event-content"><div class="event-top"><span class="tag">${esc(streamLabel(e.stream))}</span><span class="tag day">${esc(eventDayLabel(e))}</span></div>
+    <div class="event-content"><div class="event-top"><span class="tag stream-pill">${esc(streamLabel(e.stream))}</span><span class="tag day">${esc(eventDateLabel(e))}</span></div>
     <h3><a href="#/event/${encodeURIComponent(e.slug)}">${esc(e.title)}</a></h3><p>${esc(e.cardDescription || e.description)}</p>
     <div class="event-meta"><span>PRIZE <strong>${esc(displayPrize(e.prizes))}</strong></span><span>FEE <strong>${esc(e.fee || 'Not listed')}</strong></span></div>
     <div class="event-actions"><a class="text-link" href="#/event/${encodeURIComponent(e.slug)}">VIEW DOSSIER <span>↗</span></a><a class="button button-outline" href="#/event/${encodeURIComponent(e.slug)}">DETAILS</a>${registrationCta(registrationUrl(e), 'REGISTER ↗', 'button button-primary', e)}</div></div>
@@ -128,7 +135,7 @@
     <div class="info-strip cyber-strip stats-bar"><span class="stats-item"><b>30.10—01.11</b><small>THREE FESTIVAL DAYS</small></span><span class="stats-item"><b>TECHNOCITY CAMPUS</b><small>TECHNOPARK PHASE 4</small></span><span class="stats-item"><b>${events.length}</b><small>EVENT RECORDS</small></span><span class="stats-item"><b>01 / 03</b><small>DAY 1 → DAY 3</small></span></div>
     <section class="section festival-intro" id="festival"><div class="container intro-composition"><div class="intro-mark reveal"><span>VYUHAM / DUK</span><img src="assets/vyuham_logo_sm.png" alt="VYUHAM emblem"><b>ONE<br>FESTIVAL<br><i>FOUR WORLDS.</i></b></div><div class="intro-copy reveal"><div class="eyebrow">01 / ABOUT THE FESTIVAL</div><h2>WHERE<br>DISCIPLINES<br><span class="green">COLLIDE.</span></h2><p>VYUHAM is Digital University Kerala’s flagship national-level management, technology and cultural fest. Across three days, students gather to build, debate, perform and compete.</p><p>From autonomous systems and strategy arenas to live culture and esports, one campus becomes a meeting point for different ways of thinking.</p><a class="text-link" href="#/about">DISCOVER VYUHAM <span>↗</span></a></div></div></section>
     <section class="section stream-section" id="streams"><div class="container"><div class="section-head reveal"><div><div class="eyebrow">02 / FOUR SIGNALS</div><h2>FIND YOUR<br><span class="green">FREQUENCY.</span></h2></div><p>Four distinct streams. One shared festival ground.</p></div><div class="stream-grid">${streams.map((s, i) => `<a class="stream-card stream-card-${i + 1} reveal" data-index="${s.index}" href="#/events?stream=${s.id}"><img class="stream-art" src="${s.image}" alt="" loading="lazy" decoding="async"><img class="stream-emblem" src="assets/vyuham_logo_sm.png" alt="" aria-hidden="true" loading="lazy"><span class="stream-icon">${s.symbol} / STREAM</span><strong>${s.name}</strong><p>${s.desc}</p><span class="stream-go">EXPLORE ↗</span><i class="stream-watermark">${s.index}</i></a>`).join('')}</div></div></section>
-    <section class="section featured-home"><div class="container"><div class="section-head reveal"><div><div class="eyebrow">03 / EVENT FREQUENCY</div><h2>THE LINEUP<br><span class="green">IS LIVE.</span></h2></div><a class="text-link" href="#/events">ALL ${events.filter(e => e.status !== 'cancelled').length} EVENTS ↗</a></div><div class="home-event-grid">${events.filter(e => e.featured && e.status !== 'cancelled').slice(0, 4).map((e, i) => `<a class="home-event home-event-${i + 1} reveal" href="#/event/${encodeURIComponent(e.slug)}"><span>${esc(streamLabel(e.stream))} / DAY 0${e.day}</span><strong>${esc(e.title)}</strong><small>OPEN EVENT ↗</small></a>`).join('')}</div></div></section>
+    <section class="section featured-home"><div class="container"><div class="section-head reveal"><div><div class="eyebrow">03 / EVENT FREQUENCY</div><h2>LIVE &amp; FEATURED<br><span class="green">EVENTS.</span></h2></div><a class="text-link" href="#/events">ALL ${events.filter(e => e.status !== 'cancelled').length} EVENTS ↗</a></div><div class="home-event-grid">${events.filter(e => ['live', 'upcoming'].includes(e.status)).sort(eventPriority).slice(0, 6).map((e, i) => `<a class="home-event home-event-${i + 1} reveal" href="#/event/${encodeURIComponent(e.slug)}"><span>${esc(streamLabel(e.stream))} / ${esc(eventDateLabel(e))}</span><strong>${esc(e.title)}</strong><small>${e.status === 'live' ? 'LIVE NOW ↗' : 'VIEW EVENT ↗'}</small></a>`).join('')}</div></div></section>
     <section class="section schedule-section"><div class="container"><div class="section-head reveal"><div><div class="eyebrow">04 / THREE DAYS</div><h2>THE FESTIVAL<br><span class="green">SEQUENCE.</span></h2></div><a class="text-link" href="#/schedule">OPEN FULL SCHEDULE ↗</a></div><div class="schedule-preview">${days.map(d => `<a class="day-card day-card-${d.day} reveal" href="#/schedule"><span class="day-num">${d.date}</span><h3>Day ${d.day}</h3><p>${d.desc}</p><span class="day-explore">VIEW DAY ↗</span><i class="day-ghost">0${d.day}</i></a>`).join('')}</div></div></section>
     <section class="section" id="venue"><div class="container venue-home"><div><div class="eyebrow">05 / THE VENUE</div><h2>MEET US AT<br><span class="green">TECHNOCITY.</span></h2><h3>Digital University Kerala</h3><p class="muted">Technocity Campus, Mangalapuram,<br>Thiruvananthapuram, Kerala — 695317.</p><a class="text-link" target="_blank" rel="noopener" href="https://maps.google.com/?q=Digital+University+Kerala+Technocity">GET DIRECTIONS ↗</a></div><a class="venue-map" aria-label="Open map directions to Digital University Kerala" target="_blank" rel="noopener" href="https://maps.google.com/?q=Digital+University+Kerala+Technocity"><img src="assets/venue-campus-enhanced.jpg" alt="Aerial view of Digital University Kerala campus among the green Technocity landscape" loading="lazy" width="1360" height="1024"></a></div></section>
     <section class="section" id="sponsors"><div class="container sponsors-home"><div><div class="eyebrow">06 / PARTNERS</div><h2>MADE POSSIBLE<br><span class="green">TOGETHER.</span></h2><p>Official partner names and identities will be listed when confirmed for publication.</p><a class="text-link" href="mailto:techfest@duk.ac.in">PARTNER WITH VYUHAM ↗</a></div><a class="button button-outline" href="mailto:techfest@duk.ac.in">PARTNERSHIP ENQUIRIES ↗</a></div></section>
@@ -144,10 +151,10 @@
   const eventDetail = slug => {
     const e = events.find(x => x.slug === decodeURIComponent(slug) && isVisibleEvent(x));
     if (!e) return notFound();
-    const image = safeExternalUrl(e.image);
-    const hero = image ? `<section class="page-hero event-page-hero" style="--event-hero-image:url('${esc(image)}')"><div class="container"><div class="breadcrumb"><a href="#/home">VYUHAM’26</a> / EVENT DOSSIER</div><div class="eyebrow">EVENT DOSSIER</div><h1>${esc(e.title)}</h1><p>Event details, schedule information and participation overview for VYUHAM’26.</p></div></section>` : pageHero('Event dossier', esc(e.title), 'Event details, schedule information and participation overview for VYUHAM’26.');
+    const image = safeExternalUrl(e.image) || streams.find(stream => stream.id === e.stream)?.image || streams.find(stream => stream.id === ({ technology: 'tech', culture: 'cultural', gaming: 'esports' }[e.stream]))?.image || 'assets/streams/technology.jpg';
+    const hero = `<section class="page-hero event-page-hero"><img class="event-hero-image" src="${esc(image)}" alt="${esc(streamLabel(e.stream))} event artwork"><div class="event-hero-shade"></div><div class="container"><div class="breadcrumb"><a href="#/home">VYUHAM’26</a> / EVENT DOSSIER</div><span class="stream-pill">${esc(streamLabel(e.stream))}</span><h1>${esc(e.title)}</h1><p>Event details, schedule information and participation overview for VYUHAM’26.</p></div></section>`;
     return `${hero}
-      <section class="section"><div class="container"><a class="back-link" href="#/events">← BACK TO EVENT ARCHIVE</a><div class="event-detail"><div><div class="eyebrow">${esc(streamLabel(e.stream))} / ${esc(eventDayLabel(e))}</div><h2>${esc(e.title)}</h2><p class="muted" style="line-height:1.9">${esc(e.description)}</p><h3 style="margin-top:35px">Participation notes</h3>${e.rules && e.rules.length ? `<ul class="rule-list">${e.rules.map(r => `<li>${esc(r)}</li>`).join('')}</ul>` : '<p class="muted">Detailed rules will be published by the event organizers.</p>'}<div class="notice">MakeMyPass is the official registration and payment provider. Review final event details and complete your registration on the event’s MakeMyPass page.</div></div><aside class="detail-panel"><div class="eyebrow">EVENT INTEL</div><dl><div><dt>DATE</dt><dd>${esc(eventDateLabel(e))}</dd></div><div><dt>TIME</dt><dd>${esc(e.time)}</dd></div><div><dt>VENUE</dt><dd>${esc(officialVenue(e.venue))}</dd></div>${e.speaker ? `<div><dt>SPEAKER</dt><dd>${esc(e.speaker)}</dd></div>` : ''}<div><dt>PRIZE</dt><dd class="green">${esc(displayPrize(e.prizes))}</dd></div><div><dt>ENTRY FEE</dt><dd>${esc(e.fee || 'Not listed')}</dd></div><div><dt>TEAM SIZE</dt><dd>${esc(e.teamSize)}</dd></div><div><dt>ELIGIBILITY</dt><dd>${esc(e.eligibility)}</dd></div></dl>${registrationCta(registrationUrl(e), 'REGISTER & PAY ON MAKEMYPASS ↗', 'button button-primary event-register-cta', e)}<p class="muted" style="font-size:10px;margin:12px 0 0">Opens the official listing for this event. If its link is not mapped yet, MakeMyPass opens the VYUHAM event directory.</p></aside></div></div></section>`;
+      <section class="section"><div class="container"><a class="back-link" href="#/events">← BACK TO EVENT ARCHIVE</a><div class="event-detail"><div><div class="eyebrow">${esc(eventDayLabel(e))}</div><h2>${esc(e.title)}</h2><button class="info-toggle" type="button" aria-expanded="false" aria-controls="eventDescription"><span aria-hidden="true">i</span> ABOUT THIS EVENT</button><div class="event-description" id="eventDescription" hidden><p class="muted" style="line-height:1.9">${esc(e.description)}</p></div><h3 style="margin-top:35px">Participation notes</h3>${e.rules && e.rules.length ? `<ul class="rule-list">${e.rules.map(r => `<li>${esc(r)}</li>`).join('')}</ul>` : '<p class="muted">Detailed rules will be published by the event organizers.</p>'}<div class="notice">MakeMyPass is the official registration and payment provider. Review final event details and complete your registration on the event’s MakeMyPass page.</div></div><aside class="detail-panel"><div class="eyebrow">EVENT INTEL</div><dl><div><dt>DATE</dt><dd>${esc(eventDateLabel(e))}</dd></div><div><dt>TIME</dt><dd>${esc(e.time)}</dd></div><div><dt>VENUE</dt><dd>${esc(officialVenue(e.venue))}</dd></div>${e.speaker ? `<div><dt>SPEAKER</dt><dd>${esc(e.speaker)}</dd></div>` : ''}<div><dt>PRIZE</dt><dd class="green">${esc(displayPrize(e.prizes))}</dd></div><div><dt>ENTRY FEE</dt><dd>${esc(e.fee || 'Not listed')}</dd></div><div><dt>TEAM SIZE</dt><dd>${esc(e.teamSize)}</dd></div><div><dt>ELIGIBILITY</dt><dd>${esc(e.eligibility)}</dd></div></dl>${registrationCta(registrationUrl(e), 'REGISTER & PAY ON MAKEMYPASS ↗', 'button button-primary event-register-cta', e)}<p class="muted" style="font-size:10px;margin:12px 0 0">Opens the official listing for this event. If its link is not mapped yet, MakeMyPass opens the VYUHAM event directory.</p></aside></div></div></section>`;
   };
   const schedulePage = () => `<section class="page-hero schedule-page-hero"><div class="container"><div class="breadcrumb"><a href="#/home">VYUHAM’26</a> / FESTIVAL TIMELINE</div><div class="eyebrow">Festival timeline</div><h1>THREE DAYS.<br><span class="green">NO PAUSE.</span></h1><p>Plan your VYUHAM’26 experience. Event-specific timings and venues should be confirmed with the official schedule.</p></div><img class="schedule-hero-logo" src="assets/vyuham_logo_sm.png" alt="VYUHAM emblem" width="72" height="72"></section>
     <section class="section"><div class="container"><div class="schedule-days" id="scheduleDays">${days.map(d => `<button class="schedule-day schedule-day-${d.day}" type="button" aria-pressed="${d.day === 1}" data-day="${d.day}"><b>DAY 0${d.day} <i>· ${d.date}</i></b><span>${d.name}</span><small>${d.desc}</small><em>VIEW DAY <strong>↘</strong></em></button>`).join('')}</div><div id="scheduleContent"></div></div></section>`;
@@ -232,6 +239,12 @@
       if (sort === 'name') filtered.sort((a, b) => a.title.localeCompare(b.title));
       if (sort === 'fee') filtered.sort((a, b) => { const cost = e => { const m = String(e.fee || '').match(/[\d,]+/); return m ? Number(m[0].replaceAll(',', '')) : Infinity }; return cost(a) - cost(b) });
       if (sort === 'day') filtered.sort((a, b) => {
+        const streamRank = s => ['tech','technology','management'].includes(s) ? 0 : 1;
+        const sr = streamRank(a.stream) - streamRank(b.stream);
+        if (sr !== 0) return sr;
+        const prize = e => { const m = String(e.prizes || '').match(/[\d,]+/); return m ? Number(m[0].replaceAll(',', '')) : 0 };
+        const pr = prize(b) - prize(a);
+        if (pr !== 0) return pr;
         const order = e => e.scheduleGroup === 'pre-fest' ? 0 : (e.scheduleDays?.length ? Math.min(...e.scheduleDays) : Number(e.day) || 9);
         return order(a) - order(b) || a.title.localeCompare(b.title);
       });
@@ -252,7 +265,7 @@
       const eventDays = Array.isArray(e.scheduleDays) ? e.scheduleDays : (e.day == null ? [] : [Number(e.day)]);
       return eventDays.includes(selected) && e.status !== 'cancelled';
     }).sort((a, b) => scheduleMinutes(a.time) - scheduleMinutes(b.time));
-    $('#scheduleContent').innerHTML = `<div class="schedule-heading"><div><div class="eyebrow">DAY 0${d.day} / ${d.date}</div><h2>${d.name}</h2></div><p class="muted">${d.desc}</p></div><div class="schedule-list">${dayEvents.length ? dayEvents.map((e, index) => `<article class="schedule-row"><div class="schedule-time"><span>0${String(index + 1).padStart(2, '0')}</span><time>${esc(e.time)}</time></div><div class="schedule-event"><span class="schedule-stream">${esc(streamLabel(e.stream))}</span><h3><a href="#/event/${encodeURIComponent(e.slug)}">${esc(e.title)}</a></h3><p>${esc(e.description)}</p></div><div class="venue"><span>LOCATION</span><b>⌖ ${esc(officialVenue(e.venue))}</b></div></article>`).join('') : '<div class="empty-state">No event records are currently listed for this day.</div>'}</div>`;
+    $('#scheduleContent').innerHTML = `<div class="schedule-heading"><div><span class="date-capsule">${esc(ordinalDate(d.date))}</span><div class="eyebrow">DAY 0${d.day}</div><h2>${d.name}</h2></div><p class="muted">${d.desc}</p></div><div class="schedule-list">${dayEvents.length ? dayEvents.map((e, index) => `<article class="schedule-row"><div class="schedule-time"><span>0${String(index + 1).padStart(2, '0')}</span><time>${esc(e.time)}</time></div><div class="schedule-event"><span class="schedule-stream">${esc(streamLabel(e.stream))}</span><h3><a href="#/event/${encodeURIComponent(e.slug)}">${esc(e.title)}</a></h3><p>${esc(e.description)}</p></div><div class="venue"><span>LOCATION</span><b>⌖ ${esc(officialVenue(e.venue))}</b></div></article>`).join('') : '<div class="empty-state">No event records are currently listed for this day.</div>'}</div>`;
   }
   function observeReveals() {
     const items = $$('.reveal:not(.visible)');
@@ -344,11 +357,17 @@
       imagesReady.then(startSequence);
       finalFallbackTimer = setTimeout(finish, 16000);
     }
-    updateHeaderRegistration();
+
     updateCountdown();
     $('#siteFooter').style.display = '';
     if (routeDisabled) return;
     if (r.page === 'events') renderEvents(location.hash.includes('?') ? location.hash.split('?').slice(1).join('?') : '');
+    $$('.info-toggle').forEach(button => button.addEventListener('click', () => {
+      const description = document.getElementById(button.getAttribute('aria-controls'));
+      const expanded = button.getAttribute('aria-expanded') === 'true';
+      button.setAttribute('aria-expanded', String(!expanded));
+      description.hidden = expanded;
+    }));
     if (r.page === 'schedule') {
       renderSchedule(1); $('#scheduleDays').addEventListener('click', e => { const b = e.target.closest('[data-day]'); if (b) renderSchedule(b.dataset.day) });
     }
@@ -429,7 +448,18 @@
     if (isRouteHash()) render();
     else scrollToHashTarget();
   });
-  window.addEventListener('scroll', () => { const max = document.documentElement.scrollHeight - innerHeight; $('#topProgress').style.transform = `scaleX(${max > 0 ? scrollY / max : 0})` }, { passive: true });
+  let lastScrollY = 0; let scrollIdleTimer = null;
+  window.addEventListener('scroll', () => {
+    const current = window.scrollY;
+    const max = document.documentElement.scrollHeight - innerHeight;
+    $('#topProgress').style.transform = `scaleX(${max > 0 ? current / max : 0})`;
+    const header = $('#siteHeader');
+    if (current > lastScrollY && current > 120) header.classList.add('header-hidden');
+    else header.classList.remove('header-hidden');
+    lastScrollY = current;
+    clearTimeout(scrollIdleTimer);
+    scrollIdleTimer = setTimeout(() => header.classList.remove('header-hidden'), 800);
+  }, { passive: true });
   // Accurate IST countdown, with no negative values after the target time.
   const festivalStart = '2026-10-30T09:00:00+05:30';
   function updateCountdown() { const remaining = Math.max(0, new Date(festivalStart).getTime() - Date.now()); const values = [Math.floor(remaining / 86400000), Math.floor(remaining % 86400000 / 3600000), Math.floor(remaining % 3600000 / 60000), Math.floor(remaining % 60000 / 1000)]; $$('[data-countdown]').forEach(el => { el.innerHTML = values.map((value, i) => `<span><b>${String(value).padStart(2, '0')}</b><i>${['DAYS', 'HRS', 'MIN', 'SEC'][i]}</i></span>`).join('') }) }
