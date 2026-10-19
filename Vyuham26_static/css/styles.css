@@ -951,3 +951,105 @@ h1,h2,h3,.brand b,.stream-card strong,.home-event strong,.day-card h3,.stage-bra
  .intro-cinema-kicker img{width:min(58vw,220px)}
  .intro-cinema-core>img{width:clamp(84px,20vw,120px);max-height:18vh}
 }
+
+/* Homepage hero actions: clear primary, secondary, and utility hierarchy. */
+.cyber-copy .cyber-actions{
+ display:grid;
+ grid-template-columns:max-content max-content;
+ justify-content:start;
+ align-items:center;
+ gap:12px;
+ margin-top:24px;
+}
+.cyber-copy .cyber-actions .hero-cta{
+ box-sizing:border-box;
+ display:inline-flex;
+ flex:0 0 auto;
+ align-items:center;
+ justify-content:center;
+ gap:9px;
+ min-height:46px;
+ margin:0;
+ padding:12px 17px;
+ border:1px solid transparent;
+ border-radius:999px;
+ font:700 10px/1 var(--sans);
+ letter-spacing:.09em;
+ text-align:center;
+ text-decoration:none;
+ white-space:nowrap;
+ transition:background .2s ease,border-color .2s ease,color .2s ease,transform .2s ease,box-shadow .2s ease;
+}
+.cyber-copy .cyber-actions .hero-cta-register{
+ color:#fff;
+ background:linear-gradient(135deg,#e83b34,#a91820);
+ border-color:#f05a50;
+ box-shadow:0 8px 24px #d42a2a30;
+}
+.cyber-copy .cyber-actions .hero-cta-explore{
+ color:#f4eeee;
+ background:#180c0d99;
+ border-color:#ffffff52;
+}
+.cyber-copy .cyber-actions .hero-cta-map{
+ grid-column:auto;
+ justify-self:start;
+ min-height:40px;
+ padding:9px 14px;
+ color:#bdb4b8;
+ background:#10090a80;
+ border-color:#ffffff2e;
+ font-size:9px;
+}
+.cyber-copy .cyber-actions .hero-cta-map svg{
+ width:15px;
+ height:15px;
+ fill:none;
+ stroke:currentColor;
+ stroke-width:1.7;
+ stroke-linecap:round;
+ stroke-linejoin:round;
+}
+.cyber-copy .cyber-actions .hero-cta:hover{
+ transform:translateY(-2px);
+}
+.cyber-copy .cyber-actions .hero-cta-register:hover{
+ background:linear-gradient(135deg,#f04c43,#bd2027);
+ box-shadow:0 10px 28px #d42a2a45;
+}
+.cyber-copy .cyber-actions .hero-cta-explore:hover{
+ color:#fff;
+ background:#ffffff12;
+ border-color:#ffffff9c;
+}
+.cyber-copy .cyber-actions .hero-cta-explore{
+ grid-column:1 / -1;
+ justify-self:start;
+}
+.cyber-copy .cyber-actions .hero-cta-map:hover{
+ color:var(--cyan);
+ background:#0c1716;
+ border-color:var(--cyan);
+}
+.cyber-copy .cyber-actions .hero-cta:focus-visible{
+ outline:2px solid var(--cyan);
+ outline-offset:4px;
+}
+.cyber-copy .cyber-actions .hero-cta.registration-disabled{
+ color:#a99b9e;
+ background:#ffffff0a;
+ border-color:#ffffff24;
+ box-shadow:none;
+ cursor:not-allowed;
+}
+@media(max-width:1080px){
+ .cyber-copy .cyber-actions{grid-template-columns:minmax(0,1fr);max-width:360px}
+ .cyber-copy .cyber-actions .hero-cta{width:100%;min-height:48px}
+ .cyber-copy .cyber-actions .hero-cta-explore{grid-column:auto;justify-self:stretch}
+ .cyber-copy .cyber-actions .hero-cta-map{grid-column:auto;justify-self:stretch}
+}
+@media(max-width:700px){
+ .cyber-copy .cyber-actions{gap:10px;max-width:none;margin-top:20px}
+ .cyber-copy .cyber-actions .hero-cta{font-size:10px}
+ .cyber-copy .cyber-actions .hero-cta-map{min-height:45px}
+}
