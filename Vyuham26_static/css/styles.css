@@ -1175,7 +1175,7 @@ html{scroll-padding-top:calc(var(--site-header-top) + var(--site-header-height) 
 @media(prefers-reduced-motion:reduce){.site-header,.site-header .main-nav>a:not(.button),.site-header .main-nav>a:not(.button)::after,.site-header .console-launcher{transition:none;}}
 
 /* Day Pass uses the same dossier composition as individual event details. */
-.day-pass-page{padding:52px 28px 88px;background:radial-gradient(ellipse at 82% 12%,#5c0c0a1a,transparent 38%),#111214;}
+.day-pass-page{padding:32px 28px 88px;background:radial-gradient(ellipse at 82% 12%,#5c0c0a1a,transparent 38%),#111214;}
 .day-pass-page .container{max-width:var(--max);}
 .day-pass-page .back-link{margin-bottom:26px;}
 .day-pass-page .event-detail{grid-template-columns:minmax(0,1fr) 340px;align-items:start;gap:clamp(28px,4vw,52px);}
@@ -1195,6 +1195,5 @@ html{scroll-padding-top:calc(var(--site-header-top) + var(--site-header-height) 
 .day-pass-panel dt{font-size:8px;letter-spacing:.04em;}
 .day-pass-panel dd{max-width:62%;font-size:11px;line-height:1.5;}
 .day-pass-panel .event-register-cta{width:100%;min-height:48px;}
-.day-pass-page .event-register-cta{background:linear-gradient(110deg,#e3312d,#a91e20);border-color:#e4483d;box-shadow:0 9px 24px #b324252e;}
 @media(max-width:980px) and (min-width:701px){.day-pass-page .event-detail{grid-template-columns:minmax(0,1fr) 300px;gap:24px}.pass-day-options{gap:8px}.pass-day-options article{padding:15px 12px}}
 @media(max-width:700px){.day-pass-page{padding:34px 18px 68px}.day-pass-page .back-link{margin-bottom:24px}.day-pass-page .event-detail{grid-template-columns:minmax(0,1fr);gap:28px}.day-pass-main h1{font-size:clamp(42px,11vw,60px)}.pass-day-options{grid-template-columns:minmax(0,1fr);gap:9px;margin-top:24px}.pass-day-options article{min-height:0;padding:15px 16px}.pass-day-options h3{margin:8px 0 3px;font-size:19px}.day-pass-panel{padding:21px}.day-pass-panel .event-register-cta{width:100%}}
