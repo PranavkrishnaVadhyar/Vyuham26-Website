@@ -627,28 +627,7 @@ h1,h2,h3,.brand b,.stream-card strong,.home-event strong,.day-card h3,.stage-bra
 .venue-about-typewriter.is-complete span::after{display:none}
 @keyframes venue-type-caret{50%{opacity:0}}
 .venue-location-description{max-width:430px!important;margin:0 0 4px!important;font-size:14px!important;line-height:1.65;color:var(--muted)}
-.venue-team-section{position:relative;overflow:hidden;background:radial-gradient(ellipse at 50% 52%,#42101735,transparent 48%),linear-gradient(180deg,#10090b,#140a0c 55%,#10090b)}
-.venue-team-section::before{content:"";position:absolute;inset:12% 8%;border:1px solid #ff30380c;border-radius:50%;pointer-events:none}
-.venue-team-section .container{position:relative;z-index:1}
-.venue-team-section .section-head{margin-bottom:24px}
-.venue-team-section .section-head>p{max-width:340px;color:#b7a6a8;font-size:14px}
- .dev-team-grid{display:grid;gap:28px;max-width:1120px;margin:0 auto}
- .dev-team-row{display:grid;justify-content:center;gap:20px}
- .dev-team-row-primary{grid-template-columns:repeat(4,minmax(0,1fr))}
- .dev-team-row-secondary{grid-template-columns:repeat(2,minmax(0,260px))}
- .dev-team-card{display:flex;min-width:0;flex-direction:column;align-items:center;padding:20px 14px 18px;text-align:center;border:1px solid #ff30382b;border-radius:14px;background:linear-gradient(155deg,#241316eF,#1a1012f7 58%,#130d0ff5);box-shadow:0 18px 46px #0006}
- .dev-team-portrait{display:grid;width:clamp(148px,15vw,190px);aspect-ratio:1;place-items:center;overflow:hidden;border:4px solid #ff3038;border-radius:50%;background:#fff;box-shadow:0 0 0 7px #ff30381c,0 12px 32px #0007}
- .dev-team-portrait img{display:block;width:100%;height:100%;object-fit:cover;object-position:center 24%}
- .dev-team-card:nth-child(2) .dev-team-portrait img{object-position:center 20%}
- .dev-team-caption{display:flex;min-height:92px;flex-direction:column;justify-content:center;align-items:center;gap:6px;padding:13px 3px 0}
- .dev-team-caption h3{max-width:100%;margin:0;color:#f5f5f7;font:700 clamp(17px,1.8vw,22px)/1.2 'Manrope',sans-serif;letter-spacing:-.035em;text-wrap:balance}
- .dev-team-caption p{margin:0;font:10px var(--mono);letter-spacing:.1em;text-transform:uppercase}
- .dev-team-caption .dev-team-role{color:#ff5960;font-size:11px;letter-spacing:.14em}
- .dev-team-caption .dev-team-course{color:#b7a6a8}
- @media(max-width:900px){.dev-team-row-primary,.dev-team-row-secondary{grid-template-columns:repeat(2,minmax(0,1fr));max-width:620px;margin-inline:auto}.dev-team-card{padding:18px 12px 16px}.dev-team-portrait{width:clamp(148px,23vw,182px)}}
-@media(max-width:700px){.venue-page-hero h1{font-size:clamp(23px,6.2vw,30px);line-height:1.22}.venue-location-section .section-head{align-items:flex-start}.venue-location-description{font-size:13px!important}.venue-team-section{padding-right:12px;padding-left:12px}.venue-team-section .section-head{align-items:flex-start;flex-direction:column;gap:14px;margin-bottom:18px}.venue-team-section .section-head>p{margin:0;font-size:13px}.dev-team-row{gap:14px}.dev-team-card{padding:16px 8px 14px}.dev-team-portrait{width:clamp(132px,32vw,176px);border-width:3px}.dev-team-caption{min-height:88px;gap:5px;padding-top:11px}.dev-team-caption h3{font-size:clamp(15px,4.2vw,20px)}.dev-team-caption p{font-size:8px}.dev-team-caption .dev-team-role{font-size:9px}}
-@media(max-width:380px){.dev-team-row{gap:10px}.dev-team-card{padding:13px 6px 12px}.dev-team-portrait{width:clamp(122px,35vw,150px)}.dev-team-caption h3{font-size:15px}}
-@media(prefers-reduced-motion:reduce){.dev-team-card,.dev-team-portrait img{transition:none!important}}
+@media(max-width:700px){.venue-page-hero h1{font-size:clamp(23px,6.2vw,30px);line-height:1.22}.venue-location-section .section-head{align-items:flex-start}.venue-location-description{font-size:13px!important}}
 
 /* Use each stream's own artwork while keeping titles and links legible. */
 .stream-page-grid .stream-feature{position:relative;isolation:isolate;overflow:hidden;background-color:#120909!important;background-size:cover;background-position:center;background-repeat:no-repeat;transition:background-size .55s ease}
