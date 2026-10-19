@@ -287,7 +287,7 @@ window.VYUHAM_EVENTS = [
     "time": "10:00 AM – 5:00 PM",
     "venue": "Computer Lab",
     "description": "Cybersecurity puzzles and challenges.",
-    "prizes": "Prize Pool: ₹35,000+",
+    "prizes": "₹50,000+",
     "fee": "₹500 per team",
     "eligibility": "Open to all cybersecurity enthusiasts",
     "teamSize": "2–3 members",
