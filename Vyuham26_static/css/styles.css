@@ -540,8 +540,6 @@ h1,h2,h3,.brand b,.stream-card strong,.home-event strong,.day-card h3,.stage-bra
 .day-card-link{display:block;color:inherit;text-decoration:none}
 .day-card-link h3{margin-bottom:12px}
 .day-card-actions{display:flex;align-items:center;gap:16px;margin-top:auto;padding-top:18px}
-.day-pass-cta{display:inline-flex;align-items:center;justify-content:center;min-height:36px;padding:0 13px;border:1px solid #de312a80;border-radius:999px;color:#f0b0aa;text-decoration:none;font:8px var(--mono);letter-spacing:.04em;transition:background .2s,border-color .2s,color .2s}
-.day-pass-cta:hover,.day-pass-cta:focus-visible{background:#de312a24;border-color:#de312a;color:#fff;outline:none}
 .detail-panel-heading{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .detail-panel-heading .eyebrow{margin:0}
 .detail-info{position:relative;z-index:5;flex:0 0 auto}
@@ -1198,3 +1196,23 @@ html{scroll-padding-top:calc(var(--site-header-top) + var(--site-header-height) 
 @media(max-width:980px) and (min-width:701px){.day-pass-page .event-detail{grid-template-columns:minmax(0,1fr) 300px;gap:24px}.pass-day-options{gap:8px}.pass-day-options article{padding:15px 12px}}
 @media(max-width:700px){.day-pass-page{padding:calc(var(--site-header-top) + var(--site-header-height) + var(--site-header-clearance) + 16px) 18px 68px}.day-pass-page .back-link{margin-bottom:24px}.day-pass-page .event-detail{grid-template-columns:minmax(0,1fr);gap:28px}.day-pass-main h1{font-size:clamp(42px,11vw,60px)}.pass-day-options{grid-template-columns:minmax(0,1fr);gap:9px;margin-top:24px}.pass-day-options article{min-height:0;padding:15px 16px}.pass-day-options h3{margin:8px 0 3px;font-size:19px}.day-pass-panel{padding:21px}.day-pass-panel .event-register-cta{width:100%}}
 @media(max-width:700px){.cyber-hero{padding-top:calc(var(--site-header-top) + var(--site-header-height) + 16px)}.page-hero{padding-top:calc(var(--site-header-top) + var(--site-header-height) + 16px)}.page-hero.events-page-hero,.page-hero.participation-page-hero,.page-hero.competitions-page-hero,.page-hero.streams-page-hero{padding-top:calc(var(--site-header-top) + var(--site-header-height) + 16px)}}
+
+/* Keep the date at the top and place card copy and actions in the lower portion. */
+.schedule-preview{align-items:stretch;}
+.day-card{height:clamp(380px,28vw,450px);min-height:0;padding:38px 38px 34px;display:flex;flex-direction:column;align-items:stretch;}
+.day-card::after{background:linear-gradient(90deg,#101114b8 0%,#1011148c 52%,#10111442 100%),linear-gradient(0deg,#090a0ee8 0%,#10111498 44%,#10111420 100%);}
+.day-card .day-num{position:relative;z-index:1;align-self:flex-start;}
+.day-card-link{min-width:0;display:flex;flex-direction:column;margin-top:auto;color:inherit;text-decoration:none;}
+.day-card h3{margin:0 0 12px;}
+.day-card p{max-width:34ch;min-height:3.4em;margin:0;line-height:1.7;color:#c4bdc1;}
+.day-card-actions{position:relative;z-index:2;width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:44px;margin-top:18px;padding-top:8px;border-top:1px solid #ffffff24;}
+.day-explore,.day-pass-link{position:relative;box-sizing:border-box;display:inline-flex;flex:0 1 auto;align-items:center;min-width:0;min-height:44px;padding:0;color:#e8564e;text-decoration:none;white-space:nowrap;text-transform:uppercase;font:600 9px/1.2 var(--mono);letter-spacing:.08em;transition:color .2s ease;}
+.day-pass-link{color:#d2cbd0;}
+.day-explore::after,.day-pass-link::after{content:"";position:absolute;right:0;bottom:8px;left:0;height:1px;background:currentColor;transform:scaleX(0);transform-origin:left;transition:transform .2s ease;}
+.day-explore:hover,.day-explore:focus-visible{color:#ff766d;}
+.day-pass-link:hover,.day-pass-link:focus-visible{color:#ff766d;}
+.day-explore:hover::after,.day-explore:focus-visible::after,.day-pass-link:hover::after,.day-pass-link:focus-visible::after{transform:scaleX(1);}
+.day-explore:focus-visible,.day-pass-link:focus-visible{outline:2px solid #ff766d;outline-offset:2px;border-radius:2px;}
+.day-card .day-ghost{z-index:0;pointer-events:none;}
+@media(max-width:980px){.day-card{height:410px;padding:30px 30px 32px}.day-card-actions{gap:10px}}
+@media(max-width:700px){.day-card{height:370px;padding:25px 24px 28px}.day-card-actions{gap:8px}.day-explore,.day-pass-link{font-size:8px}}
