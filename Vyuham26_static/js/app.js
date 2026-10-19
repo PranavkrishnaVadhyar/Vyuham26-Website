@@ -284,7 +284,7 @@
   function render() {
     const r = route();
     const activeEvent = r.page === 'event' && decodeURIComponent(r.slug) !== 'day-pass' ? events.find(e => e.slug === decodeURIComponent(r.slug)) : null;
-    document.title = decodeURIComponent(r.slug || '') === 'day-pass' && r.page === 'event' ? 'Vyuham Day-Pass | VYUHAM’26' : activeEvent?.officialTitle ? `${officialEventTitle(activeEvent)} | VYUHAM’26` : 'VYUHAM’26 | Digital University Kerala';
+    document.title = decodeURIComponent(r.slug || '') === 'day-pass' && r.page === 'event' ? 'Vyuham Day-Pass | VYUHAM’26' : activeEvent?.officialTitle ? `${officialEventTitle(activeEvent)} | VYUHAM’26` : "VYUHAM'26 - Digital University Kerala";
     $('#mainNav').classList.remove('open'); $('#menuToggle').setAttribute('aria-expanded', 'false'); $('#menuToggle').setAttribute('aria-label', 'Open navigation');
     $$('#mainNav [data-route]').forEach(a => a.classList.toggle('active', a.dataset.route === r.page));
     const shells = ['certificates', 'checkin', 'checkout', 'confirmation', 'feedback', 'food', 'leaderboard', 'payment', 'photography', 'qualifiers', 'receipt', 'results'];
