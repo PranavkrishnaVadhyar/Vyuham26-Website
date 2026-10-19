@@ -238,16 +238,7 @@
       });
       if (sort === 'name') filtered.sort((a, b) => a.title.localeCompare(b.title));
       if (sort === 'fee') filtered.sort((a, b) => { const cost = e => { const m = String(e.fee || '').match(/[\d,]+/); return m ? Number(m[0].replaceAll(',', '')) : Infinity }; return cost(a) - cost(b) });
-      if (sort === 'day') filtered.sort((a, b) => {
-        const streamRank = s => ['tech','technology','management'].includes(s) ? 0 : 1;
-        const sr = streamRank(a.stream) - streamRank(b.stream);
-        if (sr !== 0) return sr;
-        const prize = e => { const m = String(e.prizes || '').match(/[\d,]+/); return m ? Number(m[0].replaceAll(',', '')) : 0 };
-        const pr = prize(b) - prize(a);
-        if (pr !== 0) return pr;
-        const order = e => e.scheduleGroup === 'pre-fest' ? 0 : (e.scheduleDays?.length ? Math.min(...e.scheduleDays) : Number(e.day) || 9);
-        return order(a) - order(b) || a.title.localeCompare(b.title);
-      });
+      if (sort === 'day') filtered.sort(eventPriority);
       count.textContent = `${String(filtered.length).padStart(2, '0')} EVENTS FOUND / ${events.length} ${document.documentElement.dataset.api === 'online' ? 'LIVE API' : 'CATALOG'} RECORDS`;
       grid.innerHTML = filtered.length ? filtered.map(eventCard).join('') : '<div class="empty-state" style="grid-column:1/-1">No events match these filters. Clear a filter or try another search.</div>';
       $$('#streamFilters .filter-pill').forEach(b => b.classList.toggle('active', b.dataset.stream === selected)); observeReveals();

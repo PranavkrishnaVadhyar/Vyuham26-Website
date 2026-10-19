@@ -8,6 +8,10 @@
 
 ## Executive Summary & Scorecard
 
+### Implementation progress update — 19 October 2026
+
+The baseline findings below predate the latest implementation work. Current source now has the header registration control removed, a floating pill header with scroll hide/reveal behavior, prize/stream-aware event ordering, ordinal event dates, homepage featured event ranking, event-detail info toggles and stream artwork, and schedule date capsules. Event names and event data have been left unchanged per the user's direction. These changes have not had a browser visual QA pass. Brochure reconciliation and pass purchase details remain pending the final brochure and confirmed provider information.
+
 | Area | Total Items | Implemented | Partially Done | Not Done / Blocked |
 |---|---|---|---|---|
 | **1. Home page & Navigation** | 4 | 0 | 1 | 3 |
