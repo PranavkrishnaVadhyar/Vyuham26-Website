@@ -10,6 +10,7 @@
   events = events.filter(isVisibleEvent);
   let registrationOpen = true;
   let landingIntroSeen = false;
+  let heroCarouselCleanup = null;
   const registrationFeatureEnabled = window.VYUHAM_REGISTRATION_ENABLED === true;
   const MAKEMYPASS_HOME = 'https://org.makemypass.com/web/vyuham-26';
   const DAY_PASS_URL = `${MAKEMYPASS_HOME}/events/vyuham-day-pass`;
@@ -89,6 +90,12 @@
     const dayRank = event => event.scheduleGroup === 'pre-fest' ? 0 : (event.scheduleDays?.length ? Math.min(...event.scheduleDays) : Number(event.day) || 9);
     return dayRank(a) - dayRank(b) || statusRank(a) - statusRank(b) || eventStreamRank(a) - eventStreamRank(b) || eventPrizeValue(b) - eventPrizeValue(a) || officialEventTitle(a).localeCompare(officialEventTitle(b));
   };
+  const homepageFeaturedEvents = events.filter(event => event.featured && ['live', 'upcoming'].includes(event.status)).sort(eventPriority).slice(0, 4);
+  const homepageFeaturedPoster = event => {
+    const candidate = event?.poster;
+    if (!candidate) return '';
+    return safeExternalUrl(candidate) || (/^(?:\/|assets\/)/.test(candidate) ? candidate : '');
+  };
   const registrationUrl = event => {
     const eventIdentity = `${event.slug || ''} ${event.title || event.name || ''}`.toLowerCase();
     if (eventIdentity.includes('workshop-luminar-technolab') || (eventIdentity.includes('luminar') && eventIdentity.includes('prompt engineering'))) {
@@ -143,10 +150,11 @@
   };
   const home = () => {
     const showIntro = playLandingIntro();
-    const featuredEvent = events.find(e => e.featured);
+    const featuredEvents = homepageFeaturedEvents;
+    const featuredEvent = featuredEvents[0];
     return `
     ${showIntro ? `<div class="intro-cinema" id="landingIntro" tabindex="-1" role="dialog" aria-modal="true" aria-label="VYUHAM 2026 introduction"><div class="intro-scene intro-scene-campus"><img src="assets/venue-campus-enhanced.jpg" alt=""><span>TECHNOCITY CAMPUS / TECHNOPARK PHASE 4</span></div><div class="intro-scene intro-scene-festival"><img src="assets/afterdark-monolith.png" alt=""><span>THREE DAYS / ONE CONVERGENCE</span></div><div class="intro-cinema-vignette"></div><div class="intro-cinema-grid"></div><div class="intro-cinema-orbit intro-cinema-orbit-a"></div><div class="intro-cinema-orbit intro-cinema-orbit-b"></div><div class="intro-cinema-core"><span class="intro-cinema-kicker"><img src="assets/duk-logo-intro.png" alt="Digital University Kerala"><b>Presents</b></span><img src="assets/vyuham_logo_optimized.png" alt=""><h1><span>VYUHAM</span><b>’26</b></h1><p>TECHNOLOGY. CULTURE. COMPETITION.</p></div><span class="intro-cinema-coordinate intro-cinema-left">30 OCT — 01 NOV / 2026</span><span class="intro-cinema-coordinate intro-cinema-right">THIRUVANANTHAPURAM / INDIA</span><div class="intro-cinema-flash"></div></div>` : ''}
-    <section class="cyber-hero${showIntro ? ' intro-handoff' : ''}" id="home"><div class="cyber-hero-grid"><div class="cyber-copy"><div class="cyber-kicker"><span class="live-dot"></span> DIGITAL UNIVERSITY KERALA <i>·</i> 2026</div><div class="cyber-wordmark"><img src="assets/vyuham_logo_optimized.png" alt="VYUHAM red emblem"><h1>VYUHAM<span>’26</span></h1></div><p class="cyber-slogan">THE FUTURE<br><em>AWAITS.</em></p><p class="cyber-intro">VYUHAM’26 is Digital University Kerala’s flagship national-level management, technology and cultural fest.</p><div class="cyber-actions">${registrationCta(MAKEMYPASS_HOME, 'REGISTER & GET TICKETS <span aria-hidden="true">↗</span>', 'button button-primary hero-cta hero-cta-register')}<a class="button button-outline hero-cta hero-cta-map" href="https://duk360.duk.ac.in/duk-tour/?scene=technopark-phase-4" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12Z"/><circle cx="12" cy="9" r="2.3"/></svg>CAMPUS MAP <span aria-hidden="true">↗</span></a><a class="button button-outline hero-cta hero-cta-explore" href="#/events">EXPLORE ALL EVENTS <span aria-hidden="true">↓</span></a></div><div class="cyber-data"><span>30 OCT — 01 NOV, 2026</span><span>TECHNOCITY CAMPUS, TECHNOPARK PHASE 4</span></div><div class="hero-count cyber-count" aria-label="Countdown to festival opening"><small>COUNTDOWN TO OPENING</small><strong data-countdown>—</strong></div></div><div class="cyber-stage"><figure class="stage-screen stage-main"><img src="assets/vyuham-hero-convergence.png" alt="A crimson energy beam illuminating a monumental dark gateway above a misty reflective landscape"><div class="stage-shade"></div><div class="stage-brand"><img src="assets/vyuham_logo_optimized.png" alt=""><span>VYUHAM<sup>’26</sup></span></div><figcaption><span>VYUHAM / 01</span><span>THIRUVANANTHAPURAM, INDIA</span></figcaption></figure><a class="stage-screen stage-float" href="#/event/${encodeURIComponent(featuredEvent?.slug || 'events')}"><span class="stage-float-label">FEATURED TRANSMISSION</span><b>${esc(featuredEvent ? officialEventTitle(featuredEvent) : 'VYUHAM’26')}</b>${featuredEvent?.officialTitle ? `<small class="stage-float-subtitle">${esc(featuredEvent.title)}</small>` : ''}<span class="stage-float-foot">OPEN EVENT DOSSIER ↗</span></a><span class="stage-orbit stage-orbit-one"></span><span class="stage-orbit stage-orbit-two"></span><div class="stage-index">FESTIVAL SIGNAL <b>01—03</b></div></div></div><div class="cyber-hero-foot"><span>THE NATIONAL TECHNO-CULTURAL FESTIVAL</span><a href="#festival">SCROLL TO EXPLORE ↓</a></div></section>
+    <section class="cyber-hero${showIntro ? ' intro-handoff' : ''}" id="home"><div class="cyber-hero-grid"><div class="cyber-copy"><div class="cyber-kicker"><span class="live-dot"></span> DIGITAL UNIVERSITY KERALA <i>·</i> 2026</div><div class="cyber-wordmark"><img src="assets/vyuham_logo_optimized.png" alt="VYUHAM red emblem"><h1>VYUHAM<span>’26</span></h1></div><p class="cyber-slogan">THE FUTURE<br><em>AWAITS.</em></p><p class="cyber-intro">VYUHAM’26 is Digital University Kerala’s flagship national-level management, technology and cultural fest.</p><div class="cyber-actions">${registrationCta(MAKEMYPASS_HOME, 'REGISTER & GET TICKETS <span aria-hidden="true">↗</span>', 'button button-primary hero-cta hero-cta-register')}<a class="button button-outline hero-cta hero-cta-map" href="https://duk360.duk.ac.in/duk-tour/?scene=technopark-phase-4" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12Z"/><circle cx="12" cy="9" r="2.3"/></svg>CAMPUS MAP <span aria-hidden="true">↗</span></a><a class="button button-outline hero-cta hero-cta-explore" href="#/events">EXPLORE ALL EVENTS <span aria-hidden="true">↓</span></a></div><div class="cyber-data"><span>30 OCT — 01 NOV, 2026</span><span>TECHNOCITY CAMPUS, TECHNOPARK PHASE 4</span></div><div class="hero-count cyber-count" aria-label="Countdown to festival opening"><small>COUNTDOWN TO OPENING</small><strong data-countdown>—</strong></div></div><div class="cyber-stage" id="featuredCarousel" role="region" aria-label="Featured event carousel"><figure class="stage-screen stage-main"><img class="stage-featured-art" id="featuredArtwork" src="assets/vyuham-hero-convergence.png" alt="VYUHAM’26 cinematic hero artwork" fetchpriority="high"><div class="stage-shade"></div><div class="stage-brand"><img src="assets/vyuham_logo_optimized.png" alt=""><span>VYUHAM<sup>’26</sup></span></div><figcaption><span>VYUHAM / 01</span><span>THIRUVANANTHAPURAM, INDIA</span></figcaption></figure><div class="stage-screen stage-float" id="featuredCard" role="group" aria-roledescription="slide" aria-label="Featured event 1 of ${featuredEvents.length}"><img class="stage-float-poster" id="featuredPoster" alt="" hidden><span class="stage-float-label">FEATURED TRANSMISSION</span><span class="stage-float-category" id="featuredCategory">${esc(streamLabel(featuredEvent?.stream || 'tech'))}</span><b class="stage-float-title" id="featuredTitle">${esc(featuredEvent ? officialEventTitle(featuredEvent) : 'VYUHAM’26')}</b><small class="stage-float-subtitle" id="featuredSubtitle" ${featuredEvent?.officialTitle ? '' : 'hidden'}>${esc(featuredEvent?.officialTitle ? featuredEvent.title : '')}</small><div class="stage-float-footer"><a class="stage-float-foot" id="featuredLink" href="#/event/${encodeURIComponent(featuredEvent?.slug || 'events')}">OPEN EVENT DOSSIER ↗</a><div class="stage-dots" id="featuredDots" role="group" aria-label="Choose a featured event">${featuredEvents.map((event, index) => `<button class="stage-dot ${index === 0 ? 'active' : ''}" type="button" data-featured-index="${index}" aria-label="Show ${esc(officialEventTitle(event))}" aria-pressed="${index === 0}"></button>`).join('')}</div></div></div><span class="stage-orbit stage-orbit-one"></span><span class="stage-orbit stage-orbit-two"></span></div></div><div class="cyber-hero-foot"><span>THE NATIONAL TECHNO-CULTURAL FESTIVAL</span><a href="#festival">SCROLL TO EXPLORE ↓</a></div></section>
     <div class="info-strip cyber-strip stats-bar"><span class="stats-item"><b>30 October 2026 - 01 November 2026</b><small>THREE FESTIVAL DAYS</small></span><span class="stats-item"><b>TECHNOCITY CAMPUS</b><small>TECHNOPARK PHASE 4</small></span><span class="stats-item"><b>${events.length}</b><small>EVENT RECORDS</small></span><span class="stats-item"><b>01 / 03</b><small>DAY 1 → DAY 3</small></span></div>
     <section class="section festival-intro" id="festival"><div class="container intro-composition"><div class="intro-mark reveal"><span>VYUHAM / DUK</span><img src="assets/vyuham_logo_sm.png" alt="VYUHAM emblem"><b>ONE<br>FESTIVAL<br><i>FOUR WORLDS.</i></b></div><div class="intro-copy reveal"><div class="eyebrow">01 / ABOUT THE FESTIVAL</div><h2>WHERE<br>DISCIPLINES<br><span class="green">COLLIDE.</span></h2><p>VYUHAM is Digital University Kerala’s flagship national-level management, technology and cultural fest. Across three days, students gather to build, debate, perform and compete.</p><p>From autonomous systems and strategy arenas to live culture and esports, one campus becomes a meeting point for different ways of thinking.</p><a class="text-link" href="#/about">DISCOVER VYUHAM <span>↗</span></a></div></div></section>
     <section class="section stream-section" id="streams"><div class="container"><div class="section-head reveal"><div><div class="eyebrow">02 / FOUR SIGNALS</div><h2>FIND YOUR<br><span class="green">FREQUENCY.</span></h2></div><p>Four distinct streams. One shared festival ground.</p></div><div class="stream-grid">${streams.map((s, i) => `<a class="stream-card stream-card-${i + 1} reveal" data-index="${s.index}" href="#/events?stream=${s.id}"><img class="stream-art" src="${s.image}" alt="" loading="lazy" decoding="async"><img class="stream-emblem" src="assets/vyuham_logo_sm.png" alt="" aria-hidden="true" loading="lazy"><span class="stream-icon">${s.symbol} / STREAM</span><strong>${s.name}</strong><p>${s.desc}</p><span class="stream-go">EXPLORE ↗</span><i class="stream-watermark">${s.index}</i></a>`).join('')}</div></div></section>
@@ -271,6 +279,109 @@
     });
     renderResults();
   };
+  const initHeroFeaturedCarousel = waitingForIntro => {
+    const stage = $('#featuredCarousel'), card = $('#featuredCard');
+    const poster = $('#featuredPoster'), title = $('#featuredTitle'), subtitle = $('#featuredSubtitle'), category = $('#featuredCategory'), link = $('#featuredLink'), dots = $('#featuredDots');
+    if (!stage || !card || !poster || !title || !category || !link || !dots || homepageFeaturedEvents.length < 2) return () => {};
+    const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
+    const imageLoads = new Map();
+    const imageFor = event => homepageFeaturedPoster(event);
+    const initialPoster = imageFor(homepageFeaturedEvents[0]);
+    if (initialPoster) { poster.src = initialPoster; poster.alt = `${officialEventTitle(homepageFeaturedEvents[0])} event poster`; poster.hidden = false; card.classList.add('has-poster'); }
+    const preload = event => {
+      const src = imageFor(event);
+      if (!src) return Promise.resolve();
+      if (!imageLoads.has(src)) imageLoads.set(src, new Promise(resolve => {
+        const image = new Image();
+        image.onload = image.onerror = () => resolve();
+        image.src = src;
+        if (image.complete) resolve();
+      }));
+      return imageLoads.get(src);
+    };
+    homepageFeaturedEvents.forEach(preload);
+    let activeIndex = 0, timer = 0, transitionFrame = 0, transitionToken = 0;
+    let hoverPaused = false, focusPaused = false, pageHidden = document.hidden, ready = !waitingForIntro;
+    const canAutoplay = () => ready && !pageHidden && !hoverPaused && !focusPaused && !reducedMotion.matches;
+    const schedule = () => {
+      clearTimeout(timer);
+      timer = 0;
+      if (!canAutoplay()) return;
+      timer = window.setTimeout(() => {
+        timer = 0;
+        showEvent((activeIndex + 1) % homepageFeaturedEvents.length).then(schedule);
+      }, 4500);
+    };
+    const showEvent = async index => {
+      const event = homepageFeaturedEvents[index];
+      if (!event || index === activeIndex) return;
+      const requestToken = ++transitionToken;
+      stage.classList.add('is-transitioning');
+      await preload(event);
+      if (requestToken !== transitionToken || !stage.isConnected) return;
+      const posterSrc = imageFor(event);
+      if (posterSrc) {
+        poster.src = posterSrc;
+        poster.alt = `${officialEventTitle(event)} event poster`;
+        poster.hidden = false;
+        card.classList.add('has-poster');
+      } else {
+        poster.removeAttribute('src');
+        poster.alt = '';
+        poster.hidden = true;
+        card.classList.remove('has-poster');
+      }
+      title.textContent = officialEventTitle(event);
+      category.textContent = streamLabel(event.stream);
+      if (subtitle) { subtitle.textContent = event.officialTitle ? event.title : ''; subtitle.hidden = !event.officialTitle; }
+      link.href = `#/event/${encodeURIComponent(event.slug)}`;
+      card.setAttribute('aria-label', `Featured event ${index + 1} of ${homepageFeaturedEvents.length}: ${officialEventTitle(event)}`);
+      dots.querySelectorAll('[data-featured-index]').forEach(dot => {
+        const active = Number(dot.dataset.featuredIndex) === index;
+        dot.classList.toggle('active', active);
+        dot.setAttribute('aria-pressed', String(active));
+      });
+      activeIndex = index;
+      cancelAnimationFrame(transitionFrame);
+      transitionFrame = requestAnimationFrame(() => {
+        if (requestToken === transitionToken) stage.classList.remove('is-transitioning');
+      });
+    };
+    const onMouseEnter = () => { hoverPaused = true; schedule(); };
+    const onMouseLeave = () => { hoverPaused = false; schedule(); };
+    const onFocusIn = () => { focusPaused = true; schedule(); };
+    const onFocusOut = event => { if (!card.contains(event.relatedTarget)) { focusPaused = false; schedule(); } };
+    const onVisibility = () => { pageHidden = document.hidden; schedule(); };
+    const onReducedMotion = () => schedule();
+    const onIntroReady = () => { ready = true; schedule(); };
+    const onDotClick = event => {
+      const dot = event.target.closest('[data-featured-index]');
+      if (!dot) return;
+      showEvent(Number(dot.dataset.featuredIndex)).then(schedule);
+    };
+    card.addEventListener('mouseenter', onMouseEnter);
+    card.addEventListener('mouseleave', onMouseLeave);
+    card.addEventListener('focusin', onFocusIn);
+    card.addEventListener('focusout', onFocusOut);
+    dots.addEventListener('click', onDotClick);
+    document.addEventListener('visibilitychange', onVisibility);
+    reducedMotion.addEventListener?.('change', onReducedMotion);
+    if (waitingForIntro) stage.closest('#home')?.addEventListener('hero:ready', onIntroReady, { once: true });
+    schedule();
+    return () => {
+      clearTimeout(timer);
+      cancelAnimationFrame(transitionFrame);
+      transitionToken++;
+      card.removeEventListener('mouseenter', onMouseEnter);
+      card.removeEventListener('mouseleave', onMouseLeave);
+      card.removeEventListener('focusin', onFocusIn);
+      card.removeEventListener('focusout', onFocusOut);
+      dots.removeEventListener('click', onDotClick);
+      document.removeEventListener('visibilitychange', onVisibility);
+      reducedMotion.removeEventListener?.('change', onReducedMotion);
+      stage.closest('#home')?.removeEventListener('hero:ready', onIntroReady);
+    };
+  };
   const participationPage = () => `${pageHero('Participation guide', 'CHOOSE YOUR<br><span class="green">ARENA.</span>', 'Find an event, check its requirements and finish registration and payment on the official MakeMyPass page.', 'participation-page-hero')}
     <section class="section"><div class="container"><div class="notice">MakeMyPass is the registration and ticketing provider. Your registration and payment status are confirmed there; this site does not process payments.</div><div class="participation-steps"><article class="info-card"><span class="num">STEP / 01</span><h3>Choose an event</h3><p>Browse by stream, festival day, or entry fee. Open an event dossier to review eligibility, team size and schedule.</p><a class="button button-small button-primary" href="#/events">Browse events</a></article><article class="info-card"><span class="num">STEP / 02</span><h3>Register on MakeMyPass</h3><p>Use the event-specific registration link to enter participant details and complete any ticket or event payment.</p>${registrationCta(MAKEMYPASS_HOME, 'Register now', 'button button-small button-primary')}</article><article class="info-card"><span class="num">STEP / 03</span><h3>Prepare to participate</h3><p>Follow the event instructions from the organizer. Follow the event confirmation and organizer instructions after registering on MakeMyPass.</p>${registrationCta(MAKEMYPASS_HOME, 'Register now', 'button button-small button-primary')}</article></div><div class="cta-band participation-cta"><div><div class="eyebrow">READY TO JOIN?</div><h2>YOUR NEXT<br><span class="green">MOVE.</span></h2></div><a class="button button-primary" href="#/events">FIND AN EVENT ↗</a></div></div></section>`;
   const competitionsPage = () => {
@@ -357,6 +468,8 @@
   async function loadMyCertificates() { const root = $('#myCertificates'); if (!root) return; if (!window.VYUHAM_API.session()?.access_token) { root.innerHTML = '<article class="notice" style="grid-column:1/-1">Personal certificate lookup requires an organizer-provided certificate link or code.</article>'; return } try { const rows = await window.VYUHAM_API.get('/certificates/me'); root.innerHTML = rows.length ? rows.map(cert => `<article class="info-card"><span class="num">${esc(cert.stream)} / ${esc(cert.role)}</span><h3>${esc(cert.event)}</h3><p>${esc(cert.certificate_code)} · ${esc(cert.status)}</p><small class="muted">ISSUED ${esc(cert.issue_date)}</small>${safeExternalUrl(cert.pdf_url) ? `<p><a class="text-link" href="${esc(safeExternalUrl(cert.pdf_url))}" target="_blank" rel="noopener">DOWNLOAD CERTIFICATE ↗</a></p>` : ''}</article>`).join('') : '<article class="empty-state" style="grid-column:1/-1">No certificates have been issued to this account yet.</article>' } catch (error) { root.textContent = `Could not load your certificates: ${error.message}` } }
   async function loadCheckin() { const access = $('#checkinAccess'); if (!access) return; if (!window.VYUHAM_API.session()?.access_token) { access.innerHTML = 'Scanner access is restricted to authorized volunteers and organizers. Sign-in is not available on this static site.'; $('#checkinForm').querySelectorAll('input,select,button').forEach(el => el.disabled = true); return } try { const profile = await window.VYUHAM_API.get('/auth/me'); if (!['volunteer', 'event_head', 'admin'].includes(profile.role)) { access.textContent = 'Scanner access denied. This profile does not have an operations role.'; $('#checkinForm').querySelectorAll('input,select,button').forEach(el => el.disabled = true); return } access.textContent = `SCANNER AUTHORIZED / ${profile.role.toUpperCase()} / ${profile.name || profile.email}`; const history = await window.VYUHAM_API.get(`/checkin/history?station=${encodeURIComponent($('#scanStation').value)}&limit=20`); $('#checkinHistory').innerHTML = history.length ? history.map(r => `<div class="schedule-row"><time>${esc(new Date(r.scanned_at).toLocaleTimeString())}</time><div><h3>${esc(r.ticket_code)} · ${esc(r.status)}</h3><p>${esc(r.attendee_name)} · ${esc(r.event_name)}</p></div><div class="venue">${esc(r.station)}</div></div>`).join('') : 'No scans recorded at this station.' } catch (error) { access.textContent = `Could not verify scanner access: ${error.message}` } }
   function render() {
+    heroCarouselCleanup?.();
+    heroCarouselCleanup = null;
     const r = route();
     const activeEvent = r.page === 'event' && decodeURIComponent(r.slug) !== 'day-pass' ? events.find(e => e.slug === decodeURIComponent(r.slug)) : null;
     document.title = decodeURIComponent(r.slug || '') === 'day-pass' && r.page === 'event' ? 'Vyuham Day-Pass | VYUHAM’26' : activeEvent?.officialTitle ? `${officialEventTitle(activeEvent)} | VYUHAM’26` : "VYUHAM'26 - Digital University Kerala";
@@ -419,6 +532,7 @@
         homeHero?.classList.remove('intro-handoff');
         homeHero?.classList.add('intro-completed');
         homeHero?.removeAttribute('inert');
+        homeHero?.dispatchEvent(new Event('hero:ready'));
         inertTargets.forEach(el => { el.inert = false });
         document.removeEventListener('keydown', onKeyDown);
         if (previousFocus?.isConnected) previousFocus.focus({ preventScroll: true });
@@ -441,6 +555,8 @@
       imagesReady.then(startSequence);
       finalFallbackTimer = setTimeout(finish, 16000);
     }
+
+    if (r.page === 'home') heroCarouselCleanup = initHeroFeaturedCarousel(Boolean(intro));
 
     updateCountdown();
     $('#siteFooter').style.display = '';

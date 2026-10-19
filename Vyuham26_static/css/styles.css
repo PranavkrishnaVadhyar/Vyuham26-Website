@@ -1326,3 +1326,28 @@ html{scroll-padding-top:calc(var(--site-header-top) + var(--site-header-height) 
 @media(max-width:700px){.faq-hero{padding:105px 18px 36px}.faq-hero-inner{min-height:0}.faq-hero h1{font-size:clamp(53px,13vw,76px)}.faq-question-mark{right:-9%;font-size:230px}.faq-browser{padding:0 18px 38px}.faq-search{min-height:54px;gap:10px;padding:0 13px}.faq-search input{font-size:12px}.faq-search-hint{display:none}.faq-question{min-height:66px;padding:14px 10px}.faq-question-meta{gap:12px}.faq-answer-inner{padding-right:42px;padding-left:42px;font-size:12px}.faq-support-section{padding:0 18px 52px}.faq-support{align-items:flex-start;flex-direction:column;padding:24px 20px}.faq-support-actions{width:100%;flex-wrap:wrap;gap:17px}}
 @media(max-width:420px){.faq-hero h1{font-size:51px}.faq-stats{gap:22px}.faq-search-wrap{gap:7px}.faq-search-clear{width:38px;height:38px;flex-basis:38px}.faq-question-meta{gap:9px}.faq-question-meta>small{font-size:8px}.faq-toggle-icon{width:25px;height:25px;flex-basis:25px}.faq-answer-inner{padding-right:32px;padding-left:28px}.faq-support-actions{align-items:flex-start;flex-direction:column}}
 @media(prefers-reduced-motion:reduce){.faq-search,.faq-category,.faq-question-title,.faq-toggle-icon,.faq-toggle-icon::before,.faq-toggle-icon::after,.faq-answer{transition:none!important}}
+.cyber-hero::after{display:none}
+.stage-float{gap:8px;justify-content:flex-start;min-height:190px;padding:19px 20px}
+.stage-float{width:min(340px,55%)}
+.stage-float-poster{position:absolute;z-index:0;top:0;right:0;width:38%;height:100%;object-fit:cover;object-position:center;border-radius:0 14px 14px 0;opacity:.82}
+.stage-float-poster{transition:opacity .38s ease}
+.stage-float.has-poster::after{content:"";position:absolute;z-index:1;inset:0;border-radius:inherit;pointer-events:none;background:linear-gradient(90deg,#251719 38%,#251719d9 52%,#25171926 100%),linear-gradient(0deg,#251719b3,transparent 50%)}
+.stage-float.has-poster>:not(.stage-float-poster){position:relative;z-index:2;max-width:68%}
+.stage-float>.stage-float-footer{max-width:100%}
+.stage-float-label{flex:0 0 auto}
+.stage-float-category{font:8px var(--mono);letter-spacing:.1em;color:#c3a69a;text-transform:uppercase}
+.stage-float-title{font:20px/1.12 var(--display);letter-spacing:-.02em;transition:opacity .24s ease,transform .24s ease}
+.stage-float-subtitle{font-size:10px;line-height:1.4;color:#aaa8b8;transition:opacity .24s .04s ease,transform .24s .04s ease}
+.stage-float-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:auto;padding-top:5px}
+.stage-float-foot{flex:0 1 auto;text-decoration:none}
+.stage-float-foot:hover,.stage-float-foot:focus-visible{color:#fff;text-decoration:underline;text-underline-offset:3px}
+.stage-dots{display:flex;align-items:center;gap:5px;flex:0 0 auto}
+.stage-dot{width:25px;height:28px;display:grid;place-items:center;padding:0;border:0;background:transparent;cursor:pointer}
+.stage-dot::before{content:"";width:5px;height:5px;border-radius:99px;background:#82777b;transition:width .2s ease,background-color .2s ease,box-shadow .2s ease}
+.stage-dot.active::before{width:14px;background:var(--brand-red);box-shadow:0 0 9px #de312a88}
+.stage-dot:focus-visible{outline:1px solid #de312a;border-radius:6px;outline-offset:1px}
+.cyber-stage.is-transitioning .stage-float-category,.cyber-stage.is-transitioning .stage-float-title,.cyber-stage.is-transitioning .stage-float-subtitle{opacity:.25;transform:translateX(-7px)}
+.cyber-stage.is-transitioning .stage-float-poster{opacity:.3}
+@media(max-width:1000px){.stage-float{width:min(340px,58%);right:0;padding:17px 18px}.cyber-stage{height:550px}}
+@media(max-width:700px){.cyber-hero::after{display:none}.cyber-stage{width:100%;height:360px;margin:4px 0 15px}.stage-float{width:min(340px,calc(100% - 18px));right:0;bottom:0;min-height:172px;padding:14px 16px;gap:6px;transform:rotateZ(1deg)}.stage-float:hover{transform:rotateZ(0deg) translateY(-3px)}.stage-float-title{font-size:17px}.stage-float-footer{gap:8px}.stage-dots{gap:2px}.stage-dot{width:23px;height:28px}.stage-float-foot{font-size:7px}.stage-main figcaption span:last-child{display:none}}
+@media(prefers-reduced-motion:reduce){.stage-float-poster,.stage-float-category,.stage-float-title,.stage-float-subtitle,.stage-dot::before{transition:none!important}}
