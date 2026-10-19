@@ -125,7 +125,7 @@
   const dayPassCard = () => `<article class="event-card day-pass-event-card reveal">
     <div class="event-art" aria-hidden="true"><span>VYUHAM / ALL 3 DAYS</span><b>Day Pass</b><i>PASS</i></div>
     <div class="event-content"><div class="event-top"><span class="tag stream-pill">FESTIVAL PASS</span><span class="tag day">30 OCT — 01 NOV</span></div>
-    <h3>VYUHAM’26 Day Pass</h3><p>Choose Day 1, Day 2, Day 3, or a combination when getting your pass.</p>
+    <h3><a href="#/event/day-pass">VYUHAM’26 Day Pass</a></h3><p><a class="day-pass-description-link" href="#/event/day-pass">Choose Day 1, Day 2, Day 3, or a combination when getting your pass.</a></p>
     <div class="event-meta"><span>PASS LIMIT<strong>2,000 passes</strong></span></div>
     <div class="event-actions"><a class="text-link" href="#/event/day-pass">VIEW PASS DETAILS <span>↗</span></a><a class="button button-primary" href="${DAY_PASS_URL}" target="_blank" rel="noopener noreferrer">GET DAY PASS ↗</a></div></div>
   </article>`;
