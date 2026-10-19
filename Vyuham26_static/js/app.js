@@ -389,7 +389,7 @@
     observeReveals(); window.scrollTo({ top: 0, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }); $('#app').focus({ preventScroll: true });
   }
   function toast(message) { const region = $('#toastRegion'); const el = document.createElement('div'); el.className = 'toast'; el.textContent = message; region.append(el); setTimeout(() => el.remove(), 4200) }
-  const closeMenu = () => { $('#mainNav').classList.remove('open'); $('#menuToggle').setAttribute('aria-expanded', 'false'); $('#menuToggle').setAttribute('aria-label', 'Open navigation') };
+  const closeMenu = (restoreFocus = false) => { const wasOpen = $('#mainNav').classList.contains('open'); $('#mainNav').classList.remove('open'); $('#menuToggle').setAttribute('aria-expanded', 'false'); $('#menuToggle').setAttribute('aria-label', 'Open navigation'); if (restoreFocus && wasOpen) $('#menuToggle').focus() };
   const terminalOverlay = $('#terminalOverlay'), terminalHistory = $('#terminalHistory'), terminalInput = $('#terminalInput');
   const commandHistory = []; let commandHistoryIndex = -1;
   const terminalPrint = (type, content) => { const line = document.createElement(type === 'ascii' ? 'pre' : 'div'); line.className = `terminal-line ${type}`; line.textContent = content; terminalHistory.append(line); terminalHistory.scrollTop = terminalHistory.scrollHeight };
@@ -406,8 +406,9 @@
     line.innerHTML = `<h2>VYUHAM’26 TERMINAL</h2>${groups.map(([title, commands]) => `<section class="terminal-help-group"><h3>${title}</h3><div class="terminal-help-commands">${commands.map(([command, description]) => `<div class="terminal-help-row"><code>${command}</code><span>${description}</span></div>`).join('')}</div></section>`).join('')}`;
     terminalHistory.append(line); terminalHistory.scrollTop = terminalHistory.scrollHeight;
   };
-  const openTerminal = () => { closeMenu(); terminalOverlay.hidden = false; document.documentElement.classList.add('terminal-open'); terminalInput.focus() };
-  const closeTerminal = () => { terminalOverlay.hidden = true; document.documentElement.classList.remove('terminal-open'); $('#consoleLauncher').focus() };
+  let terminalReturnFocus = null;
+  const openTerminal = (trigger = document.activeElement) => { terminalReturnFocus = trigger?.id === 'mobileConsoleLauncher' || trigger?.closest?.('#mainNav') ? $('#menuToggle') : trigger; closeMenu(); terminalOverlay.hidden = false; document.documentElement.classList.add('terminal-open'); terminalInput.focus() };
+  const closeTerminal = () => { terminalOverlay.hidden = true; document.documentElement.classList.remove('terminal-open'); (terminalReturnFocus?.isConnected ? terminalReturnFocus : $('#consoleLauncher')).focus(); terminalReturnFocus = null };
   const terminalNavigate = (path, message) => { terminalPrint('system', message); closeTerminal(); go(path) };
   const runTerminalCommand = async raw => {
     const text = raw.trim(); if (!text) return; terminalPrint('input', `$ ${text}`); commandHistory.push(text); commandHistoryIndex = commandHistory.length;
@@ -436,12 +437,12 @@
   const terminalForm = $('#terminalForm');
   terminalForm.addEventListener('submit', event => { event.preventDefault(); const value = terminalInput.value; terminalInput.value = ''; runTerminalCommand(value) });
   terminalInput.addEventListener('keydown', event => { if (event.key === 'ArrowUp') { event.preventDefault(); commandHistoryIndex = Math.max(0, commandHistoryIndex - 1); terminalInput.value = commandHistory[commandHistoryIndex] || '' } else if (event.key === 'ArrowDown') { event.preventDefault(); commandHistoryIndex = Math.min(commandHistory.length, commandHistoryIndex + 1); terminalInput.value = commandHistory[commandHistoryIndex] || '' } });
-  $('#consoleLauncher').addEventListener('click', openTerminal); $('#consoleFooter').addEventListener('click', openTerminal); $('#terminalClose').addEventListener('click', closeTerminal);
+  $('#consoleLauncher').addEventListener('click', e => openTerminal(e.currentTarget)); $('#mobileConsoleLauncher').addEventListener('click', e => openTerminal(e.currentTarget)); $('#consoleFooter').addEventListener('click', e => openTerminal(e.currentTarget)); $('#terminalClose').addEventListener('click', closeTerminal);
   terminalOverlay.addEventListener('click', event => { if (event.target === terminalOverlay) closeTerminal() });
   terminalPrint('system', 'VYUHAM’26 // FESTIVAL CONSOLE READY\nExplore the festival, events and schedule. Type “help” for commands.');
-  $('#menuToggle').addEventListener('click', () => { const open = $('#mainNav').classList.toggle('open'); $('#menuToggle').setAttribute('aria-expanded', String(open)); $('#menuToggle').setAttribute('aria-label', open ? 'Close navigation' : 'Open navigation') });
+  $('#menuToggle').addEventListener('click', () => { const open = $('#mainNav').classList.toggle('open'); $('#menuToggle').setAttribute('aria-expanded', String(open)); $('#menuToggle').setAttribute('aria-label', open ? 'Close navigation' : 'Open navigation'); if (open) $('#mainNav').querySelector('a')?.focus() });
   $('#mainNav').addEventListener('click', e => { if (e.target.closest('a')) closeMenu() });
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') { if (!terminalOverlay.hidden) closeTerminal(); closeMenu(); return } const isEditable = ['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName) || document.activeElement?.isContentEditable; const backtick = e.key === '`' || e.key === '~' || e.code === 'Backquote'; if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); terminalOverlay.hidden ? openTerminal() : closeTerminal() } else if (backtick && !isEditable) { e.preventDefault(); terminalOverlay.hidden ? openTerminal() : closeTerminal() } else if (e.key === '?' && !isEditable) { e.preventDefault(); openTerminal() } });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') { if (!terminalOverlay.hidden) closeTerminal(); closeMenu(true); return } const isEditable = ['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName) || document.activeElement?.isContentEditable; const backtick = e.key === '`' || e.key === '~' || e.code === 'Backquote'; if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); terminalOverlay.hidden ? openTerminal() : closeTerminal() } else if (backtick && !isEditable) { e.preventDefault(); terminalOverlay.hidden ? openTerminal() : closeTerminal() } else if (e.key === '?' && !isEditable) { e.preventDefault(); openTerminal() } });
   document.addEventListener('click', e => { if (!e.target.closest('#siteHeader')) closeMenu() });
   const isRouteHash = () => location.hash.startsWith('#/');
   const scrollToHashTarget = () => {
