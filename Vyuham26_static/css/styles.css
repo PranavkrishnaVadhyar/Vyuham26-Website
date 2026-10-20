@@ -1431,3 +1431,28 @@ html{scroll-padding-top:calc(var(--site-header-top) + var(--site-header-height) 
  .soc-guidelines{grid-template-columns:1fr;gap:5px;font-size:14px}
  .soc-closing-line{margin-top:26px;font-size:24px}
 }
+
+/* AI short film competition guidelines, scoped to its existing event detail. */
+.ai-film-guidelines{margin:0;padding:0;border:0}
+.ai-film-guidelines>h2{margin:0 0 13px;font:clamp(27px,3vw,37px)/1.08 var(--display);letter-spacing:-.025em;white-space:nowrap}
+.ai-film-guidelines-intro{margin:0 0 22px;font-size:14px;line-height:1.7}
+.ai-film-guideline-grid{display:grid;grid-template-columns:minmax(0,1fr);align-items:start;gap:0}
+.ai-film-guideline{min-width:0;padding:15px 0 17px;border:0;border-bottom:1px solid #ffffff16;border-radius:0;background:none;box-shadow:none}
+.ai-film-guideline:first-child{padding-top:0}
+.ai-film-guideline:last-child{border-bottom:0;padding-bottom:0}
+.ai-film-guideline-title{display:flex;align-items:flex-start;gap:12px;margin-bottom:9px}
+.ai-film-guideline-title>span{flex:0 0 auto;padding-top:2px;color:#ff8178;font:12px var(--mono);letter-spacing:.08em}
+.ai-film-guideline-title h3{margin:0;color:#f5eeee;font-size:20px;line-height:1.25}
+.ai-film-guideline>p{margin:0 0 8px;font-size:13px;line-height:1.65}
+.ai-film-guideline ul{margin:0;padding-left:19px;color:var(--muted);font-size:14px;line-height:1.7}
+.ai-film-guideline li{padding-left:3px;margin:6px 0}
+.ai-film-guideline li::marker{color:#de312a}
+@media(max-width:700px){
+ .ai-film-guidelines>h2{white-space:normal;font-size:30px}
+ .ai-film-guidelines-intro{margin-bottom:18px}
+ .ai-film-guideline{padding:14px 0 15px}
+ .ai-film-guideline:first-child{padding-top:0}
+ .ai-film-guideline:last-child{padding-bottom:0}
+ .ai-film-guideline-title h3{font-size:19px}
+ .ai-film-guideline ul{font-size:14px}
+}

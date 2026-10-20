@@ -479,22 +479,88 @@ window.VYUHAM_EVENTS = [
   {
     "slug": "ai-short-film",
     "title": "AI Short Film",
-    "officialTitle": "SYNTHETIC FRAMES - AI SHORT FILM",
+    "officialTitle": "SYNTHETIC FRAMES – AI SHORT FILM",
     "stream": "tech",
     "day": 3,
     "time": "9:00 AM – 5:00 PM",
     "venue": "Seminar Hall / Digital Showcase",
-    "description": "Theme-based short film, made entirely with AI tools.",
+    "description": "Create an original short film in response to the official competition prompt, using generative AI as a significant and identifiable part of the filmmaking process.",
     "fee": "₹50 onwards",
     "eligibility": "Open to all digital creators",
     "teamSize": "Individual / Teams",
     "status": "upcoming",
     "featured": false,
     "registrationUrl": "",
-    "rules": [
-      "All video, script, and audio assets must be generated using AI tools",
-      "Theme-based cinematic submission",
-      "Free entry open call"
+    "competitionGuidelines": [
+      {
+        "heading": "Film Requirements",
+        "items": [
+          "Duration: 2–10 minutes, including the title and end credits.",
+          "Resolution: Minimum HD (1280 × 720).",
+          "Format: MP4.",
+          "Language: Films in any language are permitted. Non-English films must include English subtitles.",
+          "Genres: Fiction, animation, documentary, experimental, and other creative formats are welcome."
+        ]
+      },
+      {
+        "heading": "Competition Theme & Prompt",
+        "items": [
+          "An official film prompt or theme will be announced at the beginning of the competition.",
+          "Participants must create their short films based on the given prompt.",
+          "Films must demonstrate originality and a creative interpretation of the announced prompt.",
+          "Participants are free to explore different genres, storytelling techniques, and AI tools within the given theme."
+        ]
+      },
+      {
+        "heading": "Use of AI",
+        "items": [
+          "Generative AI must play a significant and identifiable role in filmmaking.",
+          "Participants may use AI tools for video generation, animation, visual effects, and other creative processes.",
+          "A combination of AI-generated content and live-action footage is permitted.",
+          "Films featuring only minor AI effects will not qualify.",
+          "Participants may choose any suitable AI tools and platforms."
+        ]
+      },
+      {
+        "heading": "AI Production Details",
+        "items": [
+          "The AI tools and platforms used.",
+          "The stages of production where AI was used.",
+          "The creative or technical tasks performed using AI.",
+          "The human creative contributions and decision-making involved."
+        ],
+        "intro": "Participants must submit a brief note explaining:"
+      },
+      {
+        "heading": "Copyright & Ethical Guidelines",
+        "items": [
+          "All films must be original works.",
+          "Copyrighted music, visuals, footage, characters, and other third-party materials must be used only with appropriate permissions or licences.",
+          "Unauthorised AI recreation of real people's faces or voices is prohibited.",
+          "AI must not be used to mislead, impersonate, defame, or violate individual rights.",
+          "Participants must comply with applicable copyright, privacy, consent, and ethical standards."
+        ]
+      },
+      {
+        "heading": "Submission Requirements",
+        "items": [
+          "Final film in MP4 format.",
+          "Film title and duration.",
+          "Synopsis (maximum 150 words).",
+          "Director and team details.",
+          "AI tools used and production details.",
+          "Film poster or thumbnail."
+        ],
+        "intro": "Participants must submit the following:"
+      },
+      {
+        "heading": "Awards",
+        "items": [
+          "Best AI Short Film",
+          "Best Creative Use of AI",
+          "Best Cinematic Achievement"
+        ]
+      }
     ],
     "prizePool": "₹10,000"
   },
