@@ -52,7 +52,6 @@
     const isHome = page === 'home';
     return `<section class="section sponsors-section sponsors-section-${page}"${isHome ? ' id="sponsors"' : ''}><div class="container"><div class="section-head sponsor-section-head"><div><div class="eyebrow">VYUHAM / PARTNERS</div><h2>OUR<br><span class="green">SPONSORS</span></h2></div><p>Meet the organizations supporting VYUHAM’26.</p></div><div class="sponsor-showcase">${sponsors.map((sponsor, index) => `<article class="sponsor-entry ${index === 0 ? 'sponsor-entry-title' : ''}"><div class="sponsor-entry-heading"><span class="sponsor-category">${esc(sponsor.category)}</span></div><div class="sponsor-mark">${sponsor.logo ? `<img src="${esc(sponsor.logo)}" alt="${esc(sponsor.name)}" loading="lazy">` : `<span class="sponsor-wordmark" role="img" aria-label="${esc(sponsor.name)}">${esc(sponsor.name)}</span>`}</div></article>`).join('')}</div><div class="sponsors-section-footer"><span>Partnerships that help bring the festival to life.</span><a class="button button-outline" href="mailto:techfest@duk.ac.in">PARTNERSHIP ENQUIRIES ↗</a></div></div></section>`;
   };
-  const footerSponsorsMarkup = () => `<span class="footer-sponsor-label">OUR SPONSORS</span><div class="footer-sponsor-list">${sponsors.map(sponsor => `<div class="footer-sponsor-item">${sponsor.logo ? `<img class="footer-sponsor-logo" src="${esc(sponsor.logo)}" alt="${esc(sponsor.name)}" loading="lazy">` : `<span class="footer-sponsor-wordmark" role="img" aria-label="${esc(sponsor.name)}">${esc(sponsor.name)}</span>`}</div>`).join('')}</div>`;
   const safeExternalUrl = value => { try { const url = new URL(value); return ['https:', 'http:'].includes(url.protocol) ? url.href : ''; } catch { return ''; } };
   const scheduleMinutes = value => {
     const match = String(value || '').match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i);
@@ -548,8 +547,6 @@
     const views = { home, events: () => eventsPage(location.hash.includes('?') ? location.hash.split('?').slice(1).join('?') : ''), streams: streamsPage, event: () => eventDetail(r.slug), schedule: schedulePage, about: venuePage, venue: aboutPage, contact: contactPage, faq: faqPage, competitions: competitionsPage, ...Object.fromEntries(shells.map(p => [p, () => featurePage(p)])) };
     const routeDisabled = disabledRoutes.has(r.page);
     app.innerHTML = routeDisabled ? comingSoonPage() : (views[r.page] || notFound)();
-    const footerSponsors = $('#footerSponsors');
-    if (footerSponsors) footerSponsors.innerHTML = footerSponsorsMarkup();
     const typewriterHeading = $('.venue-about-typewriter');
     const typewriterText = typewriterHeading?.querySelector('[data-typewriter]');
     if (typewriterHeading && typewriterText) {

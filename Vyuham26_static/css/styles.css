@@ -889,18 +889,10 @@ h1,h2,h3,.brand b,.stream-card strong,.home-event strong,.day-card h3,.stage-bra
 .terminal-footer-btn span{margin-left:8px;color:#a5979f}
 .terminal-footer-btn:hover{border-color:#d3a184;background:#242120;color:#fefefe}
 .footer-bottom{padding-top:18px;border-color:#3d3936}
-.footer-sponsors{display:flex;align-items:center;gap:28px;padding:5px 0 20px}
-.footer-sponsor-label{flex:0 0 auto;color:#d3a184;font:8px var(--mono);letter-spacing:.12em}
-.footer-sponsor-list{display:flex;flex:1;align-items:center;justify-content:flex-end;gap:clamp(18px,3vw,38px)}
-.footer-sponsor-item{display:flex;min-width:0;align-items:center;gap:10px}
-.footer-sponsor-logo{display:block;width:150px;height:38px;object-fit:contain;object-position:center}
-.footer-sponsor-wordmark{display:grid;width:78px;height:38px;place-items:center;color:#e7e0df;font:600 24px/1 'Barlow Condensed','Arial Narrow',sans-serif!important;letter-spacing:.02em}
 @media(max-width:760px){
  .site-footer{padding:40px 20px 18px}
  .footer-main{grid-template-columns:repeat(2,minmax(0,1fr));gap:34px 24px}
  .footer-signature{grid-column:1/-1;max-width:440px}
- .footer-sponsors{align-items:flex-start;flex-direction:column;gap:12px;padding:0 0 19px}
- .footer-sponsor-list{justify-content:flex-start;flex-wrap:wrap;gap:14px 20px}
 }
 @media(max-width:420px){.footer-main{grid-template-columns:1fr}.footer-signature{grid-column:auto}.footer-bottom{gap:9px}}
 
