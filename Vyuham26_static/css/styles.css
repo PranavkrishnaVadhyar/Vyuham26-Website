@@ -1498,7 +1498,7 @@ html{scroll-padding-top:calc(var(--site-header-top) + var(--site-header-height) 
 .sponsor-section-head{align-items:end;margin-bottom:34px}
 .sponsor-section-head h2{margin:14px 0 0;font-size:clamp(38px,5vw,58px)}
 .sponsor-section-head>p{max-width:390px;margin:0 0 4px;color:var(--muted);font-size:14px}
-.sponsor-showcase{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
+.sponsor-showcase{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));max-width:920px;margin:0 auto}
 .sponsor-entry{position:relative;display:flex;min-width:0;min-height:218px;flex-direction:column;padding:20px 28px 19px}
 .sponsor-entry+.sponsor-entry{border-left:1px solid #ffffff19}
 .sponsor-entry-heading{display:flex;min-height:24px;align-items:flex-start}

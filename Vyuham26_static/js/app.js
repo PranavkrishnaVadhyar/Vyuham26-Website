@@ -37,8 +37,7 @@
   ];
   const sponsors = [
     { name: 'DSpace', category: 'Title Sponsor', amount: '₹3,00,000', status: 'Confirmed', logo: 'assets/sponsors/dspace.svg' },
-    { name: 'Canara Bank', category: 'Associate Sponsor', amount: '₹1,00,000', status: 'Confirmed', logo: 'assets/sponsors/canara_bank.svg' },
-    { name: 'IEEE', category: 'Powered By Sponsor', amount: '₹2,00,000', status: 'Awaiting confirmation', logo: '' }
+    { name: 'Canara Bank', category: 'Associate Sponsor', amount: '₹1,00,000', status: 'Confirmed', logo: 'assets/sponsors/canara_bank.svg' }
   ];
   const streams = [
     { id: 'tech', name: 'Technology', symbol: '01', desc: 'Hackathons, cybersecurity, AI and hands-on invention. Build what comes next.', index: '01', image: 'assets/streams/technology.jpg' },
