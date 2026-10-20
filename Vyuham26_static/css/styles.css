@@ -1462,3 +1462,12 @@ html{scroll-padding-top:calc(var(--site-header-top) + var(--site-header-height) 
  .ai-film-guideline-title h3{font-size:19px}
  .ai-film-guideline ul{font-size:14px}
 }
+
+/* Give the expanded schedule a more editorial type contrast. */
+.schedule-row h3,
+.schedule-row h3 a,
+.schedule-row .venue b{font-family:'Barlow Condensed','Arial Narrow',sans-serif!important;font-weight:600;letter-spacing:0}
+.schedule-row .schedule-event p,
+.schedule-row .schedule-event-subtitle,
+.schedule-row time,
+.schedule-row .venue>span{font-family:'Montserrat',Arial,sans-serif!important}
