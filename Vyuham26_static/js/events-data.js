@@ -1,6 +1,6 @@
 window.VYUHAM_EVENTS = [
   {
-    "slug": "hackathon",
+    "slug": "agent-forge-hackathon-24-hours",
     "title": "Hackathon — 24HR",
     "officialTitle": "AGENT FORGE - Hackathon (24 Hours)",
     "stream": "tech",
@@ -27,10 +27,11 @@ window.VYUHAM_EVENTS = [
       "ClimateTech & Sustainable Future",
       "Open Innovation"
     ],
-    "prizePool": "₹30,000"
+    "prizePool": "₹30,000",
+    "legacySlug": "hackathon"
   },
   {
-    "slug": "best-manager",
+    "slug": "the-decision-room-best-manager",
     "title": "Best Manager",
     "officialTitle": "THE DECISION ROOM - BEST MANAGER",
     "stream": "management",
@@ -56,10 +57,11 @@ window.VYUHAM_EVENTS = [
       "Coordinators: Ananthu S (6282143212) | Anindita (9365477714)",
       "Volunteers: Surya (81370 80407) | Akshay Chandran (81570 14234) | Akshay B Krishna (80780 2683) | Sreekutty (77367 64902) | Parvathy (78932 14206)"
     ],
-    "prizePool": "₹15,000"
+    "prizePool": "₹15,000",
+    "legacySlug": "best-manager"
   },
   {
-    "slug": "best-management-team",
+    "slug": "boardroom-battle-best-management-team",
     "title": "Best Management Team",
     "officialTitle": "BOARDROOM BATTLE - BEST MANAGEMENT TEAM",
     "stream": "management",
@@ -82,10 +84,11 @@ window.VYUHAM_EVENTS = [
       "Coordinators: Ananthu S (6282143212) | Anjana V S (94879 84537)",
       "Volunteers: Heaven Jose (96331 88918) | Chandradev (95884 89710) | Ananthu S (62821 43212) | Gopika (73062 19065) | Karan Krishna (77366 33014)"
     ],
-    "prizePool": "₹20,000"
+    "prizePool": "₹20,000",
+    "legacySlug": "best-management-team"
   },
   {
-    "slug": "marketing-game",
+    "slug": "market-makers-marketing-games",
     "title": "Marketing Game",
     "officialTitle": "MARKET MAKERS - MARKETING GAMES",
     "stream": "management",
@@ -112,10 +115,11 @@ window.VYUHAM_EVENTS = [
       "Coordinators: Ananthu S (6282143212) | Ahammed (90748 21829)",
       "Volunteers: Akhila (90480 52438) | Vibitha (86068 29275) | Arbab khan (73009 46462) | Anagha S (8086962374) | Shajeena (7012537656)"
     ],
-    "prizePool": "₹15,000"
+    "prizePool": "₹15,000",
+    "legacySlug": "marketing-game"
   },
   {
-    "slug": "finance-game",
+    "slug": "capital-under-pressure-finance-games",
     "title": "Finance Game",
     "officialTitle": "CAPITAL UNDER PRESSURE - FINANCE GAMES",
     "stream": "management",
@@ -142,10 +146,11 @@ window.VYUHAM_EVENTS = [
       "Coordinators: Ananthu S (6282143212) | Johan Rony (6238739660)",
       "Volunteers: Hadik Bin Siyad (8304915518) | Sree hari G (8590491685) | Suhail Khan (6282 673864) | Muhammed Suhail (80756 70806)"
     ],
-    "prizePool": "₹15,000"
+    "prizePool": "₹15,000",
+    "legacySlug": "finance-game"
   },
   {
-    "slug": "hr-game",
+    "slug": "people-in-play-hr-games",
     "title": "HR Game",
     "officialTitle": "PEOPLE IN PLAY - HR GAMES",
     "stream": "management",
@@ -169,10 +174,11 @@ window.VYUHAM_EVENTS = [
       "Coordinators: Ananthu S (6282143212) | Fatima (87144 30630)",
       "Volunteers: Diya Sabu (95262 86593) | Pretty Santhi Jose (90372 70590) | Mariyam Shamshira (96052 77787) | Nimra (79070 09237) | Panchami (97787 30260)"
     ],
-    "prizePool": "₹15,000"
+    "prizePool": "₹15,000",
+    "legacySlug": "hr-game"
   },
   {
-    "slug": "business-quiz",
+    "slug": "the-business-circuit-business-quiz",
     "title": "Business Quiz",
     "officialTitle": "THE BUSINESS CIRCUIT - BUSINESS QUIZ",
     "stream": "management",
@@ -200,10 +206,11 @@ window.VYUHAM_EVENTS = [
       "Coordinators: Ananthu S (6282143212) | Alen joe (8921955159)",
       "Volunteers: Linus (80895 81304) | Juhaina (89211 60205) | Sona (95675 08757) | Fathima (7034275591) | Pavithra (9400034736)"
     ],
-    "prizePool": "₹10,000"
+    "prizePool": "₹10,000",
+    "legacySlug": "business-quiz"
   },
   {
-    "slug": "panel-responsible-ai",
+    "slug": "beyond-accuracy-panel-discussion-on-ai-accuracy",
     "title": "Panel Discussion: Beyond Accuracy: Can We Trust the Data Behind AI?",
     "officialTitle": "Beyond Accuracy - Panel Discussion on AI Accuracy",
     "stream": "session",
@@ -217,10 +224,11 @@ window.VYUHAM_EVENTS = [
     "status": "upcoming",
     "featured": false,
     "registrationUrl": "https://makemypass.com/event/beyond-accuracy-ai-panel-discussion",
-    "rules": []
+    "rules": [],
+    "legacySlug": "panel-responsible-ai"
   },
   {
-    "slug": "talk-quantum-ai",
+    "slug": "talk-responsible-ai-a-humanities-lens",
     "title": "Talk: Responsible AI — A Humanities Lens",
     "stream": "session",
     "day": 1,
@@ -233,10 +241,11 @@ window.VYUHAM_EVENTS = [
     "status": "upcoming",
     "featured": false,
     "registrationUrl": "",
-    "rules": []
+    "rules": [],
+    "legacySlug": "talk-quantum-ai"
   },
   {
-    "slug": "workshop-prompt-engineering",
+    "slug": "ink-and-letter-calligraphy-workshop",
     "title": "Hands-on Workshop: Calligraphy",
     "officialTitle": "INK & LETTER - CALLIGRAPHY WORKSHOP",
     "stream": "session",
@@ -252,10 +261,11 @@ window.VYUHAM_EVENTS = [
     "registrationUrl": "https://org.makemypass.com/web/vyuham-26/events/hands-on-workshop",
     "rules": [],
     "eventType": "workshop",
-    "certificateProvided": true
+    "certificateProvided": true,
+    "legacySlug": "workshop-prompt-engineering"
   },
   {
-    "slug": "play-fest",
+    "slug": "play-district",
     "title": "Play Fest",
     "officialTitle": "PLAY DISTRICT",
     "stream": "general",
@@ -272,10 +282,11 @@ window.VYUHAM_EVENTS = [
     "rules": [
       "Open casual gaming and interactive carnival installations",
       "Free access throughout Day 1"
-    ]
+    ],
+    "legacySlug": "play-fest"
   },
   {
-    "slug": "fitness-competition",
+    "slug": "fit-arena-fitness-competition",
     "title": "Fitness Competition",
     "officialTitle": "FIT ARENA - FITNESS COMPETITION",
     "stream": "general",
@@ -292,10 +303,11 @@ window.VYUHAM_EVENTS = [
     "rules": [
       "Calisthenics, stamina drills, and timed fitness circuits",
       "Individual scoring table"
-    ]
+    ],
+    "legacySlug": "fitness-competition"
   },
   {
-    "slug": "ctf",
+    "slug": "the-cyber-gauntlet-capture-the-flag",
     "title": "Capture the Flag",
     "officialTitle": "THE CYBER GAUNTLET - CAPTURE THE FLAG",
     "stream": "tech",
@@ -315,7 +327,8 @@ window.VYUHAM_EVENTS = [
       "Food and refreshments will be provided",
       "Strict anti-sharing and infrastructure protection rules"
     ],
-    "prizePool": "₹50,000+"
+    "prizePool": "₹50,000+",
+    "legacySlug": "ctf"
   },
   {
     "slug": "startup-showcase",
@@ -338,7 +351,7 @@ window.VYUHAM_EVENTS = [
     "prizePool": "₹15,000"
   },
   {
-    "slug": "prompt-war",
+    "slug": "promptsmith-arena-prompt-war",
     "title": "Prompt War",
     "officialTitle": "PROMPTSMITH ARENA - PROMPT WAR",
     "stream": "tech",
@@ -356,10 +369,11 @@ window.VYUHAM_EVENTS = [
       "Time-constrained prompt engineering trials against complex target outputs",
       "Evaluation on precision, token economics, and contextual fidelity"
     ],
-    "prizePool": "₹15,000"
+    "prizePool": "₹15,000",
+    "legacySlug": "prompt-war"
   },
   {
-    "slug": "tech-quiz",
+    "slug": "techsprint-tech-quiz",
     "title": "Tech Quiz",
     "officialTitle": "TECHSPRINT - TECH QUIZ",
     "stream": "tech",
@@ -381,10 +395,11 @@ window.VYUHAM_EVENTS = [
       "Rule violations may result in disqualification. The organizers’ decisions regarding rankings and results shall be final.",
       "Questions on General Tech, Computer Science, AI, Internet History, Cutting Edge Tech."
     ],
-    "prizePool": "₹10,000"
+    "prizePool": "₹10,000",
+    "legacySlug": "tech-quiz"
   },
   {
-    "slug": "talk-agentic-ai",
+    "slug": "from-agents-to-outcome-building-ai-that-works-for-the-world",
     "title": "Talk: From Agents to Outcomes: Building AI That Works in the Real World (Applied AI and Engineering)",
     "officialTitle": "FROM AGENTS TO OUTCOME : BUILDING AI THAT WORKS FOR THE WORLD",
     "stream": "general",
@@ -411,10 +426,11 @@ window.VYUHAM_EVENTS = [
       "Photography and recording: Follow the organisers’ and speaker’s instructions before photographing or recording the session.",
       "Venue etiquette: Keep the hall clean, respect fellow attendees and follow volunteer instructions.",
       "Schedule updates: Check official VYUHAM announcements for any changes to the date, time or venue."
-    ]
+    ],
+    "legacySlug": "talk-agentic-ai"
   },
   {
-    "slug": "panel-cybersecurity",
+    "slug": "cybersecurity-in-the-era-of-ai-defend-adapt-prepare",
     "title": "Cybersecurity In the Era of AI – Defend, Adapt, Prepare",
     "stream": "session",
     "day": 1,
@@ -432,8 +448,14 @@ window.VYUHAM_EVENTS = [
     "duration": "90 minutes",
     "speakerPhoto": "assets/events/vishnu-ramachandran.png",
     "sessionSchedule": [
-      { "time": "12:00 PM – 1:00 PM", "title": "Expert Talk" },
-      { "time": "1:00 PM – 1:30 PM", "title": "Interactive Q&A" }
+      {
+        "time": "12:00 PM – 1:00 PM",
+        "title": "Expert Talk"
+      },
+      {
+        "time": "1:00 PM – 1:30 PM",
+        "title": "Interactive Q&A"
+      }
     ],
     "participantGuidelines": [
       "Arrive on time and be seated before the session begins.",
@@ -452,10 +474,11 @@ window.VYUHAM_EVENTS = [
     "status": "upcoming",
     "featured": false,
     "registrationUrl": "",
-    "rules": []
+    "rules": [],
+    "legacySlug": "panel-cybersecurity"
   },
   {
-    "slug": "workshop-ethical-hacking",
+    "slug": "think-like-an-attacker-ethical-hacking-workshop",
     "title": "Workshop: Ethical Hacking & OSINT Reconnaissance",
     "officialTitle": "THINK LIKE AN ATTACKER - ETHICAL HACKING WORKSHOP",
     "stream": "session",
@@ -474,10 +497,11 @@ window.VYUHAM_EVENTS = [
       "Demonstration of defensive countermeasures and target surface discovery"
     ],
     "eventType": "workshop",
-    "certificateProvided": true
+    "certificateProvided": true,
+    "legacySlug": "workshop-ethical-hacking"
   },
   {
-    "slug": "ai-short-film",
+    "slug": "synthetic-frames-ai-short-film",
     "title": "AI Short Film",
     "officialTitle": "SYNTHETIC FRAMES – AI SHORT FILM",
     "stream": "tech",
@@ -562,10 +586,11 @@ window.VYUHAM_EVENTS = [
         ]
       }
     ],
-    "prizePool": "₹10,000"
+    "prizePool": "₹10,000",
+    "legacySlug": "ai-short-film"
   },
   {
-    "slug": "talk-ksum",
+    "slug": "idea-to-impact-talk-session-by-kerala-startup-mission",
     "title": "From Classroom to Startup: Where Do Students’ Ideas Go?",
     "officialTitle": "IDEA TO IMPACT - TALK SESSION BY KERALA STARTUP MISSION",
     "stream": "session",
@@ -582,7 +607,8 @@ window.VYUHAM_EVENTS = [
     "rules": [
       "Introduction to Kerala Startup Mission (KSUM) and IEDC, highlighting their role in fostering student innovation and entrepreneurship.",
       "Explore student benefits, startup support opportunities, and inspiring success stories of student entrepreneurs from Kerala."
-    ]
+    ],
+    "legacySlug": "talk-ksum"
   },
   {
     "slug": "fifa-27",
@@ -613,7 +639,7 @@ window.VYUHAM_EVENTS = [
     "prizePool": "₹10,000"
   },
   {
-    "slug": "movie-quiz",
+    "slug": "reel-royale-movie-quiz",
     "title": "Movie Quiz",
     "officialTitle": "REEL ROYALE - MOVIE QUIZ",
     "stream": "cultural",
@@ -631,10 +657,11 @@ window.VYUHAM_EVENTS = [
       "Multi-round film trivia across classic, regional, and world cinema",
       "Audio-visual identifier rounds and buzzer finals"
     ],
-    "prizePool": "₹5,000"
+    "prizePool": "₹5,000",
+    "legacySlug": "movie-quiz"
   },
   {
-    "slug": "efootball",
+    "slug": "e-football-qualifiers",
     "title": "E-Football Tournament",
     "officialTitle": "E-FOOTBALL QUALIFIERS",
     "stream": "esports",
@@ -658,10 +685,11 @@ window.VYUHAM_EVENTS = [
     ],
     "scheduleDays": [],
     "scheduleGroup": "pre-fest",
-    "prizePool": "₹5,000"
+    "prizePool": "₹5,000",
+    "legacySlug": "efootball"
   },
   {
-    "slug": "bgmi",
+    "slug": "bgmi-dropzone",
     "title": "BGMI Tournament",
     "officialTitle": "BGMI DROPZONE",
     "stream": "esports",
@@ -686,10 +714,11 @@ window.VYUHAM_EVENTS = [
     ],
     "scheduleDays": [],
     "scheduleGroup": "pre-fest",
-    "prizePool": "₹5,000"
+    "prizePool": "₹5,000",
+    "legacySlug": "bgmi"
   },
   {
-    "slug": "photography",
+    "slug": "frame-hunt",
     "title": "Photography & Videography",
     "officialTitle": "FRAME HUNT",
     "stream": "general",
@@ -714,10 +743,11 @@ window.VYUHAM_EVENTS = [
       3
     ],
     "scheduleGroup": "multi-day",
-    "prizePool": "₹10,000"
+    "prizePool": "₹10,000",
+    "legacySlug": "photography"
   },
   {
-    "slug": "cdac-workshop",
+    "slug": "vega-processors-and-ecosystem-by-c-dac",
     "title": "Workshop: VEGA Processors & Ecosystem by C-DAC",
     "officialTitle": "VEGA PROCESSORS & ECOSYSTEM BY C-DAC",
     "stream": "session",
@@ -737,10 +767,11 @@ window.VYUHAM_EVENTS = [
       "Hands-on sessions using the ARIES development board, which is Arduino-compatible."
     ],
     "eventType": "workshop",
-    "certificateProvided": true
+    "certificateProvided": true,
+    "legacySlug": "cdac-workshop"
   },
   {
-    "slug": "project-expo-ieee",
+    "slug": "project-x-minerva-project-expo-by-ieee",
     "title": "ProjectX Minerva: Project Expo 2026",
     "officialTitle": "PROJECT X MINERVA - PROJECT EXPO BY IEEE",
     "stream": "general",
@@ -765,10 +796,11 @@ window.VYUHAM_EVENTS = [
       "Registration deadline: 26 October 2026",
       "Contact & Queries: Dakshin (+91 88481 82643) | Salma (+91 97465 20275) | ieee.sb@duk.ac.in"
     ],
-    "prizePool": "₹10,000"
+    "prizePool": "₹10,000",
+    "legacySlug": "project-expo-ieee"
   },
   {
-    "slug": "workshop-luminar-technolab",
+    "slug": "workshop-on-prompt-engineering",
     "title": "Workshop by Luminar Technolab: Prompt Engineering and Building with LLMs",
     "officialTitle": "Workshop On Prompt Engineering",
     "stream": "session",
@@ -784,6 +816,7 @@ window.VYUHAM_EVENTS = [
     "registrationUrl": "https://org.makemypass.com/web/vyuham-26/events/workshop-on-prompt-engineering",
     "rules": [],
     "eventType": "workshop",
-    "certificateProvided": true
+    "certificateProvided": true,
+    "legacySlug": "workshop-luminar-technolab"
   }
 ];

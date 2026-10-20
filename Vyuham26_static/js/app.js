@@ -6,7 +6,9 @@
   let events = Array.isArray(window.VYUHAM_EVENTS) ? window.VYUHAM_EVENTS : [];
   const hiddenEventSlugs = new Set(['hackathon-continues', 'hackathon-demos', 'hackathon-winners', 'inauguration-ceremony', 'talk-quantum-ai', 'cultural-night', 'dj-night', 'concert', 'fashion-show', 'food-court']);
   const hiddenEventTitles = new Set(['hackathon continues', 'hackathon demos & judging', 'hackathon winners & prize distribution', 'inauguration ceremony', 'talk: responsible ai — a humanities lens', 'cultural night', 'dj night', 'concert night', 'fashion show', 'food court, markets & stalls']);
-  const isVisibleEvent = event => !hiddenEventSlugs.has(event.slug) && !hiddenEventTitles.has(String(event.title || event.name || '').trim().toLowerCase());
+  const isVisibleEvent = event => !hiddenEventSlugs.has(event.legacySlug || event.slug) && !hiddenEventTitles.has(String(event.title || event.name || '').trim().toLowerCase());
+  const eventSlugAliases = new Map(events.filter(event => event.legacySlug).map(event => [event.legacySlug, event.slug]));
+  eventSlugAliases.set('ink-letter-calligraphy-workshop', 'ink-and-letter-calligraphy-workshop');
   events = events.filter(isVisibleEvent);
   let registrationOpen = true;
   let landingIntroSeen = false;
@@ -115,7 +117,7 @@
     if (event.teamSize) rows.push({ label: 'TEAM SIZE', value: event.teamSize });
     if (event.eligibility) rows.push({ label: 'ELIGIBILITY', value: event.eligibility });
     return rows.map(row => {
-      const isSocIntelValue = event.slug === 'panel-cybersecurity' && ['TIME', 'SPEAKER', 'DESIGNATION', 'FORMAT'].includes(row.label);
+      const isSocIntelValue = (event.legacySlug || event.slug) === 'panel-cybersecurity' && ['TIME', 'SPEAKER', 'DESIGNATION', 'FORMAT'].includes(row.label);
       const classes = [row.label === 'PRIZE POOL' ? 'green' : '', isSocIntelValue ? 'soc-intel-value' : ''].filter(Boolean).join(' ');
       return `<div><dt>${esc(row.label)}</dt><dd${classes ? ` class="${classes}"` : ''}>${esc(row.value)}</dd></div>`;
     }).join('');
@@ -142,7 +144,7 @@
       const url = new URL(supplied);
       if ((url.hostname === 'org.makemypass.com' && url.pathname.startsWith('/web/vyuham-26/events/')) || (url.hostname === 'makemypass.com' && url.pathname.startsWith('/event/'))) return url.href;
     }
-    const mapped = MAKEMYPASS_EVENT_PATHS[event.slug];
+    const mapped = MAKEMYPASS_EVENT_PATHS[event.legacySlug || event.slug];
     if (mapped) return `${MAKEMYPASS_HOME}/events/${mapped}`;
     return MAKEMYPASS_HOME;
   };
@@ -211,13 +213,13 @@
     if (decodeURIComponent(slug) === 'day-pass') return dayPassDetail();
     const e = events.find(x => x.slug === decodeURIComponent(slug) && isVisibleEvent(x));
     if (!e) return notFound();
-    const isSocTalk = e.slug === 'panel-cybersecurity';
-    const isAiFilm = e.slug === 'ai-short-film';
+    const isSocTalk = (e.legacySlug || e.slug) === 'panel-cybersecurity';
+    const isAiFilm = (e.legacySlug || e.slug) === 'ai-short-film';
     const image = safeExternalUrl(e.image) || streams.find(stream => stream.id === e.stream)?.image || streams.find(stream => stream.id === ({ technology: 'tech', culture: 'cultural', gaming: 'esports' }[e.stream]))?.image || 'assets/streams/technology.jpg';
     const participationRules = e.rules || [];
     const participationNotes = isSocTalk
       ? `<p class="muted soc-format-note">${esc(e.format)} · ${esc(e.duration)}</p>`
-      : e.slug === 'hackathon' && e.themes?.length
+      : (e.legacySlug || e.slug) === 'hackathon' && e.themes?.length
       ? `<ul class="rule-list"><li>${esc(participationRules[0] || '24 uninterrupted hours of collaborative building')}</li><li><strong>Hackathon themes:</strong><ul class="hackathon-theme-list">${e.themes.map(theme => `<li>${esc(theme)}</li>`).join('')}</ul></li>${participationRules.slice(1).map(rule => `<li>${esc(rule)}</li>`).join('')}</ul>`
       : participationRules.length ? '<ul class="rule-list">' + participationRules.map(rule => '<li>' + esc(rule) + '</li>').join('') + '</ul>' : '<p class="muted">Detailed rules will be published by the event organizers.</p>';
     const socContent = isSocTalk
@@ -526,6 +528,15 @@
     heroCarouselCleanup?.();
     heroCarouselCleanup = null;
     const r = route();
+    if (r.page === 'event' && decodeURIComponent(r.slug) !== 'day-pass') {
+      const requestedSlug = decodeURIComponent(r.slug);
+      const aliasedSlug = eventSlugAliases.get(requestedSlug);
+      const resolvedEvent = events.find(event => event.slug === requestedSlug || event.slug === aliasedSlug);
+      if (resolvedEvent && requestedSlug !== resolvedEvent.slug) {
+        go(`event/${encodeURIComponent(resolvedEvent.slug)}`);
+        return;
+      }
+    }
     const activeEvent = r.page === 'event' && decodeURIComponent(r.slug) !== 'day-pass' ? events.find(e => e.slug === decodeURIComponent(r.slug)) : null;
     document.title = decodeURIComponent(r.slug || '') === 'day-pass' && r.page === 'event' ? 'Vyuham Day-Pass | VYUHAM’26' : activeEvent?.officialTitle ? `${officialEventTitle(activeEvent)} | VYUHAM’26` : "VYUHAM'26 - Digital University Kerala";
     $('#mainNav').classList.remove('open'); $('#menuToggle').setAttribute('aria-expanded', 'false'); $('#menuToggle').setAttribute('aria-label', 'Open navigation');
