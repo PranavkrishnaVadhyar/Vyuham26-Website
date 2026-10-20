@@ -972,6 +972,19 @@ h1,h2,h3,.brand b,.stream-card strong,.home-event strong,.day-card h3,.stage-bra
  .intro-cinema-core>img{width:clamp(84px,20vw,120px);max-height:18vh}
 }
 
+/* Reduce the university lockup and PRESENTS line in the intro. */
+.intro-cinema-kicker{gap:clamp(12px,1.7vh,20px)}
+.intro-cinema-kicker img{width:clamp(230px,21vw,300px)}
+.intro-cinema-kicker b{gap:clamp(14px,1.5vw,21px);font-size:clamp(15px,1.45vw,20px);letter-spacing:.32em}
+.intro-cinema-kicker b::before,.intro-cinema-kicker b::after{width:clamp(52px,7vw,104px)}
+@media(max-width:700px){
+ .intro-cinema-kicker{gap:10px;margin-bottom:clamp(28px,4.6vh,42px)}
+ .intro-cinema-kicker img{width:min(46vw,165px)}
+ .intro-cinema-kicker b{gap:10px;font-size:clamp(13px,3.2vw,16px);letter-spacing:.22em}
+ .intro-cinema-kicker b::before,.intro-cinema-kicker b::after{width:clamp(22px,6vw,38px)}
+}
+@media(max-height:760px) and (min-width:701px){.intro-cinema-kicker img{width:min(19vw,28vh)}}
+
 .registration-info-bar{display:flex;justify-content:flex-end;margin-bottom:12px}
 .registration-info{position:relative}
 .registration-info>summary{display:flex;align-items:center;justify-content:center;width:34px;height:34px;border:1px solid #e8564e80;border-radius:50%;background:#180c0d;color:#e8564e;cursor:pointer;list-style:none;font:italic 700 20px/1 Georgia,serif}
