@@ -1372,6 +1372,14 @@ html{scroll-padding-top:calc(var(--site-header-top) + var(--site-header-height) 
  .stage-dot{width:20px;height:22px}
 }
 @media(max-width:360px){.stage-float{width:min(250px,calc(100% - 20px));min-height:112px;padding:8px 10px}.stage-float-title{font-size:14px}.stage-float-footer{gap:3px}.stage-dot{width:18px;height:20px}}
+.back-link{color:#e67b73;transition:color .2s ease,text-decoration-color .2s ease}
+.back-link:hover{color:#fff;text-decoration:underline;text-decoration-color:#de312a;text-underline-offset:4px}
+.back-link:focus-visible{outline:2px solid #de312a;outline-offset:4px;border-radius:2px}
+.detail-panel-footer{display:grid;grid-template-columns:minmax(0,1fr) 30px;align-items:center;gap:10px;margin-top:22px}
+.detail-panel-footer .event-register-cta{width:100%;min-width:0;margin-top:0;padding-inline:10px}
+.detail-info-bottom{align-self:center}
+.detail-info-bottom p{top:calc(100% + 8px);right:0;z-index:10}
+@media(max-width:700px){.detail-panel-footer{gap:8px}.detail-panel-footer .event-register-cta{font-size:9px;padding-inline:8px}}
 .events-grid .event-card{display:flex;flex-direction:column}
 .events-grid .event-card .event-content{display:flex;flex:1;flex-direction:column}
 .events-grid .event-card .event-actions{margin-top:auto;padding-top:15px}
