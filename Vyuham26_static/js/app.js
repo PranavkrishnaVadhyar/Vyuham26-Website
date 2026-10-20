@@ -128,14 +128,14 @@
   };
   const go = path => { location.hash = '#/' + path.replace(/^\//, ''); };
   const eventCard = e => `<article class="event-card reveal" data-stream="${esc(e.stream)}">
-    <div class="event-art" aria-hidden="true"${safeExternalUrl(e.image) ? ` style="--event-image:url('${esc(safeExternalUrl(e.image))}')"` : ''}></div>
+    <div class="event-art" aria-hidden="true"${safeExternalUrl(e.image) ? ` style="--event-image:url('${esc(safeExternalUrl(e.image))}')"` : ''}><span>VYUHAM / ${esc(eventDayLabel(e))}</span></div>
     <div class="event-content"><div class="event-top"><span class="tag stream-pill">${esc(streamLabel(e.stream))}</span><span class="tag day">${esc(eventDateLabel(e))}</span></div>
     <h3><a href="#/event/${encodeURIComponent(e.slug)}">${esc(officialEventTitle(e))}</a></h3>${e.officialTitle ? `<p class="event-title-subtitle">${esc(e.title)}</p>` : ''}<p>${esc(e.cardDescription || e.description)}</p>
     <div class="event-meta"><span>PRIZE POOL <strong>${esc(displayPrize(e.prizes))}</strong></span><span>FEE <strong>${esc(e.fee || 'Not listed')}</strong></span></div>
     <div class="event-actions"><a class="button button-outline" href="#/event/${encodeURIComponent(e.slug)}">DETAILS</a>${registrationCta(registrationUrl(e), 'REGISTER ↗', 'button button-primary', e)}</div></div>
   </article>`;
   const dayPassCard = () => `<article class="event-card day-pass-event-card reveal">
-    <div class="event-art" aria-hidden="true"></div>
+    <div class="event-art" aria-hidden="true"><span>VYUHAM / ALL 3 DAYS</span></div>
     <div class="event-content"><div class="event-top"><span class="tag stream-pill">FESTIVAL PASS</span><span class="tag day">30 OCT — 01 NOV</span></div>
     <h3><a href="#/event/day-pass">Vyuham Day-Pass</a></h3><p class="event-title-subtitle">VYUHAM’26 Day Pass</p><p><a class="day-pass-description-link" href="#/event/day-pass">Choose Day 1, Day 2, Day 3, or a combination when getting your pass.</a></p>
     <div class="event-meta"><span>PASS LIMIT<strong>2,000 passes</strong></span></div>
