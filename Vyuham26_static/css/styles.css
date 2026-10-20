@@ -1399,3 +1399,35 @@ html{scroll-padding-top:calc(var(--site-header-top) + var(--site-header-height) 
  .event-details-section .rule-list li{margin:10px 0}
  .event-details-section .info-toggle{margin-top:18px}
 }
+
+/* Inside Modern SOC session profile and supporting content. */
+.soc-format-note{margin:0;line-height:1.7}
+.detail-panel dd.soc-intel-value{max-width:70%;line-height:1.55;overflow-wrap:anywhere}
+.soc-content-block{margin-top:34px;padding-top:24px;border-top:1px solid #ffffff18}
+.soc-content-block>.eyebrow{margin-bottom:14px}
+.soc-content-block>p{max-width:76ch;font-size:15px;line-height:1.85}
+.soc-speaker-profile{display:grid;grid-template-columns:minmax(180px,240px) minmax(0,1fr);gap:24px;align-items:start;padding:18px;border:1px solid #ffffff18;border-radius:12px;background:linear-gradient(145deg,#211416,#171517)}
+.soc-speaker-profile>img{display:block;width:100%;aspect-ratio:4/5;object-fit:cover;object-position:center 28%;border:1px solid #ffffff20;border-radius:8px;background:#100d0e}
+.soc-speaker-copy h3{margin:0 0 6px;font-size:clamp(21px,2vw,28px);line-height:1.2}
+.soc-speaker-copy p{font-size:14px;line-height:1.8}
+.soc-speaker-copy .soc-designation{margin:0 0 15px;color:#e5aaa1}
+.soc-experience{display:inline-block;margin-bottom:4px;color:#ff8178;font-size:13px}
+.soc-session-list{border-top:1px solid #ffffff18}
+.soc-session-list>div{display:grid;grid-template-columns:minmax(170px,220px) minmax(0,1fr);gap:18px;padding:14px 4px;border-bottom:1px solid #ffffff18}
+.soc-session-list time{color:#ff8178;font:13px var(--mono)}
+.soc-session-list span{color:#eee6e6;font-size:15px}
+.soc-guidelines{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 28px;margin:0;padding-left:24px;color:var(--muted);font-size:14px;line-height:1.7}
+.soc-guidelines li{padding-left:3px}
+.soc-guidelines li::marker{color:#de312a;font-family:var(--mono)}
+.soc-closing-line{margin:32px 0 6px;color:#f0786f;font:clamp(22px,3vw,32px)/1.2 var(--display);letter-spacing:-.02em}
+@media(max-width:700px){
+ .soc-content-block{margin-top:27px;padding-top:20px}
+ .soc-content-block>p{font-size:14px;line-height:1.75}
+ .soc-speaker-profile{grid-template-columns:1fr;gap:18px;padding:14px}
+ .soc-speaker-profile>img{width:min(100%,290px);aspect-ratio:4/5;justify-self:center}
+ .soc-speaker-copy h3{font-size:24px}
+ .soc-session-list>div{grid-template-columns:1fr;gap:6px;padding:13px 3px}
+ .soc-session-list time{font-size:12px}
+ .soc-guidelines{grid-template-columns:1fr;gap:5px;font-size:14px}
+ .soc-closing-line{margin-top:26px;font-size:24px}
+}

@@ -99,10 +99,17 @@
     if (date && date !== 'TBA') rows.push({ label: 'DATE', value: date });
     if (event.time) rows.push({ label: 'TIME', value: event.time });
     if (event.speaker) rows.push({ label: 'SPEAKER', value: event.speaker });
+    if (event.designation) rows.push({ label: 'DESIGNATION', value: event.designation });
+    if (event.format) rows.push({ label: 'FORMAT', value: event.format });
+    if (event.duration) rows.push({ label: 'DURATION', value: event.duration });
     rows.push(...eventMetadataFields(event));
     if (event.teamSize) rows.push({ label: 'TEAM SIZE', value: event.teamSize });
     if (event.eligibility) rows.push({ label: 'ELIGIBILITY', value: event.eligibility });
-    return rows.map(row => `<div><dt>${esc(row.label)}</dt><dd${row.label === 'PRIZE POOL' ? ' class="green"' : ''}>${esc(row.value)}</dd></div>`).join('');
+    return rows.map(row => {
+      const isSocIntelValue = event.slug === 'panel-cybersecurity' && ['TIME', 'SPEAKER', 'DESIGNATION', 'FORMAT'].includes(row.label);
+      const classes = [row.label === 'PRIZE POOL' ? 'green' : '', isSocIntelValue ? 'soc-intel-value' : ''].filter(Boolean).join(' ');
+      return `<div><dt>${esc(row.label)}</dt><dd${classes ? ` class="${classes}"` : ''}>${esc(row.value)}</dd></div>`;
+    }).join('');
   };
   const eventStreamRank = event => ['tech', 'technology', 'management'].includes(String(event.stream || '').toLowerCase()) ? 0 : 1;
   const eventPriority = (a, b) => {
@@ -195,14 +202,24 @@
     if (decodeURIComponent(slug) === 'day-pass') return dayPassDetail();
     const e = events.find(x => x.slug === decodeURIComponent(slug) && isVisibleEvent(x));
     if (!e) return notFound();
+    const isSocTalk = e.slug === 'panel-cybersecurity';
     const image = safeExternalUrl(e.image) || streams.find(stream => stream.id === e.stream)?.image || streams.find(stream => stream.id === ({ technology: 'tech', culture: 'cultural', gaming: 'esports' }[e.stream]))?.image || 'assets/streams/technology.jpg';
     const participationRules = e.rules || [];
-    const participationNotes = e.slug === 'hackathon' && e.themes?.length
+    const participationNotes = isSocTalk
+      ? `<p class="muted soc-format-note">${esc(e.format)} · ${esc(e.duration)}</p>`
+      : e.slug === 'hackathon' && e.themes?.length
       ? `<ul class="rule-list"><li>${esc(participationRules[0] || '24 uninterrupted hours of collaborative building')}</li><li><strong>Hackathon themes:</strong><ul class="hackathon-theme-list">${e.themes.map(theme => `<li>${esc(theme)}</li>`).join('')}</ul></li>${participationRules.slice(1).map(rule => `<li>${esc(rule)}</li>`).join('')}</ul>`
       : participationRules.length ? '<ul class="rule-list">' + participationRules.map(rule => '<li>' + esc(rule) + '</li>').join('') + '</ul>' : '<p class="muted">Detailed rules will be published by the event organizers.</p>';
+    const socContent = isSocTalk
+      ? `<section class="soc-content-block"><div class="eyebrow">ABOUT THE EVENT</div><p class="muted">${esc(e.description)}</p></section>
+        <section class="soc-content-block"><div class="eyebrow">SPEAKER</div><article class="soc-speaker-profile"><img src="${esc(e.speakerPhoto)}" alt="Mr. Vishnu Ramachandran, Security Specialist at H&amp;R Block" loading="lazy"><div class="soc-speaker-copy"><h3>${esc(e.speaker)}</h3><p class="soc-designation">${esc(e.designation)}</p><strong class="soc-experience">${esc(e.speakerExperience)}</strong><p class="muted">${esc(e.speakerBio)}</p></div></article></section>
+        <section class="soc-content-block"><div class="eyebrow">SESSION SCHEDULE</div><div class="soc-session-list">${e.sessionSchedule.map(item => `<div><time>${esc(item.time)}</time><span>${esc(item.title)}</span></div>`).join('')}</div></section>
+        <section class="soc-content-block"><div class="eyebrow">PARTICIPANT GUIDELINES</div><ol class="soc-guidelines">${e.participantGuidelines.map(item => `<li>${esc(item)}</li>`).join('')}</ol></section>
+        <p class="soc-closing-line">${esc(e.closingLine)}</p>`
+      : `<button class="info-toggle" type="button" aria-expanded="false" aria-controls="eventDescription"><span aria-hidden="true">i</span> ABOUT THIS EVENT</button><div class="event-description" id="eventDescription" hidden><p class="muted" style="line-height:1.9">${esc(e.description)}</p></div>`;
     const hero = `<section class="page-hero event-page-hero"><img class="event-hero-image" src="${esc(image)}" alt="${esc(streamLabel(e.stream))} event artwork"><div class="event-hero-shade"></div><div class="container"><div class="breadcrumb"><a href="#/home">VYUHAM’26</a> / EVENT DOSSIER</div><span class="stream-pill">${esc(streamLabel(e.stream))}</span><h1>${esc(officialEventTitle(e))}</h1>${e.officialTitle ? `<p class="event-title-subtitle">${esc(e.title)}</p>` : ''}<p>Event details, schedule information and participation overview for VYUHAM’26.</p></div></section>`;
     return `${hero}
-      <section class="section event-details-section"><div class="container"><a class="back-link" href="#/events">← BACK TO EVENT ARCHIVE</a><div class="event-detail"><div><h3 class="event-participation-heading">Participation notes</h3>${participationNotes}<button class="info-toggle" type="button" aria-expanded="false" aria-controls="eventDescription"><span aria-hidden="true">i</span> ABOUT THIS EVENT</button><div class="event-description" id="eventDescription" hidden><p class="muted" style="line-height:1.9">${esc(e.description)}</p></div></div><aside class="detail-panel"><div class="detail-panel-heading"><div class="eyebrow">EVENT INTEL</div></div><dl>${renderEventIntelRows(e)}</dl><div class="detail-panel-footer">${registrationCta(registrationUrl(e), 'REGISTER & PAY ON MAKEMYPASS ↗', 'button button-primary event-register-cta', e)}<details class="detail-info detail-info-bottom"><summary aria-label="MakeMyPass registration information">ⓘ</summary><p>MakeMyPass is the official registration and payment provider. Review final event details and complete your registration on the event’s MakeMyPass page.</p></details></div></aside></div></div></section>`;
+      <section class="section event-details-section"><div class="container"><a class="back-link" href="#/events">← BACK TO EVENT ARCHIVE</a><div class="event-detail"><div><h3 class="event-participation-heading">Participation notes</h3>${participationNotes}${socContent}</div><aside class="detail-panel"><div class="detail-panel-heading"><div class="eyebrow">EVENT INTEL</div></div><dl>${renderEventIntelRows(e)}</dl><div class="detail-panel-footer">${registrationCta(registrationUrl(e), 'REGISTER & PAY ON MAKEMYPASS ↗', 'button button-primary event-register-cta', e)}<details class="detail-info detail-info-bottom"><summary aria-label="MakeMyPass registration information">ⓘ</summary><p>MakeMyPass is the official registration and payment provider. Review final event details and complete your registration on the event’s MakeMyPass page.</p></details></div></aside></div></div></section>`;
   };
   const schedulePage = () => `<section class="page-hero schedule-page-hero"><div class="container"><div class="breadcrumb"><a href="#/home">VYUHAM’26</a> / FESTIVAL TIMELINE</div><div class="eyebrow">Festival timeline</div><h1>THREE DAYS.<br><span class="green">NO PAUSE.</span></h1><p>Plan your VYUHAM’26 experience. Event-specific timings and venues should be confirmed with the official schedule.</p></div><img class="schedule-hero-logo" src="assets/vyuham_logo_sm.png" alt="VYUHAM emblem" width="72" height="72"></section>
     <section class="section"><div class="container"><div class="schedule-days" id="scheduleDays">${days.map(d => `<button class="schedule-day schedule-day-${d.day}" type="button" aria-pressed="${d.day === 1}" data-day="${d.day}"><b>DAY 0${d.day} <i>· ${d.date}</i></b><span>${d.name}</span><small>${d.desc}</small><em>VIEW DAY <strong>↘</strong></em></button>`).join('')}</div><div id="scheduleContent"></div></div></section>`;
