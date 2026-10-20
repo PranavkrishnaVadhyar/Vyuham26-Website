@@ -788,27 +788,21 @@ h1,h2,h3,.brand b,.stream-card strong,.home-event strong,.day-card h3,.stage-bra
   margin-top: 5px;
   font: 8px var(--mono);
   letter-spacing: .1em;
-  color: var(--muted);
+  color: #d3a184;
   line-height: 1.4;
   white-space: normal;
   overflow-wrap: anywhere;
 }
 
 .stats-bar > span:nth-child(1) b,
+.stats-bar > span:nth-child(2) b,
+.stats-bar > span:nth-child(3) b,
 .stats-bar > span:nth-child(4) b,
 .info-strip.cyber-strip > span:nth-child(1) b,
+.info-strip.cyber-strip > span:nth-child(2) b,
+.info-strip.cyber-strip > span:nth-child(3) b,
 .info-strip.cyber-strip > span:nth-child(4) b {
-  color: #d3a184;
-}
-
-.stats-bar > span:nth-child(2) b,
-.info-strip.cyber-strip > span:nth-child(2) b {
   color: #de312a;
-}
-
-.stats-bar > span:nth-child(3) b,
-.info-strip.cyber-strip > span:nth-child(3) b {
-  color: #cc63b2;
 }
 
 .stats-bar > span:first-child b {
