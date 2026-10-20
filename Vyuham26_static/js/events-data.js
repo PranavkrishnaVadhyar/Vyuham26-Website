@@ -8,7 +8,6 @@ window.VYUHAM_EVENTS = [
     "time": "30 October, 9:00 A.M. – 31 October, 9:00 A.M.",
     "venue": "Main Hall + Computer Lab",
     "description": "A 24-hour hackathon with overnight building across six possible theme tracks.",
-    "prizes": "₹30,000",
     "fee": "₹999",
     "eligibility": "Open to students and developers across India",
     "teamSize": "3–5 members",
@@ -27,7 +26,8 @@ window.VYUHAM_EVENTS = [
       "FinTech & Future of Commerce",
       "ClimateTech & Sustainable Future",
       "Open Innovation"
-    ]
+    ],
+    "prizePool": "₹30,000"
   },
   {
     "slug": "best-manager",
@@ -38,7 +38,6 @@ window.VYUHAM_EVENTS = [
     "time": "10:00 AM – 5:00 PM",
     "venue": "Gallery Hall",
     "description": "THINK SMART. LEAD BOLDLY. STAND OUT. — Aptitude, crisis management & leadership interview.",
-    "prizes": "₹15,000",
     "fee": "₹200",
     "eligibility": "UG/PG students across India",
     "teamSize": "Solo",
@@ -56,7 +55,8 @@ window.VYUHAM_EVENTS = [
       "Final Decision: Judges' and coordinators' decisions are final.",
       "Coordinators: Ananthu S (6282143212) | Anindita (9365477714)",
       "Volunteers: Surya (81370 80407) | Akshay Chandran (81570 14234) | Akshay B Krishna (80780 2683) | Sreekutty (77367 64902) | Parvathy (78932 14206)"
-    ]
+    ],
+    "prizePool": "₹15,000"
   },
   {
     "slug": "best-management-team",
@@ -67,7 +67,6 @@ window.VYUHAM_EVENTS = [
     "time": "10:00 AM – 5:00 PM",
     "venue": "Gallery Hall",
     "description": "ONE TEAM. ONE VISION. ONE SYMPHONY. — Team-based business strategy evaluation.",
-    "prizes": "₹20,000",
     "fee": "₹400",
     "eligibility": "College and university management teams",
     "teamSize": "3–4 members",
@@ -82,7 +81,8 @@ window.VYUHAM_EVENTS = [
       "Disqualification: Any violation of the event rules may result in disqualification.",
       "Coordinators: Ananthu S (6282143212) | Anjana V S (94879 84537)",
       "Volunteers: Heaven Jose (96331 88918) | Chandradev (95884 89710) | Ananthu S (62821 43212) | Gopika (73062 19065) | Karan Krishna (77366 33014)"
-    ]
+    ],
+    "prizePool": "₹20,000"
   },
   {
     "slug": "marketing-game",
@@ -93,7 +93,6 @@ window.VYUHAM_EVENTS = [
     "time": "10:00 AM – 5:00 PM",
     "venue": "Gallery Hall",
     "description": "STRATEGIZE. PERSUADE. WIN. — Product & campaign strategy simulation.",
-    "prizes": "₹15,000",
     "fee": "₹300",
     "eligibility": "Open to all college students",
     "teamSize": "Teams of 3-4",
@@ -112,7 +111,8 @@ window.VYUHAM_EVENTS = [
       "Time limits will be strictly enforced.",
       "Coordinators: Ananthu S (6282143212) | Ahammed (90748 21829)",
       "Volunteers: Akhila (90480 52438) | Vibitha (86068 29275) | Arbab khan (73009 46462) | Anagha S (8086962374) | Shajeena (7012537656)"
-    ]
+    ],
+    "prizePool": "₹15,000"
   },
   {
     "slug": "finance-game",
@@ -123,7 +123,6 @@ window.VYUHAM_EVENTS = [
     "time": "10:00 AM – 5:00 PM",
     "venue": "Gallery Hall",
     "description": "ANALYZE. INVEST. OUTPERFORM. — Simulated crisis — risk, budget & strategy.",
-    "prizes": "₹15,000",
     "fee": "₹300",
     "eligibility": "Open to all students",
     "teamSize": "Teams of 3-4",
@@ -142,7 +141,8 @@ window.VYUHAM_EVENTS = [
       "Calculation discrepancies may result in corrections or disqualification if intentional.",
       "Coordinators: Ananthu S (6282143212) | Johan Rony (6238739660)",
       "Volunteers: Hadik Bin Siyad (8304915518) | Sree hari G (8590491685) | Suhail Khan (6282 673864) | Muhammed Suhail (80756 70806)"
-    ]
+    ],
+    "prizePool": "₹15,000"
   },
   {
     "slug": "hr-game",
@@ -153,7 +153,6 @@ window.VYUHAM_EVENTS = [
     "time": "10:00 AM – 5:00 PM",
     "venue": "Gallery Hall",
     "description": "PEOPLE. PURPOSE. PERFORMANCE. — Debates, HR crossword, minefield & case studies.",
-    "prizes": "₹15,000",
     "fee": "₹300",
     "eligibility": "Open to all students",
     "teamSize": "Teams of 3-4",
@@ -169,7 +168,8 @@ window.VYUHAM_EVENTS = [
       "Disqualification & Decisions: Any form of cheating, malpractice, or violation of the rules will result in immediate disqualification. The decisions of the judges and event coordinators shall be final and binding.",
       "Coordinators: Ananthu S (6282143212) | Fatima (87144 30630)",
       "Volunteers: Diya Sabu (95262 86593) | Pretty Santhi Jose (90372 70590) | Mariyam Shamshira (96052 77787) | Nimra (79070 09237) | Panchami (97787 30260)"
-    ]
+    ],
+    "prizePool": "₹15,000"
   },
   {
     "slug": "business-quiz",
@@ -180,7 +180,6 @@ window.VYUHAM_EVENTS = [
     "time": "10:00 AM – 5:00 PM",
     "venue": "Gallery Hall",
     "description": "THINK FAST. KNOW BUSINESS. WIN BIG. — Current affairs, sports & management rounds.",
-    "prizes": "₹10,000",
     "fee": "₹200",
     "eligibility": "Open to all students",
     "teamSize": "Teams of 2",
@@ -200,7 +199,8 @@ window.VYUHAM_EVENTS = [
       "The quizmaster's decision on answer validity is final.",
       "Coordinators: Ananthu S (6282143212) | Alen joe (8921955159)",
       "Volunteers: Linus (80895 81304) | Juhaina (89211 60205) | Sona (95675 08757) | Fathima (7034275591) | Pavithra (9400034736)"
-    ]
+    ],
+    "prizePool": "₹10,000"
   },
   {
     "slug": "panel-responsible-ai",
@@ -211,7 +211,6 @@ window.VYUHAM_EVENTS = [
     "time": "10:00 AM – 11:30 AM",
     "venue": "Seminar Hall",
     "description": "An expert panel discussion examining data integrity, ethics, and trust behind modern artificial intelligence systems.",
-    "prizes": "Knowledge Session",
     "fee": "Free Entry",
     "eligibility": "Open to all fest delegates",
     "teamSize": "Open",
@@ -228,7 +227,6 @@ window.VYUHAM_EVENTS = [
     "time": "12:00 PM – 1:30 PM",
     "venue": "Seminar Hall",
     "description": "",
-    "prizes": "Not listed",
     "fee": "Free Entry",
     "eligibility": "Open to all attendees",
     "teamSize": "Open",
@@ -246,14 +244,15 @@ window.VYUHAM_EVENTS = [
     "time": "2:00 PM – 3:30 PM",
     "venue": "Computer Lab",
     "description": "",
-    "prizes": "",
-    "fee": "",
+    "fee": "₹120 onwards",
     "eligibility": "",
     "teamSize": "",
     "status": "upcoming",
     "featured": false,
     "registrationUrl": "https://org.makemypass.com/web/vyuham-26/events/hands-on-workshop",
-    "rules": []
+    "rules": [],
+    "eventType": "workshop",
+    "certificateProvided": true
   },
   {
     "slug": "play-fest",
@@ -264,7 +263,6 @@ window.VYUHAM_EVENTS = [
     "time": "Day One",
     "venue": "Entertainment Zone",
     "description": "Entertainment zone and casual games.",
-    "prizes": "Recreation & Games",
     "fee": "Free Entry",
     "eligibility": "Open to all delegates",
     "teamSize": "Open",
@@ -285,7 +283,6 @@ window.VYUHAM_EVENTS = [
     "time": "Day One",
     "venue": "Campus Grounds",
     "description": "Physical fitness and endurance challenge.",
-    "prizes": "Fitness Challenge",
     "fee": "₹50 per head",
     "eligibility": "Open to all participants",
     "teamSize": "Individual",
@@ -306,7 +303,6 @@ window.VYUHAM_EVENTS = [
     "time": "10:00 AM – 5:00 PM",
     "venue": "Computer Lab",
     "description": "Cybersecurity puzzles and challenges.",
-    "prizes": "₹50,000+",
     "fee": "₹500 per team",
     "eligibility": "Open to all cybersecurity enthusiasts",
     "teamSize": "2–3 members",
@@ -318,7 +314,8 @@ window.VYUHAM_EVENTS = [
       "Categories: Cryptography, Web Exploitation, Reverse Engineering, ML Security, OSINT, Blockchain and Forensics",
       "Food and refreshments will be provided",
       "Strict anti-sharing and infrastructure protection rules"
-    ]
+    ],
+    "prizePool": "₹50,000+"
   },
   {
     "slug": "startup-showcase",
@@ -328,7 +325,6 @@ window.VYUHAM_EVENTS = [
     "time": "10:00 AM – 5:00 PM",
     "venue": "Gallery Hall",
     "description": "Founders pitch to a panel of experts.",
-    "prizes": "₹15,000",
     "fee": "₹400",
     "eligibility": "Student startups and early-stage founders",
     "teamSize": "Teams of 1–4",
@@ -338,7 +334,8 @@ window.VYUHAM_EVENTS = [
     "rules": [
       "Pitch deck and product demonstration to venture experts and founders",
       "Focused Q&A round evaluating scalability, technology, and market fit"
-    ]
+    ],
+    "prizePool": "₹15,000"
   },
   {
     "slug": "prompt-war",
@@ -349,7 +346,6 @@ window.VYUHAM_EVENTS = [
     "time": "10:00 AM – 5:00 PM",
     "venue": "Computer Lab",
     "description": "Prompt-engineering challenge.",
-    "prizes": "₹15,000",
     "fee": "₹400",
     "eligibility": "Open to all students",
     "teamSize": "Individual / Pairs",
@@ -359,7 +355,8 @@ window.VYUHAM_EVENTS = [
     "rules": [
       "Time-constrained prompt engineering trials against complex target outputs",
       "Evaluation on precision, token economics, and contextual fidelity"
-    ]
+    ],
+    "prizePool": "₹15,000"
   },
   {
     "slug": "tech-quiz",
@@ -370,7 +367,6 @@ window.VYUHAM_EVENTS = [
     "time": "2:00 PM – 5:00 PM",
     "venue": "Gallery Hall",
     "description": "General technology knowledge rounds.",
-    "prizes": "₹10,000",
     "fee": "₹200",
     "eligibility": "Open to all students",
     "teamSize": "Individual participation only",
@@ -384,7 +380,8 @@ window.VYUHAM_EVENTS = [
       "The use of external resources, AI tools, or any form of assistance is strictly prohibited.",
       "Rule violations may result in disqualification. The organizers’ decisions regarding rankings and results shall be final.",
       "Questions on General Tech, Computer Science, AI, Internet History, Cutting Edge Tech."
-    ]
+    ],
+    "prizePool": "₹10,000"
   },
   {
     "slug": "talk-agentic-ai",
@@ -397,7 +394,6 @@ window.VYUHAM_EVENTS = [
     "description": "An applied AI talk on turning agentic systems into useful real-world outcomes.",
     "cardDescription": "Building practical AI for real-world outcomes.",
     "speaker": "Jawad Thotolly, Keynos Reflections",
-    "prizes": "Not listed",
     "fee": "Free Entry",
     "eligibility": "Open to all attendees",
     "teamSize": "Open",
@@ -426,7 +422,6 @@ window.VYUHAM_EVENTS = [
     "time": "4:00 PM – 5:00 PM",
     "venue": "Gallery Hall",
     "description": "",
-    "prizes": "CTF Debrief Session",
     "fee": "Free Entry",
     "eligibility": "Open to all attendees",
     "teamSize": "Open",
@@ -444,8 +439,7 @@ window.VYUHAM_EVENTS = [
     "time": "10:00 AM – 1:00 PM",
     "venue": "Gallery Hall",
     "description": "“Ethical Hacking & OSINT Reconnaissance: Think Like an Attacker”.",
-    "prizes": "Certificate Available",
-    "fee": "₹99",
+    "fee": "₹99 onwards",
     "eligibility": "Open to all attendees",
     "teamSize": "Individual",
     "status": "upcoming",
@@ -454,7 +448,9 @@ window.VYUHAM_EVENTS = [
     "rules": [
       "Hands-on tactical offensive methodology and open-source intelligence gathering",
       "Demonstration of defensive countermeasures and target surface discovery"
-    ]
+    ],
+    "eventType": "workshop",
+    "certificateProvided": true
   },
   {
     "slug": "ai-short-film",
@@ -465,7 +461,6 @@ window.VYUHAM_EVENTS = [
     "time": "9:00 AM – 5:00 PM",
     "venue": "Seminar Hall / Digital Showcase",
     "description": "Theme-based short film, made entirely with AI tools.",
-    "prizes": "₹10,000",
     "fee": "FREE ENTRY",
     "eligibility": "Open to all digital creators",
     "teamSize": "Individual / Teams",
@@ -476,7 +471,8 @@ window.VYUHAM_EVENTS = [
       "All video, script, and audio assets must be generated using AI tools",
       "Theme-based cinematic submission",
       "Free entry open call"
-    ]
+    ],
+    "prizePool": "₹10,000"
   },
   {
     "slug": "talk-ksum",
@@ -487,7 +483,6 @@ window.VYUHAM_EVENTS = [
     "time": "9:00 AM – 11:00 AM",
     "venue": "",
     "description": "Introduction to Kerala Startup Mission (KSUM) and IEDC, highlighting their role in fostering student innovation and entrepreneurship. Explore student benefits, startup support opportunities, and inspiring success stories of student entrepreneurs from Kerala.",
-    "prizes": "Interactive Session",
     "fee": "Free Entry",
     "eligibility": "Open to all attendees",
     "teamSize": "Open",
@@ -509,7 +504,6 @@ window.VYUHAM_EVENTS = [
     "venue": "DUK Campus (PlayStation Arena)",
     "description": "Championship decider on PlayStation consoles. 1v1 Single Elimination EA SPORTS FC / FIFA 27 tournament.",
     "cardDescription": "1v1 Single Elimination PlayStation tournament for college students and Technopark employees.",
-    "prizes": "₹10,000",
     "fee": "₹50",
     "eligibility": "College students and Technopark employees (Valid ID mandatory)",
     "teamSize": "Individual (1v1)",
@@ -525,7 +519,8 @@ window.VYUHAM_EVENTS = [
       "Consoles provided by organizers; players must use approved controllers",
       "Prize Pool: ₹10,000 (1st Place: ₹5,000 | 2nd Place: ₹3,000 | 3rd Place: ₹2,000)",
       "Tournament admins' decisions are final in all disputes"
-    ]
+    ],
+    "prizePool": "₹10,000"
   },
   {
     "slug": "movie-quiz",
@@ -536,7 +531,6 @@ window.VYUHAM_EVENTS = [
     "time": "1:00 PM – 3:00 PM",
     "venue": "Gallery Hall",
     "description": "Trivia across genres & eras.",
-    "prizes": "₹5,000",
     "fee": "₹200",
     "eligibility": "Open to all film enthusiasts",
     "teamSize": "Teams of 2",
@@ -546,7 +540,8 @@ window.VYUHAM_EVENTS = [
     "rules": [
       "Multi-round film trivia across classic, regional, and world cinema",
       "Audio-visual identifier rounds and buzzer finals"
-    ]
+    ],
+    "prizePool": "₹5,000"
   },
   {
     "slug": "efootball",
@@ -557,7 +552,6 @@ window.VYUHAM_EVENTS = [
     "time": "Online Qualifiers",
     "venue": "Online",
     "description": "Online qualifiers for E-Football championship.",
-    "prizes": "₹5,000",
     "fee": "ONLINE REG: ₹50/HEAD",
     "eligibility": "Open to college students (Valid college ID mandatory)",
     "teamSize": "Individual (1v1)",
@@ -573,7 +567,8 @@ window.VYUHAM_EVENTS = [
       "Prize Pool: ₹5,000 (1st Place: ₹3,000 | 2nd Place: ₹2,000)"
     ],
     "scheduleDays": [],
-    "scheduleGroup": "pre-fest"
+    "scheduleGroup": "pre-fest",
+    "prizePool": "₹5,000"
   },
   {
     "slug": "bgmi",
@@ -584,7 +579,6 @@ window.VYUHAM_EVENTS = [
     "time": "Online Qualifiers",
     "venue": "Online",
     "description": "Online qualifiers for BGMI battle royale tournament.",
-    "prizes": "₹5,000",
     "fee": "ONLINE REG: ₹50/HEAD",
     "eligibility": "Open to college students (Valid college ID mandatory)",
     "teamSize": "Squad of 4",
@@ -601,7 +595,8 @@ window.VYUHAM_EVENTS = [
       "Prize Pool: ₹5,000 (1st Place: ₹3,000 | 2nd Place: ₹2,000)"
     ],
     "scheduleDays": [],
-    "scheduleGroup": "pre-fest"
+    "scheduleGroup": "pre-fest",
+    "prizePool": "₹5,000"
   },
   {
     "slug": "photography",
@@ -612,7 +607,6 @@ window.VYUHAM_EVENTS = [
     "time": "Running All 3 Days",
     "venue": "Campus Wide",
     "description": "Campus-wide open contest across all three days.",
-    "prizes": "₹10,000",
     "fee": "CAMPUS WIDE REG: ₹100",
     "eligibility": "Open to all attendees",
     "teamSize": "Individual",
@@ -629,7 +623,8 @@ window.VYUHAM_EVENTS = [
       2,
       3
     ],
-    "scheduleGroup": "multi-day"
+    "scheduleGroup": "multi-day",
+    "prizePool": "₹10,000"
   },
   {
     "slug": "cdac-workshop",
@@ -641,8 +636,7 @@ window.VYUHAM_EVENTS = [
     "venue": "",
     "description": "The DIR-V VEGA workshop introduces the VEGA series of processors and its ecosystem, covering theoretical concepts and practical applications. Participants will explore VEGA processors, development boards, the Software Development Kit (SDK), and application development.",
     "cardDescription": "Explore VEGA processors through practical sessions.",
-    "prizes": "",
-    "fee": "",
+    "fee": "Free",
     "eligibility": "",
     "teamSize": "",
     "speaker": "Mr. Arun A",
@@ -651,7 +645,9 @@ window.VYUHAM_EVENTS = [
     "registrationUrl": "",
     "rules": [
       "Hands-on sessions using the ARIES development board, which is Arduino-compatible."
-    ]
+    ],
+    "eventType": "workshop",
+    "certificateProvided": true
   },
   {
     "slug": "project-expo-ieee",
@@ -663,7 +659,6 @@ window.VYUHAM_EVENTS = [
     "venue": "Gallery Hall",
     "description": "IEEE Student Branch, Digital University Kerala presents ProjectX Minerva: Project Expo 2026. Bring your capstones, mini-projects, and research prototypes to be evaluated by experts across 8 multidisciplinary tracks, culminating in the Grand Finale live prototype demo on 31 October at DUK.",
     "cardDescription": "Showcase working prototypes, capstones, and research across 8 tracks at ProjectX Minerva.",
-    "prizes": "₹10,000",
     "fee": "₹100 (IEEE members) / ₹200 (others)",
     "eligibility": "UG, PG & diploma students, and early-stage researchers (Register by 26 Oct)",
     "teamSize": "1–5 members",
@@ -679,7 +674,8 @@ window.VYUHAM_EVENTS = [
       "Registration Fee: ₹100 per team for IEEE members (min. 2 members), ₹200 for others",
       "Registration deadline: 26 October 2026",
       "Contact & Queries: Dakshin (+91 88481 82643) | Salma (+91 97465 20275) | ieee.sb@duk.ac.in"
-    ]
+    ],
+    "prizePool": "₹10,000"
   },
   {
     "slug": "workshop-luminar-technolab",
@@ -690,13 +686,14 @@ window.VYUHAM_EVENTS = [
     "time": "3:30 PM – 5:00 PM",
     "venue": "",
     "description": "",
-    "prizes": "",
-    "fee": "₹100",
+    "fee": "₹100 onwards",
     "eligibility": "",
     "teamSize": "",
     "status": "upcoming",
     "featured": false,
     "registrationUrl": "https://org.makemypass.com/web/vyuham-26/events/workshop-on-prompt-engineering",
-    "rules": []
+    "rules": [],
+    "eventType": "workshop",
+    "certificateProvided": true
   }
 ];

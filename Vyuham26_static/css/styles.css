@@ -1383,3 +1383,19 @@ html{scroll-padding-top:calc(var(--site-header-top) + var(--site-header-height) 
 .events-grid .event-card{display:flex;flex-direction:column}
 .events-grid .event-card .event-content{display:flex;flex:1;flex-direction:column}
 .events-grid .event-card .event-actions{margin-top:auto;padding-top:15px}
+
+/* Give event details a clearer entry point and more readable participation notes. */
+.event-details-section{padding-top:58px}
+.event-details-section>.container>.back-link{display:inline-flex;align-items:center;min-height:36px;margin:0 0 24px;font-size:12px;font-weight:600;letter-spacing:.05em}
+.event-participation-heading{margin:0 0 18px;font-size:clamp(26px,2.2vw,31px);line-height:1.08}
+.event-details-section .rule-list{font-size:15px;line-height:1.75}
+.event-details-section .rule-list li{margin:11px 0}
+.event-details-section .info-toggle{margin-top:20px;min-height:42px;font-size:10px}
+@media(max-width:700px){
+ .event-details-section{padding:38px 18px 68px}
+ .event-details-section>.container>.back-link{min-height:40px;margin-bottom:20px;font-size:12px}
+ .event-participation-heading{font-size:27px}
+ .event-details-section .rule-list{font-size:14px;line-height:1.7}
+ .event-details-section .rule-list li{margin:10px 0}
+ .event-details-section .info-toggle{margin-top:18px}
+}

@@ -14,6 +14,7 @@
   const registrationFeatureEnabled = window.VYUHAM_REGISTRATION_ENABLED === true;
   const MAKEMYPASS_HOME = 'https://org.makemypass.com/web/vyuham-26';
   const DAY_PASS_URL = `${MAKEMYPASS_HOME}/events/vyuham-day-pass`;
+  const DAY_PASS_METADATA = { passLimit: '2,000 passes', fee: '' };
   const MAKEMYPASS_EVENT_PATHS = {
     hackathon: 'hackathon-24hr', 'workshop-ethical-hacking': 'workshop-ethical-hacking-osint',
     'best-manager': 'best-manager-4', 'marketing-game': 'marketing-game-3',
@@ -50,10 +51,6 @@
     return hour * 60 + Number(match[2]);
   };
   const officialVenue = value => value || 'Not listed in official schedule';
-  const displayPrize = value => {
-    const prize = String(value ?? '').trim();
-    return prize && !['none', 'null', 'undefined'].includes(prize.toLowerCase()) ? prize : 'Not listed';
-  };
   const ordinalDate = dateStr => {
     const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
     const match = String(dateStr || '').match(/(\d{1,2})\s+(\w+)\s+(\d{4})/);
@@ -77,12 +74,35 @@
       : ordinalDate(days[Number(event.day) - 1]?.date) || 'TBA';
   const officialEventTitle = event => event.officialTitle || event.title;
   const eventPrizeValue = event => {
-    const match = String(event.prizes || '').match(/[\d,]+/);
+    const match = String(event.prizePool || '').match(/[\d,]+/);
     return match ? Number(match[0].replaceAll(',', '')) : 0;
   };
   const verifiedPrizePoolValue = event => {
-    const match = String(event.prizes || '').match(/₹\s*([\d,]+)/);
+    const match = String(event.prizePool || '').match(/₹\s*([\d,]+)/);
     return match ? Number(match[1].replaceAll(',', '')) : 0;
+  };
+  const eventMetadataFields = event => [
+    ...(event.eventType === 'workshop'
+      ? [{ label: 'CERTIFICATE PROVIDED', value: 'Yes' }]
+      : event.prizePool ? [{ label: 'PRIZE POOL', value: event.prizePool }] : []),
+    ...(event.participantLimit ? [{ label: 'PARTICIPANT LIMIT', value: event.participantLimit }] : []),
+    ...(event.passLimit ? [{ label: 'PASS LIMIT', value: event.passLimit }] : []),
+    ...(String(event.fee || '').trim() ? [{ label: 'FEE', value: event.fee }] : [])
+  ];
+  const renderEventMetadata = event => {
+    const fields = eventMetadataFields(event);
+    return fields.length ? `<div class="event-meta">${fields.map(field => `<span>${esc(field.label)}<strong>${esc(field.value)}</strong></span>`).join('')}</div>` : '';
+  };
+  const renderEventIntelRows = event => {
+    const rows = [];
+    const date = eventDateLabel(event);
+    if (date && date !== 'TBA') rows.push({ label: 'DATE', value: date });
+    if (event.time) rows.push({ label: 'TIME', value: event.time });
+    if (event.speaker) rows.push({ label: 'SPEAKER', value: event.speaker });
+    rows.push(...eventMetadataFields(event));
+    if (event.teamSize) rows.push({ label: 'TEAM SIZE', value: event.teamSize });
+    if (event.eligibility) rows.push({ label: 'ELIGIBILITY', value: event.eligibility });
+    return rows.map(row => `<div><dt>${esc(row.label)}</dt><dd${row.label === 'PRIZE POOL' ? ' class="green"' : ''}>${esc(row.value)}</dd></div>`).join('');
   };
   const eventStreamRank = event => ['tech', 'technology', 'management'].includes(String(event.stream || '').toLowerCase()) ? 0 : 1;
   const eventPriority = (a, b) => {
@@ -131,18 +151,18 @@
     <div class="event-art" aria-hidden="true"${safeExternalUrl(e.image) ? ` style="--event-image:url('${esc(safeExternalUrl(e.image))}')"` : ''}><span>VYUHAM / ${esc(eventDayLabel(e))}</span></div>
     <div class="event-content"><div class="event-top"><span class="tag stream-pill">${esc(streamLabel(e.stream))}</span><span class="tag day">${esc(eventDateLabel(e))}</span></div>
     <h3><a href="#/event/${encodeURIComponent(e.slug)}">${esc(officialEventTitle(e))}</a></h3>${e.officialTitle ? `<p class="event-title-subtitle">${esc(e.title)}</p>` : ''}<p>${esc(e.cardDescription || e.description)}</p>
-    <div class="event-meta"><span>PRIZE POOL <strong>${esc(displayPrize(e.prizes))}</strong></span><span>FEE <strong>${esc(e.fee || 'Not listed')}</strong></span></div>
+    ${renderEventMetadata(e)}
     <div class="event-actions"><a class="button button-outline" href="#/event/${encodeURIComponent(e.slug)}">DETAILS</a>${registrationCta(registrationUrl(e), 'REGISTER ↗', 'button button-primary', e)}</div></div>
   </article>`;
   const dayPassCard = () => `<article class="event-card day-pass-event-card reveal">
     <div class="event-art" aria-hidden="true"><span>VYUHAM / ALL 3 DAYS</span></div>
     <div class="event-content"><div class="event-top"><span class="tag stream-pill">FESTIVAL PASS</span><span class="tag day">30 OCT — 01 NOV</span></div>
     <h3><a href="#/event/day-pass">Vyuham Day-Pass</a></h3><p class="event-title-subtitle">VYUHAM’26 Day Pass</p><p><a class="day-pass-description-link" href="#/event/day-pass">Choose Day 1, Day 2, Day 3, or a combination when getting your pass.</a></p>
-    <div class="event-meta"><span>PASS LIMIT<strong>2,000 passes</strong></span></div>
+    <div class="event-meta"><span>PASS LIMIT<strong>${esc(DAY_PASS_METADATA.passLimit)}</strong></span>${DAY_PASS_METADATA.fee ? `<span>FEE<strong>${esc(DAY_PASS_METADATA.fee)}</strong></span>` : ''}</div>
     <div class="event-actions"><a class="button button-outline" href="#/event/day-pass">DETAILS</a><a class="button button-primary" href="${DAY_PASS_URL}" target="_blank" rel="noopener noreferrer">GET DAY PASS ↗</a></div></div>
   </article>`;
   const pageHero = (kicker, title, desc, heroClass = '') => { const showCornerLogo = ['events-page-hero', 'participation-page-hero', 'competitions-page-hero', 'streams-page-hero'].includes(heroClass); return `<section class="page-hero ${heroClass}"><div class="container"><div class="breadcrumb"><a href="#/home">VYUHAM’26</a> / ${esc(kicker.toUpperCase())}</div><div class="eyebrow">${esc(kicker)}</div><h1>${title}</h1><p>${desc}</p></div>${showCornerLogo ? '<img class="page-hero-corner-logo" src="assets/vyuham_logo_sm.png" alt="VYUHAM emblem" width="72" height="72">' : ''}</section>` };
-  const dayPassDetail = () => `<section class="section day-pass-page"><div class="container"><a class="back-link" href="#/events">← BACK TO EVENT ARCHIVE</a><div class="event-detail"><div class="day-pass-main"><div class="eyebrow">30 OCTOBER – 1 NOVEMBER 2026</div><h1>Vyuham Day-Pass</h1><p class="event-title-subtitle">VYUHAM’26 Day Pass</p><h2 class="day-pass-choice-heading">Choose your festival days</h2><p class="muted day-pass-intro">Select Day 1 only, Day 2 only, Day 3 only, or an applicable combination when completing your pass on MakeMyPass.</p><div class="pass-day-options" aria-label="Festival days"><article><span>DAY 01</span><h3>30 October</h3><p>Friday</p></article><article><span>DAY 02</span><h3>31 October</h3><p>Saturday</p></article><article><span>DAY 03</span><h3>1 November</h3><p>Sunday</p></article></div><p class="muted day-pass-note">Day selection and pass details are completed on the official MakeMyPass page.</p></div><aside class="detail-panel day-pass-panel"><div class="eyebrow">PASS DETAILS</div><dl><div><dt>FESTIVAL</dt><dd>VYUHAM’26</dd></div><div><dt>VALID DATES</dt><dd>30 Oct – 1 Nov 2026</dd></div><div><dt>PASS LIMIT</dt><dd>2,000 passes</dd></div><div><dt>DAY SELECTION</dt><dd>Single day or combination</dd></div></dl><a class="button button-primary event-register-cta" href="${DAY_PASS_URL}" target="_blank" rel="noopener noreferrer">REGISTER &amp; PAY ON MAKEMYPASS ↗</a><p class="muted day-pass-purchase-note">Continue to MakeMyPass to choose your attendance day(s) and complete your pass.</p></aside></div></div></section>`;
+  const dayPassDetail = () => `<section class="section day-pass-page"><div class="container"><a class="back-link" href="#/events">← BACK TO EVENT ARCHIVE</a><div class="event-detail"><div class="day-pass-main"><div class="eyebrow">30 OCTOBER – 1 NOVEMBER 2026</div><h1>Vyuham Day-Pass</h1><p class="event-title-subtitle">VYUHAM’26 Day Pass</p><h2 class="day-pass-choice-heading">Choose your festival days</h2><p class="muted day-pass-intro">Select Day 1 only, Day 2 only, Day 3 only, or an applicable combination when completing your pass on MakeMyPass.</p><div class="pass-day-options" aria-label="Festival days"><article><span>DAY 01</span><h3>30 October</h3><p>Friday</p></article><article><span>DAY 02</span><h3>31 October</h3><p>Saturday</p></article><article><span>DAY 03</span><h3>1 November</h3><p>Sunday</p></article></div><p class="muted day-pass-note">Day selection and pass details are completed on the official MakeMyPass page.</p></div><aside class="detail-panel day-pass-panel"><div class="eyebrow">PASS DETAILS</div><dl><div><dt>FESTIVAL</dt><dd>VYUHAM’26</dd></div><div><dt>VALID DATES</dt><dd>30 Oct – 1 Nov 2026</dd></div><div><dt>PASS LIMIT</dt><dd>${esc(DAY_PASS_METADATA.passLimit)}</dd></div><div><dt>DAY SELECTION</dt><dd>Single day or combination</dd></div></dl><a class="button button-primary event-register-cta" href="${DAY_PASS_URL}" target="_blank" rel="noopener noreferrer">REGISTER &amp; PAY ON MAKEMYPASS ↗</a><p class="muted day-pass-purchase-note">Continue to MakeMyPass to choose your attendance day(s) and complete your pass.</p></aside></div></div></section>`;
   const playLandingIntro = () => {
     if (landingIntroSeen) return false;
     landingIntroSeen = true;
@@ -182,7 +202,7 @@
       : participationRules.length ? '<ul class="rule-list">' + participationRules.map(rule => '<li>' + esc(rule) + '</li>').join('') + '</ul>' : '<p class="muted">Detailed rules will be published by the event organizers.</p>';
     const hero = `<section class="page-hero event-page-hero"><img class="event-hero-image" src="${esc(image)}" alt="${esc(streamLabel(e.stream))} event artwork"><div class="event-hero-shade"></div><div class="container"><div class="breadcrumb"><a href="#/home">VYUHAM’26</a> / EVENT DOSSIER</div><span class="stream-pill">${esc(streamLabel(e.stream))}</span><h1>${esc(officialEventTitle(e))}</h1>${e.officialTitle ? `<p class="event-title-subtitle">${esc(e.title)}</p>` : ''}<p>Event details, schedule information and participation overview for VYUHAM’26.</p></div></section>`;
     return `${hero}
-      <section class="section"><div class="container"><a class="back-link" href="#/events">← BACK TO EVENT ARCHIVE</a><div class="event-detail"><div><button class="info-toggle" type="button" aria-expanded="false" aria-controls="eventDescription"><span aria-hidden="true">i</span> ABOUT THIS EVENT</button><div class="event-description" id="eventDescription" hidden><p class="muted" style="line-height:1.9">${esc(e.description)}</p></div><h3 class="event-participation-heading">Participation notes</h3>${participationNotes}</div><aside class="detail-panel"><div class="detail-panel-heading"><div class="eyebrow">EVENT INTEL</div></div><dl><div><dt>DATE</dt><dd>${esc(eventDateLabel(e))}</dd></div><div><dt>TIME</dt><dd class="${e.slug === 'hackathon' ? 'hackathon-time-value' : ''}">${esc(e.time)}</dd></div>${e.slug !== 'hackathon' ? '<div><dt>VENUE</dt><dd>' + esc(officialVenue(e.venue)) + '</dd></div>' : ''}${e.speaker ? `<div><dt>SPEAKER</dt><dd>${esc(e.speaker)}</dd></div>` : ''}<div><dt>PRIZE POOL</dt><dd class="green">${esc(displayPrize(e.prizes) === 'Not listed' ? 'Not announced' : displayPrize(e.prizes))}</dd></div><div><dt>ENTRY FEE</dt><dd>${esc(e.fee || 'Not listed')}</dd></div><div><dt>TEAM SIZE</dt><dd>${esc(e.teamSize)}</dd></div><div><dt>ELIGIBILITY</dt><dd>${esc(e.eligibility)}</dd></div></dl><div class="detail-panel-footer">${registrationCta(registrationUrl(e), 'REGISTER & PAY ON MAKEMYPASS ↗', 'button button-primary event-register-cta', e)}<details class="detail-info detail-info-bottom"><summary aria-label="MakeMyPass registration information">ⓘ</summary><p>MakeMyPass is the official registration and payment provider. Review final event details and complete your registration on the event’s MakeMyPass page.</p></details></div></aside></div></div></section>`;
+      <section class="section event-details-section"><div class="container"><a class="back-link" href="#/events">← BACK TO EVENT ARCHIVE</a><div class="event-detail"><div><h3 class="event-participation-heading">Participation notes</h3>${participationNotes}<button class="info-toggle" type="button" aria-expanded="false" aria-controls="eventDescription"><span aria-hidden="true">i</span> ABOUT THIS EVENT</button><div class="event-description" id="eventDescription" hidden><p class="muted" style="line-height:1.9">${esc(e.description)}</p></div></div><aside class="detail-panel"><div class="detail-panel-heading"><div class="eyebrow">EVENT INTEL</div></div><dl>${renderEventIntelRows(e)}</dl><div class="detail-panel-footer">${registrationCta(registrationUrl(e), 'REGISTER & PAY ON MAKEMYPASS ↗', 'button button-primary event-register-cta', e)}<details class="detail-info detail-info-bottom"><summary aria-label="MakeMyPass registration information">ⓘ</summary><p>MakeMyPass is the official registration and payment provider. Review final event details and complete your registration on the event’s MakeMyPass page.</p></details></div></aside></div></div></section>`;
   };
   const schedulePage = () => `<section class="page-hero schedule-page-hero"><div class="container"><div class="breadcrumb"><a href="#/home">VYUHAM’26</a> / FESTIVAL TIMELINE</div><div class="eyebrow">Festival timeline</div><h1>THREE DAYS.<br><span class="green">NO PAUSE.</span></h1><p>Plan your VYUHAM’26 experience. Event-specific timings and venues should be confirmed with the official schedule.</p></div><img class="schedule-hero-logo" src="assets/vyuham_logo_sm.png" alt="VYUHAM emblem" width="72" height="72"></section>
     <section class="section"><div class="container"><div class="schedule-days" id="scheduleDays">${days.map(d => `<button class="schedule-day schedule-day-${d.day}" type="button" aria-pressed="${d.day === 1}" data-day="${d.day}"><b>DAY 0${d.day} <i>· ${d.date}</i></b><span>${d.name}</span><small>${d.desc}</small><em>VIEW DAY <strong>↘</strong></em></button>`).join('')}</div><div id="scheduleContent"></div></div></section>`;
