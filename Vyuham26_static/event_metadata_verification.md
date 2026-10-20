@@ -1,3 +1,5 @@
+> **Fee data superseded:** Use [registration_fee_audit_2026-10-20.md](registration_fee_audit_2026-10-20.md) for the current MakeMyPass comparison and corrected website fees.
+
 # VYUHAM’26 Event Metadata Verification
 
 **Audit date:** 20 October 2026  
