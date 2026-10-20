@@ -1499,17 +1499,14 @@ html{scroll-padding-top:calc(var(--site-header-top) + var(--site-header-height) 
 .sponsor-section-head h2{margin:14px 0 0;font-size:clamp(38px,5vw,58px)}
 .sponsor-section-head>p{max-width:390px;margin:0 0 4px;color:var(--muted);font-size:14px}
 .sponsor-showcase{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));max-width:920px;margin:0 auto}
-.sponsor-entry{position:relative;display:flex;min-width:0;min-height:218px;flex-direction:column;padding:20px 28px 19px}
+.sponsor-entry{position:relative;display:flex;min-width:0;min-height:170px;flex-direction:column;padding:20px 28px 19px}
 .sponsor-entry+.sponsor-entry{border-left:1px solid #ffffff19}
 .sponsor-entry-heading{display:flex;min-height:24px;align-items:flex-start}
 .sponsor-category{color:#f0786f;font:9px var(--mono);letter-spacing:.1em;text-transform:uppercase}
-.sponsor-mark{display:flex;height:90px;align-items:center;justify-content:flex-start;overflow:hidden}
+.sponsor-mark{display:flex;height:78px;align-items:center;justify-content:flex-start;overflow:hidden}
 .sponsor-mark img{display:block;width:min(100%,300px);height:64px;object-fit:contain;object-position:left center}
 .sponsor-entry-title .sponsor-mark img{height:68px}
 .sponsor-wordmark{color:#f5eeee;font:600 clamp(38px,4vw,46px)/1 'Barlow Condensed','Arial Narrow',sans-serif!important;letter-spacing:.01em}
-.sponsor-amount{display:flex;align-items:baseline;gap:10px;margin-top:auto;padding-top:5px}
-.sponsor-amount small{color:#9d8f91;font:8px var(--mono);letter-spacing:.09em}
-.sponsor-amount strong{color:#f5eeee;font:600 22px/1 'Barlow Condensed','Arial Narrow',sans-serif!important;letter-spacing:.015em}
 .sponsors-section-footer{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-top:22px}
 .sponsors-section-footer>span{color:var(--muted);font-size:12px}
 .sponsors-section-footer .button{flex:0 0 auto}
