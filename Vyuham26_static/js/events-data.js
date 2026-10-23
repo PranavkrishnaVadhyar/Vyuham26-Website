@@ -332,6 +332,7 @@ window.VYUHAM_EVENTS = [
     "registrationUrl": "",
     "rules": [
       "Offline, Jeopardy-style security challenge matrix",
+      "AI tools are allowed during the competition.",
       "Categories: Cryptography, Web Exploitation, Reverse Engineering, ML Security, OSINT, Blockchain and Forensics",
       "Food and refreshments will be provided",
       "Strict anti-sharing and infrastructure protection rules"
