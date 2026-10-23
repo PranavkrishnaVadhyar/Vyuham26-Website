@@ -39,7 +39,8 @@
   ];
   const sponsors = [
     { name: 'DSpace', category: 'Title Sponsor', status: 'Confirmed', logo: 'assets/sponsors/dspace.svg' },
-    { name: 'Canara Bank', category: 'Associate Sponsor', status: 'Confirmed', logo: 'assets/sponsors/canara_bank.svg' }
+    { name: 'Canara Bank', category: 'Associate Sponsor', status: 'Confirmed', logo: 'assets/sponsors/canara_bank.svg' },
+    { name: 'Reflections', category: 'Technology Partner', logo: 'assets/sponsors/reflections.png' }
   ];
   const streams = [
     { id: 'tech', name: 'Technology', symbol: '01', desc: 'Hackathons, cybersecurity, AI and hands-on invention. Build what comes next.', index: '01', image: 'assets/streams/technology.jpg' },
@@ -50,7 +51,7 @@
   const esc = (v = '') => String(v).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const sponsorsSection = (page = 'home') => {
     const isHome = page === 'home';
-    return `<section class="section sponsors-section sponsors-section-${page}"${isHome ? ' id="sponsors"' : ''}><div class="container"><div class="section-head sponsor-section-head"><div><div class="eyebrow">VYUHAM / PARTNERS</div><h2>OUR<br><span class="green">SPONSORS</span></h2></div><p>Meet the organizations supporting VYUHAM’26.</p></div><div class="sponsor-showcase">${sponsors.map((sponsor, index) => `<article class="sponsor-entry ${index === 0 ? 'sponsor-entry-title' : ''}"><div class="sponsor-entry-heading"><span class="sponsor-category">${esc(sponsor.category)}</span></div><div class="sponsor-mark">${sponsor.logo ? `<img src="${esc(sponsor.logo)}" alt="${esc(sponsor.name)}" loading="lazy">` : `<span class="sponsor-wordmark" role="img" aria-label="${esc(sponsor.name)}">${esc(sponsor.name)}</span>`}</div></article>`).join('')}</div><div class="sponsors-section-footer"><span>Partnerships that help bring the festival to life.</span><a class="button button-outline" href="mailto:techfest@duk.ac.in">PARTNERSHIP ENQUIRIES ↗</a></div></div></section>`;
+    return `<section class="section sponsors-section sponsors-section-${page}"${isHome ? ' id="sponsors"' : ''}><div class="container"><div class="section-head sponsor-section-head"><div><div class="eyebrow">VYUHAM / PARTNERS</div><h2>OUR<br><span class="green">SPONSORS</span></h2></div><p>Meet the organizations supporting VYUHAM’26.</p></div><div class="sponsor-showcase">${sponsors.map((sponsor, index) => `<article class="sponsor-entry ${index === 0 ? 'sponsor-entry-title' : ''} ${sponsor.name === 'Reflections' ? 'sponsor-entry-reflections' : ''}"><div class="sponsor-entry-heading"><span class="sponsor-category">${esc(sponsor.category)}</span></div><div class="sponsor-mark">${sponsor.logo ? `<img src="${esc(sponsor.logo)}" alt="${esc(sponsor.name)}" loading="lazy">` : `<span class="sponsor-wordmark" role="img" aria-label="${esc(sponsor.name)}">${esc(sponsor.name)}</span>`}</div></article>`).join('')}</div><div class="sponsors-section-footer"><span>Partnerships that help bring the festival to life.</span><a class="button button-outline" href="mailto:techfest@duk.ac.in">PARTNERSHIP ENQUIRIES ↗</a></div></div></section>`;
   };
   const safeExternalUrl = value => { try { const url = new URL(value); return ['https:', 'http:'].includes(url.protocol) ? url.href : ''; } catch { return ''; } };
   const safeEventImage = value => {
