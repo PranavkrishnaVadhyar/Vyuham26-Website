@@ -53,6 +53,12 @@
     return `<section class="section sponsors-section sponsors-section-${page}"${isHome ? ' id="sponsors"' : ''}><div class="container"><div class="section-head sponsor-section-head"><div><div class="eyebrow">VYUHAM / PARTNERS</div><h2>OUR<br><span class="green">SPONSORS</span></h2></div><p>Meet the organizations supporting VYUHAM’26.</p></div><div class="sponsor-showcase">${sponsors.map((sponsor, index) => `<article class="sponsor-entry ${index === 0 ? 'sponsor-entry-title' : ''}"><div class="sponsor-entry-heading"><span class="sponsor-category">${esc(sponsor.category)}</span></div><div class="sponsor-mark">${sponsor.logo ? `<img src="${esc(sponsor.logo)}" alt="${esc(sponsor.name)}" loading="lazy">` : `<span class="sponsor-wordmark" role="img" aria-label="${esc(sponsor.name)}">${esc(sponsor.name)}</span>`}</div></article>`).join('')}</div><div class="sponsors-section-footer"><span>Partnerships that help bring the festival to life.</span><a class="button button-outline" href="mailto:techfest@duk.ac.in">PARTNERSHIP ENQUIRIES ↗</a></div></div></section>`;
   };
   const safeExternalUrl = value => { try { const url = new URL(value); return ['https:', 'http:'].includes(url.protocol) ? url.href : ''; } catch { return ''; } };
+  const safeEventImage = value => {
+    const external = safeExternalUrl(value);
+    if (external) return external;
+    const local = String(value || '').trim();
+    return /^assets\/eventpics\/[a-z0-9 _&().-]+\.(?:png|jpe?g|webp|avif)$/i.test(local) ? local : '';
+  };
   const scheduleMinutes = value => {
     const match = String(value || '').match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i);
     if (!match) return Number.POSITIVE_INFINITY;
@@ -164,13 +170,16 @@
     return { page: parts[0] || 'home', slug: parts.slice(1).join('/'), query: new URLSearchParams(raw.includes('?') ? raw.split('?').slice(1).join('?') : '') };
   };
   const go = path => { location.hash = '#/' + path.replace(/^\//, ''); };
-  const eventCard = e => `<article class="event-card reveal" data-stream="${esc(e.stream)}">
-    <div class="event-art" aria-hidden="true"${safeExternalUrl(e.image) ? ` style="--event-image:url('${esc(safeExternalUrl(e.image))}')"` : ''}><span>VYUHAM / ${esc(eventDayLabel(e))}</span></div>
+  const eventCard = e => {
+    const image = safeEventImage(e.image);
+    return `<article class="event-card reveal" data-stream="${esc(e.stream)}">
+    <div class="event-art${image ? ' has-image' : ''}" aria-hidden="true">${image ? `<img class="event-art-image" src="${esc(image)}" alt="" loading="lazy" decoding="async">` : ''}<span>VYUHAM / ${esc(eventDayLabel(e))}</span></div>
     <div class="event-content"><div class="event-top"><span class="tag stream-pill">${esc(streamLabel(e.stream))}</span><span class="tag day">${esc(eventDateLabel(e))}</span></div>
     <h3><a href="#/event/${encodeURIComponent(e.slug)}">${esc(officialEventTitle(e))}</a></h3>${e.officialTitle ? `<p class="event-title-subtitle">${esc(e.title)}</p>` : ''}<p>${esc(e.cardDescription || e.description)}</p>
     ${renderEventMetadata(e)}
     <div class="event-actions"><a class="button button-outline" href="#/event/${encodeURIComponent(e.slug)}">DETAILS</a>${registrationCta(registrationUrl(e), 'REGISTER ↗', 'button button-primary', e)}</div></div>
   </article>`;
+  };
   const dayPassCard = () => `<article class="event-card day-pass-event-card reveal">
     <div class="event-art" aria-hidden="true"><span>VYUHAM / ALL 3 DAYS</span></div>
     <div class="event-content"><div class="event-top"><span class="tag stream-pill">FESTIVAL PASS</span><span class="tag day">30 OCT — 01 NOV</span></div>
@@ -214,7 +223,7 @@
     if (!e) return notFound();
     const isSocTalk = (e.legacySlug || e.slug) === 'panel-cybersecurity';
     const isAiFilm = (e.legacySlug || e.slug) === 'ai-short-film';
-    const image = safeExternalUrl(e.image) || streams.find(stream => stream.id === e.stream)?.image || streams.find(stream => stream.id === ({ technology: 'tech', culture: 'cultural', gaming: 'esports' }[e.stream]))?.image || 'assets/streams/technology.jpg';
+    const image = safeEventImage(e.image) || streams.find(stream => stream.id === e.stream)?.image || streams.find(stream => stream.id === ({ technology: 'tech', culture: 'cultural', gaming: 'esports' }[e.stream]))?.image || 'assets/streams/technology.jpg';
     const participationRules = e.rules || [];
     const participationNotes = isSocTalk
       ? `<p class="muted soc-format-note">${esc(e.format)} · ${esc(e.duration)}</p>`
