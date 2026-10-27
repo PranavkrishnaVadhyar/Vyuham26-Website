@@ -16,9 +16,11 @@ window.VYUHAM_EVENTS = [
     "featured": true,
     "registrationUrl": "https://org.makemypass.com/web/vyuham-26/events/hackathon-24hr",
     "rules": [
+      "Food and refreshments will be provided.",
+      "A Claude token will be provided to each team for the duration of the hackathon",
       "24 uninterrupted hours of collaborative building",
-      "Midnight mentoring round and refreshments in Main Hall",
-      "Prototype demos and jury evaluation on Day 2 morning"
+      "Continuous judging and mentorship throughout the hackathon",
+      "Prototype demos and jury evaluation on Day 2 morning",
     ],
     "themes": [
       "Agentic AI",
@@ -49,7 +51,7 @@ window.VYUHAM_EVENTS = [
     "registrationUrl": "https://org.makemypass.com/web/vyuham-26/events/best-manager-4",
     "rules": [
       "Participation: Individual.",
-      "College ID: Carry a valid college ID card for verification.",
+      "Identification: Carry a valid photo ID for verification.",
       "Reporting: Report to the venue at least 15 minutes before the event.",
       "Event Format: Participants must follow the instructions announced before each round.",
       "Time Management: Complete each round within the allotted time.",
@@ -79,9 +81,9 @@ window.VYUHAM_EVENTS = [
     "featured": false,
     "registrationUrl": "",
     "rules": [
-      "Team Composition: Each team must consist of 3–4 members from the same college.",
+      "Team Composition: Each team must consist of 3–4 members from the same institution or organization.",
       "Competition Format: The event consists of 3 rounds.",
-      "College ID: All participants must carry a valid college ID card for verification.",
+      "Identification: All participants must carry a valid photo ID for verification.",
       "Required Devices: Each team must bring one laptop and one smartphone with internet access.",
       "Disqualification: Any violation of the event rules may result in disqualification.",
       "Coordinators: Ananthu S (6282143212) | Anjana V S (94879 84537)",
@@ -108,7 +110,7 @@ window.VYUHAM_EVENTS = [
     "registrationUrl": "",
     "rules": [
       "Team Size: 3–4 members.",
-      "College ID: Carry valid college IDs for verification.",
+      "Identification: Carry a valid photo ID for verification.",
       "Follow the briefing and use the provided template to develop your marketing plan.",
       "Preparation time for the initial marketing plan is 45 minutes.",
       "Each team gets 5 minutes to pitch and 3 minutes for Q&A.",
@@ -140,7 +142,7 @@ window.VYUHAM_EVENTS = [
     "registrationUrl": "",
     "rules": [
       "Team Size: 3–4 members.",
-      "College ID: Carry valid college IDs for verification.",
+      "Identification: Carry a valid photo ID for verification.",
       "Teams will receive virtual capital and an organizer-provided asset price sheet.",
       "The trading simulation runs for 60 minutes.",
       "Respond to market news and adjust your portfolio accordingly.",
@@ -173,7 +175,7 @@ window.VYUHAM_EVENTS = [
     "rules": [
       "Team Size: 3–4 members.",
       "The event consists of 3 rounds.",
-      "Reporting & Verification: All participants must report to the venue 30 minutes before the event begins and carry a valid college ID card for verification.",
+      "Reporting & Verification: All participants must report to the venue 30 minutes before the event begins and carry a valid photo ID for verification.",
       "Code of Conduct: Participants must follow the instructions of the event coordinators, maintain discipline, and treat fellow participants, judges, volunteers, and coordinators with respect.",
       "Event Rules: Mobile phones and other electronic devices are not permitted during the event unless authorized. Teams must complete each round within the allotted time, and any applicable negative marking will be announced before the round begins.",
       "Disqualification & Decisions: Any form of cheating, malpractice, or violation of the rules will result in immediate disqualification. The decisions of the judges and event coordinators shall be final and binding.",
@@ -201,7 +203,7 @@ window.VYUHAM_EVENTS = [
     "registrationUrl": "",
     "rules": [
       "Team Size: 2 members.",
-      "College ID: Carry valid college IDs for verification.",
+      "Identification: Carry a valid photo ID for verification.",
       "The preliminary round consists of 20 written MCQs over 20 minutes.",
       "The top 5–8 teams advance to the finals.",
       "Ties in the preliminaries will be resolved through a tiebreaker question.",
@@ -225,10 +227,28 @@ window.VYUHAM_EVENTS = [
     "day": 1,
     "time": "10:00 AM – 11:30 AM",
     "venue": "Seminar Hall",
-    "description": "An expert panel discussion examining data integrity, ethics, and trust behind modern artificial intelligence systems.",
+    "description": "Can we trust AI just because it produces accurate results? This panel explores the role of data quality, bias, fairness, privacy, and transparency in building trustworthy AI systems. Join us to discover why accuracy alone is not enough and what it takes to make AI reliable, ethical, and accountable.",
     "fee": "FREE ENTRY",
     "eligibility": "Open to all fest delegates",
     "teamSize": "Open",
+    "format": "Panel Discussion",
+    "panelSpeakers": [
+      {
+        "name": "Jyothi Ramaswamy",
+        "designation": "Freelancer, ex-TCSer, Adhoc Consultant, KSAAC, DUK",
+        "photo": "assets/events/beyond-accuracy-speakers/jyothi-ramaswamy.jpeg"
+      },
+      {
+        "name": "Chitra Nair",
+        "designation": "AI and Cloud Architect, McAfee",
+        "photo": "assets/events/beyond-accuracy-speakers/chitra-nair.jpeg"
+      },
+      {
+        "name": "Ardhra Benny",
+        "designation": "Resource Person, Technology Analyst, Infosys, TVM",
+        "photo": "assets/events/beyond-accuracy-speakers/ardhra-benny.jpeg"
+      }
+    ],
     "status": "upcoming",
     "featured": false,
     "registrationUrl": "https://makemypass.com/event/beyond-accuracy-ai-panel-discussion",
@@ -259,8 +279,14 @@ window.VYUHAM_EVENTS = [
     "stream": "session",
     "day": 1,
     "time": "2:00 PM – 3:30 PM",
-    "venue": "Computer Lab",
-    "description": "",
+    "venue": "Digital University Kerala",
+    "description": "A one-day campus event inviting students and other participants to explore the flow of ornate hand-lettering.",
+    "descriptionParagraphs": [
+      "Participants will practice basic strokes of Devanagari, modern scripts, and fused calligraphy while understanding spacing and rhythm and experimenting with different calligraphy tools, including Pilot Parallel Pens, brush pens, and canvases.",
+      "All material kits, accessories, and guidance will be provided throughout the workshop. The event creates a space for hands-on learning, creative experimentation, and the joyful making of calligraphy art.",
+      "Participants will create personalized calligraphy artworks by combining different scripts, colours, and techniques. The workshop welcomes beginners and art enthusiasts alike, encouraging artistic collaboration, patience, and creative confidence.",
+      "By the end of the workshop, participants will take home their own handcrafted calligraphy creations, practical skills, and a renewed appreciation for the art of lettering."
+    ],
     "fee": "₹120 onwards",
     "eligibility": "",
     "teamSize": "",
@@ -341,26 +367,6 @@ window.VYUHAM_EVENTS = [
     "legacySlug": "ctf"
   },
   {
-    "slug": "startup-showcase",
-    "title": "Startup Showcase",
-    "stream": "tech",
-    "day": 2,
-    "time": "10:00 AM – 5:00 PM",
-    "venue": "Gallery Hall",
-    "description": "Founders pitch to a panel of experts.",
-    "fee": "Not confirmed",
-    "eligibility": "Student startups and early-stage founders",
-    "teamSize": "Teams of 1–4",
-    "status": "upcoming",
-    "featured": false,
-    "registrationUrl": "",
-    "rules": [
-      "Pitch deck and product demonstration to venture experts and founders",
-      "Focused Q&A round evaluating scalability, technology, and market fit"
-    ],
-    "prizePool": "₹15,000"
-  },
-  {
     "slug": "promptsmith-arena-prompt-war",
     "title": "Prompt War",
     "officialTitle": "PROMPTSMITH ARENA - PROMPT WAR",
@@ -368,17 +374,20 @@ window.VYUHAM_EVENTS = [
     "stream": "tech",
     "day": 2,
     "time": "10:00 AM – 5:00 PM",
-    "venue": "Computer Lab",
+    "venue": "Digital University Kerala",
     "description": "Prompt-engineering challenge.",
-    "fee": "₹400 onwards",
-    "eligibility": "Open to all students",
-    "teamSize": "Individual / Pairs",
+    "fee": "₹400",
+    "eligibility": "Open to all working professionals and students.",
+    "teamSize": "Individual or teams of 2",
     "status": "upcoming",
     "featured": false,
     "registrationUrl": "",
     "rules": [
-      "Time-constrained prompt engineering trials against complex target outputs",
-      "Evaluation on precision, token economics, and contextual fidelity"
+      "Use only the AI platform provided by the organizers; external AI tools are prohibited.",
+      "Complete all challenges within the given time limits.",
+      "Maximum 5 attempts in Rounds 1 & 2; only 1 final submission in Round 3.",
+      "Follow all round-specific instructions. Malpractice may lead to disqualification.",
+      "Judges’ decisions are final."
     ],
     "prizePool": "₹15,000",
     "legacySlug": "prompt-war"
@@ -611,6 +620,19 @@ window.VYUHAM_EVENTS = [
     "speaker": "Adarsh V",
     "designation": "Project Lead – IEDC, Kerala Startup Mission",
     "speakerPhoto": "assets/events/adarsh-v-ksum.png",
+    "professionalBiography": [
+      "Mr. Adarsh V is a professional associated with the Innovation and Entrepreneurship Development Centre (IEDC) initiative under Kerala Startup Mission (KSUM), which promotes innovation, entrepreneurship, and startup culture among students and aspiring entrepreneurs.",
+      "As a Project Lead, he supports innovation-driven initiatives, encourages entrepreneurial thinking, and fosters a culture of creativity and problem-solving. Through his association with Kerala Startup Mission, he contributes to initiatives that empower aspiring innovators and help transform ideas into entrepreneurial opportunities.",
+      "With a focus on innovation, entrepreneurship, and startup development, Mr. Adarsh V aims to inspire students and young entrepreneurs to explore new possibilities, develop practical solutions, and take their first steps towards building successful ventures."
+    ],
+    "areasOfExpertise": [
+      "Innovation and entrepreneurship development",
+      "Startup ecosystem and development",
+      "Student entrepreneurship initiatives",
+      "Idea generation and innovation",
+      "Entrepreneurial mindset and leadership",
+      "Innovation and Entrepreneurship Development Centre (IEDC) initiatives"
+    ],
     "stream": "session",
     "day": 3,
     "time": "9:00 AM – 11:00 AM",
@@ -648,7 +670,7 @@ window.VYUHAM_EVENTS = [
       "Conducted offline at Digital University Kerala campus on PlayStation consoles",
       "Format: 1v1 Single Elimination (winner advances, loser is eliminated)",
       "Matches follow a predefined schedule with strict reporting time",
-      "Open to college students and Technopark employees (valid college or employee ID mandatory)",
+      "Participants must carry a valid photo ID for verification.",
       "All participants must be pre-registered (walk-ins and on-the-spot registrations strictly not allowed)",
       "Consoles provided by organizers; players must use approved controllers",
       "Prize Pool: ₹10,000 (1st Place: ₹5,000 | 2nd Place: ₹3,000 | 3rd Place: ₹2,000)",
@@ -688,6 +710,7 @@ window.VYUHAM_EVENTS = [
     "time": "Online Qualifiers",
     "venue": "Online",
     "description": "Online qualifiers for E-Football championship.",
+    "image": "assets/eventpics/E-Football.png",
     "fee": "₹50 onwards",
     "eligibility": "Open to college students (Valid college ID mandatory)",
     "teamSize": "Individual (1v1)",
@@ -698,7 +721,7 @@ window.VYUHAM_EVENTS = [
       "Online 1v1 Single Elimination format — winner advances, loser is eliminated",
       "Match duration: 8 minutes per match",
       "Pre-Fest: Online qualifiers with predefined match schedule",
-      "Open to college students (valid college ID mandatory)",
+      "Participants must carry a valid photo ID for verification.",
       "Pre-registered participants only; no walk-ins or on-the-spot registrations",
       "Prize Pool: ₹5,000 (1st Place: ₹3,000 | 2nd Place: ₹2,000)"
     ],
@@ -716,6 +739,7 @@ window.VYUHAM_EVENTS = [
     "time": "Online Qualifiers",
     "venue": "Online",
     "description": "Online qualifiers for BGMI battle royale tournament.",
+    "image": "assets/eventpics/BGMI.png",
     "fee": "₹50 onwards",
     "eligibility": "Open to college students (Valid college ID mandatory)",
     "teamSize": "Squad of 4",
@@ -727,7 +751,7 @@ window.VYUHAM_EVENTS = [
       "Maps: Erangel, Miramar, and Sanhok",
       "Scoring System: Combined Placement Points and Kill Points",
       "Teams must join custom room within 10 minutes of scheduled match start",
-      "Open to college students (valid college ID mandatory); pre-registered only",
+      "Participants must carry a valid photo ID for verification; pre-registration is required.",
       "Substitutes permitted only if pre-registered before match start",
       "Prize Pool: ₹5,000 (1st Place: ₹3,000 | 2nd Place: ₹2,000)"
     ],
@@ -833,7 +857,18 @@ window.VYUHAM_EVENTS = [
     "status": "upcoming",
     "featured": false,
     "registrationUrl": "https://org.makemypass.com/web/vyuham-26/events/workshop-on-prompt-engineering",
-    "rules": [],
+    "rules": [
+      "Participation is individual.",
+      "Actively participate in all practical sessions.",
+      "Learn the fundamentals of prompt engineering and large language models (LLMs).",
+      "Design clear and effective prompts.",
+      "Use AI tools responsibly and ethically.",
+      "Follow the coordinators’ instructions throughout the workshop.",
+      "Bring all required devices and accessories.",
+      "Ensure reliable internet connectivity during the practical sessions.",
+      "Maintain discipline and cooperate with fellow participants and coordinators.",
+      "The coordinators’ decision will be final."
+    ],
     "eventType": "workshop",
     "certificateProvided": true,
     "legacySlug": "workshop-luminar-technolab"
