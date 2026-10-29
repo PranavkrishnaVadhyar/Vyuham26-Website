@@ -126,7 +126,7 @@
   ];
   const renderEventMetadata = event => {
     const fields = eventMetadataFields(event);
-    return fields.length ? `<div class="event-meta">${fields.map(field => `<span>${esc(field.label)}<strong>${esc(field.value)}</strong></span>`).join('')}</div>` : '';
+    return fields.length ? `<div class="event-meta">${fields.map(field => `<span>${esc(field.label)}${field.label === 'FEE' && isTechQuiz(event) ? '<strong class="discounted-fee"><s>₹200</s><b>₹100</b></strong>' : `<strong>${esc(field.value)}</strong>`}</span>`).join('')}</div>` : '';
   };
   const renderEventIntelRows = event => {
     const rows = [];
@@ -144,7 +144,10 @@
     return rows.map(row => {
       const isSocIntelValue = (event.legacySlug || event.slug) === 'panel-cybersecurity' && ['TIME', 'SPEAKER', 'DESIGNATION', 'FORMAT'].includes(row.label);
       const classes = [row.label === 'PRIZE POOL' ? 'green' : '', isSocIntelValue ? 'soc-intel-value' : ''].filter(Boolean).join(' ');
-      return `<div><dt>${esc(row.label)}</dt><dd${classes ? ` class="${classes}"` : ''}>${esc(row.value)}</dd></div>`;
+      const value = row.label === 'FEE' && isTechQuiz(event)
+        ? '<span class="discounted-fee"><s>₹200</s><b>₹100</b></span>'
+        : esc(row.value);
+      return `<div><dt>${esc(row.label)}</dt><dd${classes ? ` class="${classes}"` : ''}>${value}</dd></div>`;
     }).join('');
   };
   const eventStreamRank = event => ['tech', 'technology', 'management'].includes(String(event.stream || '').toLowerCase()) ? 0 : 1;
@@ -190,6 +193,10 @@
   const registrationCta = (url, label, className = 'button button-primary', event = null) => canRegister(event)
     ? `<a class="${className}" href="${esc(url)}">${label}</a>`
     : `<span class="${className} registration-disabled" role="status" aria-disabled="true">REGISTRATION CLOSED</span>`;
+  const isTechQuiz = event => (event?.slug || event?.legacySlug) === 'techsprint-tech-quiz' || event?.legacySlug === 'tech-quiz';
+  const techQuizCoupon = (event, placement = 'detail') => isTechQuiz(event)
+    ? `<div class="event-coupon event-coupon-${placement}"><img src="assets/techquiz-coupon.png" alt="Early bird offer: 50% off Tech Quiz registration. Use code VYUHAMQZ50." loading="${placement === 'card' ? 'lazy' : 'eager'}"></div>`
+    : '';
 
   const slugify = v => String(v || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
   const streamLabel = s => ({ tech: 'Technology', technology: 'Technology', management: 'Management', cultural: 'Culture', culture: 'Culture', esports: 'Esports', gaming: 'Esports', impact: 'Impact', general: 'General', session: 'Session' }[s] || 'General');
@@ -206,7 +213,7 @@
     const eventUrl = `#/event/${encodeURIComponent(e.slug)}`;
     const isConcert = e.slug === CONCERT_PROMOTION.slug;
     return `<article class="event-card${isConcert ? ' concert-event-card' : ''} reveal" data-stream="${esc(e.stream)}">
-    <div class="event-art${image ? ' has-image' : ''}"${isConcert ? '' : ' aria-hidden="true"'}>${image ? (isConcert ? `<a class="concert-event-poster-link" href="${eventUrl}" aria-label="Open ${esc(officialEventTitle(e))} details"><img class="event-art-image" src="${esc(image)}" alt="" loading="lazy" decoding="async"></a>` : `<img class="event-art-image" src="${esc(image)}" alt="" loading="lazy" decoding="async">`) : ''}<span>VYUHAM / ${esc(eventDayLabel(e))}</span></div>
+    <div class="event-art${image ? ' has-image' : ''}"${isConcert ? '' : ' aria-hidden="true"'}>${image ? (isConcert ? `<a class="concert-event-poster-link" href="${eventUrl}" aria-label="Open ${esc(officialEventTitle(e))} details"><img class="event-art-image" src="${esc(image)}" alt="" loading="lazy" decoding="async"></a>` : `<img class="event-art-image" src="${esc(image)}" alt="" loading="lazy" decoding="async">`) : ''}${techQuizCoupon(e, 'card')}<span>VYUHAM / ${esc(eventDayLabel(e))}</span></div>
     <div class="event-content"><div class="event-top"><span class="tag stream-pill">${esc(streamLabel(e.stream))}</span><span class="tag day">${esc(eventDateLabel(e))}</span></div>
     <h3><a href="${eventUrl}">${esc(officialEventTitle(e))}</a></h3>${e.officialTitle ? `<p class="event-title-subtitle">${esc(e.title)}</p>` : ''}<p>${esc(e.cardDescription || e.description)}</p>
     ${renderEventMetadata(e)}
@@ -383,7 +390,7 @@
       : '';
     const hero = `<section class="page-hero event-page-hero"><img class="event-hero-image" src="${esc(image)}" alt="${esc(officialEventTitle(e))} event poster"><div class="event-hero-shade"></div><div class="container"><div class="breadcrumb"><a href="#/home">VYUHAM’26</a> / EVENT DOSSIER</div><span class="stream-pill">${esc(streamLabel(e.stream))}</span><h1>${esc(officialEventTitle(e))}</h1>${e.officialTitle ? `<p class="event-title-subtitle">${esc(e.title)}</p>` : ''}<p>Event details, schedule information and participation overview for VYUHAM’26.</p></div></section>`;
     return `${hero}
-      <section class="section event-details-section"><div class="container"><a class="back-link" href="#/events">← BACK TO EVENT ARCHIVE</a><div class="event-detail"><div>${isAiFilm ? aiFilmGuidelines : `<h3 class="event-participation-heading">Participation notes</h3>${participationNotes}${isKsumTalk ? `${speakerContent}${socContent}` : `${socContent}${speakerContent}`}`}</div><aside class="detail-panel"><div class="detail-panel-heading"><div class="eyebrow">EVENT INTEL</div></div><dl>${renderEventIntelRows(e)}</dl><div class="detail-panel-footer">${registrationCta(registrationUrl(e), 'REGISTER & PAY ON MAKEMYPASS ↗', 'button button-primary event-register-cta', e)}<details class="detail-info detail-info-bottom"><summary aria-label="MakeMyPass registration information">ⓘ</summary><p>MakeMyPass is the official registration and payment provider. Review final event details and complete your registration on the event’s MakeMyPass page.</p></details></div></aside></div></div></section>`;
+      <section class="section event-details-section"><div class="container"><a class="back-link" href="#/events">← BACK TO EVENT ARCHIVE</a><div class="event-detail"><div>${isAiFilm ? aiFilmGuidelines : `<h3 class="event-participation-heading">Participation notes</h3>${techQuizCoupon(e)}${participationNotes}${isKsumTalk ? `${speakerContent}${socContent}` : `${socContent}${speakerContent}`}`}</div><aside class="detail-panel"><div class="detail-panel-heading"><div class="eyebrow">EVENT INTEL</div></div><dl>${renderEventIntelRows(e)}</dl><div class="detail-panel-footer">${registrationCta(registrationUrl(e), 'REGISTER & PAY ON MAKEMYPASS ↗', 'button button-primary event-register-cta', e)}<details class="detail-info detail-info-bottom"><summary aria-label="MakeMyPass registration information">ⓘ</summary><p>MakeMyPass is the official registration and payment provider. Review final event details and complete your registration on the event’s MakeMyPass page.</p></details></div></aside></div></div></section>`;
   };
   const schedulePage = () => `<section class="page-hero schedule-page-hero"><div class="container"><div class="breadcrumb"><a href="#/home">VYUHAM’26</a> / FESTIVAL TIMELINE</div><div class="eyebrow">Festival timeline</div><h1>THREE DAYS.<br><span class="green">NO PAUSE.</span></h1><p>Plan your VYUHAM’26 experience. Event-specific timings and venues should be confirmed with the official schedule.</p></div><img class="schedule-hero-logo" src="assets/vyuham_logo_sm.png" alt="VYUHAM emblem" width="72" height="72"></section>
     <section class="section"><div class="container"><div class="schedule-days" id="scheduleDays">${days.map(d => `<button class="schedule-day schedule-day-${d.day}" type="button" aria-pressed="${d.day === 1}" data-day="${d.day}"><b>${d.dateLabel}</b><span>${d.name}</span><small>${d.desc}</small><em>VIEW DAY <strong>↘</strong></em></button>`).join('')}</div><div id="scheduleContent"></div></div></section>`;

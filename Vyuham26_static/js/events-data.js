@@ -358,7 +358,7 @@ window.VYUHAM_EVENTS = [
     "eligibility": "Open to all cybersecurity enthusiasts",
     "teamSize": "2–3 members",
     "status": "upcoming",
-    "registrationOpen": false,
+    "registrationOpen": true,
     "featured": true,
     "registrationUrl": "",
     "rules": [
