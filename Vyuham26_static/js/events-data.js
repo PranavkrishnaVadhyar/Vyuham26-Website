@@ -307,7 +307,12 @@ window.VYUHAM_EVENTS = [
     "officialTitle": "PLAY DISTRICT",
     "stream": "general",
     "day": 1,
-    "time": "Day One",
+    "scheduleDays": [
+      1,
+      2,
+      3
+    ],
+    "time": "Running all 3 days",
     "venue": "Entertainment Zone",
     "description": "Entertainment zone and casual games.",
     "fee": "FREE ENTRY",
@@ -318,7 +323,7 @@ window.VYUHAM_EVENTS = [
     "registrationUrl": "",
     "rules": [
       "Open casual gaming and interactive carnival installations",
-      "Free access throughout Day 1"
+      "Free access throughout all three festival days"
     ],
     "legacySlug": "play-fest"
   },

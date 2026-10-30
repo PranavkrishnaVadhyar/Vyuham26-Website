@@ -16,12 +16,15 @@
   let heroCarouselCleanup = null;
   let concertPopupCleanup = null;
   let passNoticePopupCleanup = null;
+  let homeTimelineTimer = null;
+  let scheduleStatusTimer = null;
   let concertPopupState = 'idle';
   let concertPopupShownThisSession = false;
   const registrationFeatureEnabled = window.VYUHAM_REGISTRATION_ENABLED === true;
   const MAKEMYPASS_HOME = 'https://org.makemypass.com/web/vyuham-26';
   const DAY_PASS_URL = `${MAKEMYPASS_HOME}/events/vyuham-day-pass`;
   const DAY_PASS_METADATA = { passLimit: '', fee: 'FREE ENTRY', poster: 'assets/eventpics/vyuham-day-pass.png' };
+  const FRAME_HUNT_SUBMISSION_URL = 'https://drive.google.com/drive/folders/1GLJy-s-hrFNLiEqVDm56TXKddVnAQ0SZ';
   const CONCERT_REGISTRATION_URL = 'https://org.makemypass.com/web/vyuham-26/events/concert';
   const CONCERT_PROMOTION = Object.freeze({
     slug: 'thamarassery-churam-concert',
@@ -167,6 +170,62 @@
   const isDayOneEvent = event => Number(event?.day) === 1 || (Array.isArray(event?.scheduleDays) && event.scheduleDays.includes(1));
   const canRegister = event => registrationFeatureEnabled && registrationOpen && event?.registrationOpen !== false && !['registration_closed', 'closed', 'cancelled'].includes(event?.status) && !(event && isDayOneEvent(event) && !isAllDayEvent(event));
   const registrationAvailabilityRank = event => canRegister(event) ? 0 : 1;
+  const festivalTimestamp = (month, day, hour = 0, minute = 0) => new Date(`2026-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}T${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}:00+05:30`).getTime();
+  const timeToMinutes = match => {
+    let hour = Number(match[1]) % 12;
+    if (String(match[3]).toUpperCase() === 'P') hour += 12;
+    return hour * 60 + Number(match[2]);
+  };
+  const eventWindow = event => {
+    const time = String(event?.time || '');
+    const explicitDates = [...time.matchAll(/(\d{1,2})\s+(October|November)/gi)];
+    const explicitTimes = [...time.matchAll(/(\d{1,2}):(\d{2})\s*([AP])\.?M\.?/gi)];
+    let startDay = Number(event?.day) || (event?.scheduleDays?.length ? Math.min(...event.scheduleDays) : 0);
+    let endDay = startDay;
+    let startMinutes = 0;
+    let endMinutes = 24 * 60;
+    if (explicitDates.length >= 2 && explicitTimes.length >= 2) {
+      const monthNumber = value => /nov/i.test(value) ? 11 : 10;
+      const startDate = { month: monthNumber(explicitDates[0][2]), day: Number(explicitDates[0][1]) };
+      const endDate = { month: monthNumber(explicitDates[1][2]), day: Number(explicitDates[1][1]) };
+      startMinutes = timeToMinutes(explicitTimes[0]);
+      endMinutes = timeToMinutes(explicitTimes[1]);
+      const dateTime = (date, minutes) => festivalTimestamp(date.month, date.day, Math.floor(minutes / 60), minutes % 60);
+      return { start: dateTime(startDate, startMinutes), end: dateTime(endDate, endMinutes) };
+    }
+    if (!startDay) return null;
+    if (event?.scheduleDays?.length >= 3 || /running all 3 days/i.test(time)) return { start: festivalTimestamp(10, 30), end: festivalTimestamp(11, 2) };
+    if (explicitTimes.length) {
+      startMinutes = timeToMinutes(explicitTimes[0]);
+      if (explicitTimes.length > 1) endMinutes = timeToMinutes(explicitTimes[1]);
+      else endMinutes = Math.min(startMinutes + 120, 24 * 60);
+    } else if (!/^(?:day one|all day)$/i.test(time.trim())) return null;
+    const dateForDay = day => day === 3 ? [11, 1] : day >= 4 ? [11, 2] : [10, day === 2 ? 31 : 30];
+    const [startMonth, startDate] = dateForDay(startDay);
+    const endAtMinutes = endMinutes >= 24 * 60 ? 0 : endMinutes;
+    const [endMonth, endDate] = endMinutes >= 24 * 60 ? dateForDay(startDay + 1) : [startMonth, startDate];
+    return {
+      start: festivalTimestamp(startMonth, startDate, Math.floor(startMinutes / 60), startMinutes % 60),
+      end: festivalTimestamp(endMonth, endDate, Math.floor(endAtMinutes / 60), endAtMinutes % 60)
+    };
+  };
+  const eventLifecycle = (event, now = Date.now()) => {
+    const window = eventWindow(event);
+    if (!window) return 'unscheduled';
+    if (now < window.start) return 'upcoming';
+    return now < window.end ? 'live' : 'ended';
+  };
+  const festivalDayState = (day, now = Date.now()) => {
+    const start = festivalTimestamp(day === 3 ? 11 : 10, day === 1 ? 30 : day === 2 ? 31 : 1, 0, 0);
+    const end = day === 3 ? festivalTimestamp(11, 2) : start + 86400000;
+    return now < start ? 'UPCOMING' : now < end ? 'IN PROGRESS' : 'DAY OVER';
+  };
+  const archiveDayRank = event => {
+    if (event.scheduleGroup === 'multi-day' || (event.scheduleDays?.length || 0) >= 3) return 0;
+    const day = event.scheduleDays?.length ? Math.min(...event.scheduleDays) : Number(event.day) || 9;
+    return day === 1 ? 1 : day === 2 ? 2 : day === 3 ? 3 : 4;
+  };
+  const archiveOrder = (a, b) => archiveDayRank(a) - archiveDayRank(b) || eventPriority(a, b);
   const homepageReplacementSlugs = new Set(['techsprint-tech-quiz', 'promptsmith-arena-prompt-war']);
   const homepageFeaturedEvents = (() => {
     const eligible = events.filter(event => event.registrationOpen !== false && ['live', 'upcoming'].includes(event.status));
@@ -433,8 +492,44 @@
   };
   const featuredHomeSection = () => {
     const topEvents = homepageFeaturedEvents;
-    const cards = topEvents.map((e, i) => '<a class="home-event home-event-' + (i + 1) + ' reveal" href="#/event/' + encodeURIComponent(e.slug) + '">' + (safeEventImage(e.image) ? '<img class="home-event-poster" src="' + esc(safeEventImage(e.image)) + '" alt="" loading="eager" decoding="async">' : '') + '<span>' + esc(streamLabel(e.stream)) + ' / ' + esc(eventDateLabel(e)) + '</span><strong>' + esc(titleCase(officialEventTitle(e))) + '</strong>' + (e.officialTitle ? '<em class="home-event-subtitle">' + esc(e.title) + '</em>' : '') + '<small>VIEW EVENT ↗</small></a>').join('');
+    const cards = topEvents.map((e, i) => {
+      const upload = e.slug === 'frame-hunt' && e.submissionUrl ? `<a class="home-event-upload" href="${esc(e.submissionUrl)}" target="_blank" rel="noopener noreferrer" aria-label="Upload Frame Hunt submissions"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4m0 0L7 9m5-5 5 5M5 15v4h14v-4"/></svg>UPLOAD HERE <span aria-hidden="true">↗</span></a>` : '';
+      return `<div class="home-event-wrap"><a class="home-event home-event-${i + 1} reveal" href="#/event/${encodeURIComponent(e.slug)}">${safeEventImage(e.image) ? `<img class="home-event-poster" src="${esc(safeEventImage(e.image))}" alt="" loading="eager" decoding="async">` : ''}<span>${esc(streamLabel(e.stream))} / ${esc(eventDateLabel(e))}</span><strong>${esc(titleCase(officialEventTitle(e)))}</strong>${e.officialTitle ? `<em class="home-event-subtitle">${esc(e.title)}</em>` : ''}<small>VIEW EVENT ↗</small></a>${upload}</div>`;
+    }).join('');
     return '<section class="section featured-home"><div class="container"><div class="section-head reveal"><div><div class="eyebrow">03 / PRIZE POOL LEADERS</div><h2>FEATURED<br><span class="green">EVENTS.</span></h2></div><a class="text-link" href="#/events">ALL ' + events.filter(e => e.status !== 'cancelled').length + ' EVENTS ↗</a></div><div class="featured-showcase"><article class="concert-featured-panel"><a class="concert-featured-poster" href="#/event/' + encodeURIComponent(CONCERT_PROMOTION.slug) + '" aria-label="View ' + esc(CONCERT_PROMOTION.title) + ' details"><img src="' + esc(CONCERT_PROMOTION.poster) + '" alt="' + esc(CONCERT_PROMOTION.title) + ' poster, 1 November 2026 at 7:00 PM at Digital University Kerala" fetchpriority="high"></a><div class="concert-featured-details"><span class="eyebrow">DAY 03 / LIVE CONCERT</span><h3>' + esc(CONCERT_PROMOTION.title) + '</h3><p>' + esc(CONCERT_PROMOTION.date) + ' · ' + esc(CONCERT_PROMOTION.time) + '</p><small>' + esc(CONCERT_PROMOTION.venue) + '</small>' + concertRegisterCta('button button-primary') + '</div></article><div class="home-event-grid">' + cards + '</div></div></div></section>';
+  };
+  const homeTimelineCard = (event, state) => {
+    const frameHunt = event.slug === 'frame-hunt';
+    const upload = frameHunt && event.submissionUrl ? `<a class="home-timeline-upload" href="${esc(event.submissionUrl)}" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4m0 0L7 9m5-5 5 5M5 15v4h14v-4"/></svg>UPLOAD HERE <span aria-hidden="true">↗</span></a>` : '';
+    const image = safeEventImage(event.image);
+    return `<article class="home-timeline-card ${state === 'live' ? 'is-live' : ''}">${image ? `<img src="${esc(image)}" alt="" loading="lazy" decoding="async">` : ''}<div class="home-timeline-card-shade"></div><div class="home-timeline-card-body">${state === 'live' ? '<span class="home-live-badge"><i></i> LIVE NOW</span>' : `<span class="home-upcoming-badge">UP NEXT · ${esc(eventDateLabel(event))}</span>`}<span class="home-timeline-category">${esc(eventCategoryLabel(event))} · ${esc(event.time || 'TIME TBA')}</span><h3><a href="#/event/${encodeURIComponent(event.slug)}">${esc(officialEventTitle(event))}</a></h3><p>${esc(event.cardDescription || event.description)}</p><div class="home-timeline-actions"><a href="#/event/${encodeURIComponent(event.slug)}">EVENT DETAILS ↗</a>${upload}</div></div></article>`;
+  };
+  const homeTimelineMarkup = (now = Date.now()) => {
+    const scheduled = events.map(event => ({ event, state: eventLifecycle(event, now), window: eventWindow(event) })).filter(item => item.window && item.state !== 'ended');
+    const live = scheduled.filter(item => item.state === 'live').sort((a, b) => a.window.end - b.window.end).map(item => item.event);
+    const upcoming = scheduled.filter(item => item.state === 'upcoming').sort((a, b) => a.window.start - b.window.start || eventPriority(a.event, b.event)).slice(0, 5).map(item => item.event);
+    const nowLabel = new Date(now).toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata', hour: 'numeric', minute: '2-digit' });
+    return `<section class="section home-event-timeline" id="happeningNow"><div class="container"><div class="section-head"><div><div class="eyebrow">LIVE SIGNAL / ${esc(nowLabel)} IST</div><h2>HAPPENING<br><span class="green">NOW.</span></h2></div><p>Live events and the next five experiences, updated from the festival schedule.</p></div><div class="timeline-live-block"><div class="timeline-lane-heading"><span>ON AIR</span><small>${live.length} LIVE ${live.length === 1 ? 'EVENT' : 'EVENTS'}</small></div><div class="timeline-live-grid">${live.length ? live.map(event => homeTimelineCard(event, 'live')).join('') : '<div class="timeline-empty"><span class="timeline-pulse"></span><div><b>NO LIVE EVENTS RIGHT NOW</b><p>Upcoming events appear below as the festival schedule approaches.</p></div></div>'}</div></div><div class="timeline-upcoming-block"><div class="timeline-lane-heading"><span>COMING UP</span><div class="timeline-carousel-controls"><button type="button" data-timeline-shift="-1" aria-label="Show previous upcoming events">←</button><button type="button" data-timeline-shift="1" aria-label="Show more upcoming events">→</button></div></div><div class="home-upcoming-track" id="upcomingEventTrack">${upcoming.length ? upcoming.map(event => homeTimelineCard(event, 'upcoming')).join('') : '<div class="timeline-empty"><div><b>THE FESTIVAL SCHEDULE IS COMPLETE</b><p>Check the archive for event details and results.</p></div></div>'}</div></div></div></section>`;
+  };
+  const initHomeTimeline = () => {
+    const root = $('#happeningNow');
+    if (!root) return () => {};
+    const onClick = event => {
+      const button = event.target.closest('[data-timeline-shift]');
+      if (!button) return;
+      const track = $('#upcomingEventTrack', event.currentTarget);
+      if (track) track.scrollBy({ left: Number(button.dataset.timelineShift) * Math.max(280, track.clientWidth * .78), behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+    };
+    root.addEventListener('click', onClick);
+    const timer = setInterval(() => {
+      const currentRoot = $('#happeningNow');
+      if (!currentRoot) return;
+      currentRoot.outerHTML = homeTimelineMarkup();
+      const replacement = $('#happeningNow');
+      replacement?.addEventListener('click', onClick);
+    }, 60_000);
+    homeTimelineTimer = timer;
+    return () => { clearInterval(timer); root.removeEventListener('click', onClick); if (homeTimelineTimer === timer) homeTimelineTimer = null };
   };
   const home = () => {
     const showIntro = playLandingIntro();
@@ -442,11 +537,12 @@
     const featuredEvent = featuredEvents[0];
     return `
     ${showIntro ? `<div class="intro-cinema" id="landingIntro" tabindex="-1" role="dialog" aria-modal="true" aria-label="VYUHAM 2026 introduction"><button class="intro-skip" id="skipIntro" type="button">SKIP INTRO <span aria-hidden="true">↗</span></button><div class="intro-scene intro-scene-campus"><img src="assets/venue-campus-enhanced.jpg" alt=""><span>TECHNOCITY CAMPUS / TECHNOPARK PHASE 4</span></div><div class="intro-scene intro-scene-festival"><img src="assets/afterdark-monolith.png" alt=""><span>THREE DAYS / ONE CONVERGENCE</span></div><div class="intro-cinema-vignette"></div><div class="intro-cinema-grid"></div><div class="intro-cinema-orbit intro-cinema-orbit-a"></div><div class="intro-cinema-orbit intro-cinema-orbit-b"></div><div class="intro-cinema-core"><span class="intro-cinema-kicker"><img src="assets/duk-logo-intro.png" alt="Digital University Kerala"><b>Presents</b></span><img src="assets/vyuham_logo_optimized.png" alt=""><h1><span>VYUHAM</span><b>’26</b></h1><p>TECHNOLOGY. CULTURE. COMPETITION.</p></div><span class="intro-cinema-coordinate intro-cinema-left">30 OCT — 01 NOV / 2026</span><span class="intro-cinema-coordinate intro-cinema-right">THIRUVANANTHAPURAM / INDIA</span><div class="intro-cinema-flash"></div></div>` : ''}
-    <div class="campus-entry-notice" id="campusEntryNotice" hidden><section class="campus-entry-notice-dialog" role="dialog" aria-modal="false" aria-labelledby="campusEntryTitle"><button class="campus-entry-notice-close" type="button" aria-label="Close campus pass requirement">×</button><span class="campus-entry-notice-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3 20 6v5c0 5-3.4 8.5-8 10-4.6-1.5-8-5-8-10V6l8-3Z"/><path d="m8.5 12 2.2 2.2 4.8-5"/></svg></span><div class="campus-entry-notice-copy"><span class="campus-entry-notice-kicker">IMPORTANT CAMPUS NOTICE</span><h2 id="campusEntryTitle">Day Pass Mandatory</h2><p>A valid day pass is mandatory unless having event pass for entering the college campus during VYUHAM’26.</p><p>Please ensure you have your day pass or event pass before arriving at the campus.</p></div></section></div><section class="cyber-hero${showIntro ? ' intro-handoff' : ''}" id="home"><div class="cyber-hero-grid"><div class="cyber-copy"><div class="cyber-kicker"><span class="live-dot"></span> DIGITAL UNIVERSITY KERALA <i>·</i> 2026</div><div class="cyber-wordmark"><img src="assets/vyuham_logo_optimized.png" alt="VYUHAM red emblem"><h1>VYUHAM<span>’26</span></h1></div><p class="cyber-slogan">THE FUTURE<br><em>AWAITS.</em></p><p class="cyber-intro">VYUHAM’26 is Digital University Kerala’s flagship national-level management, technology and cultural fest.</p><div class="cyber-actions">${registrationCta(MAKEMYPASS_HOME, 'REGISTER & GET TICKETS <span aria-hidden="true">↗</span>', 'button button-primary hero-cta hero-cta-register')}<a class="button button-outline hero-cta hero-cta-map" href="https://duk360.duk.ac.in/duk-tour/?scene=technopark-phase-4" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 7 12 7Z"/><circle cx="12" cy="9" r="2.3"/></svg>CAMPUS MAP <span aria-hidden="true">↗</span></a><a class="button button-outline hero-cta hero-cta-explore" href="#/events">EXPLORE ALL EVENTS <span aria-hidden="true">↓</span></a></div><div class="cyber-data"><span>30 OCT — 01 NOV, 2026</span><span>TECHNOCITY CAMPUS, TECHNOPARK PHASE 4</span></div><div class="hero-count cyber-count" aria-label="Countdown to festival opening"><small>COUNTDOWN TO OPENING</small><strong data-countdown>—</strong></div></div><div class="cyber-stage concert-stage" id="featuredCarousel" role="region" aria-label="Featured event carousel"><figure class="stage-screen stage-main"><img class="stage-featured-art" id="featuredArtwork" src="assets/vyuham-hero-convergence.png" alt="VYUHAM’26 cinematic hero artwork" fetchpriority="high"><div class="stage-shade"></div><div class="stage-brand"><img src="assets/vyuham_logo_optimized.png" alt=""><span>VYUHAM<sup>’26</sup></span></div><figcaption><span>VYUHAM / 01</span><span>THIRUVANANTHAPURAM, INDIA</span></figcaption></figure><div class="stage-screen stage-float" id="featuredCard" role="group" aria-roledescription="slide" aria-label="Featured event 1 of ${featuredEvents.length}"><img class="stage-float-poster" id="featuredPoster" alt="" hidden><a class="stage-float-hitarea" id="featuredLink" href="#/event/${encodeURIComponent(featuredEvent?.slug || 'events')}" aria-label="Open details for ${esc(featuredEvent ? officialEventTitle(featuredEvent) : 'VYUHAM’26')}"></a><span class="stage-float-label">FEATURED TRANSMISSION</span><span class="stage-float-category" id="featuredCategory">${esc(streamLabel(featuredEvent?.stream || 'tech'))}</span><b class="stage-float-title" id="featuredTitle">${esc(featuredEvent ? officialEventTitle(featuredEvent) : 'VYUHAM’26')}</b><small class="stage-float-subtitle" id="featuredSubtitle" ${featuredEvent?.officialTitle ? '' : 'hidden'}>${esc(featuredEvent?.officialTitle ? featuredEvent.title : '')}</small><div class="stage-float-footer"><span class="stage-float-foot">OPEN EVENT DOSSIER ↗</span><div class="stage-dots" id="featuredDots" role="group" aria-label="Choose a featured event">${featuredEvents.map((event, index) => `<button class="stage-dot ${index === 0 ? 'active' : ''}" type="button" data-featured-index="${index}" aria-label="Show ${esc(officialEventTitle(event))}" aria-pressed="${index === 0}"></button>`).join('')}</div></div></div><span class="stage-orbit stage-orbit-one"></span><span class="stage-orbit stage-orbit-two"></span></div></div><div class="cyber-hero-foot"><span>THE NATIONAL TECHNO-CULTURAL FESTIVAL</span><a href="#festival">SCROLL TO EXPLORE ↓</a></div></section>
+    <div class="campus-entry-notice" id="campusEntryNotice" hidden><section class="campus-entry-notice-dialog" role="dialog" aria-modal="false" aria-labelledby="campusEntryTitle"><button class="campus-entry-notice-close" type="button" aria-label="Close campus pass requirement">×</button><span class="campus-entry-notice-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3 20 6v5c0 5-3.4 8.5-8 10-4.6-1.5-8-5-8-10V6l8-3Z"/><path d="m8.5 12 2.2 2.2 4.8-5"/></svg></span><div class="campus-entry-notice-copy"><span class="campus-entry-notice-kicker">IMPORTANT CAMPUS NOTICE</span><h2 id="campusEntryTitle">Day Pass Mandatory</h2><p>A valid day pass is mandatory unless having event pass for entering the college campus during VYUHAM’26.</p><p>Please ensure you have your day pass or event pass before arriving at the campus.</p></div></section></div><section class="cyber-hero${showIntro ? ' intro-handoff' : ''}" id="home"><div class="cyber-hero-grid"><div class="cyber-copy"><div class="cyber-kicker"><span class="live-dot"></span> DIGITAL UNIVERSITY KERALA <i>·</i> 2026</div><div class="cyber-wordmark"><img src="assets/vyuham_logo_optimized.png" alt="VYUHAM red emblem"><h1>VYUHAM<span>’26</span></h1></div><p class="cyber-slogan">THE FUTURE<br><em>AWAITS.</em></p><p class="cyber-intro">VYUHAM’26 is Digital University Kerala’s flagship national-level management, technology and cultural fest.</p><div class="cyber-actions">${registrationCta(MAKEMYPASS_HOME, 'REGISTER & GET TICKETS <span aria-hidden="true">↗</span>', 'button button-primary hero-cta hero-cta-register')}<a class="button button-outline hero-cta hero-cta-map" href="https://duk360.duk.ac.in/duk-tour/?scene=technopark-phase-4" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 7 12 7Z"/><circle cx="12" cy="9" r="2.3"/></svg>CAMPUS MAP <span aria-hidden="true">↗</span></a><a class="button button-outline hero-cta hero-cta-explore" href="#/events">EXPLORE ALL EVENTS <span aria-hidden="true">↓</span></a></div><div class="cyber-data"><span>30 OCT — 01 NOV, 2026</span><span>TECHNOCITY CAMPUS, TECHNOPARK PHASE 4</span></div><div class="hero-count cyber-count mission-control-dashboard" aria-label="VYUHAM’26 festival mission control"><section class="mission-control-broadcast" aria-live="polite"><span class="mission-control-kicker"><i class="mission-live-indicator" aria-hidden="true"></i><b data-festival-broadcast>FESTIVAL BROADCAST</b></span><strong class="mission-control-live" data-festival-live>STANDBY</strong><span class="mission-control-caption" data-festival-broadcast-caption>VYUHAM’26 BROADCAST STANDBY</span><span class="mission-signal-bars" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span></section><section class="mission-control-day" aria-live="polite" aria-label="Current festival day"><span class="mission-control-eyebrow">FESTIVAL STATUS</span><strong class="mission-day-number" data-festival-day>DAY 01</strong><span class="mission-day-theme" data-festival-theme>IGNITION</span><span class="mission-session-state"><i aria-hidden="true"></i><b data-festival-session>UP NEXT</b></span></section><section class="mission-control-countdown" aria-label="Countdown until festival ends"><span class="mission-control-eyebrow" data-countdown-label>UNTIL FESTIVAL ENDS</span><strong class="mission-clock" data-countdown>00:00:00</strong><span class="mission-clock-note" data-countdown-note>FINAL FESTIVAL MOMENT</span></section><span class="mission-energy-line" aria-hidden="true"></span></div></div><div class="cyber-stage concert-stage" id="featuredCarousel" role="region" aria-label="Featured event carousel"><figure class="stage-screen stage-main"><img class="stage-featured-art" id="featuredArtwork" src="assets/vyuham-hero-convergence.png" alt="VYUHAM’26 cinematic hero artwork" fetchpriority="high"><div class="stage-shade"></div><div class="stage-brand"><img src="assets/vyuham_logo_optimized.png" alt=""><span>VYUHAM<sup>’26</sup></span></div><figcaption><span>VYUHAM / 01</span><span>THIRUVANANTHAPURAM, INDIA</span></figcaption></figure><div class="stage-screen stage-float" id="featuredCard" role="group" aria-roledescription="slide" aria-label="Featured event 1 of ${featuredEvents.length}"><img class="stage-float-poster" id="featuredPoster" alt="" hidden><a class="stage-float-hitarea" id="featuredLink" href="#/event/${encodeURIComponent(featuredEvent?.slug || 'events')}" aria-label="Open details for ${esc(featuredEvent ? officialEventTitle(featuredEvent) : 'VYUHAM’26')}"></a><span class="stage-float-label">FEATURED TRANSMISSION</span><span class="stage-float-category" id="featuredCategory">${esc(streamLabel(featuredEvent?.stream || 'tech'))}</span><b class="stage-float-title" id="featuredTitle">${esc(featuredEvent ? officialEventTitle(featuredEvent) : 'VYUHAM’26')}</b><small class="stage-float-subtitle" id="featuredSubtitle" ${featuredEvent?.officialTitle ? '' : 'hidden'}>${esc(featuredEvent?.officialTitle ? featuredEvent.title : '')}</small><div class="stage-float-footer"><span class="stage-float-foot">OPEN EVENT DOSSIER ↗</span><div class="stage-dots" id="featuredDots" role="group" aria-label="Choose a featured event">${featuredEvents.map((event, index) => `<button class="stage-dot ${index === 0 ? 'active' : ''}" type="button" data-featured-index="${index}" aria-label="Show ${esc(officialEventTitle(event))}" aria-pressed="${index === 0}"></button>`).join('')}</div></div></div><span class="stage-orbit stage-orbit-one"></span><span class="stage-orbit stage-orbit-two"></span></div></div><div class="cyber-hero-foot"><span>THE NATIONAL TECHNO-CULTURAL FESTIVAL</span><a href="#festival">SCROLL TO EXPLORE ↓</a></div></section>
     <div class="info-strip cyber-strip stats-bar"><span class="stats-item"><b>30 October 2026 - 01 November 2026</b><small>THREE FESTIVAL DAYS</small></span><span class="stats-item"><b>TECHNOCITY CAMPUS</b><small>TECHNOPARK PHASE 4</small></span><span class="stats-item"><b>${events.length}</b><small>EVENT RECORDS</small></span><span class="stats-item"><b>01 / 03</b><small>DAY 1 → DAY 3</small></span></div>
     <section class="section festival-intro" id="festival"><div class="container intro-composition"><div class="intro-mark reveal"><span>VYUHAM / DUK</span><img src="assets/vyuham_logo_sm.png" alt="VYUHAM emblem"><b>ONE<br>FESTIVAL<br><i>FOUR WORLDS.</i></b></div><div class="intro-copy reveal"><div class="eyebrow">01 / ABOUT THE FESTIVAL</div><h2>WHERE<br>DISCIPLINES<br><span class="green">COLLIDE.</span></h2><p>VYUHAM is Digital University Kerala’s flagship national-level management, technology and cultural fest. Across three days, students gather to build, debate, perform and compete.</p><p>From autonomous systems and strategy arenas to live culture and esports, one campus becomes a meeting point for different ways of thinking.</p><a class="text-link" href="#/about">DISCOVER VYUHAM <span>↗</span></a></div></div></section>
     <section class="section stream-section" id="streams"><div class="container"><div class="section-head reveal"><div><div class="eyebrow">02 / FOUR SIGNALS</div><h2>FIND YOUR<br><span class="green">FREQUENCY.</span></h2></div><p>Four distinct streams. One shared festival ground.</p></div><div class="stream-grid">${streams.map((s, i) => `<a class="stream-card stream-card-${i + 1} reveal" data-index="${s.index}" href="#/events?stream=${s.id}"><img class="stream-art" src="${s.image}" alt="" loading="lazy" decoding="async"><img class="stream-emblem" src="assets/vyuham_logo_sm.png" alt="" aria-hidden="true" loading="lazy"><span class="stream-icon">${s.symbol} / STREAM</span><strong>${s.name}</strong><p>${s.desc}</p><span class="stream-go">EXPLORE ↗</span><i class="stream-watermark">${s.index}</i></a>`).join('')}</div></div></section>
     ${featuredHomeSection()}
+    ${homeTimelineMarkup()}
     <section class="section schedule-section"><div class="container"><div class="section-head reveal"><div><div class="eyebrow">04 / THREE DAYS</div><h2>THE FESTIVAL<br><span class="green">SEQUENCE.</span></h2></div><a class="text-link" href="#/schedule">OPEN FULL SCHEDULE ↗</a></div><div class="schedule-preview">${days.map(d => `<article class="day-card day-card-${d.day} reveal"><div class="day-card-meta"><span class="day-date">${d.dateLabel}</span></div><a class="day-card-link" href="#/schedule?day=${d.day}"><h3>${d.name}</h3><p>${d.desc}</p></a><footer class="day-card-actions"><a class="day-explore" href="#/schedule?day=${d.day}">VIEW DAY ↗</a><a class="day-pass-link" href="#/event/day-pass">DAY PASS ↗</a></footer><i class="day-ghost" aria-hidden="true">0${d.day}</i></article>`).join('')}</div></div></section>
     <section class="section" id="venue"><div class="container venue-home"><div><div class="eyebrow">05 / THE VENUE</div><h2>MEET US AT<br><span class="green">TECHNOCITY.</span></h2><h3>Digital University Kerala</h3><p class="muted">Technocity Campus, Mangalapuram,<br>Thiruvananthapuram, Kerala — 695317.</p><a class="text-link" target="_blank" rel="noopener" href="https://maps.google.com/?q=Digital+University+Kerala+Technocity">GET DIRECTIONS ↗</a></div><a class="venue-map" aria-label="Open map directions to Digital University Kerala" target="_blank" rel="noopener" href="https://maps.google.com/?q=Digital+University+Kerala+Technocity"><img src="assets/venue-campus-enhanced.jpg" alt="Aerial view of Digital University Kerala campus among the green Technocity landscape" loading="lazy" width="1360" height="1024"></a></div></section>
     ${sponsorsSection('home')}
@@ -477,7 +573,8 @@
     const isCalligraphyWorkshop = (e.legacySlug || e.slug) === 'workshop-prompt-engineering';
     const isAiFilm = (e.legacySlug || e.slug) === 'ai-short-film';
     const isKsumTalk = (e.legacySlug || e.slug) === 'talk-ksum';
-    const isFrameHunt = (e.legacySlug || e.slug) === 'frame-hunt' || e.legacySlug === 'photography';
+    const isFrameHunt = [e.slug, e.legacySlug, e.officialTitle, e.title]
+      .some(value => /^(?:frame-hunt|photography)$/i.test(String(value || '').trim()) || /frame\s*hunt/i.test(String(value || '')));
     const isVegaWorkshop = e.slug === 'vega-processors-and-ecosystem-by-c-dac';
     const speakerContent = !isSocTalk && !isAccuracyPanel && e.speaker
       ? `<section class="soc-content-block"><div class="eyebrow">SESSION SPEAKER</div><article class="soc-speaker-profile ksum-speaker-profile${isVegaWorkshop ? ' vega-speaker-profile' : ''}${isDspaceTalk ? ' dspace-speaker-profile' : ''}">${e.speakerPhoto ? `<img src="${esc(e.speakerPhoto)}" alt="${esc(e.speaker)}, ${esc(e.designation || 'session speaker')}" loading="lazy">` : ''}<div class="soc-speaker-copy"><h3>${esc(e.speaker)}</h3><p class="soc-designation">${esc(e.designation || '')}</p>${e.speakerContact ? `<p class="soc-speaker-contact">CONTACT <a href="tel:${esc(e.speakerContact)}">${esc(e.speakerContact)}</a></p>` : ''}${isKsumTalk ? `<div class="ksum-speaker-details"><h4>Professional Biography</h4>${e.professionalBiography.map(paragraph => `<p class="muted">${esc(paragraph)}</p>`).join('')}<h4>Areas of Expertise</h4><ul class="soc-guidelines">${e.areasOfExpertise.map(area => `<li>${esc(area)}</li>`).join('')}</ul></div>` : ''}</div></article></section>`
@@ -495,8 +592,9 @@
       : (e.legacySlug || e.slug) === 'hackathon' && e.themes?.length
       ? `<ul class="rule-list">${participationRules.map(rule => `<li>${esc(rule)}</li>`).join('')}<li><strong>Hackathon themes:</strong><ul class="hackathon-theme-list">${e.themes.map(theme => `<li>${esc(theme)}</li>`).join('')}</ul></li></ul>`
       : participationRules.length ? '<ul class="rule-list">' + participationRules.map(rule => '<li>' + esc(rule) + '</li>').join('') + '</ul>' : '<p class="muted">Detailed rules will be published by the event organizers.</p>';
-    const submissionLink = isFrameHunt && e.submissionUrl
-      ? `<section class="soc-content-block frame-hunt-submission"><div class="eyebrow">SUBMISSION LINK</div><p class="muted">Submit your Frame Hunt photos and videos using the participant submission folder.</p><a class="button button-primary" href="${esc(e.submissionUrl)}" target="_blank" rel="noopener noreferrer">SUBMIT YOUR FILES ↗</a></section>`
+    const submissionUrl = safeExternalUrl(e.submissionUrl) || FRAME_HUNT_SUBMISSION_URL;
+    const submissionLink = isFrameHunt
+      ? `<section class="soc-content-block frame-hunt-submission"><div class="eyebrow">FRAME HUNT SUBMISSION</div><p class="muted">Upload your Frame Hunt photographs and videos to the participant submission folder.</p><a class="button button-primary frame-hunt-upload-button" href="${esc(submissionUrl)}" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4m0 0L7 9m5-5 5 5M5 15v4h14v-4"/></svg>UPLOAD HERE <span aria-hidden="true">↗</span></a><small class="frame-hunt-upload-note">The submission folder opens in Google Drive.</small></section>`
       : '';
     const socContent = isSocTalk
       ? `<section class="soc-content-block"><div class="eyebrow">ABOUT THE EVENT</div><p class="muted">${esc(e.description)}</p></section>
@@ -792,7 +890,7 @@
     const grid = $('#eventsGrid'), count = $('#eventCount'), input = $('#eventSearch');
     const draw = () => {
       const filtered = events.filter(e => {
-        if (e.status === 'cancelled') return false;
+        if (!canRegister(e)) return false;
         const streamOk = selected === 'all' || e.stream === selected || (selected === 'tech' && e.stream === 'technology') || (selected === 'cultural' && e.stream === 'culture') || (selected === 'esports' && e.stream === 'gaming');
         const eventDays = Array.isArray(e.scheduleDays) ? e.scheduleDays : (e.day == null ? [] : [Number(e.day)]);
         const dayOk = day === 'all' || eventDays.includes(Number(day));
@@ -800,7 +898,7 @@
       });
       if (sort === 'name') filtered.sort((a, b) => registrationAvailabilityRank(a) - registrationAvailabilityRank(b) || officialEventTitle(a).localeCompare(officialEventTitle(b)));
       if (sort === 'fee') filtered.sort((a, b) => registrationAvailabilityRank(a) - registrationAvailabilityRank(b) || (() => { const cost = e => { const m = String(e.fee || '').match(/[\d,]+/); return m ? Number(m[0].replaceAll(',', '')) : Infinity }; return cost(a) - cost(b) })());
-      if (sort === 'day') filtered.sort((a, b) => registrationAvailabilityRank(a) - registrationAvailabilityRank(b) || eventPriority(a, b));
+      if (sort === 'day') filtered.sort(archiveOrder);
       count.textContent = `${String(filtered.length).padStart(2, '0')} EVENTS FOUND / ${events.length} ${document.documentElement.dataset.api === 'online' ? 'LIVE API' : 'CATALOG'} RECORDS`;
       const showDayPass = selected === 'all' && day === 'all' && !search.trim();
       grid.innerHTML = `${filtered.length ? filtered.map(eventCard).join('') : '<div class="empty-state" style="grid-column:1/-1">No events match these filters. Clear a filter or try another search.</div>'}${showDayPass ? dayPassCard() : ''}`;
@@ -815,11 +913,26 @@
   function renderSchedule(day = 1) {
     const selected = Number(day) || 1; const d = days.find(x => x.day === selected) || days[0];
     $$('#scheduleDays button').forEach(b => { const active = Number(b.dataset.day) === selected; b.classList.toggle('active', active); b.setAttribute('aria-pressed', String(active)) });
+    $$('#scheduleDays button').forEach(button => {
+      const phase = festivalDayState(Number(button.dataset.day));
+      let status = button.querySelector('.schedule-day-status');
+      if (!status) { status = document.createElement('span'); status.className = 'schedule-day-status'; button.append(status) }
+      status.textContent = phase;
+      status.classList.toggle('is-over', phase === 'DAY OVER');
+      status.classList.toggle('is-active', phase === 'IN PROGRESS');
+    });
     const dayEvents = events.filter(e => {
       const eventDays = Array.isArray(e.scheduleDays) ? e.scheduleDays : (e.day == null ? [] : [Number(e.day)]);
       return eventDays.includes(selected) && e.status !== 'cancelled';
     }).sort((a, b) => scheduleMinutes(a.time) - scheduleMinutes(b.time));
-    $('#scheduleContent').innerHTML = `<div class="schedule-heading"><div><span class="date-capsule">${esc(d.dateLabel)}</span><h2>${esc(d.name)}</h2></div><p class="muted">${esc(d.desc)}</p></div><div class="schedule-list">${dayEvents.length ? dayEvents.map((e, index) => `<article class="schedule-row"><div class="schedule-time"><span>0${String(index + 1).padStart(2, '0')}</span><time>${esc(e.time || 'TIME TBA')}</time></div><div class="schedule-event"><h3><a href="#/event/${encodeURIComponent(e.slug)}">${esc(officialEventTitle(e))}</a></h3>${e.officialTitle ? `<small class="schedule-event-subtitle">${esc(e.title)}</small>` : ''}<p>${esc(e.description)}</p></div><div class="venue"><span>STREAM</span><b>${esc(eventCategoryLabel(e))}</b></div></article>`).join('') : '<div class="empty-state">No event records are currently listed for this day.</div>'}</div>`;
+    const phase = festivalDayState(selected);
+    const rows = dayEvents.map((e, index) => {
+      const lifecycle = eventLifecycle(e);
+      const eventState = lifecycle === 'live' ? 'LIVE NOW' : lifecycle === 'ended' ? 'EVENT ENDED' : lifecycle === 'upcoming' ? 'UPCOMING' : 'TIME TBA';
+      const registrationState = canRegister(e) ? 'REGISTRATION OPEN' : 'REGISTRATION CLOSED';
+      return `<article class="schedule-row"><div class="schedule-time"><span>0${String(index + 1).padStart(2, '0')}</span><time>${esc(e.time || 'TIME TBA')}</time></div><div class="schedule-event"><h3><a href="#/event/${encodeURIComponent(e.slug)}">${esc(officialEventTitle(e))}</a></h3>${e.officialTitle ? `<small class="schedule-event-subtitle">${esc(e.title)}</small>` : ''}<p>${esc(e.description)}</p></div><div class="venue"><span>STREAM</span><b>${esc(eventCategoryLabel(e))}</b><div class="schedule-row-status"><span class="event-state-pill ${lifecycle === 'live' ? 'is-live' : lifecycle === 'ended' ? 'is-over' : ''}">${esc(eventState)}</span><span class="registration-state-pill ${canRegister(e) ? 'is-open' : 'is-closed'}">${esc(registrationState)}</span></div></div></article>`;
+    }).join('');
+    $('#scheduleContent').innerHTML = `<div class="schedule-heading"><div><span class="date-capsule">${esc(d.dateLabel)}</span><h2>${esc(d.name)}</h2><span class="schedule-day-overview ${phase === 'DAY OVER' ? 'is-over' : phase === 'IN PROGRESS' ? 'is-active' : ''}">${esc(phase)}</span></div><p class="muted">${esc(d.desc)}</p></div><div class="schedule-list">${rows || '<div class="empty-state">No event records are currently listed for this day.</div>'}</div>`;
   }
   function observeReveals() {
     const items = $$('.reveal:not(.visible)');
@@ -834,6 +947,8 @@
   function render() {
     heroCarouselCleanup?.();
     heroCarouselCleanup = null;
+    if (homeTimelineTimer) { clearInterval(homeTimelineTimer); homeTimelineTimer = null; }
+    if (scheduleStatusTimer) { clearInterval(scheduleStatusTimer); scheduleStatusTimer = null; }
     concertPopupCleanup?.();
     concertPopupCleanup = null;
     passNoticePopupCleanup?.();
@@ -946,6 +1061,7 @@
       heroCarouselCleanup = initHeroFeaturedCarousel(Boolean(intro));
       concertPopupCleanup = initConcertPopup();
       passNoticePopupCleanup = initPassNoticePopup();
+      initHomeTimeline();
     }
     if (r.page === 'hospitality') initEmergencyPopup();
 
@@ -960,7 +1076,10 @@
       description.hidden = expanded;
     }));
     if (r.page === 'schedule') {
-      renderSchedule(r.query.get('day') || 1); $('#scheduleDays').addEventListener('click', e => { const b = e.target.closest('[data-day]'); if (b) renderSchedule(b.dataset.day) });
+      let selectedDay = Number(r.query.get('day') || 1);
+      renderSchedule(selectedDay);
+      $('#scheduleDays').addEventListener('click', e => { const b = e.target.closest('[data-day]'); if (b) { selectedDay = Number(b.dataset.day); renderSchedule(selectedDay) } });
+      scheduleStatusTimer = setInterval(() => renderSchedule(selectedDay), 60_000);
     }
     if (r.page === 'contact') $('#contactForm').addEventListener('submit', async e => { e.preventDefault(); const d = new FormData(e.currentTarget); const button = e.currentTarget.querySelector('button[type="submit"]'); button.disabled = true; try { await window.VYUHAM_API.post('/contact', { name: d.get('name'), email: d.get('email'), tier: d.get('topic'), message: d.get('message') }); toast('Your inquiry was saved for organizer follow-up.'); e.currentTarget.reset() } catch (error) { toast(`Could not send message: ${error.message}. Please email techfest@duk.ac.in.`) } finally { button.disabled = false } });
     if (r.page === 'feedback') $('#feedbackForm').addEventListener('submit', async e => { e.preventDefault(); const d = new FormData(e.currentTarget); try { await window.VYUHAM_API.post('/feedback', { rating: Number(d.get('rating')), comments: d.get('comments') }); toast('Feedback received. Thank you.'); e.currentTarget.reset() } catch (error) { toast(`Feedback could not be sent: ${error.message}`) } });
@@ -1052,20 +1171,37 @@
     clearTimeout(scrollIdleTimer);
     scrollIdleTimer = setTimeout(() => header.classList.remove('header-hidden'), 800);
   }, { passive: true });
-  // Accurate IST countdown, with no negative values after the target time.
-  const festivalStart = '2026-10-30T09:00:00+05:30';
+  // Mission control follows the three festival dates in IST and reaches zero at the final calendar boundary.
+  const festivalStart = festivalTimestamp(10, 30, 9, 0);
+  const festivalEnd = festivalTimestamp(11, 2, 0, 0);
+  const festivalDayStarts = [festivalTimestamp(10, 30), festivalTimestamp(10, 31), festivalTimestamp(11, 1)];
+  const festivalDayThemes = ['IGNITION', 'CONVERGENCE', 'AFTERSHOCK'];
   function updateCountdown() {
-    const target = new Date(festivalStart).getTime();
-    const expired = Date.now() >= target;
-    const remaining = Math.max(0, target - Date.now());
-    const values = [Math.floor(remaining / 86400000), Math.floor(remaining % 86400000 / 3600000), Math.floor(remaining % 3600000 / 60000), Math.floor(remaining % 60000 / 1000)];
-    $$('[data-countdown]').forEach(el => {
-      const container = el.closest('.hero-count');
-      if (container) {
-        container.hidden = expired;
-        container.setAttribute('aria-hidden', String(expired));
-      }
-      if (!expired) el.innerHTML = values.map((value, i) => `<span><b>${String(value).padStart(2, '0')}</b><i>${['DAYS', 'HRS', 'MIN', 'SEC'][i]}</i></span>`).join('');
+    const now = Date.now();
+    const isLive = now >= festivalStart && now < festivalEnd;
+    const isComplete = now >= festivalEnd;
+    const target = isLive ? festivalEnd : isComplete ? festivalEnd : festivalStart;
+    const remaining = Math.max(0, target - now);
+    const totalHours = Math.floor(remaining / 3600000);
+    const minutes = Math.floor(remaining % 3600000 / 60000);
+    const seconds = Math.floor(remaining % 60000 / 1000);
+    const day = isComplete ? 3 : Math.max(1, Math.min(3, festivalDayStarts.filter(start => now >= start).length));
+    $$('[data-countdown]').forEach(clock => {
+      const dashboard = clock.closest('.mission-control-dashboard');
+      if (!dashboard) return;
+      dashboard.classList.toggle('is-festival-live', isLive);
+      dashboard.classList.toggle('is-festival-complete', isComplete);
+      dashboard.classList.toggle('is-festival-upcoming', !isLive && !isComplete);
+      dashboard.querySelector('[data-festival-live]').textContent = isComplete ? 'EVENT COMPLETED' : isLive ? 'LIVE NOW' : 'COMING ONLINE';
+      dashboard.querySelector('[data-festival-broadcast]').textContent = isComplete ? 'BROADCAST ARCHIVED' : isLive ? 'LIVE BROADCAST' : 'UPCOMING BROADCAST';
+      dashboard.querySelector('[data-festival-broadcast-caption]').textContent = isComplete ? 'VYUHAM’26 BROADCAST COMPLETE' : isLive ? 'VYUHAM’26 BROADCAST ACTIVE' : 'VYUHAM’26 BROADCAST STANDBY';
+      dashboard.querySelector('[data-festival-day]').textContent = `DAY 0${day}`;
+      dashboard.querySelector('[data-festival-theme]').textContent = festivalDayThemes[day - 1];
+      dashboard.querySelector('[data-festival-session]').textContent = isComplete ? 'COMPLETED' : isLive ? 'IN SESSION' : 'UP NEXT';
+      dashboard.querySelector('[data-countdown-label]').textContent = isComplete ? 'FESTIVAL ENDED' : isLive ? 'UNTIL FESTIVAL ENDS' : 'FESTIVAL STARTS IN';
+      dashboard.querySelector('[data-countdown-note]').textContent = isComplete ? 'THANK YOU FOR BEING HERE' : isLive ? 'HOURS : MINUTES : SECONDS' : '30 OCTOBER 2026 · 9:00 AM IST';
+      clock.textContent = `${String(totalHours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+      clock.setAttribute('aria-label', `${totalHours} hours, ${minutes} minutes, ${seconds} seconds ${isLive ? 'until the festival ends' : isComplete ? 'since the festival ended' : 'until the festival starts'}`);
     });
   }
   updateCountdown(); setInterval(updateCountdown, 1000);
