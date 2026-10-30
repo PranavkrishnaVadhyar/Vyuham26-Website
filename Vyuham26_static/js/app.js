@@ -163,16 +163,20 @@
     const dayRank = event => event.scheduleGroup === 'pre-fest' ? 0 : (event.scheduleDays?.length ? Math.min(...event.scheduleDays) : Number(event.day) || 9);
     return dayRank(a) - dayRank(b) || statusRank(a) - statusRank(b) || eventStreamRank(a) - eventStreamRank(b) || eventPrizeValue(b) - eventPrizeValue(a) || officialEventTitle(a).localeCompare(officialEventTitle(b));
   };
+  const isAllDayEvent = event => /^(?:day one|all day|running all 3 days)$/i.test(String(event?.time || '').trim()) || (Array.isArray(event?.scheduleDays) && event.scheduleDays.length >= 3);
+  const isDayOneEvent = event => Number(event?.day) === 1 || (Array.isArray(event?.scheduleDays) && event.scheduleDays.includes(1));
+  const canRegister = event => registrationFeatureEnabled && registrationOpen && event?.registrationOpen !== false && !['registration_closed', 'closed', 'cancelled'].includes(event?.status) && !(event && isDayOneEvent(event) && !isAllDayEvent(event));
+  const registrationAvailabilityRank = event => canRegister(event) ? 0 : 1;
   const homepageReplacementSlugs = new Set(['techsprint-tech-quiz', 'promptsmith-arena-prompt-war']);
   const homepageFeaturedEvents = (() => {
     const eligible = events.filter(event => event.registrationOpen !== false && ['live', 'upcoming'].includes(event.status));
     const replacements = eligible.filter(event => homepageReplacementSlugs.has(event.slug));
     const remainingLeaders = eligible
       .filter(event => !homepageReplacementSlugs.has(event.slug) && verifiedPrizePoolValue(event) > 0)
-      .sort((a, b) => verifiedPrizePoolValue(b) - verifiedPrizePoolValue(a) || eventPriority(a, b))
+      .sort((a, b) => registrationAvailabilityRank(a) - registrationAvailabilityRank(b) || verifiedPrizePoolValue(b) - verifiedPrizePoolValue(a) || eventPriority(a, b))
       .slice(0, Math.max(0, 4 - replacements.length));
     return [...remainingLeaders, ...replacements]
-      .sort((a, b) => verifiedPrizePoolValue(b) - verifiedPrizePoolValue(a) || eventPriority(a, b))
+      .sort((a, b) => registrationAvailabilityRank(a) - registrationAvailabilityRank(b) || verifiedPrizePoolValue(b) - verifiedPrizePoolValue(a) || eventPriority(a, b))
       .slice(0, 4);
   })();
   const homepageFeaturedPoster = event => {
@@ -196,7 +200,6 @@
   };
   // MakeMyPass owns public registration and payment. Keep its links independent
   // from the backend gate, which only controls VYUHAM's internal workflows.
-  const canRegister = event => registrationFeatureEnabled && registrationOpen && event?.registrationOpen !== false && !['registration_closed', 'closed', 'cancelled'].includes(event?.status);
   const registrationCta = (url, label, className = 'button button-primary', event = null) => canRegister(event)
     ? `<a class="${className}" href="${esc(url)}">${label}</a>`
     : `<span class="${className} registration-disabled" role="status" aria-disabled="true">REGISTRATION CLOSED</span>`;
@@ -474,6 +477,7 @@
     const isCalligraphyWorkshop = (e.legacySlug || e.slug) === 'workshop-prompt-engineering';
     const isAiFilm = (e.legacySlug || e.slug) === 'ai-short-film';
     const isKsumTalk = (e.legacySlug || e.slug) === 'talk-ksum';
+    const isFrameHunt = (e.legacySlug || e.slug) === 'frame-hunt' || e.legacySlug === 'photography';
     const isVegaWorkshop = e.slug === 'vega-processors-and-ecosystem-by-c-dac';
     const speakerContent = !isSocTalk && !isAccuracyPanel && e.speaker
       ? `<section class="soc-content-block"><div class="eyebrow">SESSION SPEAKER</div><article class="soc-speaker-profile ksum-speaker-profile${isVegaWorkshop ? ' vega-speaker-profile' : ''}${isDspaceTalk ? ' dspace-speaker-profile' : ''}">${e.speakerPhoto ? `<img src="${esc(e.speakerPhoto)}" alt="${esc(e.speaker)}, ${esc(e.designation || 'session speaker')}" loading="lazy">` : ''}<div class="soc-speaker-copy"><h3>${esc(e.speaker)}</h3><p class="soc-designation">${esc(e.designation || '')}</p>${e.speakerContact ? `<p class="soc-speaker-contact">CONTACT <a href="tel:${esc(e.speakerContact)}">${esc(e.speakerContact)}</a></p>` : ''}${isKsumTalk ? `<div class="ksum-speaker-details"><h4>Professional Biography</h4>${e.professionalBiography.map(paragraph => `<p class="muted">${esc(paragraph)}</p>`).join('')}<h4>Areas of Expertise</h4><ul class="soc-guidelines">${e.areasOfExpertise.map(area => `<li>${esc(area)}</li>`).join('')}</ul></div>` : ''}</div></article></section>`
@@ -491,6 +495,9 @@
       : (e.legacySlug || e.slug) === 'hackathon' && e.themes?.length
       ? `<ul class="rule-list">${participationRules.map(rule => `<li>${esc(rule)}</li>`).join('')}<li><strong>Hackathon themes:</strong><ul class="hackathon-theme-list">${e.themes.map(theme => `<li>${esc(theme)}</li>`).join('')}</ul></li></ul>`
       : participationRules.length ? '<ul class="rule-list">' + participationRules.map(rule => '<li>' + esc(rule) + '</li>').join('') + '</ul>' : '<p class="muted">Detailed rules will be published by the event organizers.</p>';
+    const submissionLink = isFrameHunt && e.submissionUrl
+      ? `<section class="soc-content-block frame-hunt-submission"><div class="eyebrow">SUBMISSION LINK</div><p class="muted">Submit your Frame Hunt photos and videos using the participant submission folder.</p><a class="button button-primary" href="${esc(e.submissionUrl)}" target="_blank" rel="noopener noreferrer">SUBMIT YOUR FILES ↗</a></section>`
+      : '';
     const socContent = isSocTalk
       ? `<section class="soc-content-block"><div class="eyebrow">ABOUT THE EVENT</div><p class="muted">${esc(e.description)}</p></section>
         <section class="soc-content-block"><div class="eyebrow">SPEAKER</div><article class="soc-speaker-profile"><img src="${esc(e.speakerPhoto)}" alt="Mr. Vishnu Ramachandran, Security Specialist at H&amp;R Block" loading="lazy"><div class="soc-speaker-copy"><h3>${esc(e.speaker)}</h3><p class="soc-designation">${esc(e.designation)}</p><strong class="soc-experience">${esc(e.speakerExperience)}</strong><p class="muted">${esc(e.speakerBio)}</p></div></article></section>
@@ -511,7 +518,7 @@
       : '';
     const hero = `<section class="page-hero event-page-hero${image ? '' : ' event-page-hero-no-image'}">${image ? `<img class="event-hero-image" src="${esc(image)}" alt="${esc(officialEventTitle(e))} event poster">` : ''}<div class="event-hero-shade"></div><div class="container"><div class="breadcrumb"><a href="#/home">VYUHAM’26</a> / EVENT DOSSIER</div><span class="stream-pill">${esc(eventCategoryLabel(e))}</span><h1>${esc(officialEventTitle(e))}</h1>${e.officialTitle ? `<p class="event-title-subtitle">${esc(e.title)}</p>` : ''}<p>Event details, schedule information and participation overview for VYUHAM’26.</p></div></section>`;
     return `${hero}
-      <section class="section event-details-section"><div class="container"><a class="back-link" href="#/events">← BACK TO EVENT ARCHIVE</a><div class="event-detail"><div>${isAiFilm ? aiFilmGuidelines : `<h3 class="event-participation-heading">Participation notes</h3>${techQuizCoupon(e)}${participationNotes}${isKsumTalk ? `${speakerContent}${socContent}` : `${socContent}${speakerContent}`}`}</div><aside class="detail-panel"><div class="detail-panel-heading"><div class="eyebrow">EVENT INTEL</div></div><dl>${renderEventIntelRows(e)}</dl><div class="detail-panel-footer">${registrationCta(registrationUrl(e), 'REGISTER & PAY ON MAKEMYPASS ↗', 'button button-primary event-register-cta', e)}<details class="detail-info detail-info-bottom"><summary aria-label="MakeMyPass registration information">ⓘ</summary><p>MakeMyPass is the official registration and payment provider. Review final event details and complete your registration on the event’s MakeMyPass page.</p></details></div></aside></div></div></section>`;
+      <section class="section event-details-section"><div class="container"><a class="back-link" href="#/events">← BACK TO EVENT ARCHIVE</a><div class="event-detail"><div>${isAiFilm ? aiFilmGuidelines : `<h3 class="event-participation-heading">Participation notes</h3>${techQuizCoupon(e)}${participationNotes}${submissionLink}${isKsumTalk ? `${speakerContent}${socContent}` : `${socContent}${speakerContent}`}`}</div><aside class="detail-panel"><div class="detail-panel-heading"><div class="eyebrow">EVENT INTEL</div></div><dl>${renderEventIntelRows(e)}</dl><div class="detail-panel-footer">${registrationCta(registrationUrl(e), 'REGISTER & PAY ON MAKEMYPASS ↗', 'button button-primary event-register-cta', e)}<details class="detail-info detail-info-bottom"><summary aria-label="MakeMyPass registration information">ⓘ</summary><p>MakeMyPass is the official registration and payment provider. Review final event details and complete your registration on the event’s MakeMyPass page.</p></details></div></aside></div></div></section>`;
   };
   const schedulePage = () => `<section class="page-hero schedule-page-hero"><div class="container"><div class="breadcrumb"><a href="#/home">VYUHAM’26</a> / FESTIVAL TIMELINE</div><div class="eyebrow">Festival timeline</div><h1>THREE DAYS.<br><span class="green">NO PAUSE.</span></h1><p>Plan your VYUHAM’26 experience. Event-specific timings and venues should be confirmed with the official schedule.</p></div><img class="schedule-hero-logo" src="assets/vyuham_logo_sm.png" alt="VYUHAM emblem" width="72" height="72"></section>
     <section class="section"><div class="container"><div class="schedule-days" id="scheduleDays">${days.map(d => `<button class="schedule-day schedule-day-${d.day}" type="button" aria-pressed="${d.day === 1}" data-day="${d.day}"><b>${d.dateLabel}</b><span>${d.name}</span><small>${d.desc}</small><em>VIEW DAY <strong>↘</strong></em></button>`).join('')}</div><div id="scheduleContent"></div></div></section>`;
@@ -791,9 +798,9 @@
         const dayOk = day === 'all' || eventDays.includes(Number(day));
         const hay = [officialEventTitle(e), e.title, e.description, e.stream, e.venue].join(' ').toLowerCase(); return streamOk && dayOk && hay.includes(search.toLowerCase());
       });
-      if (sort === 'name') filtered.sort((a, b) => officialEventTitle(a).localeCompare(officialEventTitle(b)));
-      if (sort === 'fee') filtered.sort((a, b) => { const cost = e => { const m = String(e.fee || '').match(/[\d,]+/); return m ? Number(m[0].replaceAll(',', '')) : Infinity }; return cost(a) - cost(b) });
-      if (sort === 'day') filtered.sort(eventPriority);
+      if (sort === 'name') filtered.sort((a, b) => registrationAvailabilityRank(a) - registrationAvailabilityRank(b) || officialEventTitle(a).localeCompare(officialEventTitle(b)));
+      if (sort === 'fee') filtered.sort((a, b) => registrationAvailabilityRank(a) - registrationAvailabilityRank(b) || (() => { const cost = e => { const m = String(e.fee || '').match(/[\d,]+/); return m ? Number(m[0].replaceAll(',', '')) : Infinity }; return cost(a) - cost(b) })());
+      if (sort === 'day') filtered.sort((a, b) => registrationAvailabilityRank(a) - registrationAvailabilityRank(b) || eventPriority(a, b));
       count.textContent = `${String(filtered.length).padStart(2, '0')} EVENTS FOUND / ${events.length} ${document.documentElement.dataset.api === 'online' ? 'LIVE API' : 'CATALOG'} RECORDS`;
       const showDayPass = selected === 'all' && day === 'all' && !search.trim();
       grid.innerHTML = `${filtered.length ? filtered.map(eventCard).join('') : '<div class="empty-state" style="grid-column:1/-1">No events match these filters. Clear a filter or try another search.</div>'}${showDayPass ? dayPassCard() : ''}`;

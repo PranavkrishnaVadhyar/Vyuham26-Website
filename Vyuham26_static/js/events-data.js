@@ -784,6 +784,7 @@ window.VYUHAM_EVENTS = [
     "venue": "Campus Wide",
     "description": "Campus-wide open contest across all three days.",
     "fee": "₹100 onwards",
+    "submissionUrl": "https://drive.google.com/drive/folders/1GLJy-s-hrFNLiEqVDm56TXKddVnAQ0SZ",
     "eligibility": "Open to all attendees",
     "teamSize": "Individual",
     "status": "upcoming",
