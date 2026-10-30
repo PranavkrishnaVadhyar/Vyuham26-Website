@@ -15,6 +15,8 @@
   let landingIntroSeen = false;
   let heroCarouselCleanup = null;
   let concertPopupCleanup = null;
+  let passNoticePopupCleanup = null;
+  let concertPopupState = 'idle';
   let concertPopupShownThisSession = false;
   const registrationFeatureEnabled = window.VYUHAM_REGISTRATION_ENABLED === true;
   const MAKEMYPASS_HOME = 'https://org.makemypass.com/web/vyuham-26';
@@ -54,7 +56,10 @@
   const sponsors = [
     { name: 'DSpace', category: 'Title Sponsor', status: 'Confirmed', logo: 'assets/sponsors/dspace.svg' },
     { name: 'Canara Bank', category: 'Associate Sponsor', status: 'Confirmed', logo: 'assets/sponsors/canara_bank.svg' },
-    { name: 'Reflections', category: 'Technology Partner', logo: 'assets/sponsors/reflections.png' }
+    { name: 'Reflections', category: 'Technology Partner', logo: 'assets/sponsors/reflections.png' },
+    { name: 'IEEE', category: 'Co-Powered By', logo: 'assets/sponsors/ieee.png' },
+    { name: 'IEEE Circuits and Systems Society', category: 'Co-Powered By', logo: 'assets/sponsors/ieee-circuits-and-systems-society.png' },
+    { name: 'DUK IEEE Student Branch', category: 'Co-Powered By', logo: 'assets/sponsors/duk-ieee-student-branch.png' }
   ];
   const streams = [
     { id: 'tech', name: 'Technology', symbol: '01', desc: 'Hackathons, cybersecurity, AI and hands-on invention. Build what comes next.', index: '01', image: 'assets/streams/technology.jpg' },
@@ -68,8 +73,9 @@
     const isHome = page === 'home';
     const renderSponsor = (sponsor, extraClass = '') => `<article class="sponsor-entry ${extraClass} ${sponsor.name === 'Reflections' ? 'sponsor-entry-reflections' : ''}"><div class="sponsor-mark">${sponsor.logo ? `<img src="${esc(sponsor.logo)}" alt="${esc(sponsor.name)}" loading="lazy">` : `<span class="sponsor-wordmark" role="img" aria-label="${esc(sponsor.name)}">${esc(sponsor.name)}</span>`}</div><span class="sponsor-name">${esc(sponsor.name)}</span><span class="sponsor-category">${esc(sponsor.category)}</span></article>`;
     const titleSponsor = sponsors.find(sponsor => sponsor.category === 'Title Sponsor');
-    const supportingSponsors = sponsors.filter(sponsor => sponsor.category !== 'Title Sponsor');
-    return `<section class="section sponsors-section sponsors-section-${page}"${isHome ? ' id="sponsors"' : ''}><div class="container"><div class="section-head sponsor-section-head"><div><div class="eyebrow">VYUHAM / PARTNERS</div><h2>OUR<br><span class="green">SPONSORS</span></h2></div><p>Meet the organizations supporting VYUHAM’26.</p></div><div class="sponsor-showcase"><div class="sponsor-tier sponsor-tier-title">${titleSponsor ? renderSponsor(titleSponsor, 'sponsor-entry-title') : ''}</div><div class="sponsor-tier sponsor-tier-supporting"><div class="sponsor-supporting-grid">${supportingSponsors.map(sponsor => renderSponsor(sponsor, 'sponsor-entry-supporting')).join('')}</div></div></div><div class="sponsors-section-footer"><span>Partnerships that help bring the festival to life.</span><a class="button button-outline" href="mailto:techfest@duk.ac.in">PARTNERSHIP ENQUIRIES ↗</a></div></div></section>`;
+    const supportingSponsors = sponsors.filter(sponsor => sponsor.category !== 'Title Sponsor' && sponsor.category !== 'Co-Powered By');
+    const coPoweredSponsors = sponsors.filter(sponsor => sponsor.category === 'Co-Powered By');
+    return `<section class="section sponsors-section sponsors-section-${page}"${isHome ? ' id="sponsors"' : ''}><div class="container"><div class="section-head sponsor-section-head"><div><div class="eyebrow">VYUHAM / PARTNERS</div><h2>OUR<br><span class="green">SPONSORS</span></h2></div><p>Meet the organizations supporting VYUHAM’26.</p></div><div class="sponsor-showcase"><div class="sponsor-tier sponsor-tier-title">${titleSponsor ? renderSponsor(titleSponsor, 'sponsor-entry-title') : ''}</div><div class="sponsor-tier sponsor-tier-supporting"><div class="sponsor-supporting-grid">${supportingSponsors.map(sponsor => renderSponsor(sponsor, 'sponsor-entry-supporting')).join('')}</div></div>${coPoweredSponsors.length ? `<div class="sponsor-tier sponsor-tier-copowered"><div class="sponsor-co-powered-row" aria-label="Co-Powered By sponsors">${coPoweredSponsors.map(sponsor => renderSponsor(sponsor, 'sponsor-entry-copowered')).join('')}</div></div>` : ''}</div><div class="sponsors-section-footer"><span>Partnerships that help bring the festival to life.</span><a class="button button-outline" href="mailto:techfest@duk.ac.in">PARTNERSHIP ENQUIRIES ↗</a></div></div></section>`;
   };
   const safeExternalUrl = value => { try { const url = new URL(value); return ['https:', 'http:'].includes(url.protocol) ? url.href : ''; } catch { return ''; } };
   const safeEventImage = value => {
@@ -102,11 +108,11 @@
       : Number.isFinite(Number(event.day))
         ? `DAY 0${event.day}`
         : 'FESTIVAL';
-  const eventDateLabel = event => event.scheduleGroup === 'pre-fest'
+  const eventDateLabel = event => event.dateLabel || (event.scheduleGroup === 'pre-fest'
     ? 'PRE-FESTIVAL'
     : event.scheduleDays?.length > 1
       ? '30th October – 1st November 2026'
-      : ordinalDate(days[Number(event.day) - 1]?.date) || 'TBA';
+      : ordinalDate(days[Number(event.day) - 1]?.date) || 'TBA');
   const officialEventTitle = event => event.officialTitle || event.title;
   const eventPrizeValue = event => {
     const match = String(event.prizePool || '').match(/[\d,]+/);
@@ -126,7 +132,7 @@
   ];
   const renderEventMetadata = event => {
     const fields = eventMetadataFields(event);
-    return fields.length ? `<div class="event-meta">${fields.map(field => `<span>${esc(field.label)}${field.label === 'FEE' && isTechQuiz(event) ? '<strong class="discounted-fee"><s>₹200</s><b>₹100</b></strong>' : `<strong>${esc(field.value)}</strong>`}</span>`).join('')}</div>` : '';
+    return fields.length ? `<div class="event-meta">${fields.map(field => `<span>${esc(field.label)}${field.label === 'FEE' && isTechQuiz(event) ? `<strong class="discounted-fee"><s>${esc(event.originalFee || '₹150 onwards')}</s><b>${esc(event.fee)}</b></strong>` : `<strong>${esc(field.value)}</strong>`}</span>`).join('')}</div>` : '';
   };
   const renderEventIntelRows = event => {
     const rows = [];
@@ -138,6 +144,7 @@
     if (event.designation) rows.push({ label: 'DESIGNATION', value: event.designation });
     if (event.format) rows.push({ label: 'FORMAT', value: event.format });
     if (event.duration) rows.push({ label: 'DURATION', value: event.duration });
+    if (event.topic) rows.push({ label: 'TOPIC', value: event.topic });
     rows.push(...eventMetadataFields(event));
     if (event.teamSize) rows.push({ label: 'TEAM SIZE', value: event.teamSize });
     rows.push({ label: 'ELIGIBILITY', value: universalEligibility });
@@ -145,7 +152,7 @@
       const isSocIntelValue = (event.legacySlug || event.slug) === 'panel-cybersecurity' && ['TIME', 'SPEAKER', 'DESIGNATION', 'FORMAT'].includes(row.label);
       const classes = [row.label === 'PRIZE POOL' ? 'green' : '', isSocIntelValue ? 'soc-intel-value' : ''].filter(Boolean).join(' ');
       const value = row.label === 'FEE' && isTechQuiz(event)
-        ? '<span class="discounted-fee"><s>₹200</s><b>₹100</b></span>'
+        ? `<span class="discounted-fee"><s>${esc(event.originalFee || '₹150 onwards')}</s><b>${esc(event.fee)}</b></span>`
         : esc(row.value);
       return `<div><dt>${esc(row.label)}</dt><dd${classes ? ` class="${classes}"` : ''}>${value}</dd></div>`;
     }).join('');
@@ -199,7 +206,8 @@
     : '';
 
   const slugify = v => String(v || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-  const streamLabel = s => ({ tech: 'Technology', technology: 'Technology', management: 'Management', cultural: 'Culture', culture: 'Culture', esports: 'Esports', gaming: 'Esports', impact: 'Impact', general: 'General', session: 'Session' }[s] || 'General');
+  const streamLabel = s => ({ tech: 'Technology', technology: 'Technology', management: 'Management', cultural: 'Culture', culture: 'Culture', esports: 'Esports', gaming: 'Esports', impact: 'Impact', general: 'General', session: 'Session', 'talk-session': 'Talk Session' }[s] || 'General');
+  const eventCategoryLabel = event => event.eventType === 'talk-session' ? 'Talk Session' : streamLabel(event.stream);
   const route = () => {
     // Hash routes use `#/...`; a plain `#section` is a native in-page anchor.
     const raw = location.hash.startsWith('#/') ? location.hash.slice(2) || 'home' : 'home';
@@ -214,7 +222,7 @@
     const isConcert = e.slug === CONCERT_PROMOTION.slug;
     return `<article class="event-card${isConcert ? ' concert-event-card' : ''} reveal" data-stream="${esc(e.stream)}">
     <div class="event-art${image ? ' has-image' : ''}"${isConcert ? '' : ' aria-hidden="true"'}>${image ? (isConcert ? `<a class="concert-event-poster-link" href="${eventUrl}" aria-label="Open ${esc(officialEventTitle(e))} details"><img class="event-art-image" src="${esc(image)}" alt="" loading="lazy" decoding="async"></a>` : `<img class="event-art-image" src="${esc(image)}" alt="" loading="lazy" decoding="async">`) : ''}${techQuizCoupon(e, 'card')}<span>VYUHAM / ${esc(eventDayLabel(e))}</span></div>
-    <div class="event-content"><div class="event-top"><span class="tag stream-pill">${esc(streamLabel(e.stream))}</span><span class="tag day">${esc(eventDateLabel(e))}</span></div>
+    <div class="event-content"><div class="event-top"><span class="tag stream-pill">${esc(eventCategoryLabel(e))}</span><span class="tag day">${esc(eventDateLabel(e))}</span></div>
     <h3><a href="${eventUrl}">${esc(officialEventTitle(e))}</a></h3>${e.officialTitle ? `<p class="event-title-subtitle">${esc(e.title)}</p>` : ''}<p>${esc(e.cardDescription || e.description)}</p>
     ${renderEventMetadata(e)}
     <div class="event-actions"><a class="button button-outline" href="${eventUrl}">DETAILS</a>${registrationCta(registrationUrl(e), 'REGISTER ↗', 'button button-primary', e)}</div></div>
@@ -244,6 +252,7 @@
   const initConcertPopup = () => {
     const root = $('#concertPopupRoot');
     if (!root) return () => {};
+    concertPopupState = 'pending';
     root.innerHTML = concertPopup();
     const overlay = $('#concertPopup', root);
     const dialog = $('.concert-popup-dialog', root);
@@ -254,7 +263,10 @@
     let open = false;
     // Show once per page load: a hard refresh should replay the intro and popup,
     // while SPA navigation during this load should not reopen a dismissed popup.
-    if (concertPopupShownThisSession) return () => { root.innerHTML = '' };
+    if (concertPopupShownThisSession) {
+      concertPopupState = 'closed';
+      return () => { root.innerHTML = '' };
+    }
     const finish = restoreFocus => {
       if (!open) return;
       open = false;
@@ -263,11 +275,13 @@
       document.body.classList.remove('concert-popup-open');
       app.inert = wasAppInert;
       siteHeader.inert = wasHeaderInert;
-      siteHeader.hidden = wasHeaderHidden;
+      siteHeader.hidden = false;
       $('#siteFooter').inert = wasFooterInert;
       overlay.removeEventListener('click', onOverlayClick);
       document.removeEventListener('keydown', onDialogKeydown);
       if (restoreFocus && previousFocus?.isConnected) previousFocus.focus({ preventScroll: true });
+      concertPopupState = 'closed';
+      document.dispatchEvent(new CustomEvent('concert-popup-closed'));
     };
     const onOverlayClick = event => { if (event.target === overlay) finish(true) };
     const onDialogKeydown = event => {
@@ -282,6 +296,7 @@
     const show = () => {
       if (open || overlay.hidden === false) return;
       concertPopupShownThisSession = true;
+      concertPopupState = 'open';
       previousFocus = document.activeElement;
       wasAppInert = app.inert; wasHeaderInert = siteHeader.inert; wasFooterInert = $('#siteFooter').inert; wasHeaderHidden = siteHeader.hidden;
       app.inert = true; siteHeader.inert = true; siteHeader.hidden = true; $('#siteFooter').inert = true;
@@ -303,11 +318,114 @@
       timer = window.setTimeout(show, 4500);
     }
     return () => {
+      concertPopupState = 'idle';
       clearTimeout(timer);
       if (readyHandler) $('#home')?.removeEventListener('hero:ready', readyHandler);
       finish(false);
       closeButton.removeEventListener('click', onCloseClick);
       root.innerHTML = '';
+    };
+  };
+  const initEmergencyPopup = () => {
+    const overlay = $('#emergencyServicesPopup');
+    const openButton = $('#emergencyServicesButton');
+    if (!overlay || !openButton) return;
+    const closeButton = $('.emergency-popup-close', overlay);
+    const copyButtons = $$('.emergency-copy', overlay);
+    const copyResetTimers = new WeakMap();
+    const close = () => {
+      overlay.hidden = true;
+      document.body.classList.remove('emergency-popup-open');
+      openButton.focus({ preventScroll: true });
+    };
+    openButton.addEventListener('click', () => {
+      overlay.hidden = false;
+      document.body.classList.add('emergency-popup-open');
+      closeButton.focus({ preventScroll: true });
+    });
+    closeButton.addEventListener('click', close);
+    overlay.addEventListener('click', event => { if (event.target === overlay) close() });
+    overlay.addEventListener('keydown', event => { if (event.key === 'Escape') close() });
+    copyButtons.forEach(button => button.addEventListener('click', async () => {
+      const number = button.dataset.copy;
+      try {
+        await navigator.clipboard.writeText(number);
+        const status = $('span', button);
+        clearTimeout(copyResetTimers.get(button));
+        status.textContent = 'COPIED';
+        copyResetTimers.set(button, setTimeout(() => {
+          status.textContent = 'COPY';
+          copyResetTimers.delete(button);
+        }, 3000));
+        toast(`${number} copied to clipboard.`);
+      } catch {
+        toast('Could not copy the number. Please press and hold to copy it.');
+      }
+    }));
+  };
+  const initPassNoticePopup = () => {
+    const notices = [...document.querySelectorAll('.campus-entry-notice')];
+    notices.slice(1).forEach(notice => notice.remove());
+    const overlay = $('#campusEntryNotice');
+    const launcher = $('#passNoticeLauncher');
+    if (!overlay || !launcher) return;
+    // Keep the timed notice outside the routed app so no page-level notice can
+    // remain underneath it during route transitions or rerenders.
+    if (overlay.parentElement !== document.body) document.body.append(overlay);
+    const closeButton = $('.campus-entry-notice-close', overlay);
+    let closeTimer = 0;
+    let previousFocus = null;
+    launcher.hidden = true;
+    const close = restoreFocus => {
+      clearTimeout(closeTimer);
+      overlay.hidden = true;
+      document.body.classList.remove('campus-entry-notice-open');
+      if (restoreFocus) launcher.focus({ preventScroll: true });
+    };
+    const show = (focusDialog = false, automatic = false) => {
+      clearTimeout(closeTimer);
+      previousFocus = document.activeElement;
+      overlay.hidden = false;
+      document.body.classList.add('campus-entry-notice-open');
+      closeTimer = window.setTimeout(() => close(false), 8000);
+      if (focusDialog) closeButton.focus({ preventScroll: true });
+    };
+    launcher.addEventListener('click', () => show(true));
+    closeButton.addEventListener('click', () => close(true));
+    overlay.addEventListener('click', event => { if (event.target === overlay) close(true) });
+    overlay.addEventListener('keydown', event => {
+      if (event.key === 'Escape') { event.preventDefault(); close(true) }
+      if (event.key !== 'Tab') return;
+      const controls = $$('button:not([disabled]),a[href],[tabindex]:not([tabindex="-1"])', overlay);
+      const first = controls[0], last = controls[controls.length - 1];
+      if (!first) return;
+      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus() }
+      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus() }
+    });
+    const showAutomatically = () => show(false, true);
+    const homeHero = $('#home');
+    const revealLauncher = () => { launcher.hidden = false };
+    const waitForConcertClose = () => {
+      if (concertPopupState === 'pending' || concertPopupState === 'open') {
+        document.addEventListener('concert-popup-closed', showAutomatically, { once: true });
+        return;
+      }
+      showAutomatically();
+    };
+    if ($('#landingIntro') && homeHero) {
+      homeHero.addEventListener('hero:ready', revealLauncher, { once: true });
+      homeHero.addEventListener('hero:ready', waitForConcertClose, { once: true });
+    } else {
+      revealLauncher();
+      waitForConcertClose();
+    }
+    return () => {
+      clearTimeout(closeTimer);
+      document.removeEventListener('concert-popup-closed', showAutomatically);
+      launcher.hidden = true;
+      overlay.remove();
+      document.body.classList.remove('campus-entry-notice-open');
+      if (previousFocus?.isConnected) previousFocus.focus({ preventScroll: true });
     };
   };
   const featuredHomeSection = () => {
@@ -321,7 +439,7 @@
     const featuredEvent = featuredEvents[0];
     return `
     ${showIntro ? `<div class="intro-cinema" id="landingIntro" tabindex="-1" role="dialog" aria-modal="true" aria-label="VYUHAM 2026 introduction"><button class="intro-skip" id="skipIntro" type="button">SKIP INTRO <span aria-hidden="true">↗</span></button><div class="intro-scene intro-scene-campus"><img src="assets/venue-campus-enhanced.jpg" alt=""><span>TECHNOCITY CAMPUS / TECHNOPARK PHASE 4</span></div><div class="intro-scene intro-scene-festival"><img src="assets/afterdark-monolith.png" alt=""><span>THREE DAYS / ONE CONVERGENCE</span></div><div class="intro-cinema-vignette"></div><div class="intro-cinema-grid"></div><div class="intro-cinema-orbit intro-cinema-orbit-a"></div><div class="intro-cinema-orbit intro-cinema-orbit-b"></div><div class="intro-cinema-core"><span class="intro-cinema-kicker"><img src="assets/duk-logo-intro.png" alt="Digital University Kerala"><b>Presents</b></span><img src="assets/vyuham_logo_optimized.png" alt=""><h1><span>VYUHAM</span><b>’26</b></h1><p>TECHNOLOGY. CULTURE. COMPETITION.</p></div><span class="intro-cinema-coordinate intro-cinema-left">30 OCT — 01 NOV / 2026</span><span class="intro-cinema-coordinate intro-cinema-right">THIRUVANANTHAPURAM / INDIA</span><div class="intro-cinema-flash"></div></div>` : ''}
-    <section class="cyber-hero${showIntro ? ' intro-handoff' : ''}" id="home"><div class="cyber-hero-grid"><div class="cyber-copy"><div class="cyber-kicker"><span class="live-dot"></span> DIGITAL UNIVERSITY KERALA <i>·</i> 2026</div><div class="cyber-wordmark"><img src="assets/vyuham_logo_optimized.png" alt="VYUHAM red emblem"><h1>VYUHAM<span>’26</span></h1></div><p class="cyber-slogan">THE FUTURE<br><em>AWAITS.</em></p><p class="cyber-intro">VYUHAM’26 is Digital University Kerala’s flagship national-level management, technology and cultural fest.</p><div class="cyber-actions">${registrationCta(MAKEMYPASS_HOME, 'REGISTER & GET TICKETS <span aria-hidden="true">↗</span>', 'button button-primary hero-cta hero-cta-register')}<a class="button button-outline hero-cta hero-cta-map" href="https://duk360.duk.ac.in/duk-tour/?scene=technopark-phase-4" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12Z"/><circle cx="12" cy="9" r="2.3"/></svg>CAMPUS MAP <span aria-hidden="true">↗</span></a><a class="button button-outline hero-cta hero-cta-explore" href="#/events">EXPLORE ALL EVENTS <span aria-hidden="true">↓</span></a></div><div class="cyber-data"><span>30 OCT — 01 NOV, 2026</span><span>TECHNOCITY CAMPUS, TECHNOPARK PHASE 4</span></div><div class="hero-count cyber-count" aria-label="Countdown to festival opening"><small>COUNTDOWN TO OPENING</small><strong data-countdown>—</strong></div></div><div class="cyber-stage concert-stage" id="featuredCarousel" role="region" aria-label="Featured event carousel"><figure class="stage-screen stage-main"><img class="stage-featured-art" id="featuredArtwork" src="assets/vyuham-hero-convergence.png" alt="VYUHAM’26 cinematic hero artwork" fetchpriority="high"><div class="stage-shade"></div><div class="stage-brand"><img src="assets/vyuham_logo_optimized.png" alt=""><span>VYUHAM<sup>’26</sup></span></div><figcaption><span>VYUHAM / 01</span><span>THIRUVANANTHAPURAM, INDIA</span></figcaption></figure><div class="stage-screen stage-float" id="featuredCard" role="group" aria-roledescription="slide" aria-label="Featured event 1 of ${featuredEvents.length}"><img class="stage-float-poster" id="featuredPoster" alt="" hidden><a class="stage-float-hitarea" id="featuredLink" href="#/event/${encodeURIComponent(featuredEvent?.slug || 'events')}" aria-label="Open details for ${esc(featuredEvent ? officialEventTitle(featuredEvent) : 'VYUHAM’26')}"></a><span class="stage-float-label">FEATURED TRANSMISSION</span><span class="stage-float-category" id="featuredCategory">${esc(streamLabel(featuredEvent?.stream || 'tech'))}</span><b class="stage-float-title" id="featuredTitle">${esc(featuredEvent ? officialEventTitle(featuredEvent) : 'VYUHAM’26')}</b><small class="stage-float-subtitle" id="featuredSubtitle" ${featuredEvent?.officialTitle ? '' : 'hidden'}>${esc(featuredEvent?.officialTitle ? featuredEvent.title : '')}</small><div class="stage-float-footer"><span class="stage-float-foot">OPEN EVENT DOSSIER ↗</span><div class="stage-dots" id="featuredDots" role="group" aria-label="Choose a featured event">${featuredEvents.map((event, index) => `<button class="stage-dot ${index === 0 ? 'active' : ''}" type="button" data-featured-index="${index}" aria-label="Show ${esc(officialEventTitle(event))}" aria-pressed="${index === 0}"></button>`).join('')}</div></div></div><span class="stage-orbit stage-orbit-one"></span><span class="stage-orbit stage-orbit-two"></span></div></div><div class="cyber-hero-foot"><span>THE NATIONAL TECHNO-CULTURAL FESTIVAL</span><a href="#festival">SCROLL TO EXPLORE ↓</a></div></section>
+    <div class="campus-entry-notice" id="campusEntryNotice" hidden><section class="campus-entry-notice-dialog" role="dialog" aria-modal="false" aria-labelledby="campusEntryTitle"><button class="campus-entry-notice-close" type="button" aria-label="Close campus pass requirement">×</button><span class="campus-entry-notice-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3 20 6v5c0 5-3.4 8.5-8 10-4.6-1.5-8-5-8-10V6l8-3Z"/><path d="m8.5 12 2.2 2.2 4.8-5"/></svg></span><div class="campus-entry-notice-copy"><span class="campus-entry-notice-kicker">IMPORTANT CAMPUS NOTICE</span><h2 id="campusEntryTitle">Day Pass Mandatory</h2><p>A valid day pass is mandatory unless having event pass for entering the college campus during VYUHAM’26.</p><p>Please ensure you have your day pass or event pass before arriving at the campus.</p></div></section></div><section class="cyber-hero${showIntro ? ' intro-handoff' : ''}" id="home"><div class="cyber-hero-grid"><div class="cyber-copy"><div class="cyber-kicker"><span class="live-dot"></span> DIGITAL UNIVERSITY KERALA <i>·</i> 2026</div><div class="cyber-wordmark"><img src="assets/vyuham_logo_optimized.png" alt="VYUHAM red emblem"><h1>VYUHAM<span>’26</span></h1></div><p class="cyber-slogan">THE FUTURE<br><em>AWAITS.</em></p><p class="cyber-intro">VYUHAM’26 is Digital University Kerala’s flagship national-level management, technology and cultural fest.</p><div class="cyber-actions">${registrationCta(MAKEMYPASS_HOME, 'REGISTER & GET TICKETS <span aria-hidden="true">↗</span>', 'button button-primary hero-cta hero-cta-register')}<a class="button button-outline hero-cta hero-cta-map" href="https://duk360.duk.ac.in/duk-tour/?scene=technopark-phase-4" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 7 12 7Z"/><circle cx="12" cy="9" r="2.3"/></svg>CAMPUS MAP <span aria-hidden="true">↗</span></a><a class="button button-outline hero-cta hero-cta-explore" href="#/events">EXPLORE ALL EVENTS <span aria-hidden="true">↓</span></a></div><div class="cyber-data"><span>30 OCT — 01 NOV, 2026</span><span>TECHNOCITY CAMPUS, TECHNOPARK PHASE 4</span></div><div class="hero-count cyber-count" aria-label="Countdown to festival opening"><small>COUNTDOWN TO OPENING</small><strong data-countdown>—</strong></div></div><div class="cyber-stage concert-stage" id="featuredCarousel" role="region" aria-label="Featured event carousel"><figure class="stage-screen stage-main"><img class="stage-featured-art" id="featuredArtwork" src="assets/vyuham-hero-convergence.png" alt="VYUHAM’26 cinematic hero artwork" fetchpriority="high"><div class="stage-shade"></div><div class="stage-brand"><img src="assets/vyuham_logo_optimized.png" alt=""><span>VYUHAM<sup>’26</sup></span></div><figcaption><span>VYUHAM / 01</span><span>THIRUVANANTHAPURAM, INDIA</span></figcaption></figure><div class="stage-screen stage-float" id="featuredCard" role="group" aria-roledescription="slide" aria-label="Featured event 1 of ${featuredEvents.length}"><img class="stage-float-poster" id="featuredPoster" alt="" hidden><a class="stage-float-hitarea" id="featuredLink" href="#/event/${encodeURIComponent(featuredEvent?.slug || 'events')}" aria-label="Open details for ${esc(featuredEvent ? officialEventTitle(featuredEvent) : 'VYUHAM’26')}"></a><span class="stage-float-label">FEATURED TRANSMISSION</span><span class="stage-float-category" id="featuredCategory">${esc(streamLabel(featuredEvent?.stream || 'tech'))}</span><b class="stage-float-title" id="featuredTitle">${esc(featuredEvent ? officialEventTitle(featuredEvent) : 'VYUHAM’26')}</b><small class="stage-float-subtitle" id="featuredSubtitle" ${featuredEvent?.officialTitle ? '' : 'hidden'}>${esc(featuredEvent?.officialTitle ? featuredEvent.title : '')}</small><div class="stage-float-footer"><span class="stage-float-foot">OPEN EVENT DOSSIER ↗</span><div class="stage-dots" id="featuredDots" role="group" aria-label="Choose a featured event">${featuredEvents.map((event, index) => `<button class="stage-dot ${index === 0 ? 'active' : ''}" type="button" data-featured-index="${index}" aria-label="Show ${esc(officialEventTitle(event))}" aria-pressed="${index === 0}"></button>`).join('')}</div></div></div><span class="stage-orbit stage-orbit-one"></span><span class="stage-orbit stage-orbit-two"></span></div></div><div class="cyber-hero-foot"><span>THE NATIONAL TECHNO-CULTURAL FESTIVAL</span><a href="#festival">SCROLL TO EXPLORE ↓</a></div></section>
     <div class="info-strip cyber-strip stats-bar"><span class="stats-item"><b>30 October 2026 - 01 November 2026</b><small>THREE FESTIVAL DAYS</small></span><span class="stats-item"><b>TECHNOCITY CAMPUS</b><small>TECHNOPARK PHASE 4</small></span><span class="stats-item"><b>${events.length}</b><small>EVENT RECORDS</small></span><span class="stats-item"><b>01 / 03</b><small>DAY 1 → DAY 3</small></span></div>
     <section class="section festival-intro" id="festival"><div class="container intro-composition"><div class="intro-mark reveal"><span>VYUHAM / DUK</span><img src="assets/vyuham_logo_sm.png" alt="VYUHAM emblem"><b>ONE<br>FESTIVAL<br><i>FOUR WORLDS.</i></b></div><div class="intro-copy reveal"><div class="eyebrow">01 / ABOUT THE FESTIVAL</div><h2>WHERE<br>DISCIPLINES<br><span class="green">COLLIDE.</span></h2><p>VYUHAM is Digital University Kerala’s flagship national-level management, technology and cultural fest. Across three days, students gather to build, debate, perform and compete.</p><p>From autonomous systems and strategy arenas to live culture and esports, one campus becomes a meeting point for different ways of thinking.</p><a class="text-link" href="#/about">DISCOVER VYUHAM <span>↗</span></a></div></div></section>
     <section class="section stream-section" id="streams"><div class="container"><div class="section-head reveal"><div><div class="eyebrow">02 / FOUR SIGNALS</div><h2>FIND YOUR<br><span class="green">FREQUENCY.</span></h2></div><p>Four distinct streams. One shared festival ground.</p></div><div class="stream-grid">${streams.map((s, i) => `<a class="stream-card stream-card-${i + 1} reveal" data-index="${s.index}" href="#/events?stream=${s.id}"><img class="stream-art" src="${s.image}" alt="" loading="lazy" decoding="async"><img class="stream-emblem" src="assets/vyuham_logo_sm.png" alt="" aria-hidden="true" loading="lazy"><span class="stream-icon">${s.symbol} / STREAM</span><strong>${s.name}</strong><p>${s.desc}</p><span class="stream-go">EXPLORE ↗</span><i class="stream-watermark">${s.index}</i></a>`).join('')}</div></div></section>
@@ -350,16 +468,19 @@
     if (!e) return notFound();
     if (e.slug === CONCERT_PROMOTION.slug) return concertDetailPage(e);
     const isSocTalk = (e.legacySlug || e.slug) === 'panel-cybersecurity';
-    const isAccuracyPanel = (e.legacySlug || e.slug) === 'panel-responsible-ai';
+    const isAccuracyPanel = (e.legacySlug || e.slug) === 'panel-responsible-ai' && Array.isArray(e.panelSpeakers);
+    const isDspaceTalk = e.eventType === 'talk-session' && e.speaker === 'Shome Jose';
     const isPromptWar = (e.legacySlug || e.slug) === 'prompt-war';
     const isCalligraphyWorkshop = (e.legacySlug || e.slug) === 'workshop-prompt-engineering';
     const isAiFilm = (e.legacySlug || e.slug) === 'ai-short-film';
     const isKsumTalk = (e.legacySlug || e.slug) === 'talk-ksum';
     const isVegaWorkshop = e.slug === 'vega-processors-and-ecosystem-by-c-dac';
-    const speakerContent = !isSocTalk && !isAccuracyPanel && e.speaker && e.speakerPhoto
-      ? `<section class="soc-content-block"><div class="eyebrow">SESSION SPEAKER</div><article class="soc-speaker-profile ksum-speaker-profile${isVegaWorkshop ? ' vega-speaker-profile' : ''}"><img src="${esc(e.speakerPhoto)}" alt="${esc(e.speaker)}, ${esc(e.designation || 'session speaker')}" loading="lazy"><div class="soc-speaker-copy"><h3>${esc(e.speaker)}</h3><p class="soc-designation">${esc(e.designation || '')}</p>${e.speakerContact ? `<p class="soc-speaker-contact">CONTACT <a href="tel:${esc(e.speakerContact)}">${esc(e.speakerContact)}</a></p>` : ''}${isKsumTalk ? `<div class="ksum-speaker-details"><h4>Professional Biography</h4>${e.professionalBiography.map(paragraph => `<p class="muted">${esc(paragraph)}</p>`).join('')}<h4>Areas of Expertise</h4><ul class="soc-guidelines">${e.areasOfExpertise.map(area => `<li>${esc(area)}</li>`).join('')}</ul></div>` : ''}</div></article></section>`
+    const speakerContent = !isSocTalk && !isAccuracyPanel && e.speaker
+      ? `<section class="soc-content-block"><div class="eyebrow">SESSION SPEAKER</div><article class="soc-speaker-profile ksum-speaker-profile${isVegaWorkshop ? ' vega-speaker-profile' : ''}${isDspaceTalk ? ' dspace-speaker-profile' : ''}">${e.speakerPhoto ? `<img src="${esc(e.speakerPhoto)}" alt="${esc(e.speaker)}, ${esc(e.designation || 'session speaker')}" loading="lazy">` : ''}<div class="soc-speaker-copy"><h3>${esc(e.speaker)}</h3><p class="soc-designation">${esc(e.designation || '')}</p>${e.speakerContact ? `<p class="soc-speaker-contact">CONTACT <a href="tel:${esc(e.speakerContact)}">${esc(e.speakerContact)}</a></p>` : ''}${isKsumTalk ? `<div class="ksum-speaker-details"><h4>Professional Biography</h4>${e.professionalBiography.map(paragraph => `<p class="muted">${esc(paragraph)}</p>`).join('')}<h4>Areas of Expertise</h4><ul class="soc-guidelines">${e.areasOfExpertise.map(area => `<li>${esc(area)}</li>`).join('')}</ul></div>` : ''}</div></article></section>`
       : '';
-    const image = safeEventImage(e.image) || streams.find(stream => stream.id === e.stream)?.image || streams.find(stream => stream.id === ({ technology: 'tech', culture: 'cultural', gaming: 'esports' }[e.stream]))?.image || 'assets/streams/technology.jpg';
+    // This event's previous panel poster no longer matches its dSPACE talk details.
+    // Keep the hero artwork-free until an approved dSPACE poster is supplied.
+    const image = isDspaceTalk ? '' : safeEventImage(e.image) || streams.find(stream => stream.id === e.stream)?.image || streams.find(stream => stream.id === ({ technology: 'tech', culture: 'cultural', gaming: 'esports' }[e.stream]))?.image || 'assets/streams/technology.jpg';
     const participationRules = e.rules || [];
     const participationNotes = isSocTalk
       ? `<p class="muted soc-format-note">${esc(e.format)} · ${esc(e.duration)}</p>`
@@ -388,7 +509,7 @@
     const aiFilmGuidelines = isAiFilm
       ? `<section class="ai-film-guidelines"><h2>Participation Guidelines</h2><p class="muted ai-film-guidelines-intro">Review the competition requirements, AI-use rules, ethical standards, and submission checklist before preparing your film.</p><div class="ai-film-guideline-grid">${e.competitionGuidelines.map((section, index) => `<article class="ai-film-guideline"><div class="ai-film-guideline-title"><span>${String(index + 1).padStart(2, '0')}</span><h3>${esc(section.heading)}</h3></div>${section.intro ? `<p class="muted">${esc(section.intro)}</p>` : ''}<ul>${section.items.map(item => `<li>${esc(item)}</li>`).join('')}</ul></article>`).join('')}</div></section>`
       : '';
-    const hero = `<section class="page-hero event-page-hero"><img class="event-hero-image" src="${esc(image)}" alt="${esc(officialEventTitle(e))} event poster"><div class="event-hero-shade"></div><div class="container"><div class="breadcrumb"><a href="#/home">VYUHAM’26</a> / EVENT DOSSIER</div><span class="stream-pill">${esc(streamLabel(e.stream))}</span><h1>${esc(officialEventTitle(e))}</h1>${e.officialTitle ? `<p class="event-title-subtitle">${esc(e.title)}</p>` : ''}<p>Event details, schedule information and participation overview for VYUHAM’26.</p></div></section>`;
+    const hero = `<section class="page-hero event-page-hero${image ? '' : ' event-page-hero-no-image'}">${image ? `<img class="event-hero-image" src="${esc(image)}" alt="${esc(officialEventTitle(e))} event poster">` : ''}<div class="event-hero-shade"></div><div class="container"><div class="breadcrumb"><a href="#/home">VYUHAM’26</a> / EVENT DOSSIER</div><span class="stream-pill">${esc(eventCategoryLabel(e))}</span><h1>${esc(officialEventTitle(e))}</h1>${e.officialTitle ? `<p class="event-title-subtitle">${esc(e.title)}</p>` : ''}<p>Event details, schedule information and participation overview for VYUHAM’26.</p></div></section>`;
     return `${hero}
       <section class="section event-details-section"><div class="container"><a class="back-link" href="#/events">← BACK TO EVENT ARCHIVE</a><div class="event-detail"><div>${isAiFilm ? aiFilmGuidelines : `<h3 class="event-participation-heading">Participation notes</h3>${techQuizCoupon(e)}${participationNotes}${isKsumTalk ? `${speakerContent}${socContent}` : `${socContent}${speakerContent}`}`}</div><aside class="detail-panel"><div class="detail-panel-heading"><div class="eyebrow">EVENT INTEL</div></div><dl>${renderEventIntelRows(e)}</dl><div class="detail-panel-footer">${registrationCta(registrationUrl(e), 'REGISTER & PAY ON MAKEMYPASS ↗', 'button button-primary event-register-cta', e)}<details class="detail-info detail-info-bottom"><summary aria-label="MakeMyPass registration information">ⓘ</summary><p>MakeMyPass is the official registration and payment provider. Review final event details and complete your registration on the event’s MakeMyPass page.</p></details></div></aside></div></div></section>`;
   };
@@ -400,22 +521,23 @@
     <section class="section venue-location-section"><div class="container"><div class="section-head"><div><div class="eyebrow">VYUHAM / THE VENUE</div><h2>LOCATION</h2></div><p class="venue-location-description">VYUHAM’26 takes place at Digital University Kerala, Technocity Campus, Thiruvananthapuram.</p></div><div class="info-grid"><article class="info-card venue-info-card venue-campus-card"><span class="num">01 / CAMPUS</span><span class="venue-card-mark venue-campus-mark" aria-hidden="true">DUK</span><div class="venue-duk-logo-frame"><img class="venue-duk-logo" src="assets/duk-logo.png" alt="Digital University Kerala — Curating a responsible digital world" loading="lazy"></div><h3>Digital University Kerala</h3><p>Technocity Campus, Mangalapuram, Thiruvananthapuram, Kerala – 695317.</p></article><article class="info-card venue-info-card"><span class="num">02 / ARRIVAL</span><span class="venue-card-mark" aria-hidden="true"><svg viewBox="0 0 48 48"><path d="M9 36c7-1 8-9 14-10s7 6 13 3 2-10 5-16"/><circle cx="9" cy="36" r="3"/><circle cx="41" cy="13" r="3"/><path d="m33 13 8 0 0 8"/></svg></span><h3>Plan your visit</h3><p>Check your event’s assigned venue and arrival instructions before travelling. Detailed transport information should be confirmed through official festival communications.</p></article><article class="info-card venue-info-card"><span class="num">03 / HELP</span><span class="venue-card-mark venue-help-mark" aria-hidden="true"><svg viewBox="0 0 48 48"><path d="M24 42s14-13 14-25a14 14 0 1 0-28 0c0 12 14 25 14 25Z"/><circle cx="24" cy="17" r="5"/><path d="M34 35h8M38 31v8"/></svg></span><h3>Need directions?</h3><p>Contact the organizing team for venue access, accessibility needs and event-specific location details.</p><a class="text-link" href="mailto:techfest@duk.ac.in">CONTACT TEAM ↗</a></article></div><div style="margin-top:22px;border:1px solid var(--line);border-radius:12px;overflow:hidden"><iframe title="Digital University Kerala location" src="https://www.google.com/maps?q=Digital%20University%20Kerala%20Technocity&output=embed" width="100%" height="350" style="border:0;display:block" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></div></div></section>${sponsorsSection('about')}`;
   const hospitalityPage = () => {
     const accommodations = [
-      { name: 'Technopark Guest House', type: 'GUEST HOUSE', area: 'Technopark Phase IV · Technocity', address: 'Technopark Phase IV, Technocity, Thiruvananthapuram', contacts: [{ label: '0471 2700825', tel: '+914712700825' }, { label: '0471 2700925', tel: '+914712700925' }, { label: '0471 3048105', tel: '+914713048105' }], rates: [['STANDARD ROOM', '₹2,100 / day'], ['SUITE ROOM', '₹2,625 / day'], ['DELUXE SUITE', '₹3,150 / day']], rateNote: 'Official Technopark rates; taxes extra.', map: 'https://www.google.com/maps/search/?api=1&query=Technopark+Guest+House+Thiruvananthapuram', link: 'https://technopark.in/services-directory-details', linkLabel: 'OFFICIAL TECHNOPARK LISTING ↗' },
-      { name: 'Lotus PG', type: 'PAYING GUEST · GENTS', area: 'Kazhakkoottam and Attinkuzhi, Thiruvananthapuram', address: 'Kazhakkoottam and Attinkuzhi, Thiruvananthapuram', contacts: [{ label: '+91 73568 27032', tel: '+917356827032' }, { label: 'info@lotuspggroups.com', mail: true }], rateNote: 'Contact provider for current rates and availability.', link: 'https://www.lotuspggroups.com/pg/', linkLabel: 'OFFICIAL LOTUS PG LISTING ↗', map: 'https://www.google.com/maps/search/?api=1&query=Lotus+PG+Kazhakkoottam+Attinkuzhi' },
+      { name: 'Digital University Kerala Hostel', type: 'CAMPUS HOSTEL', area: 'Digital University Kerala · Technocity Campus', address: 'Digital University Kerala, Technocity Campus, Mangalapuram, Thiruvananthapuram', contacts: [], audience: 'GIRLS ONLY', map: 'https://www.google.com/maps/search/?api=1&query=Digital+University+Kerala+Technocity+Campus' },
+      { name: 'Lotus PG', type: 'PAYING GUEST · GENTS', area: 'Kazhakkoottam and Attinkuzhi, Thiruvananthapuram', address: 'Kazhakkoottam and Attinkuzhi, Thiruvananthapuram', contacts: [{ label: '+91 73568 27032', tel: '+917356827032' }, { label: 'info@lotuspggroups.com', mail: true }], audience: 'BOYS ONLY', rateNote: 'Contact provider for current rates and availability.', link: 'https://www.lotuspggroups.com/pg/', linkLabel: 'OFFICIAL LOTUS PG LISTING ↗', map: 'https://www.google.com/maps/search/?api=1&query=Lotus+PG+Kazhakkoottam+Attinkuzhi' },
       { name: 'Kalloor Residency', type: 'RESIDENCY', area: 'Mangalapuram', address: 'JRGX+Q8J, Mangalapuram, Kerala 695317', contacts: [], rateNote: 'Contact details and rates not verified; confirm locally before booking.', map: 'https://www.google.com/maps/search/?api=1&query=Kalloor+Residency+Mangalapuram+Kerala' },
       { name: 'JL Residency', type: 'RESIDENCY', area: 'Kalloor Building · NH 66 Junction · Mangalapuram', address: 'Kalloor Building, NH 66 Junction, Mangalapuram, Kerala 695317', contacts: [{ label: '81378 62001', tel: '+918137862001' }], rateNote: 'Rates vary by room and date; check live availability.', link: 'https://www.oyorooms.com/215785/', linkLabel: 'PROPERTY LISTING ↗', map: 'https://www.google.com/maps/search/?api=1&query=JL+Residency+Mangalapuram+Kerala' },
       { name: 'Amalas Lodge', type: 'LODGE', area: 'Vetturoad · Kazhakkoottam', address: 'Amalas Tower, Vetturoad, Kazhakkoottam, Thiruvananthapuram 695585', contacts: [{ label: '98954 85116', tel: '+919895485116' }], rateNote: 'Rates vary by dates and room; contact the property or check live availability.', link: 'https://www.makemytrip.com/hotels/amalas_lodge-details-thiruvananthapuram.html', linkLabel: 'PROPERTY LISTING ↗', map: 'https://www.google.com/maps/search/?api=1&query=Amalas+Lodge+Vetturoad+Kazhakkoottam' },
       { name: 'Grace Service Apartments', type: 'SERVICE APARTMENTS', area: 'Nila Nagar Road · Technopark Campus', address: 'Nila Nagar Road, Technopark Campus, Kazhakkoottam 695582', contacts: [{ label: '70251 85000', tel: '+917025185000' }], rateNote: 'Contact provider for current rates and availability.', map: 'https://www.google.com/maps/search/?api=1&query=Grace+Service+Apartments+Nila+Nagar+Road' },
-      { name: 'Capital Park Residency', type: 'RESIDENCY', area: 'Kazhakkoottam Bypass · Technopark Campus', address: 'Kazhakkoottam Bypass, Technopark Campus, Thiruvananthapuram 695582', contacts: [{ label: '92077 15154 · WhatsApp', tel: '+919207715154' }, { label: '0471 259 9990 · property', tel: '+914712599990' }], rateNote: 'Contact the property for a quote for your dates.', link: 'https://capitalparkresidency.in/', linkLabel: 'OFFICIAL PROPERTY SITE ↗', map: 'https://www.google.com/maps/search/?api=1&query=Capital+Park+Residency+Kazhakkoottam' },
+      { name: 'Capital Park Residency', type: 'RESIDENCY', area: 'Kazhakkoottam Bypass · Technopark Campus', address: 'Kazhakkoottam Bypass, Technopark Campus, Thiruvananthapuram 695582', contacts: [{ label: '92077 15154 · WhatsApp', tel: '+919207715154' }, { label: '0471 259 9990 · property', tel: '+914712599990' }], rates: [['RATE · BASIS TO CONFIRM', '₹3,000']], availability: 'Rooms are not available on 31 October.', link: 'https://capitalparkresidency.in/', linkLabel: 'OFFICIAL PROPERTY SITE ↗', map: 'https://www.google.com/maps/search/?api=1&query=Capital+Park+Residency+Kazhakkoottam' },
       { name: 'BnB Homes', type: 'HOMESTAY', area: 'Kulathoor · near Technopark', address: 'Thripadapuram Road, Phoenix Lane, near Technopark, Kulathoor 695583', contacts: [{ label: '75400 00750', tel: '+917540000750' }], rateNote: 'Rates vary by dates and room; check the property site.', link: 'https://bnbhomes.in/', linkLabel: 'PROPERTY WEBSITE ↗', map: 'https://www.google.com/maps/search/?api=1&query=BnB+Homes+Kulathoor+Trivandrum' },
-      { name: 'Super Hotel O, Technopark Phase 2', type: 'HOTEL', area: 'Nila Nagar Road · near Technopark', address: 'Nila Nagar Road, near Technopark, Kazhakkoottam 695582', contacts: [{ label: '0124 433 0599 · booking service', tel: '+911244330599' }], rateNote: 'Rates vary by dates and room; check live availability.', map: 'https://www.google.com/maps/search/?api=1&query=Hotel+O+Kazhakkoottam+Technopark+Phase+2' },
-      { name: 'Blue Pearl Residency', type: 'RESIDENCY', area: 'St Joseph Church Lane · Kazhakkoottam', address: 'St Joseph Church Lane, near Kazhakkoottam Railway Station Road, Thiruvananthapuram 695582', contacts: [{ label: '79022 06775', tel: '+917902206775' }], rateNote: 'Rates vary by dates and room; check live availability.', link: 'https://www.makemytrip.com/hotels/blue_pearl_residency_near_technopark-details-thiruvananthapuram.html', linkLabel: 'PROPERTY LISTING ↗', map: 'https://www.google.com/maps/search/?api=1&query=Blue+Pearl+Residency+Kazhakkoottam' },
-      { name: 'Infinity Rooms – AKR Residency', type: 'RESIDENCY', area: 'Bypass Junction · Kazhakkoottam', address: 'Bypass Junction, Kazhakkoottam, Thiruvananthapuram 695582', contacts: [{ label: '95672 12358', tel: '+919567212358' }], rateNote: 'Rates vary by dates and room; contact the property to confirm.', map: 'https://www.google.com/maps/search/?api=1&query=Infinity+Rooms+AKR+Residency+Kazhakkoottam' },
-      { name: 'Olaya Residency', type: 'RESIDENCY', area: 'Technopark Campus · Ambalathinkara', address: 'Technopark Campus, Ambalathinkara, Kazhakkoottam 695582', contacts: [{ label: '88911 10445', tel: '+918891110445' }], rates: [['ONLINE RATE · 30–31 OCT 2026', '₹2,200 / night']], rateNote: 'MakeMyTrip listing for 30–31 October 2026; taxes and availability may change.', link: 'https://www.makemytrip.com/hotels/olaya_residency-details-thiruvananthapuram.html', linkLabel: 'PROPERTY LISTING ↗', map: 'https://www.google.com/maps/search/?api=1&query=Olaya+Residency+Technopark+Kazhakkoottam' }
+      { name: 'Blue Pearl Residency', type: 'RESIDENCY', area: 'St Joseph Church Lane · Kazhakkoottam', address: 'St Joseph Church Lane, near Kazhakkoottam Railway Station Road, Thiruvananthapuram 695582', contacts: [{ label: '79022 06775', tel: '+917902206775' }], rates: [['RATE · BASIS TO CONFIRM', '₹1,585']], availability: 'Available for students.', link: 'https://www.makemytrip.com/hotels/blue_pearl_residency_near_technopark-details-thiruvananthapuram.html', linkLabel: 'PROPERTY LISTING ↗', map: 'https://www.google.com/maps/search/?api=1&query=Blue+Pearl+Residency+Kazhakkoottam' },
+      { name: 'Infinity Rooms – AKR Residency', type: 'RESIDENCY', area: 'Bypass Junction · Kazhakkoottam', address: 'Bypass Junction, Kazhakkoottam, Thiruvananthapuram 695582', contacts: [{ label: '95672 12358', tel: '+919567212358' }], rates: [['TWO-SHARING RATE · BASIS TO CONFIRM', '₹1,500']], availability: 'Available for students · Two sharing.', map: 'https://www.google.com/maps/search/?api=1&query=Infinity+Rooms+AKR+Residency+Kazhakkoottam' },
+      { name: 'Olaya Residency', type: 'RESIDENCY', area: 'Technopark Campus · Ambalathinkara', address: 'Technopark Campus, Ambalathinkara, Kazhakkoottam 695582', contacts: [{ label: '88911 10445', tel: '+918891110445' }], rates: [['AC ROOM', '₹1,600'], ['NON-AC ROOM', '₹1,400']], availability: 'Available for students.', link: 'https://www.makemytrip.com/hotels/olaya_residency-details-thiruvananthapuram.html', linkLabel: 'PROPERTY LISTING ↗', map: 'https://www.google.com/maps/search/?api=1&query=Olaya+Residency+Technopark+Kazhakkoottam' },
+      { name: 'Sree Raj Apartments', type: 'APARTMENTS', area: '', address: '', contacts: [{ label: '+91 98474 43190', tel: '+919847443190' }], rates: [['PER HEAD / NIGHT', '₹400']], availability: '6 rooms available · Two sharing.' }
     ];
-    const cards = accommodations.map((place, index) => `<article class="hospitality-card"><div class="hospitality-card-top"><span class="num">${String(index + 1).padStart(2, '0')} / ${esc(place.type)}</span></div><h3>${esc(place.name)}</h3><p class="hospitality-location">${esc(place.area)}</p><p class="hospitality-address">${esc(place.address)}</p>${place.contacts?.length ? `<div class="hospitality-contact"><span>CONTACT</span>${place.contacts.map(contact => contact.mail ? `<a href="mailto:${esc(contact.label)}">${esc(contact.label)}</a>` : `<a href="tel:${esc(contact.tel)}">${esc(contact.label)}</a>`).join('')}</div>` : ''}<div class="hospitality-card-actions">${place.link ? `<a class="text-link" href="${esc(place.link)}" target="_blank" rel="noopener noreferrer">${esc(place.linkLabel || 'PROPERTY INFORMATION ↗')}</a>` : ''}<a class="text-link hospitality-map-link" href="${esc(place.map)}" target="_blank" rel="noopener noreferrer">OPEN GOOGLE MAPS ↗</a></div></article>`).join('');
-    return `${pageHero('Hospitality near DUK', 'FIND YOUR<br><span class="green">STAY.</span>', 'Rooms, PGs and campus accommodation contacts for visitors attending VYUHAM’26.', 'hospitality-page-hero')}
-      <section class="section hospitality-section"><div class="container"><div class="hospitality-intro"><div><div class="eyebrow">VISITOR INFORMATION / ACCOMMODATION</div><h2>STAY NEAR<br><span class="green">THE FESTIVAL.</span></h2></div><p>Contact providers directly to confirm availability, eligibility and booking terms.</p></div><div class="hospitality-grid">${cards}</div><p class="hospitality-note">Listings are provided for visitor convenience. VYUHAM’26 does not manage bookings or guarantee accommodation, availability, distance or service quality. Confirm all booking details directly with the property.</p></div></section>`;
+    const sortedAccommodations = [...accommodations].sort((a, b) => Number(Boolean(b.rates?.length)) - Number(Boolean(a.rates?.length)));
+    const cards = sortedAccommodations.map((place, index) => `<article class="hospitality-card"><div class="hospitality-card-top"><span class="num">${String(index + 1).padStart(2, '0')} / ${esc(place.type)}</span>${place.audience ? `<span class="hospitality-audience">${esc(place.audience)}</span>` : ''}</div><h3>${esc(place.name)}</h3>${place.area ? `<p class="hospitality-location">${esc(place.area)}</p>` : ''}${place.address ? `<p class="hospitality-address">${esc(place.address)}</p>` : ''}${place.availability ? `<p class="hospitality-availability">${esc(place.availability)}</p>` : ''}${place.rates?.length ? `<dl class="hospitality-rates">${place.rates.map(([label, value]) => `<div><dt>${esc(label)}</dt><dd>${esc(value)}</dd></div>`).join('')}</dl>` : ''}${place.contacts?.length ? `<div class="hospitality-contact"><span>CONTACT</span>${place.contacts.map(contact => contact.mail ? `<a href="mailto:${esc(contact.label)}">${esc(contact.label)}</a>` : `<a href="tel:${esc(contact.tel)}">${esc(contact.label)}</a>`).join('')}</div>` : ''}<div class="hospitality-card-actions">${place.link ? `<a class="text-link" href="${esc(place.link)}" target="_blank" rel="noopener noreferrer">${esc(place.linkLabel || 'PROPERTY INFORMATION ↗')}</a>` : ''}${place.map ? `<a class="text-link hospitality-map-link" href="${esc(place.map)}" target="_blank" rel="noopener noreferrer">OPEN GOOGLE MAPS ↗</a>` : ''}</div></article>`).join('');
+    return `${pageHero('Hospitality near DUK', 'HOSPITALITY', 'Rooms, PGs and campus accommodation contacts for visitors attending VYUHAM’26.', 'hospitality-page-hero')}
+      <section class="section hospitality-section"><div class="container"><div class="hospitality-intro"><div><div class="eyebrow">VISITOR INFORMATION / ACCOMMODATION</div><h2>STAY NEAR<br><span class="green">THE FESTIVAL.</span></h2></div><div class="hospitality-intro-actions"><p>Contact providers directly to confirm availability, eligibility and booking terms.</p><button class="button button-primary emergency-services-button" id="emergencyServicesButton" type="button">EMERGENCY SERVICES</button></div></div><div class="hospitality-grid">${cards}</div><p class="hospitality-note">Listings are provided for visitor convenience. VYUHAM’26 does not manage bookings or guarantee accommodation, availability, distance or service quality. Confirm all booking details directly with the property.</p></div></section><div class="emergency-popup-overlay" id="emergencyServicesPopup" hidden><section class="emergency-popup-dialog" role="dialog" aria-modal="true" aria-labelledby="emergencyPopupTitle"><button class="emergency-popup-close" type="button" aria-label="Close emergency services">×</button><div class="emergency-popup-content"><div class="eyebrow">EMERGENCY SERVICES</div><h2 id="emergencyPopupTitle">Ambulance Services Contact</h2><div class="emergency-contact-list"><article><h3>Medicare Hospital Cehmbakamangalam</h3><button class="emergency-copy" type="button" data-copy="9846228455">9846228455 <span aria-hidden="true">COPY</span></button><button class="emergency-copy" type="button" data-copy="9544623496">9544623496 <span aria-hidden="true">COPY</span></button></article><article><h3>Classic Air Ambulance</h3><p>Koithoorkonam</p><button class="emergency-copy" type="button" data-copy="9947773108">9947773108 <span aria-hidden="true">COPY</span></button></article><article><h3>Technopark Hospital Kazhakootam</h3><button class="emergency-copy" type="button" data-copy="8606604076">Manu · 8606604076 <span aria-hidden="true">COPY</span></button><p class="emergency-last-option">(Last option)</p></article></div></div></section></div>`;
   };
   const contactPage = () => `${pageHero('Contact', 'LET’S START<br><span class="green">A SIGNAL.</span>', 'Questions about events, participation or the festival? Reach out to the organizing team.')}
     <section class="section"><div class="container contact-grid"><div><div class="contact-list"><div class="contact-item"><small>EMAIL</small><p><a href="mailto:techfest@duk.ac.in" class="text-link">techfest@duk.ac.in</a></p></div><div class="contact-item"><small>PHONE</small><p>+91 471 278 8000</p></div><div class="contact-item"><small>LOCATION</small><p>Technocity Campus, Mangalapuram, Thiruvananthapuram – 695317</p></div><div class="contact-item"><small>SOCIAL</small><p><a class="text-link" href="https://instagram.com/vyuham.duk" target="_blank" rel="noopener">INSTAGRAM ↗</a></p></div></div></div><form class="form-card" id="contactForm"><div class="eyebrow">SEND A MESSAGE</div><h3 style="margin:16px 0 22px">How can we help?</h3><div class="form-grid"><div class="form-field"><label for="contactName">NAME</label><input id="contactName" name="name" autocomplete="name" required></div><div class="form-field"><label for="contactEmail">EMAIL</label><input id="contactEmail" name="email" type="email" autocomplete="email" required></div><div class="form-field full"><label for="contactTopic">TOPIC</label><select id="contactTopic" name="topic"><option>Event information</option><option>Registration support</option><option>Partnership</option><option>Accessibility</option><option>Other</option></select></div><div class="form-field full"><label for="contactMessage">MESSAGE</label><textarea id="contactMessage" name="message" required></textarea></div></div><p class="form-note">Your inquiry is saved to the festival support system for organizer follow-up.</p><button class="button button-primary" type="submit">SEND MESSAGE ↗</button></form></div></section>`;
@@ -690,7 +812,7 @@
       const eventDays = Array.isArray(e.scheduleDays) ? e.scheduleDays : (e.day == null ? [] : [Number(e.day)]);
       return eventDays.includes(selected) && e.status !== 'cancelled';
     }).sort((a, b) => scheduleMinutes(a.time) - scheduleMinutes(b.time));
-    $('#scheduleContent').innerHTML = `<div class="schedule-heading"><div><span class="date-capsule">${esc(d.dateLabel)}</span><h2>${esc(d.name)}</h2></div><p class="muted">${esc(d.desc)}</p></div><div class="schedule-list">${dayEvents.length ? dayEvents.map((e, index) => `<article class="schedule-row"><div class="schedule-time"><span>0${String(index + 1).padStart(2, '0')}</span><time>${esc(e.time)}</time></div><div class="schedule-event"><h3><a href="#/event/${encodeURIComponent(e.slug)}">${esc(officialEventTitle(e))}</a></h3>${e.officialTitle ? `<small class="schedule-event-subtitle">${esc(e.title)}</small>` : ''}<p>${esc(e.description)}</p></div><div class="venue"><span>STREAM</span><b>${esc(streamLabel(e.stream))}</b></div></article>`).join('') : '<div class="empty-state">No event records are currently listed for this day.</div>'}</div>`;
+    $('#scheduleContent').innerHTML = `<div class="schedule-heading"><div><span class="date-capsule">${esc(d.dateLabel)}</span><h2>${esc(d.name)}</h2></div><p class="muted">${esc(d.desc)}</p></div><div class="schedule-list">${dayEvents.length ? dayEvents.map((e, index) => `<article class="schedule-row"><div class="schedule-time"><span>0${String(index + 1).padStart(2, '0')}</span><time>${esc(e.time || 'TIME TBA')}</time></div><div class="schedule-event"><h3><a href="#/event/${encodeURIComponent(e.slug)}">${esc(officialEventTitle(e))}</a></h3>${e.officialTitle ? `<small class="schedule-event-subtitle">${esc(e.title)}</small>` : ''}<p>${esc(e.description)}</p></div><div class="venue"><span>STREAM</span><b>${esc(eventCategoryLabel(e))}</b></div></article>`).join('') : '<div class="empty-state">No event records are currently listed for this day.</div>'}</div>`;
   }
   function observeReveals() {
     const items = $$('.reveal:not(.visible)');
@@ -707,6 +829,8 @@
     heroCarouselCleanup = null;
     concertPopupCleanup?.();
     concertPopupCleanup = null;
+    passNoticePopupCleanup?.();
+    passNoticePopupCleanup = null;
     const r = route();
     if (r.page === 'event' && decodeURIComponent(r.slug) !== 'day-pass') {
       const requestedSlug = decodeURIComponent(r.slug);
@@ -726,7 +850,7 @@
           ? allEventRecords.find(e => e.slug === decodeURIComponent(r.slug))
           : null)
       : null;
-    document.title = decodeURIComponent(r.slug || '') === 'day-pass' && r.page === 'event' ? 'Vyuham Day-Pass | VYUHAM’26' : activeEvent?.officialTitle ? `${officialEventTitle(activeEvent)} | VYUHAM’26` : r.page === 'hospitality' ? 'Hospitality near DUK | VYUHAM’26' : "VYUHAM'26 - Digital University Kerala";
+    document.title = decodeURIComponent(r.slug || '') === 'day-pass' && r.page === 'event' ? 'Vyuham Day-Pass | VYUHAM’26' : activeEvent?.officialTitle ? `${officialEventTitle(activeEvent)} | VYUHAM’26` : r.page === 'hospitality' ? 'Hospitality | VYUHAM’26' : "VYUHAM'26 - Digital University Kerala";
     $('#mainNav').classList.remove('open'); $('#menuToggle').setAttribute('aria-expanded', 'false'); $('#menuToggle').setAttribute('aria-label', 'Open navigation');
     $$('#mainNav [data-route]').forEach(a => a.classList.toggle('active', a.dataset.route === r.page));
     const shells = ['certificates', 'checkin', 'checkout', 'confirmation', 'feedback', 'food', 'leaderboard', 'payment', 'photography', 'qualifiers', 'receipt', 'results'];
@@ -814,7 +938,9 @@
     if (r.page === 'home') {
       heroCarouselCleanup = initHeroFeaturedCarousel(Boolean(intro));
       concertPopupCleanup = initConcertPopup();
+      passNoticePopupCleanup = initPassNoticePopup();
     }
+    if (r.page === 'hospitality') initEmergencyPopup();
 
     updateCountdown();
     $('#siteFooter').style.display = '';
@@ -921,7 +1047,20 @@
   }, { passive: true });
   // Accurate IST countdown, with no negative values after the target time.
   const festivalStart = '2026-10-30T09:00:00+05:30';
-  function updateCountdown() { const remaining = Math.max(0, new Date(festivalStart).getTime() - Date.now()); const values = [Math.floor(remaining / 86400000), Math.floor(remaining % 86400000 / 3600000), Math.floor(remaining % 3600000 / 60000), Math.floor(remaining % 60000 / 1000)]; $$('[data-countdown]').forEach(el => { el.innerHTML = values.map((value, i) => `<span><b>${String(value).padStart(2, '0')}</b><i>${['DAYS', 'HRS', 'MIN', 'SEC'][i]}</i></span>`).join('') }) }
+  function updateCountdown() {
+    const target = new Date(festivalStart).getTime();
+    const expired = Date.now() >= target;
+    const remaining = Math.max(0, target - Date.now());
+    const values = [Math.floor(remaining / 86400000), Math.floor(remaining % 86400000 / 3600000), Math.floor(remaining % 3600000 / 60000), Math.floor(remaining % 60000 / 1000)];
+    $$('[data-countdown]').forEach(el => {
+      const container = el.closest('.hero-count');
+      if (container) {
+        container.hidden = expired;
+        container.setAttribute('aria-hidden', String(expired));
+      }
+      if (!expired) el.innerHTML = values.map((value, i) => `<span><b>${String(value).padStart(2, '0')}</b><i>${['DAYS', 'HRS', 'MIN', 'SEC'][i]}</i></span>`).join('');
+    });
+  }
   updateCountdown(); setInterval(updateCountdown, 1000);
   render();
   if (!isRouteHash() && location.hash.length > 1) scrollToHashTarget();

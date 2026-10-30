@@ -16,6 +16,11 @@ build/
 .turbo/
 .vercel/
 stats.html
+*.zip
+*.tar.gz
+*.tgz
+*.rar
+*.7z
 
 # Environment Variables & Secrets
 .env

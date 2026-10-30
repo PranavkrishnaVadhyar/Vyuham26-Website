@@ -1,0 +1,10 @@
+# HMS reverse proxy for shared-folder Apache hosting.
+# Requires mod_rewrite + mod_proxy + mod_proxy_http enabled by the host, and
+# AllowOverride FileInfo (or All) for this document-root directory.
+RewriteEngine On
+
+# Keep the DUK origin in the address bar; proxy the exact route and all child
+# routes to the corresponding HMS paths. This is a proxy, not a redirect, and
+# it does not introduce a client-side hash route.
+RewriteRule ^hackathon/?$ https://vyuham26hms.vercel.app/hackathon/ [P,L,QSA]
+RewriteRule ^hackathon/(.*)$ https://vyuham26hms.vercel.app/hackathon/$1 [P,L,QSA]

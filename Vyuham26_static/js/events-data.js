@@ -80,6 +80,7 @@ window.VYUHAM_EVENTS = [
     "teamSize": "3–4 members",
     "status": "upcoming",
     "featured": false,
+    "registrationOpen": true,
     "registrationUrl": "",
     "rules": [
       "Team Composition: Each team must consist of 3–4 members from the same institution or organization.",
@@ -221,39 +222,38 @@ window.VYUHAM_EVENTS = [
   },
   {
     "slug": "beyond-accuracy-panel-discussion-on-ai-accuracy",
-    "title": "Panel Discussion: Beyond Accuracy: Can We Trust the Data Behind AI?",
-    "officialTitle": "Beyond Accuracy - Panel Discussion on AI Accuracy",
-    "image": "assets/eventpics/paneldis.png",
+    "title": "Driving Innovation: Inside dSPACE",
+    "image": "",
     "stream": "session",
     "day": 1,
-    "time": "10:00 AM – 11:30 AM",
+    "dateLabel": "30 OCTOBER 2026",
+    "time": "",
     "venue": "Seminar Hall",
-    "description": "Can we trust AI just because it produces accurate results? This panel explores the role of data quality, bias, fairness, privacy, and transparency in building trustworthy AI systems. Join us to discover why accuracy alone is not enough and what it takes to make AI reliable, ethical, and accountable.",
+    "description": "Discover dSPACE's engineering solutions in this 90-minute talk session, Driving Innovation: Inside dSPACE. Shome Jose, Department Head at dSPACE, will introduce its product portfolio and explain how simulation and validation tools support engineering development. The session will explore applications including software-defined vehicles, autonomous driving, e-mobility and powertrain systems, as well as ECU development and software-in-the-loop and hardware-in-the-loop testing. It will also highlight how dSPACE simulation models are used in fields such as rail, aerospace and off-highway engineering, followed by an opportunity for questions and discussion.",
+    "cardDescription": "Shome Jose · Department Head, dSPACE · Products, simulation & validation",
     "fee": "FREE ENTRY",
     "eligibility": "Open to all fest delegates",
     "teamSize": "Open",
-    "format": "Panel Discussion",
-    "panelSpeakers": [
-      {
-        "name": "Jyothi Ramaswamy",
-        "designation": "Freelancer, ex-TCSer, Adhoc Consultant, KSAAC, DUK",
-        "photo": "assets/events/beyond-accuracy-speakers/jyothi-ramaswamy.jpeg"
-      },
-      {
-        "name": "Chitra Nair",
-        "designation": "AI and Cloud Architect, McAfee",
-        "photo": "assets/events/beyond-accuracy-speakers/chitra-nair.jpeg"
-      },
-      {
-        "name": "Ardhra Benny",
-        "designation": "Resource Person, Technology Analyst, Infosys, TVM",
-        "photo": "assets/events/beyond-accuracy-speakers/ardhra-benny.jpeg"
-      }
-    ],
+    "format": "Talk Session",
+    "eventType": "talk-session",
+    "speaker": "Shome Jose",
+    "designation": "Department Head, dSPACE",
+    "speakerPhoto": "assets/events/shome-jose-dspace.png",
+    "duration": "1.5 hours (90 minutes)",
+    "topic": "dSPACE Products Overview",
     "status": "upcoming",
     "featured": false,
     "registrationUrl": "https://makemypass.com/event/beyond-accuracy-ai-panel-discussion",
-    "rules": [],
+    "rules": [
+      "Open to all students interested in dSPACE products, engineering technologies, and innovation.",
+      "Shome Jose will introduce dSPACE's product portfolio and explain how its engineering solutions are used in real-world development.",
+      "Learn how simulation and validation support software-defined vehicles, autonomous driving, e-mobility, powertrains, and ECU development.",
+      "The session will cover software-in-the-loop (SIL) and hardware-in-the-loop (HIL) testing, plus simulation-model applications across automotive, rail, aerospace, and off-highway fields.",
+      "Participants are requested to arrive a few minutes before the session begins.",
+      "The session will last approximately 1.5 hours (90 minutes).",
+      "Participants are encouraged to actively listen and engage in the Q&A session, if available.",
+      "Please maintain decorum throughout the session."
+    ],
     "legacySlug": "panel-responsible-ai"
   },
   {
@@ -407,7 +407,8 @@ window.VYUHAM_EVENTS = [
     "time": "2:00 PM – 5:00 PM",
     "venue": "Gallery Hall",
     "description": "General technology knowledge rounds.",
-    "fee": "₹200 onwards",
+    "fee": "₹75 onwards",
+    "originalFee": "₹150 onwards",
     "eligibility": "Open to all students",
     "teamSize": "Individual participation only",
     "status": "upcoming",
@@ -756,6 +757,7 @@ window.VYUHAM_EVENTS = [
     "teamSize": "Squad of 4",
     "status": "upcoming",
     "featured": false,
+    "registrationOpen": false,
     "registrationUrl": "",
     "rules": [
       "Online Battle Royale — Squad mode (4 players per team)",
