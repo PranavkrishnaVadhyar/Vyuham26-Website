@@ -11,7 +11,8 @@
   const eventSlugAliases = new Map(events.filter(event => event.legacySlug).map(event => [event.legacySlug, event.slug]));
   eventSlugAliases.set('ink-letter-calligraphy-workshop', 'ink-and-letter-calligraphy-workshop');
   events = events.filter(isVisibleEvent);
-  let registrationOpen = true;
+  const REGISTRATION_CUTOFF = Date.parse('2026-11-01T23:00:00+05:30');
+  let registrationOpen = Date.now() < REGISTRATION_CUTOFF;
   let landingIntroSeen = false;
   let heroCarouselCleanup = null;
   let concertPopupCleanup = null;
@@ -168,7 +169,18 @@
   };
   const isAllDayEvent = event => /^(?:day one|all day|running all 3 days)$/i.test(String(event?.time || '').trim()) || (Array.isArray(event?.scheduleDays) && event.scheduleDays.length >= 3);
   const isDayOneEvent = event => Number(event?.day) === 1 || (Array.isArray(event?.scheduleDays) && event.scheduleDays.includes(1));
-  const canRegister = event => registrationFeatureEnabled && registrationOpen && event?.registrationOpen !== false && !['registration_closed', 'closed', 'cancelled'].includes(event?.status) && !(event && isDayOneEvent(event) && !isAllDayEvent(event));
+  const eventIsComplete = (event, now = Date.now()) => ['completed', 'complete', 'ended'].includes(String(event?.status || '').toLowerCase()) || eventLifecycle(event, now) === 'ended';
+  const canRegister = (event, now = Date.now()) => registrationFeatureEnabled && registrationOpen && now < REGISTRATION_CUTOFF && event?.registrationOpen !== false && !['registration_closed', 'closed', 'cancelled', 'completed', 'complete', 'ended'].includes(String(event?.status || '').toLowerCase()) && !(event && eventIsComplete(event, now)) && !(event && isDayOneEvent(event) && !isAllDayEvent(event));
+  const eventLifecycleLabel = event => {
+    if (String(event?.status || '').toLowerCase() === 'cancelled') return 'EVENT CANCELLED';
+    const lifecycle = eventIsComplete(event) ? 'ended' : eventLifecycle(event);
+    return lifecycle === 'live' ? 'LIVE NOW' : lifecycle === 'ended' ? 'EVENT ENDED' : lifecycle === 'upcoming' ? 'UPCOMING' : 'TIME TBA';
+  };
+  const eventLifecycleBadge = event => {
+    const lifecycle = eventIsComplete(event) || String(event?.status || '').toLowerCase() === 'cancelled' ? 'ended' : eventLifecycle(event);
+    const statusClass = lifecycle === 'live' ? 'is-live' : lifecycle === 'ended' ? 'is-over' : '';
+    return `<span class="event-state-pill event-detail-state ${statusClass}">${esc(eventLifecycleLabel(event))}</span>`;
+  };
   const registrationAvailabilityRank = event => canRegister(event) ? 0 : 1;
   const festivalTimestamp = (month, day, hour = 0, minute = 0) => new Date(`2026-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}T${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}:00+05:30`).getTime();
   const timeToMinutes = match => {
@@ -199,7 +211,7 @@
       startMinutes = timeToMinutes(explicitTimes[0]);
       if (explicitTimes.length > 1) endMinutes = timeToMinutes(explicitTimes[1]);
       else endMinutes = Math.min(startMinutes + 120, 24 * 60);
-    } else if (!/^(?:day one|all day)$/i.test(time.trim())) return null;
+    } else if (time.trim() && !/^(?:day one|all day)$/i.test(time.trim())) return null;
     const dateForDay = day => day === 3 ? [11, 1] : day >= 4 ? [11, 2] : [10, day === 2 ? 31 : 30];
     const [startMonth, startDate] = dateForDay(startDay);
     const endAtMinutes = endMinutes >= 24 * 60 ? 0 : endMinutes;
@@ -331,17 +343,19 @@
     <div class="event-content"><div class="event-top"><span class="tag stream-pill">FESTIVAL PASS</span><span class="tag day">30 OCT — 01 NOV</span></div>
     <h3><a href="#/event/day-pass">Vyuham Day-Pass</a></h3><p class="event-title-subtitle">VYUHAM’26 Day Pass</p><p><a class="day-pass-description-link" href="#/event/day-pass">Choose Day 1, Day 2, Day 3, or a combination when getting your pass.</a></p>
     <div class="event-meta">${DAY_PASS_METADATA.passLimit ? `<span>PASS LIMIT<strong>${esc(DAY_PASS_METADATA.passLimit)}</strong></span>` : ''}${DAY_PASS_METADATA.fee ? `<span>FEE<strong>${esc(DAY_PASS_METADATA.fee)}</strong></span>` : ''}</div>
-    <div class="event-actions"><a class="button button-outline" href="#/event/day-pass">DETAILS</a><a class="button button-primary" href="${DAY_PASS_URL}" target="_blank" rel="noopener noreferrer">GET DAY PASS ↗</a></div></div>
+    <div class="event-actions"><a class="button button-outline" href="#/event/day-pass">DETAILS</a><span class="button button-primary registration-disabled" aria-disabled="true">REGISTRATION CLOSED</span></div></div>
   </article>`;
   const pageHero = (kicker, title, desc, heroClass = '') => { const showCornerLogo = ['events-page-hero', 'participation-page-hero', 'competitions-page-hero', 'streams-page-hero'].includes(heroClass); return `<section class="page-hero ${heroClass}"><div class="container"><div class="breadcrumb"><a href="#/home">VYUHAM’26</a> / ${esc(kicker.toUpperCase())}</div><div class="eyebrow">${esc(kicker)}</div><h1>${title}</h1><p>${desc}</p></div>${showCornerLogo ? '<img class="page-hero-corner-logo" src="assets/vyuham_logo_sm.png" alt="VYUHAM emblem" width="72" height="72">' : ''}</section>` };
-  const dayPassDetail = () => `<section class="section day-pass-page"><div class="container"><a class="back-link" href="#/events">← BACK TO EVENT ARCHIVE</a><div class="event-detail"><div class="day-pass-main"><a class="day-pass-poster" href="${DAY_PASS_URL}" target="_blank" rel="noopener noreferrer" aria-label="Open VYUHAM’26 Day Pass on MakeMyPass"><img src="${esc(DAY_PASS_METADATA.poster)}" alt="VYUHAM’26 Day Pass poster for 30 October to 1 November 2026" loading="lazy" decoding="async"></a><div class="eyebrow">30 OCTOBER – 1 NOVEMBER 2026</div><h1>Vyuham Day-Pass</h1><p class="event-title-subtitle">VYUHAM’26 Day Pass</p><h2 class="day-pass-choice-heading">Choose your festival days</h2><p class="muted day-pass-intro">Select Day 1 only, Day 2 only, Day 3 only, or an applicable combination when completing your pass on MakeMyPass.</p><div class="pass-day-options" aria-label="Festival days"><article><span>DAY 01</span><h3>30 October</h3><p>Friday</p></article><article><span>DAY 02</span><h3>31 October</h3><p>Saturday</p></article><article><span>DAY 03</span><h3>1 November</h3><p>Sunday</p></article></div><p class="muted day-pass-note">Day selection and pass details are completed on the official MakeMyPass page.</p></div><aside class="detail-panel day-pass-panel"><div class="eyebrow">PASS DETAILS</div><dl><div><dt>FESTIVAL</dt><dd>VYUHAM’26</dd></div><div><dt>VALID DATES</dt><dd>30 Oct – 1 Nov 2026</dd></div>${DAY_PASS_METADATA.passLimit ? `<div><dt>PASS LIMIT</dt><dd>${esc(DAY_PASS_METADATA.passLimit)}</dd></div>` : ''}${DAY_PASS_METADATA.fee ? `<div><dt>FEE</dt><dd>${esc(DAY_PASS_METADATA.fee)}</dd></div>` : ''}<div><dt>DAY SELECTION</dt><dd>Single day or combination</dd></div></dl><a class="button button-primary event-register-cta" href="${DAY_PASS_URL}" target="_blank" rel="noopener noreferrer">REGISTER &amp; PAY ON MAKEMYPASS ↗</a><p class="muted day-pass-purchase-note">Continue to MakeMyPass to choose your attendance day(s) and complete your pass.</p></aside></div></div></section>`;
+  const dayPassDetail = () => `<section class="section day-pass-page"><div class="container"><a class="back-link" href="#/events">← BACK TO EVENT ARCHIVE</a><div class="event-detail"><div class="day-pass-main"><div class="day-pass-poster"><img src="${esc(DAY_PASS_METADATA.poster)}" alt="VYUHAM’26 Day Pass poster for 30 October to 1 November 2026" loading="lazy" decoding="async"></div><div class="eyebrow">30 OCTOBER – 1 NOVEMBER 2026</div><h1>Vyuham Day-Pass</h1><p class="event-title-subtitle">VYUHAM’26 Day Pass</p><h2 class="day-pass-choice-heading">Choose your festival days</h2><p class="muted day-pass-intro">Select Day 1 only, Day 2 only, Day 3 only, or an applicable combination when completing your pass on MakeMyPass.</p><div class="pass-day-options" aria-label="Festival days"><article><span>DAY 01</span><h3>30 October</h3><p>Friday</p></article><article><span>DAY 02</span><h3>31 October</h3><p>Saturday</p></article><article><span>DAY 03</span><h3>1 November</h3><p>Sunday</p></article></div><p class="muted day-pass-note">Day selection and pass details are completed on the official MakeMyPass page.</p></div><aside class="detail-panel day-pass-panel"><div class="eyebrow">PASS DETAILS</div><dl><div><dt>FESTIVAL</dt><dd>VYUHAM’26</dd></div><div><dt>VALID DATES</dt><dd>30 Oct – 1 Nov 2026</dd></div>${DAY_PASS_METADATA.passLimit ? `<div><dt>PASS LIMIT</dt><dd>${esc(DAY_PASS_METADATA.passLimit)}</dd></div>` : ''}${DAY_PASS_METADATA.fee ? `<div><dt>FEE</dt><dd>${esc(DAY_PASS_METADATA.fee)}</dd></div>` : ''}<div><dt>DAY SELECTION</dt><dd>Single day or combination</dd></div></dl><span class="button button-primary event-register-cta registration-disabled" aria-disabled="true">REGISTRATION CLOSED</span><p class="muted day-pass-purchase-note">Day Pass registration is closed.</p></aside></div></div></section>`;
   const playLandingIntro = () => {
     if (landingIntroSeen) return false;
     landingIntroSeen = true;
     return !matchMedia('(prefers-reduced-motion: reduce)').matches;
   };
-  const concertRegisterCta = (className = 'button button-primary') => {
+  const concertRegisterCta = (className = 'button button-primary', event = null) => {
     const destination = safeExternalUrl(CONCERT_PROMOTION.registrationUrl);
+    const concertEvent = event || events.find(item => item.slug === CONCERT_PROMOTION.slug);
+    if (!canRegister(concertEvent)) return `<span class="${className} registration-disabled" role="status" aria-disabled="true">REGISTRATION CLOSED</span>`;
     return destination
       ? `<a class="${className}" href="${esc(destination)}" target="_blank" rel="noopener noreferrer">REGISTER NOW <span aria-hidden="true">↗</span></a>`
       : `<button class="${className}" type="button" disabled aria-disabled="true" title="Official concert registration URL has not been configured">REGISTER NOW</button>`;
@@ -606,7 +620,7 @@
     return `${pageHero('Event archive', 'FIND YOUR<br><span class="green">ARENA.</span>', 'Explore competitions, challenges and experiences across VYUHAM’26. Filter by stream or search for an event.', 'events-page-hero')}
       <section class="section"><div class="container"><div class="registration-info-bar"><details class="registration-info"><summary aria-label="Registration information"><span aria-hidden="true">i</span></summary><p>Registration and ticket payments are completed on MakeMyPass. Select an event to view its official registration page.</p></details></div><div class="filter-bar"><label class="search-box"><input id="eventSearch" type="search" placeholder="Search events, keywords…" aria-label="Search events"></label><label class="event-filter"><span>DAY</span><select id="eventDay"><option value="all">All events</option><option value="1">Day 1 · Oct 30</option><option value="2">Day 2 · Oct 31</option><option value="3">Day 3 · Nov 1</option></select></label><label class="event-filter"><span>SORT</span><select id="eventSort"><option value="day">Festival order</option><option value="name">Name A–Z</option><option value="fee">Fee · low to high</option></select></label></div><div class="filter-pills" id="streamFilters">${[['all', 'ALL EVENTS'], ['tech', 'TECHNOLOGY'], ['management', 'MANAGEMENT'], ['cultural', 'CULTURE'], ['esports', 'ESPORTS']].map(([id, label]) => `<button class="filter-pill ${selected === id ? 'active' : ''}" data-stream="${id}">${label}</button>`).join('')}</div><p class="muted mono" style="font-size:10px;margin:22px 0" id="eventCount"></p><div class="events-grid" id="eventsGrid"></div><p style="text-align:center;margin-top:34px">${registrationCta(MAKEMYPASS_HOME, 'VIEW ALL EVENTS ON MAKEMYPASS ↗', 'button button-outline')}</p></div></section>`;
   };
-  const concertDetailPage = event => `<section class="page-hero event-page-hero concert-event-page-hero"><img class="event-hero-image" src="assets/eventpics/thamarassery-churam-punnyapradeep.png" alt="Thamarassery Churam featuring Punnya Pradeep concert banner"><div class="event-hero-shade"></div><div class="container"><div class="breadcrumb"><a href="#/home">VYUHAM’26</a> / <a href="#/events">EVENT ARCHIVE</a> / LIVE CONCERT</div><span class="stream-pill">CULTURALS</span><h1>THAMARASSERY CHURAM</h1><p class="concert-hero-subtitle">Ft. Punnya Pradeep · Live Concert</p><p>1 November 2026 · 7:00 PM · Digital University Kerala (DUK)</p></div></section><section class="section concert-event-details-section"><div class="container"><a class="back-link" href="#/events">← BACK TO EVENT ARCHIVE</a><div class="concert-event-details"><a class="concert-detail-poster" href="${esc(CONCERT_PROMOTION.registrationUrl)}" target="_blank" rel="noopener noreferrer" aria-label="Register for ${esc(CONCERT_PROMOTION.title)} on MakeMyPass"><img src="${esc(CONCERT_PROMOTION.poster)}" alt="${esc(CONCERT_PROMOTION.title)} poster showing Punnya Pradeep and band, 1 November 2026" loading="lazy"></a><div class="concert-detail-copy"><div class="eyebrow">VYUHAM’26 / LIVE CONCERT</div><h2>${esc(CONCERT_PROMOTION.title)}</h2><p>${esc(event.description)}</p><dl><div><dt>DATE</dt><dd>${esc(CONCERT_PROMOTION.date)}</dd></div><div><dt>TIME</dt><dd>${esc(CONCERT_PROMOTION.time)}</dd></div><div><dt>VENUE</dt><dd>${esc(CONCERT_PROMOTION.venue)}</dd></div><div><dt>ENTRY</dt><dd>${esc(CONCERT_PROMOTION.audience)}</dd></div></dl><div class="concert-detail-actions"><a class="button button-primary" href="${esc(CONCERT_PROMOTION.registrationUrl)}" target="_blank" rel="noopener noreferrer">REGISTER NOW <span aria-hidden="true">↗</span></a><a class="button button-outline" href="#/schedule?day=3">VIEW DAY 03 SCHEDULE</a></div></div></div></div></section>`;
+  const concertDetailPage = event => `<section class="page-hero event-page-hero concert-event-page-hero"><img class="event-hero-image" src="assets/eventpics/thamarassery-churam-punnyapradeep.png" alt="Thamarassery Churam featuring Punnya Pradeep concert banner"><div class="event-hero-shade"></div><div class="container"><div class="breadcrumb"><a href="#/home">VYUHAM’26</a> / <a href="#/events">EVENT ARCHIVE</a> / LIVE CONCERT</div><span class="stream-pill">CULTURALS</span>${eventLifecycleBadge(event)}<h1>THAMARASSERY CHURAM</h1><p class="concert-hero-subtitle">Ft. Punnya Pradeep · Live Concert</p><p>1 November 2026 · 7:00 PM · Digital University Kerala (DUK)</p></div></section><section class="section concert-event-details-section"><div class="container"><a class="back-link" href="#/events">← BACK TO EVENT ARCHIVE</a><div class="concert-event-details"><a class="concert-detail-poster" href="${esc(CONCERT_PROMOTION.registrationUrl)}" target="_blank" rel="noopener noreferrer" aria-label="Register for ${esc(CONCERT_PROMOTION.title)} on MakeMyPass"><img src="${esc(CONCERT_PROMOTION.poster)}" alt="${esc(CONCERT_PROMOTION.title)} poster showing Punnya Pradeep and band, 1 November 2026" loading="lazy"></a><div class="concert-detail-copy"><div class="eyebrow">VYUHAM’26 / LIVE CONCERT</div><h2>${esc(CONCERT_PROMOTION.title)}</h2><p>${esc(event.description)}</p><dl><div><dt>DATE</dt><dd>${esc(CONCERT_PROMOTION.date)}</dd></div><div><dt>TIME</dt><dd>${esc(CONCERT_PROMOTION.time)}</dd></div><div><dt>VENUE</dt><dd>${esc(CONCERT_PROMOTION.venue)}</dd></div><div><dt>ENTRY</dt><dd>${esc(CONCERT_PROMOTION.audience)}</dd></div></dl><div class="concert-detail-actions">${concertRegisterCta("button button-primary", event)}<a class="button button-outline" href="#/schedule?day=3">VIEW DAY 03 SCHEDULE</a></div></div></div></div></section>`;
   const eventDetail = slug => {
     if (decodeURIComponent(slug) === 'day-pass') return dayPassDetail();
     // FIT ARENA is intentionally omitted from public listings, but its direct
@@ -665,7 +679,7 @@
     const aiFilmGuidelines = isAiFilm
       ? `<section class="ai-film-guidelines"><h2>Participation Guidelines</h2><p class="muted ai-film-guidelines-intro">Review the competition requirements, AI-use rules, ethical standards, and submission checklist before preparing your film.</p><div class="ai-film-guideline-grid">${e.competitionGuidelines.map((section, index) => `<article class="ai-film-guideline"><div class="ai-film-guideline-title"><span>${String(index + 1).padStart(2, '0')}</span><h3>${esc(section.heading)}</h3></div>${section.intro ? `<p class="muted">${esc(section.intro)}</p>` : ''}<ul>${section.items.map(item => `<li>${esc(item)}</li>`).join('')}</ul></article>`).join('')}</div></section>`
       : '';
-    const hero = `<section class="page-hero event-page-hero${image ? '' : ' event-page-hero-no-image'}">${image ? `<img class="event-hero-image" src="${esc(image)}" alt="${esc(officialEventTitle(e))} event poster">` : ''}<div class="event-hero-shade"></div><div class="container"><div class="breadcrumb"><a href="#/home">VYUHAM’26</a> / EVENT DOSSIER</div><span class="stream-pill">${esc(eventCategoryLabel(e))}</span><h1>${esc(officialEventTitle(e))}</h1>${e.officialTitle ? `<p class="event-title-subtitle">${esc(e.title)}</p>` : ''}<p>Event details, schedule information and participation overview for VYUHAM’26.</p></div></section>`;
+    const hero = `<section class="page-hero event-page-hero${image ? '' : ' event-page-hero-no-image'}">${image ? `<img class="event-hero-image" src="${esc(image)}" alt="${esc(officialEventTitle(e))} event poster">` : ''}<div class="event-hero-shade"></div><div class="container"><div class="breadcrumb"><a href="#/home">VYUHAM’26</a> / EVENT DOSSIER</div><span class="stream-pill">${esc(eventCategoryLabel(e))}</span>${eventLifecycleBadge(e)}<h1>${esc(officialEventTitle(e))}</h1>${e.officialTitle ? `<p class="event-title-subtitle">${esc(e.title)}</p>` : ''}<p>Event details, schedule information and participation overview for VYUHAM’26.</p></div></section>`;
     return `${hero}
       <section class="section event-details-section"><div class="container"><a class="back-link" href="#/events">← BACK TO EVENT ARCHIVE</a><div class="event-detail"><div>${isAiFilm ? aiFilmGuidelines : `<h3 class="event-participation-heading">Participation notes</h3>${techQuizCoupon(e)}${participationNotes}${submissionLink}${isKsumTalk ? `${speakerContent}${socContent}` : `${socContent}${speakerContent}`}`}</div><aside class="detail-panel"><div class="detail-panel-heading"><div class="eyebrow">EVENT INTEL</div></div><dl>${renderEventIntelRows(e)}</dl><div class="detail-panel-footer">${registrationCta(registrationUrl(e), 'REGISTER & PAY ON MAKEMYPASS ↗', 'button button-primary event-register-cta', e)}<details class="detail-info detail-info-bottom"><summary aria-label="MakeMyPass registration information">ⓘ</summary><p>MakeMyPass is the official registration and payment provider. Review final event details and complete your registration on the event’s MakeMyPass page.</p></details></div></aside></div></div></section>`;
   };
@@ -1066,7 +1080,7 @@
     const phase = festivalDayState(selected);
     const rows = dayEvents.map((e, index) => {
       const lifecycle = eventLifecycle(e);
-      const eventState = lifecycle === 'live' ? 'LIVE NOW' : lifecycle === 'ended' ? 'EVENT ENDED' : lifecycle === 'upcoming' ? 'UPCOMING' : 'TIME TBA';
+      const eventState = eventLifecycleLabel(e);
       const registrationState = canRegister(e) ? 'REGISTRATION OPEN' : 'REGISTRATION CLOSED';
       return `<article class="schedule-row"><div class="schedule-time"><span>0${String(index + 1).padStart(2, '0')}</span><time>${esc(e.time || 'TIME TBA')}</time></div><div class="schedule-event"><h3><a href="#/event/${encodeURIComponent(e.slug)}">${esc(officialEventTitle(e))}</a></h3>${e.officialTitle ? `<small class="schedule-event-subtitle">${esc(e.title)}</small>` : ''}<p>${esc(e.description)}</p></div><div class="venue"><span>STREAM</span><b>${esc(eventCategoryLabel(e))}</b><div class="schedule-row-status"><span class="event-state-pill ${lifecycle === 'live' ? 'is-live' : lifecycle === 'ended' ? 'is-over' : ''}">${esc(eventState)}</span><span class="registration-state-pill ${canRegister(e) ? 'is-open' : 'is-closed'}">${esc(registrationState)}</span></div></div></article>`;
     }).join('');
@@ -1342,7 +1356,38 @@
       clock.setAttribute('aria-label', `${totalHours} hours, ${minutes} minutes, ${seconds} seconds ${isLive ? 'until the festival ends' : isComplete ? 'since the festival ended' : 'until the festival starts'}`);
     });
   }
+  const closeRegistrationsAtCutoff = () => {
+    const remaining = REGISTRATION_CUTOFF - Date.now();
+    if (remaining <= 0) {
+      if (registrationOpen) { registrationOpen = false; render(); }
+      return;
+    }
+    setTimeout(() => { registrationOpen = false; render(); }, remaining);
+  };
+  closeRegistrationsAtCutoff();
+  document.addEventListener('click', event => {
+    const registrationLink = event.target.closest('a[href*="makemypass.com"]');
+    if (!registrationLink) return;
+    const destination = new URL(registrationLink.href, location.href).href;
+    const linkedEvent = destination !== MAKEMYPASS_HOME && events.find(item => registrationUrl(item) === destination);
+    if (Date.now() < REGISTRATION_CUTOFF && (!linkedEvent || canRegister(linkedEvent))) return;
+    event.preventDefault();
+    if (Date.now() >= REGISTRATION_CUTOFF && registrationOpen) { registrationOpen = false; render(); }
+  });
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden && Date.now() >= REGISTRATION_CUTOFF && registrationOpen) {
+      registrationOpen = false;
+      render();
+    }
+  });
   updateCountdown(); setInterval(updateCountdown, 1000);
   render();
+  let eventStatusSnapshot = events.map(event => `${event.slug}:${eventLifecycleLabel(event)}:${canRegister(event)}`).join('|');
+  setInterval(() => {
+    const nextSnapshot = events.map(event => `${event.slug}:${eventLifecycleLabel(event)}:${canRegister(event)}`).join('|');
+    if (nextSnapshot === eventStatusSnapshot) return;
+    eventStatusSnapshot = nextSnapshot;
+    if (['event', 'schedule'].includes(route().page)) render();
+  }, 30_000);
   if (!isRouteHash() && location.hash.length > 1) scrollToHashTarget();
 })();

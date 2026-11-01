@@ -1891,3 +1891,4 @@ html{scroll-padding-top:calc(var(--site-header-top) + var(--site-header-height) 
 @media(prefers-reduced-motion:reduce){
   .dev-team-card,.dev-team-card::before,.dev-avatar-ring,.dev-live-beacon::after{animation:none!important}
 }
+.event-page-hero .event-detail-state{margin:0 0 18px;vertical-align:middle}
