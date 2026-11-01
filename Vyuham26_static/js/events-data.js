@@ -14,14 +14,14 @@ window.VYUHAM_EVENTS = [
     "teamSize": "3–5 members",
     "status": "upcoming",
     "registrationOpen": false,
-    "featured": true,
+    "featured": false,
     "registrationUrl": "https://org.makemypass.com/web/vyuham-26/events/hackathon-24hr",
     "rules": [
       "Food and refreshments will be provided.",
       "A Claude token will be provided to each team for the duration of the hackathon",
       "24 uninterrupted hours of collaborative building",
       "Continuous judging and mentorship throughout the hackathon",
-      "Prototype demos and jury evaluation on Day 2 morning",
+      "Prototype demos and jury evaluation on Day 2 morning"
     ],
     "themes": [
       "Agentic AI",
@@ -63,7 +63,8 @@ window.VYUHAM_EVENTS = [
       "Volunteers: Surya (81370 80407) | Akshay Chandran (81570 14234) | Akshay B Krishna (80780 2683) | Sreekutty (77367 64902) | Parvathy (78932 14206)"
     ],
     "prizePool": "₹15,000",
-    "legacySlug": "best-manager"
+    "legacySlug": "best-manager",
+    "registrationOpen": false
   },
   {
     "slug": "boardroom-battle-best-management-team",
@@ -80,7 +81,7 @@ window.VYUHAM_EVENTS = [
     "teamSize": "3–4 members",
     "status": "upcoming",
     "featured": false,
-    "registrationOpen": true,
+    "registrationOpen": false,
     "registrationUrl": "",
     "rules": [
       "Team Composition: Each team must consist of 3–4 members from the same institution or organization.",
@@ -124,7 +125,8 @@ window.VYUHAM_EVENTS = [
       "Volunteers: Akhila (90480 52438) | Vibitha (86068 29275) | Arbab khan (73009 46462) | Anagha S (8086962374) | Shajeena (7012537656)"
     ],
     "prizePool": "₹15,000",
-    "legacySlug": "marketing-game"
+    "legacySlug": "marketing-game",
+    "registrationOpen": false
   },
   {
     "slug": "capital-under-pressure-finance-games",
@@ -156,7 +158,8 @@ window.VYUHAM_EVENTS = [
       "Volunteers: Hadik Bin Siyad (8304915518) | Sree hari G (8590491685) | Suhail Khan (6282 673864) | Muhammed Suhail (80756 70806)"
     ],
     "prizePool": "₹15,000",
-    "legacySlug": "finance-game"
+    "legacySlug": "finance-game",
+    "registrationOpen": false
   },
   {
     "slug": "people-in-play-hr-games",
@@ -185,7 +188,8 @@ window.VYUHAM_EVENTS = [
       "Volunteers: Diya Sabu (95262 86593) | Pretty Santhi Jose (90372 70590) | Mariyam Shamshira (96052 77787) | Nimra (79070 09237) | Panchami (97787 30260)"
     ],
     "prizePool": "₹15,000",
-    "legacySlug": "hr-game"
+    "legacySlug": "hr-game",
+    "registrationOpen": false
   },
   {
     "slug": "the-business-circuit-business-quiz",
@@ -218,7 +222,8 @@ window.VYUHAM_EVENTS = [
       "Volunteers: Linus (80895 81304) | Juhaina (89211 60205) | Sona (95675 08757) | Fathima (7034275591) | Pavithra (9400034736)"
     ],
     "prizePool": "₹10,000",
-    "legacySlug": "business-quiz"
+    "legacySlug": "business-quiz",
+    "registrationOpen": false
   },
   {
     "slug": "beyond-accuracy-panel-discussion-on-ai-accuracy",
@@ -254,7 +259,8 @@ window.VYUHAM_EVENTS = [
       "Participants are encouraged to actively listen and engage in the Q&A session, if available.",
       "Please maintain decorum throughout the session."
     ],
-    "legacySlug": "panel-responsible-ai"
+    "legacySlug": "panel-responsible-ai",
+    "registrationOpen": false
   },
   {
     "slug": "talk-responsible-ai-a-humanities-lens",
@@ -271,7 +277,8 @@ window.VYUHAM_EVENTS = [
     "featured": false,
     "registrationUrl": "",
     "rules": [],
-    "legacySlug": "talk-quantum-ai"
+    "legacySlug": "talk-quantum-ai",
+    "registrationOpen": false
   },
   {
     "slug": "ink-and-letter-calligraphy-workshop",
@@ -298,7 +305,8 @@ window.VYUHAM_EVENTS = [
     "rules": [],
     "eventType": "workshop",
     "certificateProvided": true,
-    "legacySlug": "workshop-prompt-engineering"
+    "legacySlug": "workshop-prompt-engineering",
+    "registrationOpen": false
   },
   {
     "slug": "play-district",
@@ -325,7 +333,8 @@ window.VYUHAM_EVENTS = [
       "Open casual gaming and interactive carnival installations",
       "Free access throughout all three festival days"
     ],
-    "legacySlug": "play-fest"
+    "legacySlug": "play-fest",
+    "registrationOpen": false
   },
   {
     "slug": "fit-arena-fitness-competition",
@@ -347,7 +356,8 @@ window.VYUHAM_EVENTS = [
       "Calisthenics, stamina drills, and timed fitness circuits",
       "Individual scoring table"
     ],
-    "legacySlug": "fitness-competition"
+    "legacySlug": "fitness-competition",
+    "registrationOpen": false
   },
   {
     "slug": "the-cyber-gauntlet-capture-the-flag",
@@ -363,7 +373,7 @@ window.VYUHAM_EVENTS = [
     "eligibility": "Open to all cybersecurity enthusiasts",
     "teamSize": "2–3 members",
     "status": "upcoming",
-    "registrationOpen": true,
+    "registrationOpen": false,
     "featured": true,
     "registrationUrl": "",
     "rules": [
@@ -400,7 +410,8 @@ window.VYUHAM_EVENTS = [
       "Judges’ decisions are final."
     ],
     "prizePool": "₹15,000",
-    "legacySlug": "prompt-war"
+    "legacySlug": "prompt-war",
+    "registrationOpen": false
   },
   {
     "slug": "techsprint-tech-quiz",
@@ -428,7 +439,8 @@ window.VYUHAM_EVENTS = [
       "Questions on General Tech, Computer Science, AI, Internet History, Cutting Edge Tech."
     ],
     "prizePool": "₹10,000",
-    "legacySlug": "tech-quiz"
+    "legacySlug": "tech-quiz",
+    "registrationOpen": false
   },
   {
     "slug": "from-agents-to-outcome-building-ai-that-works-for-the-world",
@@ -460,7 +472,8 @@ window.VYUHAM_EVENTS = [
       "Venue etiquette: Keep the hall clean, respect fellow attendees and follow volunteer instructions.",
       "Schedule updates: Check official VYUHAM announcements for any changes to the date, time or venue."
     ],
-    "legacySlug": "talk-agentic-ai"
+    "legacySlug": "talk-agentic-ai",
+    "registrationOpen": false
   },
   {
     "slug": "cybersecurity-in-the-era-of-ai-defend-adapt-prepare",
@@ -509,7 +522,8 @@ window.VYUHAM_EVENTS = [
     "featured": false,
     "registrationUrl": "",
     "rules": [],
-    "legacySlug": "panel-cybersecurity"
+    "legacySlug": "panel-cybersecurity",
+    "registrationOpen": false
   },
   {
     "slug": "think-like-an-attacker-ethical-hacking-workshop",
@@ -527,6 +541,7 @@ window.VYUHAM_EVENTS = [
     "teamSize": "Individual",
     "status": "upcoming",
     "featured": false,
+    "roomNumber": "45",
     "registrationUrl": "",
     "rules": [
       "Hands-on tactical offensive methodology and open-source intelligence gathering",
@@ -534,7 +549,8 @@ window.VYUHAM_EVENTS = [
     ],
     "eventType": "workshop",
     "certificateProvided": true,
-    "legacySlug": "workshop-ethical-hacking"
+    "legacySlug": "workshop-ethical-hacking",
+    "registrationOpen": true
   },
   {
     "slug": "synthetic-frames-ai-short-film",
@@ -551,6 +567,7 @@ window.VYUHAM_EVENTS = [
     "teamSize": "Individual / Teams",
     "status": "upcoming",
     "featured": false,
+    "roomNumber": "216",
     "registrationUrl": "",
     "competitionGuidelines": [
       {
@@ -624,7 +641,8 @@ window.VYUHAM_EVENTS = [
       }
     ],
     "prizePool": "₹10,000",
-    "legacySlug": "ai-short-film"
+    "legacySlug": "ai-short-film",
+    "registrationOpen": true
   },
   {
     "slug": "idea-to-impact-talk-session-by-kerala-startup-mission",
@@ -649,20 +667,22 @@ window.VYUHAM_EVENTS = [
     ],
     "stream": "session",
     "day": 3,
-    "time": "9:00 AM – 11:00 AM",
+    "time": "9:00 AM – 1:00 PM",
     "venue": "",
     "description": "Introduction to Kerala Startup Mission (KSUM) and IEDC, highlighting their role in fostering student innovation and entrepreneurship. Explore student benefits, startup support opportunities, and inspiring success stories of student entrepreneurs from Kerala.",
     "fee": "FREE ENTRY",
     "eligibility": "Open to all attendees",
     "teamSize": "Open",
-    "status": "upcoming",
+    "status": "closed",
     "featured": false,
+    "roomNumber": "22",
     "registrationUrl": "",
     "rules": [
       "Introduction to Kerala Startup Mission (KSUM) and IEDC, highlighting their role in fostering student innovation and entrepreneurship.",
       "Explore student benefits, startup support opportunities, and inspiring success stories of student entrepreneurs from Kerala."
     ],
-    "legacySlug": "talk-ksum"
+    "legacySlug": "talk-ksum",
+    "registrationOpen": false
   },
   {
     "slug": "fifa-27",
@@ -680,6 +700,7 @@ window.VYUHAM_EVENTS = [
     "teamSize": "Individual (1v1)",
     "status": "upcoming",
     "featured": true,
+    "roomNumber": "116",
     "registrationUrl": "",
     "rules": [
       "Conducted offline at Digital University Kerala campus on PlayStation consoles",
@@ -692,7 +713,8 @@ window.VYUHAM_EVENTS = [
       "Tournament admins' decisions are final in all disputes"
     ],
     "prizePool": "₹10,000",
-    "legacySlug": "fifa-27"
+    "legacySlug": "fifa-27",
+    "registrationOpen": false
   },
   {
     "slug": "reel-royale-movie-quiz",
@@ -709,13 +731,15 @@ window.VYUHAM_EVENTS = [
     "teamSize": "Teams of 2",
     "status": "upcoming",
     "featured": false,
+    "roomNumber": "22",
     "registrationUrl": "",
     "rules": [
       "Multi-round film trivia across classic, regional, and world cinema",
       "Audio-visual identifier rounds and buzzer finals"
     ],
     "prizePool": "₹5,000",
-    "legacySlug": "movie-quiz"
+    "legacySlug": "movie-quiz",
+    "registrationOpen": true
   },
   {
     "slug": "e-football-qualifiers",
@@ -788,7 +812,7 @@ window.VYUHAM_EVENTS = [
     "time": "Running All 3 Days",
     "venue": "Campus Wide",
     "description": "Campus-wide open contest across all three days.",
-    "fee": "₹100 onwards",
+    "fee": "FREE ENTRY",
     "submissionUrl": "https://drive.google.com/drive/folders/1GLJy-s-hrFNLiEqVDm56TXKddVnAQ0SZ",
     "eligibility": "Open to all attendees",
     "teamSize": "Individual",
@@ -807,7 +831,8 @@ window.VYUHAM_EVENTS = [
     ],
     "scheduleGroup": "multi-day",
     "prizePool": "₹10,000",
-    "legacySlug": "photography"
+    "legacySlug": "photography",
+    "registrationOpen": false
   },
   {
     "slug": "vega-processors-and-ecosystem-by-c-dac",
@@ -840,7 +865,8 @@ window.VYUHAM_EVENTS = [
     ],
     "eventType": "workshop",
     "certificateProvided": true,
-    "legacySlug": "cdac-workshop"
+    "legacySlug": "cdac-workshop",
+    "registrationOpen": false
   },
   {
     "slug": "project-x-minerva-project-expo-by-ieee",
@@ -870,7 +896,8 @@ window.VYUHAM_EVENTS = [
       "Contact & Queries: Dakshin (+91 88481 82643) | Salma (+91 97465 20275) | ieee.sb@duk.ac.in"
     ],
     "prizePool": "₹10,000",
-    "legacySlug": "project-expo-ieee"
+    "legacySlug": "project-expo-ieee",
+    "registrationOpen": false
   },
   {
     "slug": "workshop-on-prompt-engineering",
@@ -902,7 +929,8 @@ window.VYUHAM_EVENTS = [
     ],
     "eventType": "workshop",
     "certificateProvided": true,
-    "legacySlug": "workshop-luminar-technolab"
+    "legacySlug": "workshop-luminar-technolab",
+    "registrationOpen": false
   },
   {
     "slug": "thamarassery-churam-concert",
@@ -924,7 +952,8 @@ window.VYUHAM_EVENTS = [
       "Live concert on 1 November 2026 at 7:00 PM.",
       "Venue: Digital University Kerala (DUK).",
       "For college students and Technopark employees."
-    ]
+    ],
+    "registrationOpen": true
   },
   {
     "slug": "vyuham-after-dark-cultural-night",
@@ -943,7 +972,8 @@ window.VYUHAM_EVENTS = [
     "status": "upcoming",
     "featured": false,
     "registrationUrl": "https://org.makemypass.com/web/vyuham-26/events/cultural-night-1",
-    "rules": []
+    "rules": [],
+    "registrationOpen": false
   },
   {
     "slug": "couture-boulevard-fashion-show",
@@ -962,6 +992,7 @@ window.VYUHAM_EVENTS = [
     "status": "upcoming",
     "featured": false,
     "registrationUrl": "https://org.makemypass.com/web/vyuham-26/events/fashion-show-1",
-    "rules": []
+    "rules": [],
+    "registrationOpen": false
   }
 ];

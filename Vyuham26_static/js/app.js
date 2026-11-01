@@ -5,7 +5,7 @@
   const app = $('#app');
   const allEventRecords = Array.isArray(window.VYUHAM_EVENTS) ? window.VYUHAM_EVENTS : [];
   let events = allEventRecords;
-  const hiddenEventSlugs = new Set(['hackathon-continues', 'hackathon-demos', 'hackathon-winners', 'inauguration-ceremony', 'talk-quantum-ai', 'cultural-night', 'dj-night', 'concert', 'fashion-show', 'food-court']);
+  const hiddenEventSlugs = new Set(['hackathon-continues', 'hackathon-demos', 'hackathon-winners', 'inauguration-ceremony', 'talk-quantum-ai', 'cultural-night', 'dj-night', 'concert', 'fashion-show', 'food-court', 'couture-boulevard-fashion-show']);
   const hiddenEventTitles = new Set(['hackathon continues', 'hackathon demos & judging', 'hackathon winners & prize distribution', 'inauguration ceremony', 'talk: responsible ai — a humanities lens', 'cultural night', 'dj night', 'concert night', 'fashion show', 'food court, markets & stalls']);
   const isVisibleEvent = event => event.slug !== 'fit-arena-fitness-competition' && !hiddenEventSlugs.has(event.legacySlug || event.slug) && !hiddenEventTitles.has(String(event.title || event.name || '').trim().toLowerCase());
   const eventSlugAliases = new Map(events.filter(event => event.legacySlug).map(event => [event.legacySlug, event.slug]));
@@ -226,17 +226,24 @@
     return day === 1 ? 1 : day === 2 ? 2 : day === 3 ? 3 : 4;
   };
   const archiveOrder = (a, b) => archiveDayRank(a) - archiveDayRank(b) || eventPriority(a, b);
-  const homepageReplacementSlugs = new Set(['techsprint-tech-quiz', 'promptsmith-arena-prompt-war']);
+  const heroCarouselEventSlugs = [
+    'synthetic-frames-ai-short-film',
+    'think-like-an-attacker-ethical-hacking-workshop',
+    'reel-royale-movie-quiz',
+    'thamarassery-churam-concert'
+  ];
+  const heroCarouselEvents = heroCarouselEventSlugs
+    .map(slug => allEventRecords.find(e => e.slug === slug))
+    .filter(Boolean);
+
   const homepageFeaturedEvents = (() => {
-    const eligible = events.filter(event => event.registrationOpen !== false && ['live', 'upcoming'].includes(event.status));
-    const replacements = eligible.filter(event => homepageReplacementSlugs.has(event.slug));
-    const remainingLeaders = eligible
-      .filter(event => !homepageReplacementSlugs.has(event.slug) && verifiedPrizePoolValue(event) > 0)
-      .sort((a, b) => registrationAvailabilityRank(a) - registrationAvailabilityRank(b) || verifiedPrizePoolValue(b) - verifiedPrizePoolValue(a) || eventPriority(a, b))
-      .slice(0, Math.max(0, 4 - replacements.length));
-    return [...remainingLeaders, ...replacements]
-      .sort((a, b) => registrationAvailabilityRank(a) - registrationAvailabilityRank(b) || verifiedPrizePoolValue(b) - verifiedPrizePoolValue(a) || eventPriority(a, b))
-      .slice(0, 4);
+    const pinnedSlugs = [
+      'think-like-an-attacker-ethical-hacking-workshop',
+      'fifa-27'
+    ];
+    return pinnedSlugs
+      .map(slug => allEventRecords.find(e => e.slug === slug))
+      .filter(Boolean);
   })();
   const homepageFeaturedPoster = event => {
     const candidate = event?.poster;
@@ -502,7 +509,20 @@
     const frameHunt = event.slug === 'frame-hunt';
     const upload = frameHunt && event.submissionUrl ? `<a class="home-timeline-upload" href="${esc(event.submissionUrl)}" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4m0 0L7 9m5-5 5 5M5 15v4h14v-4"/></svg>UPLOAD HERE <span aria-hidden="true">↗</span></a>` : '';
     const image = safeEventImage(event.image);
-    return `<article class="home-timeline-card ${state === 'live' ? 'is-live' : ''}">${image ? `<img src="${esc(image)}" alt="" loading="lazy" decoding="async">` : ''}<div class="home-timeline-card-shade"></div><div class="home-timeline-card-body">${state === 'live' ? '<span class="home-live-badge"><i></i> LIVE NOW</span>' : `<span class="home-upcoming-badge">UP NEXT · ${esc(eventDateLabel(event))}</span>`}<span class="home-timeline-category">${esc(eventCategoryLabel(event))} · ${esc(event.time || 'TIME TBA')}</span><h3><a href="#/event/${encodeURIComponent(event.slug)}">${esc(officialEventTitle(event))}</a></h3><p>${esc(event.cardDescription || event.description)}</p><div class="home-timeline-actions"><a href="#/event/${encodeURIComponent(event.slug)}">EVENT DETAILS ↗</a>${upload}</div></div></article>`;
+    const eventRooms = {
+      'think-like-an-attacker-ethical-hacking-workshop': '45',
+      'workshop-ethical-hacking': '45',
+      'idea-to-impact-talk-session-by-kerala-startup-mission': '22',
+      'talk-ksum': '22',
+      'synthetic-frames-ai-short-film': '216',
+      'ai-short-film': '216',
+      'fifa-27': '116',
+      'reel-royale-movie-quiz': '22',
+      'movie-quiz': '22'
+    };
+    const roomNumber = event.room ?? event.roomNumber ?? eventRooms[event.slug] ?? eventRooms[event.legacySlug];
+    const roomMarkup = roomNumber != null ? `<div class="home-timeline-room"><span class="room-label">ROOM:</span> <b class="room-number">${esc(roomNumber)}</b></div>` : '';
+    return `<article class="home-timeline-card ${state === 'live' ? 'is-live' : ''}">${image ? `<img src="${esc(image)}" alt="" loading="lazy" decoding="async">` : ''}<div class="home-timeline-card-shade"></div><div class="home-timeline-card-body">${state === 'live' ? '<span class="home-live-badge"><i></i> LIVE NOW</span>' : `<span class="home-upcoming-badge">UP NEXT · ${esc(eventDateLabel(event))}</span>`}<span class="home-timeline-category">${esc(eventCategoryLabel(event))} · ${esc(event.time || 'TIME TBA')}</span><h3><a href="#/event/${encodeURIComponent(event.slug)}">${esc(officialEventTitle(event))}</a></h3><p>${esc(event.cardDescription || event.description)}</p><div class="home-timeline-actions"><a href="#/event/${encodeURIComponent(event.slug)}">EVENT DETAILS ↗</a>${upload}${roomMarkup}</div></div></article>`;
   };
   const homeTimelineMarkup = (now = Date.now()) => {
     const scheduled = events.map(event => ({ event, state: eventLifecycle(event, now), window: eventWindow(event) })).filter(item => item.window && item.state !== 'ended');
@@ -533,11 +553,11 @@
   };
   const home = () => {
     const showIntro = playLandingIntro();
-    const featuredEvents = homepageFeaturedEvents;
-    const featuredEvent = featuredEvents[0];
+    const heroEvents = heroCarouselEvents;
+    const featuredEvent = heroEvents[0];
     return `
     ${showIntro ? `<div class="intro-cinema" id="landingIntro" tabindex="-1" role="dialog" aria-modal="true" aria-label="VYUHAM 2026 introduction"><button class="intro-skip" id="skipIntro" type="button">SKIP INTRO <span aria-hidden="true">↗</span></button><div class="intro-scene intro-scene-campus"><img src="assets/venue-campus-enhanced.jpg" alt=""><span>TECHNOCITY CAMPUS / TECHNOPARK PHASE 4</span></div><div class="intro-scene intro-scene-festival"><img src="assets/afterdark-monolith.png" alt=""><span>THREE DAYS / ONE CONVERGENCE</span></div><div class="intro-cinema-vignette"></div><div class="intro-cinema-grid"></div><div class="intro-cinema-orbit intro-cinema-orbit-a"></div><div class="intro-cinema-orbit intro-cinema-orbit-b"></div><div class="intro-cinema-core"><span class="intro-cinema-kicker"><img src="assets/duk-logo-intro.png" alt="Digital University Kerala"><b>Presents</b></span><img src="assets/vyuham_logo_optimized.png" alt=""><h1><span>VYUHAM</span><b>’26</b></h1><p>TECHNOLOGY. CULTURE. COMPETITION.</p></div><span class="intro-cinema-coordinate intro-cinema-left">30 OCT — 01 NOV / 2026</span><span class="intro-cinema-coordinate intro-cinema-right">THIRUVANANTHAPURAM / INDIA</span><div class="intro-cinema-flash"></div></div>` : ''}
-    <div class="campus-entry-notice" id="campusEntryNotice" hidden><section class="campus-entry-notice-dialog" role="dialog" aria-modal="false" aria-labelledby="campusEntryTitle"><button class="campus-entry-notice-close" type="button" aria-label="Close campus pass requirement">×</button><span class="campus-entry-notice-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3 20 6v5c0 5-3.4 8.5-8 10-4.6-1.5-8-5-8-10V6l8-3Z"/><path d="m8.5 12 2.2 2.2 4.8-5"/></svg></span><div class="campus-entry-notice-copy"><span class="campus-entry-notice-kicker">IMPORTANT CAMPUS NOTICE</span><h2 id="campusEntryTitle">Day Pass Mandatory</h2><p>A valid day pass is mandatory unless having event pass for entering the college campus during VYUHAM’26.</p><p>Please ensure you have your day pass or event pass before arriving at the campus.</p></div></section></div><section class="cyber-hero${showIntro ? ' intro-handoff' : ''}" id="home"><div class="cyber-hero-grid"><div class="cyber-copy"><div class="cyber-kicker"><span class="live-dot"></span> DIGITAL UNIVERSITY KERALA <i>·</i> 2026</div><div class="cyber-wordmark"><img src="assets/vyuham_logo_optimized.png" alt="VYUHAM red emblem"><h1>VYUHAM<span>’26</span></h1></div><p class="cyber-slogan">THE FUTURE<br><em>AWAITS.</em></p><p class="cyber-intro">VYUHAM’26 is Digital University Kerala’s flagship national-level management, technology and cultural fest.</p><div class="cyber-actions">${registrationCta(MAKEMYPASS_HOME, 'REGISTER & GET TICKETS <span aria-hidden="true">↗</span>', 'button button-primary hero-cta hero-cta-register')}<a class="button button-outline hero-cta hero-cta-map" href="https://duk360.duk.ac.in/duk-tour/?scene=technopark-phase-4" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 7 12 7Z"/><circle cx="12" cy="9" r="2.3"/></svg>CAMPUS MAP <span aria-hidden="true">↗</span></a><a class="button button-outline hero-cta hero-cta-explore" href="#/events">EXPLORE ALL EVENTS <span aria-hidden="true">↓</span></a></div><div class="cyber-data"><span>30 OCT — 01 NOV, 2026</span><span>TECHNOCITY CAMPUS, TECHNOPARK PHASE 4</span></div><div class="hero-count cyber-count mission-control-dashboard" aria-label="VYUHAM’26 festival mission control"><section class="mission-control-broadcast" aria-live="polite"><span class="mission-control-kicker"><i class="mission-live-indicator" aria-hidden="true"></i><b data-festival-broadcast>FESTIVAL BROADCAST</b></span><strong class="mission-control-live" data-festival-live>STANDBY</strong><span class="mission-control-caption" data-festival-broadcast-caption>VYUHAM’26 BROADCAST STANDBY</span><span class="mission-signal-bars" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span></section><section class="mission-control-day" aria-live="polite" aria-label="Current festival day"><span class="mission-control-eyebrow">FESTIVAL STATUS</span><strong class="mission-day-number" data-festival-day>DAY 01</strong><span class="mission-day-theme" data-festival-theme>IGNITION</span><span class="mission-session-state"><i aria-hidden="true"></i><b data-festival-session>UP NEXT</b></span></section><section class="mission-control-countdown" aria-label="Countdown until festival ends"><span class="mission-control-eyebrow" data-countdown-label>UNTIL FESTIVAL ENDS</span><strong class="mission-clock" data-countdown>00:00:00</strong><span class="mission-clock-note" data-countdown-note>FINAL FESTIVAL MOMENT</span></section><span class="mission-energy-line" aria-hidden="true"></span></div></div><div class="cyber-stage concert-stage" id="featuredCarousel" role="region" aria-label="Featured event carousel"><figure class="stage-screen stage-main"><img class="stage-featured-art" id="featuredArtwork" src="assets/vyuham-hero-convergence.png" alt="VYUHAM’26 cinematic hero artwork" fetchpriority="high"><div class="stage-shade"></div><div class="stage-brand"><img src="assets/vyuham_logo_optimized.png" alt=""><span>VYUHAM<sup>’26</sup></span></div><figcaption><span>VYUHAM / 01</span><span>THIRUVANANTHAPURAM, INDIA</span></figcaption></figure><div class="stage-screen stage-float" id="featuredCard" role="group" aria-roledescription="slide" aria-label="Featured event 1 of ${featuredEvents.length}"><img class="stage-float-poster" id="featuredPoster" alt="" hidden><a class="stage-float-hitarea" id="featuredLink" href="#/event/${encodeURIComponent(featuredEvent?.slug || 'events')}" aria-label="Open details for ${esc(featuredEvent ? officialEventTitle(featuredEvent) : 'VYUHAM’26')}"></a><span class="stage-float-label">FEATURED TRANSMISSION</span><span class="stage-float-category" id="featuredCategory">${esc(streamLabel(featuredEvent?.stream || 'tech'))}</span><b class="stage-float-title" id="featuredTitle">${esc(featuredEvent ? officialEventTitle(featuredEvent) : 'VYUHAM’26')}</b><small class="stage-float-subtitle" id="featuredSubtitle" ${featuredEvent?.officialTitle ? '' : 'hidden'}>${esc(featuredEvent?.officialTitle ? featuredEvent.title : '')}</small><div class="stage-float-footer"><span class="stage-float-foot">OPEN EVENT DOSSIER ↗</span><div class="stage-dots" id="featuredDots" role="group" aria-label="Choose a featured event">${featuredEvents.map((event, index) => `<button class="stage-dot ${index === 0 ? 'active' : ''}" type="button" data-featured-index="${index}" aria-label="Show ${esc(officialEventTitle(event))}" aria-pressed="${index === 0}"></button>`).join('')}</div></div></div><span class="stage-orbit stage-orbit-one"></span><span class="stage-orbit stage-orbit-two"></span></div></div><div class="cyber-hero-foot"><span>THE NATIONAL TECHNO-CULTURAL FESTIVAL</span><a href="#festival">SCROLL TO EXPLORE ↓</a></div></section>
+    <div class="campus-entry-notice" id="campusEntryNotice" hidden><section class="campus-entry-notice-dialog" role="dialog" aria-modal="false" aria-labelledby="campusEntryTitle"><button class="campus-entry-notice-close" type="button" aria-label="Close campus pass requirement">×</button><span class="campus-entry-notice-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3 20 6v5c0 5-3.4 8.5-8 10-4.6-1.5-8-5-8-10V6l8-3Z"/><path d="m8.5 12 2.2 2.2 4.8-5"/></svg></span><div class="campus-entry-notice-copy"><span class="campus-entry-notice-kicker">IMPORTANT CAMPUS NOTICE</span><h2 id="campusEntryTitle">Day Pass Mandatory</h2><p>A valid day pass is mandatory unless having event pass for entering the college campus during VYUHAM’26.</p><p>Please ensure you have your day pass or event pass before arriving at the campus.</p></div></section></div><section class="cyber-hero${showIntro ? ' intro-handoff' : ''}" id="home"><div class="cyber-hero-grid"><div class="cyber-copy"><div class="cyber-kicker"><span class="live-dot"></span> DIGITAL UNIVERSITY KERALA <i>·</i> 2026</div><div class="cyber-wordmark"><img src="assets/vyuham_logo_optimized.png" alt="VYUHAM red emblem"><h1>VYUHAM<span>’26</span></h1></div><p class="cyber-slogan">THE FUTURE<br><em>AWAITS.</em></p><p class="cyber-intro">VYUHAM’26 is Digital University Kerala’s flagship national-level management, technology and cultural fest.</p><div class="cyber-actions">${registrationCta(MAKEMYPASS_HOME, 'REGISTER & GET TICKETS <span aria-hidden="true">↗</span>', 'button button-primary hero-cta hero-cta-register')}<a class="button button-outline hero-cta hero-cta-map" href="https://duk360.duk.ac.in/duk-tour/?scene=technopark-phase-4" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 7 12 7Z"/><circle cx="12" cy="9" r="2.3"/></svg>CAMPUS MAP <span aria-hidden="true">↗</span></a><a class="button button-outline hero-cta hero-cta-explore" href="#/events">EXPLORE ALL EVENTS <span aria-hidden="true">↓</span></a></div><div class="cyber-data"><span>30 OCT — 01 NOV, 2026</span><span>TECHNOCITY CAMPUS, TECHNOPARK PHASE 4</span></div><div class="hero-count cyber-count mission-control-dashboard" aria-label="VYUHAM’26 festival mission control"><section class="mission-control-broadcast" aria-live="polite"><span class="mission-control-kicker"><i class="mission-live-indicator" aria-hidden="true"></i><b data-festival-broadcast>FESTIVAL BROADCAST</b></span><strong class="mission-control-live" data-festival-live>STANDBY</strong><span class="mission-control-caption" data-festival-broadcast-caption>VYUHAM’26 BROADCAST STANDBY</span><span class="mission-signal-bars" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span></section><section class="mission-control-day" aria-live="polite" aria-label="Current festival day"><span class="mission-control-eyebrow">FESTIVAL STATUS</span><strong class="mission-day-number" data-festival-day>DAY 01</strong><span class="mission-day-theme" data-festival-theme>IGNITION</span><span class="mission-session-state"><i aria-hidden="true"></i><b data-festival-session>UP NEXT</b></span></section><section class="mission-control-countdown" aria-label="Countdown until festival ends"><span class="mission-control-eyebrow" data-countdown-label>UNTIL FESTIVAL ENDS</span><strong class="mission-clock" data-countdown>00:00:00</strong><span class="mission-clock-note" data-countdown-note>FINAL FESTIVAL MOMENT</span></section><span class="mission-energy-line" aria-hidden="true"></span></div></div><div class="cyber-stage concert-stage" id="featuredCarousel" role="region" aria-label="Featured event carousel"><figure class="stage-screen stage-main"><img class="stage-featured-art" id="featuredArtwork" src="assets/vyuham-hero-convergence.png" alt="VYUHAM’26 cinematic hero artwork" fetchpriority="high"><div class="stage-shade"></div><div class="stage-brand"><img src="assets/vyuham_logo_optimized.png" alt=""><span>VYUHAM<sup>’26</sup></span></div><figcaption><span>VYUHAM / 01</span><span>THIRUVANANTHAPURAM, INDIA</span></figcaption></figure><div class="stage-screen stage-float" id="featuredCard" role="group" aria-roledescription="slide" aria-label="Featured event 1 of ${heroEvents.length}"><img class="stage-float-poster" id="featuredPoster" alt="" hidden><a class="stage-float-hitarea" id="featuredLink" href="#/event/${encodeURIComponent(featuredEvent?.slug || 'events')}" aria-label="Open details for ${esc(featuredEvent ? officialEventTitle(featuredEvent) : 'VYUHAM’26')}"></a><span class="stage-float-label">FEATURED TRANSMISSION</span><span class="stage-float-category" id="featuredCategory">${esc(streamLabel(featuredEvent?.stream || 'tech'))}</span><b class="stage-float-title" id="featuredTitle">${esc(featuredEvent ? officialEventTitle(featuredEvent) : 'VYUHAM’26')}</b><small class="stage-float-subtitle" id="featuredSubtitle" ${featuredEvent?.officialTitle ? '' : 'hidden'}>${esc(featuredEvent?.officialTitle ? featuredEvent.title : '')}</small><div class="stage-float-footer"><span class="stage-float-foot">OPEN EVENT DOSSIER ↗</span><div class="stage-dots" id="featuredDots" role="group" aria-label="Choose a featured event">${heroEvents.map((event, index) => `<button class="stage-dot ${index === 0 ? 'active' : ''}" type="button" data-featured-index="${index}" aria-label="Show ${esc(officialEventTitle(event))}" aria-pressed="${index === 0}"></button>`).join('')}</div></div></div><span class="stage-orbit stage-orbit-one"></span><span class="stage-orbit stage-orbit-two"></span></div></div><div class="cyber-hero-foot"><span>THE NATIONAL TECHNO-CULTURAL FESTIVAL</span><a href="#festival">SCROLL TO EXPLORE ↓</a></div></section>
     <div class="info-strip cyber-strip stats-bar"><span class="stats-item"><b>30 October 2026 - 01 November 2026</b><small>THREE FESTIVAL DAYS</small></span><span class="stats-item"><b>TECHNOCITY CAMPUS</b><small>TECHNOPARK PHASE 4</small></span><span class="stats-item"><b>${events.length}</b><small>EVENT RECORDS</small></span><span class="stats-item"><b>01 / 03</b><small>DAY 1 → DAY 3</small></span></div>
     <section class="section festival-intro" id="festival"><div class="container intro-composition"><div class="intro-mark reveal"><span>VYUHAM / DUK</span><img src="assets/vyuham_logo_sm.png" alt="VYUHAM emblem"><b>ONE<br>FESTIVAL<br><i>FOUR WORLDS.</i></b></div><div class="intro-copy reveal"><div class="eyebrow">01 / ABOUT THE FESTIVAL</div><h2>WHERE<br>DISCIPLINES<br><span class="green">COLLIDE.</span></h2><p>VYUHAM is Digital University Kerala’s flagship national-level management, technology and cultural fest. Across three days, students gather to build, debate, perform and compete.</p><p>From autonomous systems and strategy arenas to live culture and esports, one campus becomes a meeting point for different ways of thinking.</p><a class="text-link" href="#/about">DISCOVER VYUHAM <span>↗</span></a></div></div></section>
     <section class="section stream-section" id="streams"><div class="container"><div class="section-head reveal"><div><div class="eyebrow">02 / FOUR SIGNALS</div><h2>FIND YOUR<br><span class="green">FREQUENCY.</span></h2></div><p>Four distinct streams. One shared festival ground.</p></div><div class="stream-grid">${streams.map((s, i) => `<a class="stream-card stream-card-${i + 1} reveal" data-index="${s.index}" href="#/events?stream=${s.id}"><img class="stream-art" src="${s.image}" alt="" loading="lazy" decoding="async"><img class="stream-emblem" src="assets/vyuham_logo_sm.png" alt="" aria-hidden="true" loading="lazy"><span class="stream-icon">${s.symbol} / STREAM</span><strong>${s.name}</strong><p>${s.desc}</p><span class="stream-go">EXPLORE ↗</span><i class="stream-watermark">${s.index}</i></a>`).join('')}</div></div></section>
@@ -622,8 +642,49 @@
     <section class="section"><div class="container"><div class="schedule-days" id="scheduleDays">${days.map(d => `<button class="schedule-day schedule-day-${d.day}" type="button" aria-pressed="${d.day === 1}" data-day="${d.day}"><b>${d.dateLabel}</b><span>${d.name}</span><small>${d.desc}</small><em>VIEW DAY <strong>↘</strong></em></button>`).join('')}</div><div id="scheduleContent"></div></div></section>`;
   const aboutPage = () => `${pageHero('About the festival', 'WHERE DISCIPLINES<br><span class="green">CONVERGE.</span>', 'A national-level techno-cultural gathering hosted by Digital University Kerala.')}
     <section class="section"><div class="container about-grid"><div class="about-visual"><div class="visual-cross"></div><div class="visual-core"><img src="assets/vyuham_logo_sm.png" alt="VYUHAM logo"></div></div><div class="about-copy"><div class="eyebrow">THE VYUHAM IDEA</div><h2>BUILT FOR<br><span class="green">WHAT’S NEXT.</span></h2><p>VYUHAM brings technology, management, culture and esports into one shared arena. It is designed for curious minds, ambitious teams, performers and problem-solvers from across India.</p><p>Across three days, participants can compete, collaborate, learn from one another and experience a festival shaped by innovation and expression.</p><div class="about-points"><div class="about-point"><i>01</i><span>Technology — create, test and build.</span></div><div class="about-point"><i>02</i><span>Management — lead, plan and adapt.</span></div><div class="about-point"><i>03</i><span>Culture — perform, express and connect.</span></div><div class="about-point"><i>04</i><span>Esports — compete with focus and teamwork.</span></div></div></div></div></section><section class="section"><div class="container"><div class="cta-band"><div><div class="eyebrow">OCTOBER 30 – NOVEMBER 1, 2026</div><h2>SEE YOU IN<br><span class="green">THE ARENA.</span></h2></div><a class="button button-primary" href="#/events">EXPLORE EVENTS ↗</a></div></div></section>`;
+  const devTeamSection = () => {
+    const coordinators = [
+      {
+        name: 'Noyal',
+        role: 'COORDINATOR',
+        image: 'assets/team-noyal.png'
+      },
+      {
+        name: 'Hizan',
+        role: 'COORDINATOR',
+        image: 'assets/team-hizan-rehman.png'
+      }
+    ];
+
+    const developers = [
+      {
+        name: 'Nived B',
+        role: 'DEVELOPER',
+        image: 'assets/team-nived.png'
+      },
+      {
+        name: 'Pranavkrishna',
+        role: 'DEVELOPER',
+        image: 'assets/team-pranavkrishna.png'
+      },
+      {
+        name: 'Adhwaith Krishnan J R',
+        role: 'DEVELOPER',
+        image: 'assets/team-adhwaith.png'
+      },
+      {
+        name: 'Aswanth M C',
+        role: 'DEVELOPER',
+        image: 'assets/team-aswanth.png'
+      }
+    ];
+
+    const renderCard = (m, idx = 0) => `<article class="dev-team-card" style="--card-delay:${(idx * 0.45).toFixed(2)}s"><div class="dev-avatar-ring"><div class="dev-avatar-inner"><img src="${esc(m.image)}" alt="${esc(m.name)}" loading="lazy"></div></div><h3 class="dev-name">${esc(m.name)}</h3><span class="dev-role">${esc(m.role)}</span></article>`;
+
+    return `<section class="section dev-team-section" id="dev-team"><div class="container"><div class="dev-team-header"><div><div class="dev-team-eyebrow"><span class="dev-live-beacon" aria-hidden="true"></span> THE PEOPLE BEHIND VYUHAM</div><h2 class="dev-team-title">MEET THE <br><span class="dev-team-highlight">WEB-DEV'S TEAM.</span></h2></div><p class="dev-team-subtitle">Meet the coordinators and developers building the VYUHAM’26 experience.</p></div><div class="team-tier"><div class="team-tier-title"><span>COORDINATORS</span></div><div class="dev-team-grid dev-team-grid-coordinators">${coordinators.map((m, i) => renderCard(m, i)).join('')}</div></div><div class="team-tier"><div class="team-tier-title"><span>DEVELOPERS</span></div><div class="dev-team-grid dev-team-grid-developers">${developers.map((m, i) => renderCard(m, i + coordinators.length)).join('')}</div></div></div></section>`;
+  };
   const venuePage = () => `<section class="page-hero venue-page-hero"><div class="container"><div class="breadcrumb"><a href="#/home">VYUHAM’26</a> / ABOUT</div><div class="eyebrow">About</div><h1 class="venue-about-typewriter" aria-label="VYUHAM is Digital University Kerala’s flagship national-level management, technology and cultural fest."><span aria-hidden="true" data-typewriter="VYUHAM is Digital University Kerala’s flagship national-level management, technology and cultural fest."></span></h1></div><img class="venue-hero-logo" src="assets/vyuham_logo_sm.png" alt="VYUHAM emblem" width="72" height="72"></section>
-    <section class="section venue-location-section"><div class="container"><div class="section-head"><div><div class="eyebrow">VYUHAM / THE VENUE</div><h2>LOCATION</h2></div><p class="venue-location-description">VYUHAM’26 takes place at Digital University Kerala, Technocity Campus, Thiruvananthapuram.</p></div><div class="info-grid"><article class="info-card venue-info-card venue-campus-card"><span class="num">01 / CAMPUS</span><span class="venue-card-mark venue-campus-mark" aria-hidden="true">DUK</span><div class="venue-duk-logo-frame"><img class="venue-duk-logo" src="assets/duk-logo.png" alt="Digital University Kerala — Curating a responsible digital world" loading="lazy"></div><h3>Digital University Kerala</h3><p>Technocity Campus, Mangalapuram, Thiruvananthapuram, Kerala – 695317.</p></article><article class="info-card venue-info-card"><span class="num">02 / ARRIVAL</span><span class="venue-card-mark" aria-hidden="true"><svg viewBox="0 0 48 48"><path d="M9 36c7-1 8-9 14-10s7 6 13 3 2-10 5-16"/><circle cx="9" cy="36" r="3"/><circle cx="41" cy="13" r="3"/><path d="m33 13 8 0 0 8"/></svg></span><h3>Plan your visit</h3><p>Check your event’s assigned venue and arrival instructions before travelling. Detailed transport information should be confirmed through official festival communications.</p></article><article class="info-card venue-info-card"><span class="num">03 / HELP</span><span class="venue-card-mark venue-help-mark" aria-hidden="true"><svg viewBox="0 0 48 48"><path d="M24 42s14-13 14-25a14 14 0 1 0-28 0c0 12 14 25 14 25Z"/><circle cx="24" cy="17" r="5"/><path d="M34 35h8M38 31v8"/></svg></span><h3>Need directions?</h3><p>Contact the organizing team for venue access, accessibility needs and event-specific location details.</p><a class="text-link" href="mailto:techfest@duk.ac.in">CONTACT TEAM ↗</a></article></div><div style="margin-top:22px;border:1px solid var(--line);border-radius:12px;overflow:hidden"><iframe title="Digital University Kerala location" src="https://www.google.com/maps?q=Digital%20University%20Kerala%20Technocity&output=embed" width="100%" height="350" style="border:0;display:block" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></div></div></section>${sponsorsSection('about')}`;
+    <section class="section venue-location-section"><div class="container"><div class="section-head"><div><div class="eyebrow">VYUHAM / THE VENUE</div><h2>LOCATION</h2></div><p class="venue-location-description">VYUHAM’26 takes place at Digital University Kerala, Technocity Campus, Thiruvananthapuram.</p></div><div class="info-grid"><article class="info-card venue-info-card venue-campus-card"><span class="num">01 / CAMPUS</span><span class="venue-card-mark venue-campus-mark" aria-hidden="true">DUK</span><div class="venue-duk-logo-frame"><img class="venue-duk-logo" src="assets/duk-logo.png" alt="Digital University Kerala — Curating a responsible digital world" loading="lazy"></div><h3>Digital University Kerala</h3><p>Technocity Campus, Mangalapuram, Thiruvananthapuram, Kerala – 695317.</p></article><article class="info-card venue-info-card"><span class="num">02 / ARRIVAL</span><span class="venue-card-mark" aria-hidden="true"><svg viewBox="0 0 48 48"><path d="M9 36c7-1 8-9 14-10s7 6 13 3 2-10 5-16"/><circle cx="9" cy="36" r="3"/><circle cx="41" cy="13" r="3"/><path d="m33 13 8 0 0 8"/></svg></span><h3>Plan your visit</h3><p>Check your event’s assigned venue and arrival instructions before travelling. Detailed transport information should be confirmed through official festival communications.</p></article><article class="info-card venue-info-card"><span class="num">03 / HELP</span><span class="venue-card-mark venue-help-mark" aria-hidden="true"><svg viewBox="0 0 48 48"><path d="M24 42s14-13 14-25a14 14 0 1 0-28 0c0 12 14 25 14 25Z"/><circle cx="24" cy="17" r="5"/><path d="M34 35h8M38 31v8"/></svg></span><h3>Need directions?</h3><p>Contact the organizing team for venue access, accessibility needs and event-specific location details.</p><a class="text-link" href="mailto:techfest@duk.ac.in">CONTACT TEAM ↗</a></article></div><div style="margin-top:22px;border:1px solid var(--line);border-radius:12px;overflow:hidden"><iframe title="Digital University Kerala location" src="https://www.google.com/maps?q=Digital%20University%20Kerala%20Technocity&output=embed" width="100%" height="350" style="border:0;display:block" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></div></div></section>${devTeamSection()}${sponsorsSection('about')}`;
   const hospitalityPage = () => {
     const accommodations = [
       { name: 'Digital University Kerala Hostel', type: 'CAMPUS HOSTEL', area: 'Digital University Kerala · Technocity Campus', address: 'Digital University Kerala, Technocity Campus, Mangalapuram, Thiruvananthapuram', contacts: [], audience: 'GIRLS ONLY', map: 'https://www.google.com/maps/search/?api=1&query=Digital+University+Kerala+Technocity+Campus' },
@@ -740,13 +801,13 @@
   const initHeroFeaturedCarousel = waitingForIntro => {
     const stage = $('#featuredCarousel'), card = $('#featuredCard');
     const poster = $('#featuredPoster'), title = $('#featuredTitle'), subtitle = $('#featuredSubtitle'), category = $('#featuredCategory'), link = $('#featuredLink'), dots = $('#featuredDots');
-    if (!stage || !card || !poster || !title || !category || !link || !dots || homepageFeaturedEvents.length < 2) return () => {};
+    if (!stage || !card || !poster || !title || !category || !link || !dots || heroCarouselEvents.length < 2) return () => {};
     const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
     const imageLoads = new Map();
     const imageFor = event => safeEventImage(event?.image) || homepageFeaturedPoster(event);
-    const initialPoster = imageFor(homepageFeaturedEvents[0]);
+    const initialPoster = imageFor(heroCarouselEvents[0]);
     if (initialPoster) {
-      const initialAlt = `${officialEventTitle(homepageFeaturedEvents[0])} event poster`;
+      const initialAlt = `${officialEventTitle(heroCarouselEvents[0])} event poster`;
       poster.src = initialPoster; poster.alt = initialAlt; poster.hidden = false; card.classList.add('has-poster');
     }
     const preload = event => {
@@ -760,7 +821,7 @@
       }));
       return imageLoads.get(src);
     };
-    homepageFeaturedEvents.forEach(preload);
+    heroCarouselEvents.forEach(preload);
     let activeIndex = 0, timer = 0, transitionFrame = 0, transitionToken = 0;
     let hoverPaused = false, focusPaused = false, pageHidden = document.hidden, ready = !waitingForIntro;
     const canAutoplay = () => ready && !pageHidden && !hoverPaused && !focusPaused && !reducedMotion.matches;
@@ -770,11 +831,11 @@
       if (!canAutoplay()) return;
       timer = window.setTimeout(() => {
         timer = 0;
-        showEvent((activeIndex + 1) % homepageFeaturedEvents.length).then(schedule);
+        showEvent((activeIndex + 1) % heroCarouselEvents.length).then(schedule);
       }, 4500);
     };
     const showEvent = async index => {
-      const event = homepageFeaturedEvents[index];
+      const event = heroCarouselEvents[index];
       if (!event || index === activeIndex) return;
       const requestToken = ++transitionToken;
       stage.classList.add('is-transitioning');
@@ -797,7 +858,7 @@
       if (subtitle) { subtitle.textContent = event.officialTitle ? event.title : ''; subtitle.hidden = !event.officialTitle; }
       link.href = `#/event/${encodeURIComponent(event.slug)}`;
       link.setAttribute('aria-label', `Open details for ${officialEventTitle(event)}`);
-      card.setAttribute('aria-label', `Featured event ${index + 1} of ${homepageFeaturedEvents.length}: ${officialEventTitle(event)}`);
+      card.setAttribute('aria-label', `Featured event ${index + 1} of ${heroCarouselEvents.length}: ${officialEventTitle(event)}`);
       dots.querySelectorAll('[data-featured-index]').forEach(dot => {
         const active = Number(dot.dataset.featuredIndex) === index;
         dot.classList.toggle('active', active);
