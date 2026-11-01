@@ -1830,19 +1830,31 @@ html{scroll-padding-top:calc(var(--site-header-top) + var(--site-header-height) 
 .dev-team-highlight{color:#de312a}
 .dev-team-subtitle{margin:0 0 6px;max-width:420px;font:400 13px/1.65 var(--sans);color:var(--muted);text-align:right}
 
-.team-tier{margin-top:40px}
+.team-cluster{margin-top:52px}
+.team-cluster:first-of-type{margin-top:0}
+.team-cluster-header{display:flex;align-items:center;gap:14px;margin-bottom:28px;padding-bottom:12px;border-bottom:1px solid #4a1c1d80}
+.team-cluster-title{margin:0;font:700 24px/1.1 var(--display);letter-spacing:.04em;color:#ffffff;text-transform:uppercase}
+.team-cluster-badge{display:inline-block;padding:4px 10px;border-radius:4px;background:rgba(222,49,42,0.15);border:1px solid rgba(222,49,42,0.4);font:700 10px/1 var(--mono);color:#ff4444;letter-spacing:.14em;text-transform:uppercase}
+
+.team-tier{margin-top:36px}
 .team-tier:first-of-type{margin-top:0}
-.team-tier-title{display:flex;align-items:center;gap:16px;margin-bottom:26px}
+.team-tier-title{display:flex;align-items:center;gap:16px;margin-bottom:24px}
 .team-tier-title span{font:700 11px/1 var(--mono);letter-spacing:.18em;color:#ff4444;text-transform:uppercase}
 .team-tier-title::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,#ff444438,transparent 80%)}
 
 .dev-team-grid{display:grid;gap:18px}
+.dev-team-grid-lead{grid-template-columns:minmax(0,320px);justify-content:center}
+.dev-team-grid-council{display:flex;flex-wrap:wrap;justify-content:center;gap:18px}
+.dev-team-grid-council .dev-team-card{width:calc((100% - 54px) / 4);box-sizing:border-box}
 .dev-team-grid-coordinators{grid-template-columns:repeat(2,minmax(0,300px));justify-content:center;gap:24px}
 .dev-team-grid-developers{grid-template-columns:repeat(4,minmax(0,1fr))}
 
 .dev-team-card{position:relative;display:flex;flex-direction:column;align-items:center;text-align:center;padding:34px 20px 28px;border-radius:18px;background:linear-gradient(180deg,#1b0d0e 0%,#110708 100%);border:1px solid #4a1c1d80;box-shadow:0 12px 32px #00000070;overflow:hidden;animation:devCardFloat 4.6s ease-in-out infinite alternate;animation-delay:var(--card-delay,0s);transition:transform .28s var(--ease),border-color .28s var(--ease),box-shadow .28s var(--ease)}
 .dev-team-card::before{content:"";position:absolute;inset:0;border-radius:18px;background:linear-gradient(125deg,transparent 35%,rgba(255,68,68,0.08) 50%,transparent 65%);background-size:250% 250%;animation:devCardShimmer 5.5s ease-in-out infinite;animation-delay:var(--card-delay,0s);pointer-events:none}
 .dev-team-card:hover{animation-play-state:paused;transform:translateY(-8px) scale(1.02);border-color:#ff3b3b;box-shadow:0 20px 42px rgba(222,49,42,0.28),0 12px 30px #00000090}
+
+.dev-card-lead .dev-avatar-ring{width:156px;height:156px;border-width:3px;box-shadow:0 0 26px rgba(222,49,42,0.55)}
+.dev-card-lead .dev-name{font-size:21px}
 
 .dev-avatar-ring{width:142px;height:142px;border-radius:50%;padding:4px;background:#140809;border:2.5px solid #de312a;box-shadow:0 0 20px #de312a45;display:grid;place-items:center;margin-bottom:20px;flex-shrink:0;animation:devRingPulse 3.5s ease-in-out infinite;animation-delay:var(--card-delay,0s);transition:transform .28s var(--ease),box-shadow .28s var(--ease),border-color .28s var(--ease)}
 .dev-team-card:hover .dev-avatar-ring{animation-play-state:paused;border-color:#ff3b3b;box-shadow:0 0 32px #ff3b3b,0 0 55px rgba(222,49,42,0.5);transform:scale(1.05)}
@@ -1858,14 +1870,18 @@ html{scroll-padding-top:calc(var(--site-header-top) + var(--site-header-height) 
 
 @media(max-width:980px){
   .dev-team-grid-developers{grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+  .dev-team-grid-council{gap:16px}
+  .dev-team-grid-council .dev-team-card{width:calc((100% - 16px) / 2)}
 }
 @media(max-width:700px){
   .dev-team-section{padding:65px 18px 50px}
   .dev-team-header{flex-direction:column;align-items:flex-start;gap:14px;margin-bottom:28px}
   .dev-team-subtitle{text-align:left;font-size:12px}
   .dev-team-title{font-size:clamp(32px,9vw,44px)}
-  .dev-team-grid-coordinators,.dev-team-grid-developers{grid-template-columns:1fr;justify-content:stretch;gap:16px}
+  .dev-team-grid-lead,.dev-team-grid-coordinators,.dev-team-grid-developers{grid-template-columns:1fr;justify-content:stretch;gap:16px}
+  .dev-team-grid-council .dev-team-card{width:100%}
   .dev-avatar-ring{width:130px;height:130px}
+  .dev-card-lead .dev-avatar-ring{width:142px;height:142px}
 }
 @media(prefers-reduced-motion:reduce){
   .dev-team-card,.dev-team-card::before,.dev-avatar-ring,.dev-live-beacon::after{animation:none!important}

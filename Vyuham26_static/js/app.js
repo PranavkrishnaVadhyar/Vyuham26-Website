@@ -643,6 +643,51 @@
   const aboutPage = () => `${pageHero('About the festival', 'WHERE DISCIPLINES<br><span class="green">CONVERGE.</span>', 'A national-level techno-cultural gathering hosted by Digital University Kerala.')}
     <section class="section"><div class="container about-grid"><div class="about-visual"><div class="visual-cross"></div><div class="visual-core"><img src="assets/vyuham_logo_sm.png" alt="VYUHAM logo"></div></div><div class="about-copy"><div class="eyebrow">THE VYUHAM IDEA</div><h2>BUILT FOR<br><span class="green">WHAT’S NEXT.</span></h2><p>VYUHAM brings technology, management, culture and esports into one shared arena. It is designed for curious minds, ambitious teams, performers and problem-solvers from across India.</p><p>Across three days, participants can compete, collaborate, learn from one another and experience a festival shaped by innovation and expression.</p><div class="about-points"><div class="about-point"><i>01</i><span>Technology — create, test and build.</span></div><div class="about-point"><i>02</i><span>Management — lead, plan and adapt.</span></div><div class="about-point"><i>03</i><span>Culture — perform, express and connect.</span></div><div class="about-point"><i>04</i><span>Esports — compete with focus and teamwork.</span></div></div></div></div></section><section class="section"><div class="container"><div class="cta-band"><div><div class="eyebrow">OCTOBER 30 – NOVEMBER 1, 2026</div><h2>SEE YOU IN<br><span class="green">THE ARENA.</span></h2></div><a class="button button-primary" href="#/events">EXPLORE EVENTS ↗</a></div></div></section>`;
   const devTeamSection = () => {
+    const councilLead = {
+      name: 'Ardhra Sasidhran',
+      role: 'STUDENT LEAD',
+      image: 'assets/team-Ardra-Sasidhran.png',
+      imagePos: 'center 28%'
+    };
+
+    const councilMembers = [
+      {
+        name: 'Nihal',
+        role: 'STUDENT COUNCIL',
+        image: 'assets/team-Nihal.png'
+      },
+      {
+        name: 'Meerna',
+        role: 'STUDENT COUNCIL',
+        image: 'assets/team-Meerna.jpeg'
+      },
+      {
+        name: 'Indrajith',
+        role: 'STUDENT COUNCIL',
+        image: 'assets/team-Indrajith.jpeg'
+      },
+      {
+        name: 'Nayana',
+        role: 'STUDENT COUNCIL',
+        image: 'assets/team-Nayana.jpeg'
+      },
+      {
+        name: 'Darshana',
+        role: 'STUDENT COUNCIL',
+        image: 'assets/team-Darshana.png'
+      },
+      {
+        name: 'Anandhu',
+        role: 'STUDENT COUNCIL',
+        image: 'assets/team-Anandu.jpeg'
+      },
+      {
+        name: 'Arjun',
+        role: 'STUDENT COUNCIL',
+        image: 'assets/team-Arjun.jpeg'
+      }
+    ];
+
     const coordinators = [
       {
         name: 'Noyal',
@@ -679,9 +724,9 @@
       }
     ];
 
-    const renderCard = (m, idx = 0) => `<article class="dev-team-card" style="--card-delay:${(idx * 0.45).toFixed(2)}s"><div class="dev-avatar-ring"><div class="dev-avatar-inner"><img src="${esc(m.image)}" alt="${esc(m.name)}" loading="lazy"></div></div><h3 class="dev-name">${esc(m.name)}</h3><span class="dev-role">${esc(m.role)}</span></article>`;
+    const renderCard = (m, idx = 0, isLead = false) => `<article class="dev-team-card${isLead ? ' dev-card-lead' : ''}" style="--card-delay:${(idx * 0.25).toFixed(2)}s"><div class="dev-avatar-ring"><div class="dev-avatar-inner"><img src="${esc(m.image)}" alt="${esc(m.name)}" loading="lazy"${m.imagePos ? ` style="object-position:${m.imagePos}"` : ''}></div></div><h3 class="dev-name">${esc(m.name)}</h3><span class="dev-role">${esc(m.role)}</span></article>`;
 
-    return `<section class="section dev-team-section" id="dev-team"><div class="container"><div class="dev-team-header"><div><div class="dev-team-eyebrow"><span class="dev-live-beacon" aria-hidden="true"></span> THE PEOPLE BEHIND VYUHAM</div><h2 class="dev-team-title">MEET THE <br><span class="dev-team-highlight">WEB-DEV'S TEAM.</span></h2></div><p class="dev-team-subtitle">Meet the coordinators and developers building the VYUHAM’26 experience.</p></div><div class="team-tier"><div class="team-tier-title"><span>COORDINATORS</span></div><div class="dev-team-grid dev-team-grid-coordinators">${coordinators.map((m, i) => renderCard(m, i)).join('')}</div></div><div class="team-tier"><div class="team-tier-title"><span>DEVELOPERS</span></div><div class="dev-team-grid dev-team-grid-developers">${developers.map((m, i) => renderCard(m, i + coordinators.length)).join('')}</div></div></div></section>`;
+    return `<section class="section dev-team-section" id="meet-the-team"><div class="container"><div class="dev-team-header"><div><div class="dev-team-eyebrow"><span class="dev-live-beacon" aria-hidden="true"></span> THE PEOPLE BEHIND VYUHAM</div><h2 class="dev-team-title">MEET THE <br><span class="dev-team-highlight">TEAM.</span></h2></div><p class="dev-team-subtitle">Meet the student council and the web development team behind VYUHAM’26.</p></div><div class="team-cluster"><div class="team-cluster-header"><span class="team-cluster-badge">COUNCIL</span><h3 class="team-cluster-title">STUDENT COUNCIL</h3></div><div class="team-tier"><div class="team-tier-title"><span>LEAD</span></div><div class="dev-team-grid dev-team-grid-lead">${renderCard(councilLead, 0, true)}</div></div><div class="team-tier"><div class="team-tier-title"><span>COUNCIL MEMBERS</span></div><div class="dev-team-grid dev-team-grid-council">${councilMembers.map((m, i) => renderCard(m, i + 1)).join('')}</div></div></div><div class="team-cluster"><div class="team-cluster-header"><span class="team-cluster-badge">TECH</span><h3 class="team-cluster-title">WEB TEAM</h3></div><div class="team-tier"><div class="team-tier-title"><span>COORDINATORS</span></div><div class="dev-team-grid dev-team-grid-coordinators">${coordinators.map((m, i) => renderCard(m, i + 1 + councilMembers.length)).join('')}</div></div><div class="team-tier"><div class="team-tier-title"><span>DEVELOPERS</span></div><div class="dev-team-grid dev-team-grid-developers">${developers.map((m, i) => renderCard(m, i + 1 + councilMembers.length + coordinators.length)).join('')}</div></div></div></div></section>`;
   };
   const venuePage = () => `<section class="page-hero venue-page-hero"><div class="container"><div class="breadcrumb"><a href="#/home">VYUHAM’26</a> / ABOUT</div><div class="eyebrow">About</div><h1 class="venue-about-typewriter" aria-label="VYUHAM is Digital University Kerala’s flagship national-level management, technology and cultural fest."><span aria-hidden="true" data-typewriter="VYUHAM is Digital University Kerala’s flagship national-level management, technology and cultural fest."></span></h1></div><img class="venue-hero-logo" src="assets/vyuham_logo_sm.png" alt="VYUHAM emblem" width="72" height="72"></section>
     <section class="section venue-location-section"><div class="container"><div class="section-head"><div><div class="eyebrow">VYUHAM / THE VENUE</div><h2>LOCATION</h2></div><p class="venue-location-description">VYUHAM’26 takes place at Digital University Kerala, Technocity Campus, Thiruvananthapuram.</p></div><div class="info-grid"><article class="info-card venue-info-card venue-campus-card"><span class="num">01 / CAMPUS</span><span class="venue-card-mark venue-campus-mark" aria-hidden="true">DUK</span><div class="venue-duk-logo-frame"><img class="venue-duk-logo" src="assets/duk-logo.png" alt="Digital University Kerala — Curating a responsible digital world" loading="lazy"></div><h3>Digital University Kerala</h3><p>Technocity Campus, Mangalapuram, Thiruvananthapuram, Kerala – 695317.</p></article><article class="info-card venue-info-card"><span class="num">02 / ARRIVAL</span><span class="venue-card-mark" aria-hidden="true"><svg viewBox="0 0 48 48"><path d="M9 36c7-1 8-9 14-10s7 6 13 3 2-10 5-16"/><circle cx="9" cy="36" r="3"/><circle cx="41" cy="13" r="3"/><path d="m33 13 8 0 0 8"/></svg></span><h3>Plan your visit</h3><p>Check your event’s assigned venue and arrival instructions before travelling. Detailed transport information should be confirmed through official festival communications.</p></article><article class="info-card venue-info-card"><span class="num">03 / HELP</span><span class="venue-card-mark venue-help-mark" aria-hidden="true"><svg viewBox="0 0 48 48"><path d="M24 42s14-13 14-25a14 14 0 1 0-28 0c0 12 14 25 14 25Z"/><circle cx="24" cy="17" r="5"/><path d="M34 35h8M38 31v8"/></svg></span><h3>Need directions?</h3><p>Contact the organizing team for venue access, accessibility needs and event-specific location details.</p><a class="text-link" href="mailto:techfest@duk.ac.in">CONTACT TEAM ↗</a></article></div><div style="margin-top:22px;border:1px solid var(--line);border-radius:12px;overflow:hidden"><iframe title="Digital University Kerala location" src="https://www.google.com/maps?q=Digital%20University%20Kerala%20Technocity&output=embed" width="100%" height="350" style="border:0;display:block" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></div></div></section>${devTeamSection()}${sponsorsSection('about')}`;
