@@ -132,7 +132,7 @@ async def scan_pass(
 @router.get("/history", response_model=list[CheckInHistoryItem])
 async def get_checkin_history(
     scanner: ScanAuth,
-    station: Annotated[str | None, Query()] = None,
+    station: Annotated[str | None, Query(max_length=120)] = None,
     limit: Annotated[int, Query(ge=1, le=100)] = 50,
     db: Annotated[AsyncSession, Depends(get_db)] = None,
 ) -> list[CheckInHistoryItem]:

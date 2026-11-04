@@ -13,6 +13,7 @@ from starlette.concurrency import run_in_threadpool
 from app.core.config import settings
 from app.core.db import get_db
 from app.core.security import decode_supabase_token
+from app.core.security_state import validate_active_session, reject_revoked_session
 from app.modules.auth.models import Profile, UserRole
 
 bearer_scheme = HTTPBearer(auto_error=False)
@@ -83,11 +84,14 @@ async def get_current_user(
             headers={"WWW-Authenticate": "Bearer"},
         )
     claims = await run_in_threadpool(decode_supabase_token, credentials.credentials)
+    await reject_revoked_session(claims)
     profile_id = UUID(claims["sub"])
     profile = await db.get(Profile, profile_id)
     if profile is not None:
         if not profile.is_active:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="This participant account has been deactivated")
+        if profile.role == UserRole.participant:
+            await validate_active_session(profile.id, claims)
         # Keep the locally cached email aligned with Supabase's verified claim.
         if profile.email != claims["email"]:
             profile.email = claims["email"]
@@ -100,6 +104,7 @@ async def get_current_user(
     try:
         await db.commit()
         await db.refresh(profile)
+        await validate_active_session(profile.id, claims)
         return profile
     except IntegrityError:
         # Another request may have created this profile concurrently.
@@ -107,6 +112,8 @@ async def get_current_user(
         profile = await db.get(Profile, profile_id)
         if profile is None:
             raise HTTPException(status_code=409, detail="Could not initialize profile")
+        if profile.role == UserRole.participant:
+            await validate_active_session(profile.id, claims)
         return profile
 
 
@@ -124,6 +131,7 @@ async def get_verified_user_id(
         return None
     try:
         claims = await run_in_threadpool(decode_supabase_token, credentials.credentials)
+        await reject_revoked_session(claims)
     except HTTPException:
         return None
     try:

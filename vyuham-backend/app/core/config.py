@@ -1,5 +1,6 @@
 from functools import lru_cache
 from typing import Optional
+from urllib.parse import urlsplit
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -29,7 +30,25 @@ class Settings(BaseSettings):
 
     @property
     def allowed_frontend_origins(self) -> list[str]:
-        return [origin.strip() for origin in self.frontend_origins.split(",") if origin.strip()]
+        origins: list[str] = []
+        for raw_origin in self.frontend_origins.split(","):
+            origin = raw_origin.strip().rstrip("/")
+            parsed = urlsplit(origin)
+            local_http = parsed.scheme == "http" and parsed.hostname in {"localhost", "127.0.0.1"}
+            secure_https = parsed.scheme == "https"
+            if (
+                origin
+                and "*" not in origin
+                and (local_http or secure_https)
+                and parsed.hostname
+                and not parsed.username
+                and not parsed.password
+                and parsed.path == ""
+                and not parsed.query
+                and not parsed.fragment
+            ):
+                origins.append(origin)
+        return list(dict.fromkeys(origins))
 
     @property
     def async_database_url(self) -> str:

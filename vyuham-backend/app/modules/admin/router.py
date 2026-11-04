@@ -35,7 +35,7 @@ async def list_admin_users(
     _: Annotated[Profile, Depends(require_role("admin"))],
     db: Annotated[AsyncSession, Depends(get_db)],
     limit: Annotated[int, Query(ge=1, le=500)] = 100,
-    offset: Annotated[int, Query(ge=0)] = 0,
+    offset: Annotated[int, Query(ge=0, le=1_000_000)] = 0,
 ) -> dict:
     total = await db.scalar(select(func.count(Profile.id))) or 0
     records = (
@@ -107,7 +107,7 @@ async def list_admin_registrations(
     _: Annotated[Profile, Depends(require_role("admin"))],
     db: Annotated[AsyncSession, Depends(get_db)],
     limit: Annotated[int, Query(ge=1, le=500)] = 100,
-    offset: Annotated[int, Query(ge=0)] = 0,
+    offset: Annotated[int, Query(ge=0, le=1_000_000)] = 0,
 ) -> dict:
     total = await db.scalar(select(func.count(Registration.id))) or 0
     rows = (

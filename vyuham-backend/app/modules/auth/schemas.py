@@ -1,5 +1,6 @@
 from typing import Any
 from uuid import UUID
+from urllib.parse import urlsplit
 
 from pydantic import BaseModel, ConfigDict, Field, computed_field, field_serializer, field_validator
 
@@ -51,6 +52,16 @@ class ProfileUpdate(BaseModel):
     year: str | None = Field(default=None, max_length=50)
     station: str | None = Field(default=None, max_length=120)
     avatar_url: str | None = Field(default=None, max_length=500)
+
+    @field_validator("avatar_url")
+    @classmethod
+    def validate_avatar_url(cls, value: str | None) -> str | None:
+        if value is None or not value.strip():
+            return value
+        parsed = urlsplit(value)
+        if parsed.scheme != "https" or not parsed.hostname or parsed.username or parsed.password:
+            raise ValueError("Avatar URL must be a valid HTTPS URL")
+        return value
 
 
 class RoleAssignRequest(BaseModel):

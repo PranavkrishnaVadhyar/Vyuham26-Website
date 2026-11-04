@@ -1,12 +1,13 @@
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.db import get_db
 from app.core.deps import get_current_user, require_role
 from app.core.site_settings import get_registration_open
+from app.core.security_state import enforce_rate_limit
 from app.modules.auth.models import Profile
 from app.modules.teams.schemas import TeamCreate, TeamDetailOut, TeamJoinRequest, TeamOut
 from app.modules.teams.service import (
@@ -23,9 +24,11 @@ router = APIRouter(prefix="/teams", tags=["teams"])
 @router.post("", response_model=TeamOut, status_code=status.HTTP_201_CREATED)
 async def post_team(
     data: TeamCreate,
+    request: Request,
     current_user: Annotated[Profile, Depends(get_current_user)],
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> dict:
+    await enforce_rate_limit(request, scope="team-create", limit=3, window_seconds=3600, identity=str(current_user.id))
     if not await get_registration_open(db):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Registration is coming soon")
     if not data.name.strip():
@@ -36,9 +39,11 @@ async def post_team(
 @router.post("/join", response_model=TeamOut)
 async def post_join_team(
     data: TeamJoinRequest,
+    request: Request,
     current_user: Annotated[Profile, Depends(get_current_user)],
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> dict:
+    await enforce_rate_limit(request, scope="team-join", limit=10, window_seconds=3600, identity=str(current_user.id))
     if not await get_registration_open(db):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Registration is coming soon")
     try:

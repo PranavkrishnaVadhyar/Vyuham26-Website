@@ -14,6 +14,7 @@ export default function ContactPage() {
 
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [submitError, setSubmitError] = useState("");
 
   const [formData, setFormData] = useState({
     name: "",
@@ -26,14 +27,17 @@ export default function ContactPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (formData.name.trim().length > 100 || formData.organization.length > 150 || formData.email.length > 254 || formData.phone.length > 20 || formData.tier.length > 60 || formData.message.trim().length > 3000) return;
     setLoading(true);
+    setSubmitError("");
     try {
       await auxiliaryApi.submitContact(formData);
+      setSubmitted(true);
     } catch {
-      // Fallback already handled
+      setSubmitted(false);
+      setSubmitError("Your message could not be delivered. Please try again shortly.");
     } finally {
       setLoading(false);
-      setSubmitted(true);
     }
   };
 
@@ -359,6 +363,7 @@ export default function ContactPage() {
                           animate={{ opacity: 1 }}
                           className="space-y-6"
                         >
+                          {submitError && <p role="alert" className="border border-red-500/30 bg-red-950/20 p-3 font-mono text-xs text-red-200">{submitError}</p>}
 
                           {/* NAME + ORGANIZATION */}
                           <div className="grid gap-5 md:grid-cols-2">
@@ -375,6 +380,7 @@ export default function ContactPage() {
                                 id="name"
                                 name="name"
                                 required
+                                maxLength={100}
                                 value={formData.name}
                                 onChange={handleChange}
                                 className={inputClasses}
@@ -394,6 +400,7 @@ export default function ContactPage() {
                                 type="text"
                                 id="organization"
                                 name="organization"
+                                maxLength={150}
                                 value={formData.organization}
                                 onChange={handleChange}
                                 className={inputClasses}
@@ -417,6 +424,7 @@ export default function ContactPage() {
                                 id="email"
                                 name="email"
                                 required
+                                maxLength={254}
                                 value={formData.email}
                                 onChange={handleChange}
                                 className={inputClasses}
@@ -436,6 +444,7 @@ export default function ContactPage() {
                                 type="tel"
                                 id="phone"
                                 name="phone"
+                                maxLength={20}
                                 value={formData.phone}
                                 onChange={handleChange}
                                 className={inputClasses}
@@ -494,6 +503,7 @@ export default function ContactPage() {
                               id="message"
                               name="message"
                               required
+                                maxLength={3000}
                               rows={6}
                               value={formData.message}
                               onChange={handleChange}

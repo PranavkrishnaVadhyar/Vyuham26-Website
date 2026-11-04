@@ -1,7 +1,7 @@
 import secrets
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Path, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -17,7 +17,7 @@ router = APIRouter(prefix="/certificates", tags=["certificates"])
 
 @router.get("/verify/{code}", response_model=CertificateOut)
 async def verify_certificate(
-    code: str,
+    code: Annotated[str, Path(min_length=1, max_length=100)],
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> CertificateOut:
     cert = await db.scalar(

@@ -211,6 +211,7 @@ export default function AnnouncementManager() {
         <div className="mt-5 flex flex-wrap items-center gap-3 border-t border-[rgba(120,160,145,0.12)] pt-4">
           <input
             type="text"
+            maxLength={150}
             placeholder="Search broadcasts..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -257,6 +258,7 @@ export default function AnnouncementManager() {
               <input
                 type="text"
                 required
+                maxLength={150}
                 placeholder="e.g. DUK Gate 1 Entry Pass Verification Active"
                 value={newTitle}
                 onChange={(e) => setNewTitle(e.target.value)}
@@ -288,6 +290,7 @@ export default function AnnouncementManager() {
             </label>
             <textarea
               required
+              maxLength={5000}
               rows={3}
               placeholder="Full details of the announcement broadcast..."
               value={newContent}
@@ -457,6 +460,7 @@ export default function AnnouncementManager() {
                 <input
                   type="text"
                   required
+                  maxLength={150}
                   value={editTitle}
                   onChange={(e) => setEditTitle(e.target.value)}
                   className="w-full rounded border border-[rgba(120,160,145,0.3)] bg-[#030605] px-3 py-2 font-mono text-xs text-[#eef8f3] focus:border-emerald-500 focus:outline-none"
@@ -487,6 +491,7 @@ export default function AnnouncementManager() {
               </label>
               <textarea
                 required
+                maxLength={5000}
                 rows={4}
                 value={editContent}
                 onChange={(e) => setEditContent(e.target.value)}

@@ -2,6 +2,7 @@ from datetime import datetime
 from decimal import Decimal
 from typing import Any
 from uuid import UUID
+from urllib.parse import urlsplit
 
 from pydantic import BaseModel, ConfigDict, Field, computed_field, field_validator, model_validator
 
@@ -13,14 +14,14 @@ class EventFields(BaseModel):
     slug: str = Field(min_length=1, max_length=100)
     stream: EventStream
     registration_type: RegistrationType = RegistrationType.solo
-    team_size_min: int | None = Field(default=None, ge=1)
-    team_size_max: int | None = Field(default=None, ge=1)
-    prize_amount: Decimal | None = Field(default=None, ge=0)
+    team_size_min: int | None = Field(default=None, ge=1, le=100)
+    team_size_max: int | None = Field(default=None, ge=1, le=100)
+    prize_amount: Decimal | None = Field(default=None, ge=0, le=1_000_000_000, max_digits=12, decimal_places=2)
     venue: str | None = Field(default=None, max_length=250)
     fee: str | None = Field(default=None, max_length=80)
     day: int | None = Field(default=None, ge=1, le=3)
     time: str | None = Field(default=None, max_length=100)
-    rules: list[str] | None = None
+    rules: list[str] | None = Field(default=None, max_length=100)
     eligibility: str | None = Field(default=None, max_length=200)
     seats_total: int | None = Field(default=None, ge=1)
     image: str | None = Field(default=None, max_length=500)
@@ -29,7 +30,7 @@ class EventFields(BaseModel):
     blurb: str | None = Field(default=None, max_length=500)
     start_time: datetime | None = None
     end_time: datetime | None = None
-    description: str | None = None
+    description: str | None = Field(default=None, max_length=5000)
     registration_url: str | None = Field(default=None, max_length=500)
     makemypass_url: str | None = Field(default=None, max_length=500)
 
@@ -45,6 +46,25 @@ class EventFields(BaseModel):
             }
             return mapping.get(v.lower(), v.lower())
         return v
+
+    @field_validator("image", "registration_url", "makemypass_url")
+    @classmethod
+    def validate_event_url(cls, value: str | None) -> str | None:
+        if value is None or not value.strip():
+            return value
+        parsed = urlsplit(value)
+        if value.startswith("/") and not value.startswith("//"):
+            return value
+        if parsed.scheme != "https" or not parsed.hostname or parsed.username or parsed.password:
+            raise ValueError("URLs must be HTTPS or a same-site relative path")
+        return value
+
+    @field_validator("rules")
+    @classmethod
+    def cap_rule_text(cls, rules: list[str] | None) -> list[str] | None:
+        if rules is not None and any(len(rule) > 2000 for rule in rules):
+            raise ValueError("Each rule must be 2000 characters or fewer")
+        return rules
 
     @model_validator(mode="after")
     def validate_team_size(self):
@@ -64,14 +84,14 @@ class EventUpdate(BaseModel):
     slug: str | None = Field(default=None, min_length=1, max_length=100)
     stream: EventStream | None = None
     registration_type: RegistrationType | None = None
-    team_size_min: int | None = Field(default=None, ge=1)
-    team_size_max: int | None = Field(default=None, ge=1)
-    prize_amount: Decimal | None = Field(default=None, ge=0)
+    team_size_min: int | None = Field(default=None, ge=1, le=100)
+    team_size_max: int | None = Field(default=None, ge=1, le=100)
+    prize_amount: Decimal | None = Field(default=None, ge=0, le=1_000_000_000, max_digits=12, decimal_places=2)
     venue: str | None = Field(default=None, max_length=250)
     fee: str | None = Field(default=None, max_length=80)
     day: int | None = Field(default=None, ge=1, le=3)
     time: str | None = Field(default=None, max_length=100)
-    rules: list[str] | None = None
+    rules: list[str] | None = Field(default=None, max_length=100)
     eligibility: str | None = Field(default=None, max_length=200)
     seats_total: int | None = Field(default=None, ge=1)
     image: str | None = Field(default=None, max_length=500)
@@ -80,7 +100,7 @@ class EventUpdate(BaseModel):
     blurb: str | None = Field(default=None, max_length=500)
     start_time: datetime | None = None
     end_time: datetime | None = None
-    description: str | None = None
+    description: str | None = Field(default=None, max_length=5000)
     registration_url: str | None = Field(default=None, max_length=500)
     makemypass_url: str | None = Field(default=None, max_length=500)
 
@@ -96,6 +116,25 @@ class EventUpdate(BaseModel):
             }
             return mapping.get(v.lower(), v.lower())
         return v
+
+    @field_validator("image", "registration_url", "makemypass_url")
+    @classmethod
+    def validate_event_url(cls, value: str | None) -> str | None:
+        if value is None or not value.strip():
+            return value
+        parsed = urlsplit(value)
+        if value.startswith("/") and not value.startswith("//"):
+            return value
+        if parsed.scheme != "https" or not parsed.hostname or parsed.username or parsed.password:
+            raise ValueError("URLs must be HTTPS or a same-site relative path")
+        return value
+
+    @field_validator("rules")
+    @classmethod
+    def cap_rule_text(cls, rules: list[str] | None) -> list[str] | None:
+        if rules is not None and any(len(rule) > 2000 for rule in rules):
+            raise ValueError("Each rule must be 2000 characters or fewer")
+        return rules
 
     @model_validator(mode="after")
     def validate_team_size(self):

@@ -1,13 +1,14 @@
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.db import get_db
 from app.core.deps import get_verified_user_id
 from app.modules.auxiliary.models import ContactInquiry, Feedback
 from app.modules.auxiliary.schemas import ContactCreateRequest, FeedbackCreateRequest
+from app.core.security_state import enforce_rate_limit
 
 router = APIRouter(tags=["auxiliary"])
 
@@ -15,8 +16,10 @@ router = APIRouter(tags=["auxiliary"])
 @router.post("/contact")
 async def submit_contact(
     payload: ContactCreateRequest,
+    request: Request,
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> dict:
+    await enforce_rate_limit(request, scope="contact", limit=5, window_seconds=3600)
     inquiry = ContactInquiry(
         name=payload.name,
         organization=payload.organization,
@@ -33,9 +36,17 @@ async def submit_contact(
 @router.post("/feedback")
 async def submit_feedback(
     payload: FeedbackCreateRequest,
+    request: Request,
     db: Annotated[AsyncSession, Depends(get_db)],
     verified_user_id: Annotated[UUID | None, Depends(get_verified_user_id)],
 ) -> dict:
+    await enforce_rate_limit(
+        request,
+        scope="feedback",
+        limit=10,
+        window_seconds=3600,
+        identity=str(verified_user_id) if verified_user_id else None,
+    )
     # Attribution comes ONLY from a verified bearer token. The client-supplied
     # payload.user_id field is intentionally ignored so feedback cannot be
     # attributed to arbitrary users.

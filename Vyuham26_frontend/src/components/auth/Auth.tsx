@@ -158,6 +158,7 @@ export function AuthModal() {
                   onChange={(e) => setName(e.target.value)}
                   disabled={pending}
                   required
+                  maxLength={100}
                 />
                 <input
                   className="field"
@@ -165,12 +166,14 @@ export function AuthModal() {
                   value={college}
                   onChange={(e) => setCollege(e.target.value)}
                   disabled={pending}
+                  maxLength={150}
                 />
               </>
             )}
             <input
               className="field"
               type="email"
+              maxLength={254}
               placeholder="Email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -185,7 +188,8 @@ export function AuthModal() {
               onChange={(e) => setPassword(e.target.value)}
               disabled={pending}
               required
-              minLength={4}
+              minLength={mode === "signup" ? 12 : 1}
+              maxLength={128}
             />
 
             {notice && <p role="status" aria-live="polite" className="border border-[rgba(24,196,124,0.24)] bg-[rgba(24,196,124,0.06)] px-3 py-2 font-mono text-[10px] leading-relaxed tracking-[0.08em] text-[#7fe6b8]">{notice}</p>}
@@ -196,6 +200,8 @@ export function AuthModal() {
               {pending ? "AUTHENTICATING..." : mode === "login" ? "ENTER" : "CREATE ACCESS"}
             </button>
           </form>
+
+          {mode === "login" && <a href="/reset-password" className="mt-3 inline-block font-mono text-[9px] tracking-[0.18em] text-[#7fae9b] hover:text-white">FORGOT PASSWORD?</a>}
 
           <div className="mt-4 space-y-4">
             <AuthDivider />

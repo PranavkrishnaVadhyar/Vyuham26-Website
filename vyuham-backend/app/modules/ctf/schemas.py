@@ -8,11 +8,11 @@ from app.modules.ctf.models import CTFTrack
 
 class ChallengeCreate(BaseModel):
     title: str = Field(min_length=1, max_length=200)
-    description: str
+    description: str = Field(min_length=1, max_length=5000)
     category: str = Field(min_length=1, max_length=80)
     track: CTFTrack
-    points: int = Field(gt=0)
-    flag: str = Field(min_length=1)
+    points: int = Field(gt=0, le=1_000_000)
+    flag: str = Field(min_length=1, max_length=300)
 
 
 class ChallengeOut(BaseModel):
@@ -30,14 +30,14 @@ class ChallengeOut(BaseModel):
 
 class ChallengeUpdate(BaseModel):
     title: str | None = Field(default=None, min_length=1, max_length=200)
-    description: str | None = None
-    points: int | None = Field(default=None, gt=0)
+    description: str | None = Field(default=None, max_length=5000)
+    points: int | None = Field(default=None, gt=0, le=1_000_000)
     is_active: bool | None = None
 
 
 class FlagSubmitRequest(BaseModel):
     challenge_id: UUID
-    flag: str = Field(min_length=1)
+    flag: str = Field(min_length=1, max_length=300)
     team_id: UUID | None = None
 
 

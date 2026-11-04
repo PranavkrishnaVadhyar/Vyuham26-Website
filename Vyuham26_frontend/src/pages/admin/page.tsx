@@ -425,6 +425,7 @@ function MainPageStarredManager() {
         <div className="flex flex-wrap items-center gap-2">
           <input
             type="text"
+            maxLength={100}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="FILTER EVENTS..."

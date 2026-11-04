@@ -1,7 +1,7 @@
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Path, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -43,7 +43,7 @@ async def list_event_results(
 
 @router.post("/{event_id}/results", response_model=EventResultOut)
 async def publish_event_result(
-    event_id: str,
+    event_id: Annotated[str, Path(min_length=1, max_length=100)],
     payload: EventResultCreate,
     current_admin: Annotated[Profile, Depends(require_role("admin"))],
     db: Annotated[AsyncSession, Depends(get_db)],

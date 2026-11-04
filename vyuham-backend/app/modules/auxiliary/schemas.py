@@ -7,10 +7,12 @@ class ContactCreateRequest(BaseModel):
     email: EmailStr
     phone: str | None = Field(default=None, max_length=40)
     tier: str | None = Field(default=None, max_length=60)
-    message: str = Field(min_length=1)
+    message: str = Field(min_length=1, max_length=3000)
 
 
 class FeedbackCreateRequest(BaseModel):
     rating: int = Field(ge=1, le=5)
-    comments: str = Field(min_length=1)
-    user_id: str | None = None
+    comments: str = Field(min_length=1, max_length=3000)
+    # Kept for older clients but ignored by the API; identity comes only
+    # from a verified bearer token.
+    user_id: str | None = Field(default=None, max_length=64)

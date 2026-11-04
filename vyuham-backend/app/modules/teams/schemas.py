@@ -11,7 +11,7 @@ class TeamCreate(BaseModel):
 
 
 class TeamJoinRequest(BaseModel):
-    invite_code: str = Field(min_length=6, max_length=8)
+    invite_code: str = Field(min_length=6, max_length=8, pattern=r"^[A-Za-z0-9]+$")
 
 
 class TeamOut(BaseModel):

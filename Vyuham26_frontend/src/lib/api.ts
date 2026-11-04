@@ -61,20 +61,16 @@ export async function apiFetch<T = any>(
   }
 
   // Inject the admin access key when the admin console is unlocked.
-  // Sources (in order): the passphrase the operator typed at unlock time
-  // (sessionStorage) or the build-time VITE_ADMIN_ACCESS_KEY variable.
-  // Nothing is hardcoded in the bundle: without a configured key the header
-  // is omitted and the backend only accepts real admin-role tokens.
+  // Only an operator-entered key held for this tab session is accepted here.
+  // Never source privileged credentials from VITE_* build variables: they are
+  // embedded in the public JavaScript bundle.
   try {
     if (
       typeof window !== "undefined" &&
       sessionStorage.getItem("vyuham26:admin_unlocked") === "true" &&
       !headers["X-Admin-Key"]
     ) {
-      const adminKey =
-        sessionStorage.getItem("vyuham26:admin_key") ||
-        (import.meta.env.VITE_ADMIN_ACCESS_KEY as string | undefined) ||
-        "";
+      const adminKey = sessionStorage.getItem("vyuham26:admin_key") || "";
       if (adminKey) headers["X-Admin-Key"] = adminKey;
     }
   } catch {}
@@ -244,7 +240,9 @@ export interface AdminRegistrationRecord {
 /* ================================================================== */
 
 export const authApi = {
+  registerSession: () => apiFetch<void>("/auth/session", { method: "POST" }),
   getMe: () => apiFetch<ProfileOut>("/auth/me"),
+  logout: () => apiFetch<void>("/auth/logout", { method: "POST" }),
   updateProfile: (data: ProfileUpdatePayload) =>
     apiFetch<ProfileOut>("/auth/me", {
       method: "PATCH",
@@ -892,14 +890,10 @@ export const auxiliaryApi = {
     tier: string;
     message: string;
   }): Promise<{ ok: boolean; message: string }> => {
-    try {
-      return await apiFetch("/contact", {
-        method: "POST",
-        body: JSON.stringify(payload),
-      });
-    } catch {
-      return { ok: true, message: "Inquiry recorded successfully." };
-    }
+    return await apiFetch("/contact", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
   },
   submitFeedback: async (payload: {
     rating: number;

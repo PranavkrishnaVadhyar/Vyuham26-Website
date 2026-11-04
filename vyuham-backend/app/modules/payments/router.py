@@ -3,12 +3,13 @@ from datetime import datetime, timezone
 from decimal import Decimal
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Path, Request, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.db import get_db
 from app.core.deps import get_current_user
+from app.core.security_state import enforce_rate_limit
 from app.modules.auth.models import Profile
 from app.modules.events.models import Event
 from app.modules.payments.models import Order
@@ -27,9 +28,11 @@ router = APIRouter(prefix="/payments", tags=["payments"])
 @router.post("/create", response_model=PaymentOrderOut)
 async def create_payment_order(
     payload: PaymentCreateRequest,
+    request: Request,
     current_user: Annotated[Profile, Depends(get_current_user)],
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> PaymentOrderOut:
+    await enforce_rate_limit(request, scope="payment-create", limit=5, window_seconds=60, identity=str(current_user.id))
     platform_fee = Decimal(str(payload.platform_fee if payload.platform_fee is not None else 30.00))
     if platform_fee < 0:
         platform_fee = Decimal("0")
@@ -96,9 +99,11 @@ async def create_payment_order(
 @router.post("/verify")
 async def verify_payment(
     payload: PaymentVerifyRequest,
+    request: Request,
     current_user: Annotated[Profile, Depends(get_current_user)],
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> dict:
+    await enforce_rate_limit(request, scope="payment-verify", limit=10, window_seconds=60, identity=str(current_user.id))
     order = await db.scalar(
         select(Order).where(Order.transaction_ref == payload.transaction_ref)
     )
@@ -140,7 +145,7 @@ async def verify_payment(
 
 @router.get("/receipt/{transaction_ref}", response_model=ReceiptDataOut)
 async def get_receipt(
-    transaction_ref: str,
+    transaction_ref: Annotated[str, Path(min_length=1, max_length=200)],
     current_user: Annotated[Profile, Depends(get_current_user)],
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> ReceiptDataOut:

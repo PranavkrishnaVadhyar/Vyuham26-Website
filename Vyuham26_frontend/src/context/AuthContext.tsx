@@ -49,6 +49,8 @@ interface AuthContextType {
     role?: "user" | "volunteer" | "event_head" | "admin";
   }) => Promise<AuthResult>;
   loginWithGoogle: (redirectPath?: string) => Promise<AuthResult>;
+  requestPasswordReset: (email: string) => Promise<void>;
+  completePasswordReset: (password: string) => Promise<void>;
   updateUser:(patch: Partial<AuthUser>) => Promise<void>;
   logout: () => Promise<void>;
   registerForEvent: (eventSlug: string) => {
@@ -248,6 +250,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // If this session came back from a Google redirect, finish that sign-in too.
     const syncSession = async (session: Session) => {
       const oauthDestination = takeOAuthRedirect();
+      // OAuth returns through a full-page redirect, so its login may first be
+      // observed during initial session restoration rather than SIGNED_IN.
+      if (oauthDestination) await authApi.registerSession();
       const backendProfile = await fetchBackendProfile();
       if (oauthDestination && backendProfile) {
         await seedProfileFromProvider(session, backendProfile);
@@ -289,7 +294,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if ((event === "SIGNED_IN" || event === "TOKEN_REFRESHED") && session) {
+      if (event === "SIGNED_IN" && session) {
+        // Register a newly authenticated session before any protected profile
+        // request; token refreshes retain their existing session registration.
+        window.setTimeout(() => {
+          void authApi.registerSession()
+            .then(() => syncSession(session))
+            .catch((error) => console.warn("Could not register login session:", error));
+        }, 0);
+      } else if (event === "TOKEN_REFRESHED" && session) {
         await syncSession(session);
       } else if (event === "SIGNED_OUT") {
         setUser(null);
@@ -311,6 +324,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // }
       const cleanEmail = email.trim().toLowerCase();
       if (!cleanEmail || !password) return { success: false, error: "Enter your email and password." };
+      if (cleanEmail.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
+        return { success: false, error: "Enter a valid email address." };
+      }
+      if (password.length > 128) return { success: false, error: "Password must be 128 characters or fewer." };
 
       try {
         const { data, error } = await supabase.auth.signInWithPassword({ email: cleanEmail, password });
@@ -318,6 +335,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (!data.session || !data.user) {
           return { success: false, error: "Sign-in did not create a valid session. Please try again." };
         }
+
+        await authApi.registerSession();
 
         const backendProfile = await fetchBackendProfile();
         const newUser: AuthUser = {
@@ -365,6 +384,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!cleanEmail || !details.password) {
         return { success: false, error: "Enter your email and password." };
       }
+      if (cleanEmail.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
+        return { success: false, error: "Enter a valid email address." };
+      }
+      if (details.password.length < 12 || details.password.length > 128) {
+        return { success: false, error: "Use a password between 12 and 128 characters." };
+      }
+      if (details.name.trim().length > 100 || (details.phone?.length || 0) > 20 || (details.college?.length || 0) > 150) {
+        return { success: false, error: "One or more profile fields exceed the allowed length." };
+      }
 
       try {
         const { data, error } = await supabase.auth.signUp({
@@ -386,6 +414,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // Supabase returns a user without a session when email confirmation is
         // enabled. Keep the person signed out and ask them to confirm first.
         if (!data.session) return { success: true, confirmationRequired: true };
+
+        await authApi.registerSession();
 
         let profileWarning: string | undefined;
         try {
@@ -491,10 +521,43 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = useCallback(async () => {
     try {
+      await authApi.logout();
+    } catch (err) {
+      console.warn("Backend session revocation failed:", err);
+    }
+    try {
       await supabase.auth.signOut();
     } catch (err) {
       console.warn("Supabase signOut error:", err);
     }
+    setUser(null);
+    saveUserToStorage(null);
+  }, []);
+
+  const requestPasswordReset = useCallback(async (email: string) => {
+    const cleanEmail = email.trim().toLowerCase();
+    if (cleanEmail.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
+      throw new Error("Enter a valid email address.");
+    }
+    const { error } = await supabase.auth.resetPasswordForEmail(cleanEmail, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    if (error) throw new Error("If an account exists for that address, a password reset link will be sent.");
+  }, []);
+
+  const completePasswordReset = useCallback(async (password: string) => {
+    if (password.length < 12 || password.length > 128) {
+      throw new Error("Use a password between 12 and 128 characters.");
+    }
+    const { error } = await supabase.auth.updateUser({ password });
+    if (error) throw new Error("The reset link is invalid or expired. Request a new one and try again.");
+    try {
+      await authApi.logout();
+    } catch (revokeError) {
+      console.warn("Backend session revocation failed after password reset:", revokeError);
+    }
+    const { error: signOutError } = await supabase.auth.signOut({ scope: "global" });
+    if (signOutError) throw new Error("Password changed, but sessions could not be ended. Sign out from other devices.");
     setUser(null);
     saveUserToStorage(null);
   }, []);
@@ -600,6 +663,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         login,
         signup,
         loginWithGoogle,
+        requestPasswordReset,
+        completePasswordReset,
         updateUser,
         logout,
         registerForEvent,

@@ -1,7 +1,7 @@
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Response, status
+from fastapi import APIRouter, Depends, HTTPException, Path, Response, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.db import get_db
@@ -26,12 +26,12 @@ async def read_events(db: Annotated[AsyncSession, Depends(get_db)]) -> list:
 
 
 @router.get("/by-slug/{slug}", response_model=EventOut)
-async def read_event_by_slug(slug: str, db: Annotated[AsyncSession, Depends(get_db)]) -> object:
+async def read_event_by_slug(slug: Annotated[str, Path(min_length=1, max_length=100)], db: Annotated[AsyncSession, Depends(get_db)]) -> object:
     return await get_event_by_slug(db, slug)
 
 
 @router.get("/{event_id}", response_model=EventOut)
-async def read_event(event_id: str, db: Annotated[AsyncSession, Depends(get_db)]) -> object:
+async def read_event(event_id: Annotated[str, Path(min_length=1, max_length=100)], db: Annotated[AsyncSession, Depends(get_db)]) -> object:
     try:
         parsed_id = UUID(event_id)
         return await get_event(db, parsed_id)

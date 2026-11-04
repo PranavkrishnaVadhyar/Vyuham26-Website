@@ -7,6 +7,9 @@ from app.core.config import settings
 from app.core.db import engine
 from app.core.exceptions import register_exception_handlers
 from app.core.site_settings import ensure_site_settings_table
+from app.core.middleware import RequestBodyLimitMiddleware
+from app.core.db import Base
+from app.core.security_state import ActiveAuthSession, RateLimitBucket, RevokedAuthSession
 
 from app.modules.auth.router import router as auth_router
 from app.modules.events.router import router as events_router
@@ -27,6 +30,14 @@ from app.admin import configure_admin
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
+    # Small security-state tables are created idempotently; user/profile and
+    # product schema continue to be managed by the existing SQL scripts.
+    async with engine.begin() as conn:
+        await conn.run_sync(lambda sync_conn: Base.metadata.create_all(
+            sync_conn,
+            tables=[ActiveAuthSession.__table__, RevokedAuthSession.__table__, RateLimitBucket.__table__],
+            checkfirst=True,
+        ))
     # Registration gateway configuration lives in the
     # site_settings table. Make sure it exists before
     # serving traffic.
@@ -64,6 +75,7 @@ app = FastAPI(
     version="0.1.0",
     lifespan=lifespan,
 )
+app.add_middleware(RequestBodyLimitMiddleware, max_bytes=1_048_576)
 
 
 # ---------------------------------------------------------------------------
@@ -73,10 +85,22 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.allowed_frontend_origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_credentials=False,
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type", "X-Admin-Key", "Accept"],
 )
+
+
+@app.middleware("http")
+async def apply_security_headers(request, call_next):
+    response = await call_next(request)
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
+    response.headers["Cross-Origin-Opener-Policy"] = "same-origin"
+    response.headers["Content-Security-Policy"] = "frame-ancestors 'none'"
+    return response
 
 
 # ---------------------------------------------------------------------------

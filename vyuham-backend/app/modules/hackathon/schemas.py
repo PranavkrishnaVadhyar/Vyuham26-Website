@@ -42,7 +42,7 @@ class SubmissionOut(BaseModel):
 
 
 class SubmissionScoreUpdate(BaseModel):
-    score: Decimal = Field(ge=0)
+    score: Decimal = Field(ge=0, le=1000000, max_digits=12, decimal_places=2)
 
 
 class MentorCreate(BaseModel):

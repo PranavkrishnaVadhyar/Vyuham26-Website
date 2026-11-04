@@ -623,6 +623,7 @@ export default function TeamsPage() {
                           <div className="mt-4 flex flex-col gap-3">
                             <input
                               type="text"
+                              maxLength={120}
                               value={createName}
                               onChange={(e) => setCreateName(e.target.value)}
                               placeholder="e.g. QuantumGlitch"

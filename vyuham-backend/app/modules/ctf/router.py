@@ -1,7 +1,7 @@
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.db import get_db
@@ -10,6 +10,7 @@ from app.modules.auth.models import Profile
 from app.modules.ctf.models import CTFTrack
 from app.modules.ctf.schemas import ChallengeCreate, ChallengeOut, ChallengeUpdate, FlagSubmitRequest, ScoreboardEntry, SubmissionResult
 from app.modules.ctf.service import create_challenge, get_scoreboard, list_challenges, submit_flag, update_challenge
+from app.core.security_state import enforce_rate_limit
 
 router = APIRouter(prefix="/ctf", tags=["ctf"])
 
@@ -33,7 +34,8 @@ async def patch_challenge(event_id: UUID, challenge_id: UUID, data: ChallengeUpd
 
 
 @router.post("/{event_id}/submit", response_model=SubmissionResult)
-async def post_flag(event_id: UUID, data: FlagSubmitRequest, user: Annotated[Profile, Depends(get_current_user)], db: Annotated[AsyncSession, Depends(get_db)]):
+async def post_flag(event_id: UUID, data: FlagSubmitRequest, request: Request, user: Annotated[Profile, Depends(get_current_user)], db: Annotated[AsyncSession, Depends(get_db)]):
+    await enforce_rate_limit(request, scope="ctf-flag", limit=10, window_seconds=60, identity=str(user.id))
     try:
         correct = await submit_flag(db, event_id, data.challenge_id, data.flag, user, data.team_id)
         return {"correct": correct}

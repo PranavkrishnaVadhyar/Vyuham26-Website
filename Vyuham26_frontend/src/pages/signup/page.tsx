@@ -526,6 +526,7 @@ function SignupContent() {
                               id="name"
                               type="text"
                               required
+                              maxLength={100}
                               value={formData.name}
                               disabled={status === "registering"}
                               onChange={(e) =>
@@ -551,6 +552,7 @@ function SignupContent() {
                               id="phone"
                               type="tel"
                               required
+                              maxLength={20}
                               value={formData.phone}
                               disabled={status === "registering"}
                               onChange={(e) =>
@@ -580,6 +582,7 @@ function SignupContent() {
                             id="email"
                             type="email"
                             required
+                            maxLength={254}
                             value={formData.email}
                             disabled={status === "registering"}
                             onChange={(e) =>
@@ -607,6 +610,7 @@ function SignupContent() {
                             id="college"
                             type="text"
                             required
+                            maxLength={150}
                             value={formData.college}
                             disabled={status === "registering"}
                             onChange={(e) =>
@@ -648,6 +652,8 @@ function SignupContent() {
                                 id="password"
                                 type="password"
                                 required
+                                minLength={12}
+                                maxLength={128}
                                 value={formData.password}
                                 disabled={status === "registering"}
                                 onChange={(e) =>
@@ -673,6 +679,8 @@ function SignupContent() {
                                 id="confirmPassword"
                                 type="password"
                                 required
+                                minLength={12}
+                                maxLength={128}
                                 value={formData.confirmPassword}
                                 disabled={status === "registering"}
                                 onChange={(e) =>

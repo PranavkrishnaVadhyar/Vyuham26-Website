@@ -1,7 +1,7 @@
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Response, status
+from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from pydantic import BaseModel
@@ -20,6 +20,7 @@ from app.modules.registrations.service import (
     register_for_event,
     update_status,
 )
+from app.core.security_state import enforce_rate_limit
 
 router = APIRouter(prefix="/registrations", tags=["registrations"])
 
@@ -56,9 +57,11 @@ async def set_registration_gateway_status(
 @router.post("", response_model=RegistrationOut, status_code=status.HTTP_201_CREATED)
 async def post_registration(
     data: RegistrationCreate,
+    request: Request,
     current_user: Annotated[Profile, Depends(get_current_user)],
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> object:
+    await enforce_rate_limit(request, scope="registration", limit=8, window_seconds=3600, identity=str(current_user.id))
     if not await get_registration_open(db):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,

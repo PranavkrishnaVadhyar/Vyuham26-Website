@@ -88,22 +88,25 @@ function Input({
   onChange,
   type = "text",
   area,
+  maxLength,
 }: {
   label: string;
   value: string | number;
   onChange: (v: string) => void;
   type?: string;
   area?: boolean;
+  maxLength?: number;
 }) {
+  const inputLimit = maxLength ?? (area ? 5000 : type === "email" ? 254 : 500);
   return (
     <label className="block">
       <span className="mb-[6px] block font-mono text-[8px] tracking-[0.28em] text-[#4f6f61]">
         {label.toUpperCase()}
       </span>
       {area ? (
-        <textarea className="field min-h-[86px]" value={value} onChange={(e) => onChange(e.target.value)} />
+        <textarea maxLength={inputLimit} className="field min-h-[86px]" value={value} onChange={(e) => onChange(e.target.value)} />
       ) : (
-        <input className="field" type={type} value={value} onChange={(e) => onChange(e.target.value)} />
+        <input maxLength={type === "number" ? undefined : inputLimit} max={type === "number" ? "1000000000" : undefined} className="field" type={type} value={value} onChange={(e) => onChange(e.target.value)} />
       )}
     </label>
   );
@@ -665,11 +668,12 @@ export default function AdminApp({ initialSection = "Overview" }: { initialSecti
               }
             }}
           >
-            <input className="field" type="email" required disabled={adminAuthPending} value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" />
+            <input className="field" type="email" required maxLength={254} disabled={adminAuthPending} value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" />
             <input
               className="field"
               type="password"
               required
+              maxLength={128}
               disabled={adminAuthPending}
               value={pw}
               onChange={(e) => setPw(e.target.value)}
@@ -1647,7 +1651,7 @@ export default function AdminApp({ initialSection = "Overview" }: { initialSecti
                 <Input label="Image URL" value={editing.image} onChange={(v) => setEditing({ ...editing, image: v })} />
               </div>
               <div className="md:col-span-2">
-                <Input label="Blurb" area value={editing.blurb} onChange={(v) => setEditing({ ...editing, blurb: v })} />
+                    <Input label="Blurb" area maxLength={500} value={editing.blurb} onChange={(v) => setEditing({ ...editing, blurb: v })} />
               </div>
               <div className="flex flex-wrap items-center gap-4 md:col-span-2">
                 <label className="flex items-center gap-2 rounded border border-amber-400/40 bg-amber-400/10 px-3 py-1.5 font-mono text-[9px] font-bold tracking-[0.2em] text-amber-300">

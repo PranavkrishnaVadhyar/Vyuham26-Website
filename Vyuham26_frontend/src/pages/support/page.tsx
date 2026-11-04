@@ -398,6 +398,7 @@ export default function SupportPage() {
 
                             <input
                               required
+                              maxLength={100}
                               value={form.name}
                               onChange={(e) =>
                                 setForm({
@@ -418,6 +419,7 @@ export default function SupportPage() {
                             <input
                               required
                               type="email"
+                              maxLength={254}
                               value={form.email}
                               onChange={(e) =>
                                 setForm({
@@ -470,6 +472,7 @@ export default function SupportPage() {
 
                           <textarea
                             required
+                            maxLength={3000}
                             rows={6}
                             value={form.message}
                             onChange={(e) =>

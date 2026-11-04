@@ -46,6 +46,7 @@ export const routeLoaders: Record<string, () => Promise<any>> = {
   "food-vendor": () => import("@/pages/food/vendor/page"),
   teams: () => import("@/pages/teams/page"),
   login: () => import("@/pages/login/page"),
+  "reset-password": () => import("@/pages/reset-password/page"),
   signup: () => import("@/pages/signup/page"),
   dashboard: () => import("@/pages/dashboard/page"),
   profile: () => import("@/pages/profile/page"),
@@ -251,6 +252,7 @@ export const routes: RouteConfig[] = [
   // Auth/profile routes were previously tied to the event-registration flag.
   // requiresRegistrationOpen: true,
   { id: "login", pattern: "/login", component: LoginPage },
+  { id: "reset-password", pattern: "/reset-password", component: lazy(routeLoaders["reset-password"]) },
   { id: "signup", pattern: "/signup", component: SignupPage },
   { id: "dashboard", pattern: "/dashboard", component: DashboardPage },
   { id: "profile", pattern: "/profile", component: ProfilePage },

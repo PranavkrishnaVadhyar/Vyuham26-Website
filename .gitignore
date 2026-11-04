@@ -1,28 +1,46 @@
 # ==============================================================================
-# VYUHAM 26 ROOT GITIGNORE (Frontend & Backend)
+# VYUHAM 26 ROOT GITIGNORE (Frontend, Backend & Static)
 # ==============================================================================
 
-# Dependencies
+# Dependencies & Package Managers
 node_modules/
 .pnp
 .pnp.js
+.yarn/cache/
+.yarn/unplugged/
+.yarn/build-state.yml
+.yarn/install-state.gz
+.pnpm-store/
 
-# Build Outputs & Bundles
+# Build Outputs, Bundles & Caches
 dist/
 dist-ssr/
+dist-electron/
 out/
 build/
 .next/
 .turbo/
 .vercel/
+.vite/
+.cache/
+.parcel-cache/
 stats.html
+*.tsbuildinfo
+.eslintcache
+
+# Archives & Compressed Files (prevents GitHub 100MB push errors)
 *.zip
+*.tar
 *.tar.gz
 *.tgz
 *.rar
 *.7z
+*.gz
+*.bz2
+*.xz
+*.iso
 
-# Environment Variables & Secrets
+# Environment Variables, Secrets & Keys
 .env
 .env.*
 .env.local
@@ -33,12 +51,23 @@ stats.html
 *.env
 env
 env.*
+.env.vault
+*.pem
+*.key
+*.cert
+*.crt
+*.pfx
+*.p12
+*.secret
 !.env.example
 !*.env.example
+!.env.template
+!*.env.template
 
-# Logs
+# Logs & Debugging
 logs/
 *.log
+*.log*
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
@@ -51,8 +80,24 @@ __pycache__/
 *$py.class
 *.so
 .Python
-*.egg-info/
+develop-eggs/
+downloads/
+eggs/
 .eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+.python-version
+pip-log.txt
+pip-delete-this-directory.txt
 
 # Virtual Environments
 .venv/
@@ -61,13 +106,21 @@ venv/
 venv*/
 ENV/
 env/
+ENV*/
+env*/
 
-# Python Testing & Linters
+# Python Testing, Coverage & Linters
 .pytest_cache/
 .coverage
+.coverage.*
+coverage.xml
+*.cover
 htmlcov/
 .mypy_cache/
 .ruff_cache/
+.hypothesis/
+.tox/
+.nox/
 
 # Frontend Testing & Playwright
 test-results/
@@ -76,14 +129,23 @@ blob-report/
 coverage/
 .nyc_output/
 
-# SQLite & Local DBs
+# Databases, Local Storage & Broker state
 *.sqlite
 *.sqlite3
 *.db
+*.sqlite-journal
+*.sqlite3-journal
+*.db-journal
+*.db-wal
+*.db-shm
+dump.rdb
+celerybeat-schedule
+celerybeat.pid
 
-# Editor & IDE directories
-.vscode/
+# Editor & IDE Directories
+.vscode/*
 !.vscode/extensions.json
+!.vscode/settings.json
 .idea/
 *.suo
 *.ntvs*
@@ -92,11 +154,10 @@ coverage/
 *.sw?
 *.swo
 *.swp
-
-# AI Assistant configs & Local Artifacts
-.gemini/
-.agents/
-.claude/
+*~
+.directory
+*.sublime-project
+*.sublime-workspace
 
 # Operating System Files
 .DS_Store
@@ -104,10 +165,28 @@ coverage/
 ._*
 .Spotlight-V100
 .Trashes
-ehthumbs.db
+.AppleDouble
+.LSOverride
 Thumbs.db
+ehthumbs.db
+ehthumbs_vista.db
 desktop.ini
+$RECYCLE.BIN/
 
-# TypeScript & Cache
-*.tsbuildinfo
-.eslintcache
+# AI Assistant Configs & Local Artifacts
+.gemini/
+.agents/
+.claude/
+.cursor/
+.cursorrules.local
+.copilot/
+.continue/
+.aider*
+
+# Temporary & Backup Files
+tmp/
+temp/
+*.tmp
+*.temp
+*.bak
+*.orig
